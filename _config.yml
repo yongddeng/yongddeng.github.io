@@ -1,12 +1,11 @@
 permalink: /:year:month:day/:title
-url: #Your url here
+url: description # Your url here
 baseurl: /project
 
 # variables
-name: Your Site Name
-description: Your description here
+name: Hikikomori # Your Site Name
+description: # Your description here
 google_verification: null
-
 
 # File management
 include: [".htaccess"]
