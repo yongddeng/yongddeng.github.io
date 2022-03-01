@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "central limit theorem"
-tags: tag4
+tags: tag1
 use_math: true
 ---
 
