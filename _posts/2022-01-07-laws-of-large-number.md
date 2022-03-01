@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "law of large numbers"
-tags: tag4
+tags: tag1
 use_math: true
 ---
 
@@ -41,4 +41,4 @@ For instance, consider ind. $X_n$ such that $P(X_n = n+1) = P(X_n = -(n+1)) = M_
 
 ## **
 ---
-**(#1)** In terms of statistics, $\bar{X}_n$ is an unbiased estimator of $\mu$ if it converges in $L^2$, and $\operatorname{Var}\bar{X}_n$ is the mse. **(#2)** For a i.i.d. sequence $(X_n)_{n\in\mathbb{N}}$, we alter the condition to $\Sigma_{k=1}^{n}P({\vert X_i \vert} > x) = xP({\ver X_1 \vert} > x) \to 0$ as $n \to \infty$, then $n^{-1}S_n - \mu_n \xrightarrow{p} 0$ as $n \to \infty$, where $\mu_n = \operatorname{E} X_1 I_{{\ver X_1 \vert} \leq x}$. **(#3)** The implication holds because $\mu$ is constant. **(#4)** Whilst we shall prove it via the convergence of a series, we may attempt to refine relationships between the convergence in probability and almost sure convergence: if $X_{n} \xrightarrow{p} X$, then $\exists$ a subsequence $(k_{n})_{n\in\mathbb{N}}$ such that $X_{k_{n}}\ {\xrightarrow {\text{a.s.}}}\ X$. **(#5)** Refer to the [three-series theorem](). **(#6)** The WLLN was proven by Bernoulli in the 18th century. The SLLN was proven by Borel in the beginning of the 20th century. **(#7)** Whilst a Monte Carlo utilises the LLN (and the CLT), we may use the [variance reduction](https://en.wikipedia.org/wiki/Variance_reduction) to //
+**(#1)** In terms of statistics, $\bar{X}_n$ is an unbiased estimator of $\mu$ if it converges in $L^2$, and $\operatorname{Var}\bar{X}_n$ is the mse. **(#2)** For a i.i.d. sequence $(X_n)_{n\in\mathbb{N}}$, we alter the condition to $\Sigma_{k=1}^{n}P({\vert X_i \vert} > x) = xP({\vert X_1 \vert} > x) \to 0$ as $n \to \infty$, then $n^{-1}S_n - \mu_n \xrightarrow{p} 0$ as $n \to \infty$, where $\mu_n = \operatorname{E} X_1 I_{{\vert X_1 \vert} \leq x}$. **(#3)** The implication holds because $\mu$ is constant. **(#4)** Whilst we shall prove it via the convergence of a series, we may attempt to refine relationships between the convergence in probability and almost sure convergence: if $X_{n} \xrightarrow{p} X$, then $\exists$ a subsequence $(k_{n})_{n\in\mathbb{N}}$ such that $X_{k_{n}}\ {\xrightarrow {\text{a.s.}}}\ X$. **(#5)** Refer to the [three-series theorem](). **(#6)** The WLLN was proven by Bernoulli in the 18th century. The SLLN was proven by Borel in the beginning of the 20th century. **(#7)** Whilst a Monte Carlo utilises the LLN (and the CLT), we may use the [variance reduction](https://en.wikipedia.org/wiki/Variance_reduction) to //

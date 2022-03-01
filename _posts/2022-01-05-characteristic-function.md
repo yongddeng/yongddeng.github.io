@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "characteristic function"
-tags: tag4
+tags: tag1
 use_math: true
 ---
 
