@@ -17,18 +17,12 @@ A [probability theory](https://en.wikipedia.org/wiki/Probability_theory) is base
 
 In the subject, we call a set $\Omega$ a [sample space](https://en.wikipedia.org/wiki/Sample_space), its element $\omega \in \Omega$ (i.e. resulted by random expriments) an [elementary event](https://en.wikipedia.org/wiki/Elementary_event), and a subset $A \subseteq \Omega$ such that $\lvert{A}\rvert \leq \lvert{\Omega}\rvert$ an [event](https://en.wikipedia.org/wiki/Event_(probability_theory)). In particular, we say $A$ is occured (not occured) if $\omega \in A$ ($\omega \notin A$). Subsequently, we define a [$\sigma$-algebra](https://en.wikipedia.org/wiki/%CE%A3-algebra) $\mathcal{F} = \sigma(A)$ such that (i) $\Omega \in \mathcal{F}$; (ii) if $A \in \mathcal{F}$, then $A^{c} \in \mathcal{F}$; (iii) if $A_{n \in \mathbb{N}} \in \mathcal{F}$, then $\bigcup_{n \in \mathbb{N}} A_n \in \mathcal{F}$; Note that there may exist one or more $\sigma$-algebras $\mathcal{F}^* = \{\mathcal{F}_0, \mathcal{F}_1, \dots \lvert \, A \subset \mathcal{F_n}\}$. We specifically say $\mathcal{F}$ is countably generated if there exists only countably many generators (**2). Loosely speaking, any $\sigma$-algebra quantifies the amount of information available, and therefore, we search for the largest possible $\sigma$-algebra to make a tuple $(\Omega, \mathcal{F})$. 
 
-The [power set](https://en.wikipedia.org/wiki/Power_set) $\mathcal{F}_{\Omega} = \sigma(\Omega)$ is easily taken for a finite or a countable $\Omega$. 
+The [power set](https://en.wikipedia.org/wiki/Power_set) $\mathcal{F}_{\Omega} = \sigma(\Omega)$ is easily taken for a finite or a countable $\Omega$. However, when $\Omega$ is uncountable, $\mathcal{F}_{\Omega} = \sigma(\Omega)$ yields a sum of uncountably many probabilities //
 
-- However, when $\Omega$ is uncountable, 
-
-
-- $\mathcal{F}_{\Omega} = \sigma(\Omega)$ yields a sum of uncountably many probabilities $P(\Omega) = \Sigma_{\omega \in \Omega} p_{\omega} = \infty$,
-
-- thus undesirable. Instead, similar to measure theory, when $\Omega = \mathbb{R}$, 
-
-- the Euclidean space $(\mathbb{R}^n, \mathcal{B_{\mathbb{R}^n}})$ 
-
-- can be expanded with the [Borel $\sigma$-algebra](https://en.wikipedia.org/wiki/Borel_set) $\mathcal{B_{\mathbb{R}^n}} = \sigma(\mathcal{O} \subset \mathbb{R})$. Such $\sigma$-algebra is the smallest $\sigma$-algebra containing every open subsets that are indeed measurable. In some cases, we use the monotone class theorem and the $\pi - \lambda$ theorem for an algebra and a $\pi$-system, respectively. For instance, if an algebra $A$ is a subset of a monotone class $\mathcal{M}$ **(#3)**, then the smallest $\sigma$-algebra $\sigma(A)$ is equals to the smallest monotone class $\mathcal{M}(A)$.
+- $P(\Omega) = \Sigma_{\omega \in \Omega} p_{\omega} = \infty$, thus undesirable. 
+  
+  
+- Instead, similar to measure theory, when $\Omega = \mathbb{R}$, the Euclidean space $(\mathbb{R}^n, \mathcal{B_{\mathbb{R}^n}})$ can be expanded with the [Borel $\sigma$-algebra](https://en.wikipedia.org/wiki/Borel_set) $\mathcal{B_{\mathbb{R}^n}} = \sigma(\mathcal{O} \subset \mathbb{R})$. Such $\sigma$-algebra is the smallest $\sigma$-algebra containing every open subsets that are indeed measurable. In some cases, we use the monotone class theorem and the $\pi - \lambda$ theorem for an algebra and a $\pi$-system, respectively. For instance, if an algebra $A$ is a subset of a monotone class $\mathcal{M}$ **(#3)**, then the smallest $\sigma$-algebra $\sigma(A)$ is equals to the smallest monotone class $\mathcal{M}(A)$.
 
 
 ## II
