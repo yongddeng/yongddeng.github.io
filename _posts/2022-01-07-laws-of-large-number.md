@@ -1,12 +1,12 @@
 ---
 layout: default
-title: "law of large numbers"
+title: "law of large number"
 tags: tag1
 use_math: true
 ---
 
 
-# Law of Large Numbers
+# Law of Large Number
 ---
 Emperically, the more a fair dice is rolled, the closer normalised sums get to $3.5 \simeq (1+2+..+6)/6$. We wonder if the mathematical definitions of convergence hold for sums of ind. random variables. That is, we shall elaborate rigorous proof for the laws of large numbers (LLNs), and smear away a wild randomness lies in a small sample which destabilises the relative frequencies.
 
