@@ -8,7 +8,7 @@ use_math: true
 
 # Characteristic Function
 ---
-The [convolution theorem](https://en.wikipedia.org/wiki/Convolution_theorem) puts $\operatorname{FT}\{f*g\} = \operatorname{FT}\{f\} \cdot \operatorname{FT}\{g\}$, where $\operatorname{FT}$ denotes the Fourier transform and $(f*g)(x) = \int_{\mathbb{R}}f(\tau)g(x-\tau)\,\mathrm{d}\tau$ is convolution. That is, convolution of $f,g\in\mathbb{R}$ can be computed by multiplying $\hat{f},\hat{g}\in\mathbb{C}$ and taking $\operatorname{FT}^{-1}$. The characteristic function in general is the probabilistic version of $\operatorname{FT}$ that is applied to the density function $f_Z(z) = \int_{x \in X} f_X(x)f_Y(z-x)\, \mathrm{d}x$, where $Z = X+Y$ and $f_{X,Y}=f_{X}f_{Y}$.
+The [convolution theorem](https://en.wikipedia.org/wiki/Convolution_theorem) puts $\operatorname{FT}\lbrace f*g \rbrace = \operatorname{FT} \lbrace f \rbrace \cdot \operatorname{FT} \lbrace g \rbrace$, where $\operatorname{FT}$ denotes the Fourier transform and $(f*g)(x) = \int_\mathbb{R} f(\tau)g(x-\tau)\,\mathrm{d}\tau$ is convolution. That is, convolution of $f,g\in\mathbb{R}$ can be computed by multiplying $\hat{f},\hat{g}\in\mathbb{C}$ and taking $\operatorname{FT}^{-1}$. The characteristic function in general is the probabilistic version of $\operatorname{FT}$ that is applied to the density function $f_Z(z) = \int\_{x \in X} f_X(x) f_Y(z-x)\, \mathrm{d}x$, where $Z = X+Y$ and $f\_{X,Y} = f_X f_Y$.
 
 
 ## I
