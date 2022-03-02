@@ -14,6 +14,7 @@ One of the basis of probability theory is the stabilisation of the relative freq
 ## I
 ---
 
+
 | Mode                | Alias                                                 | Definition                                                                                          | Notation                      |
 | :------------------ | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------- | :---------------------------: |
 | [Completely]()      |                                                       | $\Sigma_{n=1}^{\infty} P(\lvert X_n - X \rvert > \varepsilon) < \infty$, for all $\varepsilon > 0$  | $X_n \xrightarrow{c.c.} X$    |
@@ -21,27 +22,6 @@ One of the basis of probability theory is the stabilisation of the relative freq
 | [in Probability]()  | weak convergence (with reference to the weak LLN)     | $\lim_{n \to \infty} P(\lvert X_n - X \rvert \leq \varepsilon) = 1$, for all $\varepsilon > 0$      | $X_n \xrightarrow{p} X$       |
 | [in $r$-Mean]()     |                                                       | $\lim_{n \to \infty} \operatorname{E}{\vert X_n - X \rvert}^r = 0$, where $r \geq 1$                | $X_n \xrightarrow{r} X$       |
 | [in Distribution]() | weakest convergence (with reference to the CLT)       | $\lim_{n \to \infty} F_{X_n} = F_X$, for all $x \in C(F_X)$                                         | $X_n \xrightarrow{d} X$       |
-
-
-
-| Mode                | Definition                                                                                          | Notation                      |
-| :------------------ | :-------------------------------------------------------------------------------------------------- | :---------------------------: |
-| [Completely]()      | $\Sigma_{n=1}^{\infty} P(\lvert X_n - X \rvert > \varepsilon) < \infty$, for all $\varepsilon > 0$  | $X_n \xrightarrow{c.c.} X$    |
-| [Almost surely]()   | $P(\lim_{n \to \infty} X_n - X = 0) = 1$                                                            | $X_n \xrightarrow{a.s.} X$    |
-| [in Probability]()  | $\lim_{n \to \infty} P(\lvert X_n - X \rvert \leq \varepsilon) = 1$, for all $\varepsilon > 0$      | $X_n \xrightarrow{p} X$       |
-| [in $r$-Mean]()     | $\lim_{n \to \infty} \operatorname{E}{\vert X_n - X \rvert}^r = 0$, where $r \geq 1$                | $X_n \xrightarrow{r} X$       |
-| [in Distribution]() | $\lim_{n \to \infty} F_{X_n} = F_X$, for all $x \in C(F_X)$                                         | $X_n \xrightarrow{d} X$       |
-
-
-
-| Table Heading 1 | Table Heading 2 | Center align    | Right align     | Table Heading 5 |
-| :-------------- | :-------------- | :-------------: | --------------: | :-------------- |
-| Item 1          | Item 2          | Item 3          | Item 4          | Item 5          |
-| Item 1          | Item 2          | Item 3          | Item 4          | Item 5          |
-| Item 1          | Item 2          | Item 3          | Item 4          | Item 5          |
-| Item 1          | Item 2          | Item 3          | Item 4          | Item 5          |
-| Item 1          | Item 2          | Item 3          | Item 4          | Item 5          |
-
 
 
 A few notes on the modes of convergence: (i) Although the "complete convergence" is less common, it is be useful when working with respect to the Borel-Cantelli lemma; (ii) The terms "almost sure convergence" and "[convergence with probability $1$]()" are often used interchangably; (iii) The "convergence in probability" can also be defined by $\lim_{n\to\infty}P(\vert X_n-X \vert >\varepsilon)=0$; (iv) The "convergence in $r$-mean" essentially equals to the "[convergence in $L^p$-space]()" with any $p = r \geq 1$ whilst a convergence in higher order implies a convergence in lower order; (v) Each element $X_n$ of a sequence need not be defined on the same probability space for the "convergence in distribution" since they are taken only in terms of $F_{X_n}$.
