@@ -14,7 +14,7 @@ One of the basis of probability theory is the stabilisation of the relative freq
 ## I
 ---
 
-| Mode                | Alias                                                 | Definition                                                                                          | Notation                      |
+| **Mode**            | **Alias**                                             | **Definition**                                                                                      | **Notation**                   |
 | :------------------ | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------- | :---------------------------: |
 | [Completely]()      |                                                       | $\Sigma_{n=1}^{\infty} P(\lvert X_n - X \rvert > \varepsilon) < \infty$, for all $\varepsilon > 0$  | $X_n \xrightarrow{c.c.} X$    |
 | [Almost surely]()   | strong convergence (with reference to the strong LLN) | $P(\lim_{n \to \infty} X_n - X = 0) = 1$                                                            | $X_n \xrightarrow{a.s.} X$    |
