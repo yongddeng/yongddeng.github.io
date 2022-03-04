@@ -97,8 +97,8 @@ ul.topbar {
 .post_list {
 	width: 70.2%;
 	margin: 0 auto;
-	min-height: 150px;
-	max-height: 150px;
+	min-height: 200px;
+	max-height: 200px;
 	overflow-y: scroll;
 	display: inline-block;
 
@@ -130,8 +130,8 @@ ul.topbar {
 .tag_list {
 	width: 28%;
 	margin: 0 auto;
-	min-height: 300px;
-	max-height: 300px;
+	min-height: 200px;
+	max-height: 2000px;
 	overflow-y: scroll;
 	display: inline-block;
 
@@ -189,8 +189,8 @@ ul.topbar {
 .post_content {
 	position: relative;
 	width: 98.5%;
-	min-height: 900px;
-	max-height: 900px;
+	min-height: 700px;
+	max-height: 700px;
 	padding: 2px;
 	margin: 0 auto;
 	overflow-y: scroll;
