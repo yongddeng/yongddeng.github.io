@@ -35,9 +35,16 @@ If $X$ is stationary, we have the [time average]() $\bar{x} = {1\over{2T}}\int_{
 
 ## III
 ---
-A simple [random walk]() on $\mathbb{Z}$, introduced by Karl Pearson in 1905, is an elementary example of a stochastic process. Specifically, a partial sum process $(S\_{n})\_{n\in\mathbb{N}}$ consists of $S\_0 = 0$ and $S\_n = \Sigma\_{t=1}^{n}X\_t$ with evenly distributed ind. random variables $X\_{t} \in \lbrace +1, -1 \rbrace$ is called the simple random walk **(#4)**. 
+A simple [random walk]() on $\mathbb{Z}$, introduced by Karl Pearson in 1905, is an elementary example of a stochastic process. Specifically, a partial sum process $(S\_{n})\_{n\in\mathbb{N}}$ consists of $S\_0 = 0$ and $S\_n = \Sigma\_{t=1}^{n}X\_t$ with uniformly distributed ind. random variables $X\_{t} \in \lbrace +1, -1 \rbrace$ is called the simple random walk **(#4)**. It has $\operatorname{E}S\_n = 0$ and $\operatorname{Var}S\_{n} = n$. 
 
-// This particular stochastic process has a mean $\operatorname{E}S\_n = 0$. Also, using the fact that $\operatorname{E}Z\_t = 1$, we have $\operatorname{E}S\_{n}^2 = \Sigma\_{t=1}^{n}\operatorname{E}Z\_{t}^2 + 2\Sigma\_{1 \leq s \leq t \leq n}\operatorname{E}(Z\_{s}Z\_{t}) = n$. It hints that $E(\lvert S\_{n} \rvert)$, the expected translation distance after $n$ steps, should be of the order of $\sqrt{n}$. In fact, $\lim\_{n\to\infty} \operatorname{E}(\lvert S\_{n} \rvert)/\sqrt{n} = \sqrt{2/\pi}$. //  The random walk process has independent increments; $X\_t - X\_s$ is independent of $\mathcal{F}\_s$ for all $s, t \in T$ with $s \leq t$. Also, it has stationary increments; the dist. of $X\_n - X\_m$ is the same as the dist. of $X\_{n-m} - X\_0$ for all $n, m \in T$ with $m \leq n$.
+
+If $X\_t = 1$ with $p$ and $X\_t = -1$ with $q=1-p$, then $\operatorname{E}X\_t = 2p-1$ and $\operatorname{Var}X\_t = 4pq$. 
+
+It hints that $E(\lvert S\_{n} \rvert)$, the expected translation distance after $n$ steps, should be of the order of $\sqrt{n}$, whilst $\lim\_{n\to\infty} \operatorname{E}(\lvert S\_{n} \rvert)/\sqrt{n} = \sqrt{2/\pi}$.
+
+// The random walk process has independent increments; $X\_t - X\_s$ is independent of $\mathcal{F}\_s$ for all $s, t \in T$ with $s \leq t$. // Also, it has stationary increments; the dist. of $X\_n - X\_m$ is the same as the dist. of $X\_{n-m} - X\_0$ for all $n, m \in T$ with $m \leq n$.
+
+
 
 How many times will a random walk cross a boundary line if permitted to continue walking forever? A simple random walk on $\mathbb{Z}$ will cross every point an infinite number of times (stopping time? first hitting time?). Several properties, including dispersal distributions, first-passage or hitting times, encounter rates, recurrence or transience, have been introduced to quantify their behavior. A random walk is also a fundamental topic in discussions of Markov processes, and the term itself most often refers to a special category of Markov chains. // Poisson process (including random walk, they have independent increments; this property will make them to be considered as a martingale) 는 도착간의 시간이 i.i.d. 한 exponential dist.를 따르는 sum process이다. 따라서 이 process의 sample paths는 monotonically increasing하며 range는 0 이상의 integer이다.
 
