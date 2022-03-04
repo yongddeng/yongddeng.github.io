@@ -26,13 +26,9 @@ A f.d.d. however does not correspond to a product measure unless the selected ti
 
 ## II
 ---
-Remark. given a set of complex-valued random variable $X\_t \in L^2(\Omega, \mathcal{F}, P)$ whose $\operatorname{E}X\_t = 0$ and $\operatorname{E}{\lvert X \rvert}^2 < \infty$, if the inner product in the $L^2$-space is properly given by $\langle X\_{t\_1}, X_{t\_2} \rangle = \operatorname{E}[X\_{t_1}\overline{X}\_{t\_2}]$ (i.e. ${\left\lVert X\_t \right\rVert}\_{2} = \sqrt{\langle X\_t, X\_t \rangle}$), then a set $(X\_t)_{t \in T}$ forms a Hilbert space $H$. Therefore, if the index set $T$ contains non-negative real numbers, then $(X\_t)\_{t \in T}$ can be regarded as a curve $C$ exsiting in $H$; The statistical properties of $X_t$ at a fixed $t$ shall be determined by its marginal dist., but also its joint dist. since $X_t$ may be relavant to some neighbourhoods marignals. In fact, the relationship with neighbourhoods can change as $t$ moves, results a catastrophe for the investigation.
+Remark. given a set of complex-valued random variable $X\_t \in L^2(\Omega, \mathcal{F}, P)$ whose $\operatorname{E}X\_t = 0$ and $\operatorname{E}{\lvert X \rvert}^2 < \infty$, if the inner product in the $L^2$-space is properly given by $\langle X\_{t\_1}, X_{t\_2} \rangle = \operatorname{E}[X\_{t_1}\overline{X}\_{t\_2}]$ (i.e. ${\left\lVert X\_t \right\rVert}\_{2} = \sqrt{\langle X\_t, X\_t \rangle}$), then a set $(X\_t)_{t \in T}$ forms a Hilbert space $H$. Therefore, if the index set $T$ contains non-negative real numbers, then $(X\_t)\_{t \in T}$ can be regarded as a curve $C$ exsiting in $H$; The statistical properties of $X_t$ at a fixed $t$ shall be determined by its marginal dist. (as usual), but also its joint dist. because $X_t$ may be relavant to some neighbourhoods marignals. In fact, the relationship with neighbourhoods can change as $t$ moves, results a catastrophe for the investigation.
 
-For all $n \in \mathbb{N}$, if the joint cdf is given by $F_{(X_{t_1}, X_{t_1}, \cdots, X_{t_n})}(x_1, x_2, \dots, x_n) = F_{(X_{t_{1+\tau}}, X_{t_{2+\tau}}, \cdots, X_{t_{n+\tau}})}(x_{1+\tau}, x_{2+\tau}, \dots, x_{n+\tau})$, i.e. the f.d.d. of $X$ is invariant under the time translation, then $X$ is [strict-sense stationary]() (sss). If we were given $n \in \lbrace 1, 2, \cdots, N \rbrace$, then $X$ is [$N$-th order stationary]() **(#2)**. Instead, if $\mu_X(t) = \mu_X$ and $\gamma_{XX}(t_1, t_2) = \gamma_{XX}(\tau, 0)$ with $\tau = t_2 - t_1$, then $X$ is [weak-sense stationary]() (wss). We resort to a weaker condition as ss-stationarity is highly restrictive in practice. 
-
-// Having ind. increments is one example of a property that is determined by the f.f.d., so 
-
-//. Then, the f.f.d. of any process is consistent, that is, $\lim_{}$.
+For all $n \in \mathbb{N}$, if the joint cdf is given by $F_{(X_{t_1}, X_{t_1}, \cdots, X_{t_n})}(x_1, x_2, \dots, x_n) = F_{(X_{t_{1+\tau}}, X_{t_{2+\tau}}, \cdots, X_{t_{n+\tau}})}(x_{1+\tau}, x_{2+\tau}, \dots, x_{n+\tau})$, i.e. the f.d.d. of $X$ is invariant under the time translation, then $X$ is [strict-sense stationary]() (sss). If we were given $n \in \lbrace 1, 2, \cdots, N \rbrace$, then $X$ is [$N$-th order stationary]() **(#2)**. Instead, if $\mu_X(t) = \mu_X$ and $\gamma_{XX}(t_1, t_2) = \gamma_{XX}(\tau, 0)$ with $\tau = t_2 - t_1$, then $X$ is [weak-sense stationary]() (wss). We resort to a weaker condition because the ss-stationarity is highly restrictive. //
 
 If $X$ is stationary, we have the [time average]() $\bar{x} = {1\over{2T}}\int_{-T}^{T} X(t)\, \mathrm{d}t$ and the [ensemble average]() $\mu\_{X} = \operatorname{E}X(t) = \int_{-\infty}^{\infty} zf\_{X\_t}(z)\,\mathrm{d}z$. If it is true that $\lim\_{T\to\infty}\bar{x} = \mu\_X$, then such a process is [mean-ergodic](). By virtue of ergodicity, we may evaluate the statistical properties of a process by using a single long sample path, whilst observing all possible samples at some fixed time $t$ is impractical. Similarly, given the time average estimate $\bar{\gamma}\_{XX}(\tau) = {1\over{2T}}\int\_{-T}^{T}\,(X(t+\tau)-\mu_X)\cdot(X(t)-\mu_X) \, \mathrm{d}t$, if it is true that $\lim\_{T\to\infty}\bar{\gamma}\_{XX}(\tau) = \gamma\_{XX}(\tau)$, then such a process [autocovariance-ergodic](). A process that is both mean and autocovariance-ergodic may be called wide-sense ergodic **(#3)**.
  
@@ -57,3 +53,8 @@ Eg2: Poisson process (including random walk, they have independent increments; t
 - https://cnx.org/contents/PCe6SiVb@3/A-Hilbert-Space-for-Stochastic-Processes
 - http://www.mathnet.ru/links/5d075e08842a102b4b354c1a1dc7c472/tvp368.pdf
 - https://math.stackexchange.com/questions/2617773/stochastic-processes-as-banach-or-hilbert-space-valued-random-variables
+
+
+// Having ind. increments is one example of a property that is determined by the f.f.d., so 
+
+//. Then, the f.f.d. of any process is consistent, that is, $\lim_{}$.
