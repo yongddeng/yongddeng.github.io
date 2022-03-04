@@ -35,9 +35,7 @@ If $X$ is stationary, we have the [time average]() $\bar{x} = {1\over{2T}}\int_{
 
 ## III
 ---
-A simple [random walk]() on $\mathbb{Z}$, introduced by Karl Pearson in 1905, is an elementary example of a stochastic process. Specifically, a partial sum process $(S\_{n})\_{n\in\mathbb{N}}$ consists of $S\_0 = 0$ and $S\_n = \Sigma\_{t=1}^{n}X\_t$ with uniformly distributed ind. random variables $X\_{t} \in \lbrace +1, -1 \rbrace$ is called the simple random walk **(#4)** which has $\operatorname{E}S\_n = 0$ and $\operatorname{Var}S\_{n} = n$. Note that $(I\_{t})\_{t\in\mathbb{N}}$ consists of $I\_{t} = (X\_{t} + 1)/2$ is a set of Bernoulli trial with success parameter $p$, and so $R\_{n} = \Sigma\_{t=1}^{n} I\_{t}$ follows $\operatorname{Bin}(n,p)$. 
-
-If $X\_{t} = 1$ with $p$ and $X\_{t} = -1$ with $q=1-p$, then $\operatorname{E}X\_{t} = 2p-1$ and $\operatorname{Var}X\_{t} = 4pq$. That is, if $Y\_{n} = 2R\_{n}-n$, then $\operatorname{E}Y\_{t} = n(2p-1)$ and $\operatorname{Var}Y\_{t} = 4npq$.
+A simple [random walk]() on $\mathbb{Z}$, introduced by Karl Pearson in 1905, is an elementary example of a stochastic process. Specifically, a partial sum process $(S\_{n})\_{n\in\mathbb{N}}$ consists of $S\_0 = 0$ and $S\_n = \Sigma\_{t=1}^{n}X\_t$ with uniformly distributed ind. random variables $X\_{t} \in \lbrace +1, -1 \rbrace$ is a simple random walk **(#4)** with $\operatorname{E}S\_n = 0$ and $\operatorname{Var}S\_{n} = n$. Note that $(I\_{t})\_{t\in\mathbb{N}}$ consists of $I\_{t} = (X\_{t} + 1)/2$ is a set of Bernoulli trials with success parameter $p$, and hence $R\_{n} = \Sigma\_{t=1}^{n} I\_{t}$ follows $\operatorname{Bin}(n,p)$. If $X\_{t} = 1$ with $p$ and $X\_{t} = -1$ with $q=1-p$, then $\operatorname{E}X\_{t} = 2p-1$ and $\operatorname{Var}X\_{t} = 4pq$. That is, if $Y\_{n} = 2R\_{n}-n$, then $\operatorname{E}Y\_{t} = n(2p-1)$ and $\operatorname{Var}Y\_{t} = 4npq$.
 
  - // It hints that $E(\lvert S\_{n} \rvert)$, the expected translation distance after $n$ steps, should be of the order of $\sqrt{n}$, whilst $\lim\_{n\to\infty} \operatorname{E}(\lvert S\_{n} \rvert)/\sqrt{n} = \sqrt{2/\pi}$.
 
