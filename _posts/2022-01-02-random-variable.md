@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "random variable"
+title: "02. random variable"
 tags: tag1
 use_math: true
 ---

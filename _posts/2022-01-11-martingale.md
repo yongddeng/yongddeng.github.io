@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "martingale"
+title: "11. martingale"
 tags: tag1
 use_math: true
 ---

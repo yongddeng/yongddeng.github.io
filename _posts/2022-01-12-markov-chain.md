@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "markov chain"
+title: "12. markov chain"
 tags: tag1
 use_math: true
 ---

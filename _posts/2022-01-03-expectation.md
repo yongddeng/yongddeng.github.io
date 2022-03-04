@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "expectated value"
+title: "03. expectated value"
 tags: tag1
 use_math: true
 ---

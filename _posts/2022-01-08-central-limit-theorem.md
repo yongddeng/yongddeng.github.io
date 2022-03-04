@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "central limit theorem"
+title: "08. central limit theorem"
 tags: tag1
 use_math: true
 ---

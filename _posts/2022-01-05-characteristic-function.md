@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "characteristic function"
+title: "05. characteristic function"
 tags: tag1
 use_math: true
 ---

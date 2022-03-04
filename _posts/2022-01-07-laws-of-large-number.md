@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "law of large number"
+title: "07. law of large number"
 tags: tag1
 use_math: true
 ---

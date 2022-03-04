@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "stochastic process"
+title: "10. stochastic process"
 tags: tag1
 use_math: true
 ---
@@ -8,7 +8,7 @@ use_math: true
 
 # Stochastic Process
 ---
-The preceding four notes (09, 10, 11, 12) are based on [Stochastic Processes](), edited by Amir Dembo, revised by Kevin Ross. // Especially for notes 10, we read J.L. Doob: What is a Martingale. 
+The preceding three posts (10, 11, 12) are based on [Stochastic Processes](), edited by Amir Dembo, revised by Kevin Ross. // Especially for notes 10, we read J.L. Doob: What is a Martingale. 
 
 
 - time_series.theory.[ergodicity](https://www.youtube.com/watch?v=k6y2kzayV6A#t=1520)

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "inequality"
+title: "04. inequality"
 tags: tag1
 use_math: true
 ---

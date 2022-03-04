@@ -1,12 +1,12 @@
 ---
 layout: default
-title: "(tbd) law of the iterated logarithm"
+title: "09. law of the iterated logarithm"
 tags: tag1
 use_math: true
 ---
 
 
-# Law of the Iterated Logarithm
+# (TBD) Law of the Iterated Logarithm
 ---
 For sums of independent random variables we already know two limit theorems: the law of large numbers and the central limit theorem. The LLN describes for large $n \in \mathbb{N}$ the typical behavior, or average value behavior, of sums of $n$ random variables. On the other hand, the CLT quantifies the typical fluctuations about this average value. // We will study atypically large deviations from the average value in greater detail. The goal is to quantify the typical fluctuations of the whole process as $n \to \infty$. The main message is: While for fixed time $n$ the partial sum $S_n$ deviates by approximately $\sqrt{n}$ from its expected value (CLT), the maximal fluctuation up to time $n$ is of order $\sqrt{n \log \log n}$ (LIL) as stated by the Hartman–Wintner's theorem.
 

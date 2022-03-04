@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "mode of convergence"
+title: "06. mode of convergence"
 tags: tag1
 use_math: true
 ---

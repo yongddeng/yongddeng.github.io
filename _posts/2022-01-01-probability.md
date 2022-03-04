@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "probability theory"
+title: "01. probability theory"
 tags: tag1
 use_math: true
 ---
