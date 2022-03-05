@@ -8,7 +8,7 @@ use_math: true
 
 # Stochastic Process
 ---
-The preceding three posts (10, 11, 12) are based on [Stochastic Processes](https://www.lkouniv.ac.in/site/writereaddata/siteContent/202004061923052865rajiv_pandey_Stochastic_Process_2.pdf), edited by Amir Dembo, revised by Kevin Ross. // Especially for notes 10, we read J.L. Doob: What is a Martingale. 
+The preceding three posts (10, 11, 12) are based on [Stochastic Processes](https://www.lkouniv.ac.in/site/writereaddata/siteContent/202004061923052865rajiv_pandey_Stochastic_Process_2.pdf), edited by Amir Dembo, revised by Kevin Ross. // For notes 11, we read J.L. Doob: What is a Martingale. // For notes 12, we read Leon-Garcia: A book (3rd edition).
 
 
 ## I
