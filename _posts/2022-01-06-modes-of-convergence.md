@@ -16,8 +16,8 @@ One of the basis of probability theory is the stabilisation of the relative freq
 
 | **Mode**            | **Alias**                                             | **Definition**                                                                                      | **Notation**                   |
 | :------------------ | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------- | :---------------------------: |
-| [Completely]()      |                                                       | $\Sigma_{n=1}^{\infty} P(\lvert X_n - X \rvert > \varepsilon) < \infty$, for all $\varepsilon > 0$  | $X_n \xrightarrow{c.c.} X$    |
-| [Almost surely]()   | strong convergence (with reference to the strong LLN) | $P(\lim_{n \to \infty} X_n - X = 0) = 1$                                                            | $X_n \xrightarrow{a.s.} X$    |
+| [completely]()      |                                                       | $\Sigma_{n=1}^{\infty} P(\lvert X_n - X \rvert > \varepsilon) < \infty$, for all $\varepsilon > 0$  | $X_n \xrightarrow{c.c.} X$    |
+| [almost surely]()   | strong convergence (with reference to the strong LLN) | $P(\lim_{n \to \infty} X_n - X = 0) = 1$                                                            | $X_n \xrightarrow{a.s.} X$    |
 | [in Probability]()  | weak convergence (with reference to the weak LLN)     | $\lim_{n \to \infty} P(\lvert X_n - X \rvert \leq \varepsilon) = 1$, for all $\varepsilon > 0$      | $X_n \xrightarrow{p} X$       |
 | [in $r$-Mean]()     |                                                       | $\lim_{n \to \infty} \operatorname{E}{\vert X_n - X \rvert}^r = 0$, where $r \geq 1$                | $X_n \xrightarrow{r} X$       |
 | [in Distribution]() | weakest convergence (with reference to the CLT)       | $\lim_{n \to \infty} F_{X_n} = F_X$, for all $x \in C(F_X)$                                         | $X_n \xrightarrow{d} X$       |
