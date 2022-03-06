@@ -36,6 +36,9 @@ If $(X\_n)\_{n\in\mathbb{N}}$ converges completely, almost surely, in probabilit
 $(1) \begin{array}{ccccc} X_n \xrightarrow{c.c.} X & \Longrightarrow & X_n \xrightarrow{a.s.} X & \Longrightarrow & X_n \xrightarrow{p} X & \Longrightarrow & X_n \xrightarrow{d} X \end{array}$
 
 $(2) \begin{array}{ccccc} X_n \xrightarrow{r} X & \Longrightarrow & X_n \xrightarrow{p} X \end{array}$
+
+
+
 The firt implication in $(1)$ follows from the 1st Borel-Canteli lemma. In fact, if $X_n$ are ind. and $X$ is degenerate, then the converse is true due to the 2nd Borel-Canteli lemma. The relation $(2)$ follows from Markov's inequality that bounds $P(\vert Y_n \vert > \varepsilon) \leq \varepsilon^{-r}\operatorname{E}{\vert Y_n \vert}^r$, where $Y_n = X_n-X$. 
 
 
