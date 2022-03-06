@@ -8,7 +8,7 @@ use_math: true
 
 # Characteristic Function
 ---
-Let $\operatorname{FT}$ denotes the Fourier transform and $(f \ast g)(x) = \int\_{\mathbb{R}} f(\tau)g(x-\tau)\,\mathrm{d}\tau$ is the convolution operator. The [convolution theorem](https://en.wikipedia.org/wiki/Convolution_theorem) puts $\operatorname{FT} \lbrace f \ast g \rbrace = \operatorname{FT} \lbrace f \rbrace \cdot \operatorname{FT} \lbrace g \rbrace$. The characteristic function in general is the probabilistic version of $\operatorname{FT}$ that is applied to the density function $f\_{Z}(z) = \int\_{x \in X} f\_{X}(x) f\_{Y}(z-x)\,\mathrm{d}x$, where $Z = X+Y$ and $f\_{X,Y} = f\_{X}f\_{Y}$.
+Let $\operatorname{FT}$ denotes the Fourier transform and $(f \ast g)(x) = \int\_{\mathbb{R}} f(\tau)g(x-\tau)\,\mathrm{d}\tau$ is the convolution operator. The [convolution theorem](https://en.wikipedia.org/wiki/Convolution_theorem) puts $\operatorname{FT} \lbrace f \ast g \rbrace = \operatorname{FT} \lbrace f \rbrace \cdot \operatorname{FT} \lbrace g \rbrace$. The characteristic function $\varphi$ in general is the probabilistic version of $\operatorname{FT}$ that is applied to the density function $f\_{Z}(z) = \int\_{x \in X} f\_{X}(x) f\_{Y}(z-x)\,\mathrm{d}x$, where $Z = X+Y$ and $f\_{X,Y} = f\_{X}f\_{Y}$.
 
 
 ## I
