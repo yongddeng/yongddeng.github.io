@@ -8,7 +8,7 @@ use_math: true
 
 # Inequality
 ---
-Queried: Who invented inequalities; Google responded: The signs for greater than and less than were introduced by Thomas Harriot (1560-1621), but he initially wrote triangular symbols, and the editor of his book altered to what resemble the modern symbols. Inequalities in probability thoery are essential in order to adapt some mathematics originated in geometry and linear algebra.
+Queried: Who invented inequalities; Google responded: The signs for greater than and less than were introduced by Thomas Harriot (1560-1621), but he initially wrote triangular symbols which the editor of his book altered to what resemble the modern symbols. Inequalities are essential for the subject in order to adapt some mathematics originated in geometry and linear algebra.
 
 
 ## I
