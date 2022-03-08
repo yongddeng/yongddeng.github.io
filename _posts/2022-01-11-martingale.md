@@ -21,22 +21,7 @@ A few adjustments in the definition induces another accessible martingales. We l
 
 ## II
 ---
-If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_{s}) \geq X\_{s}$ a.s., then $X$ is called a [submartingale](). Similarly, if $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_s) \leq X\_s$ a.s., then $X$ is called a [supermartingale](). From the definition, a submartingale (supermartingale) has a monotonically increasing (monotonically decreasing) expectation, and a martingale is both a sub- and a super- martingale **(#3)**. 
-
-- Assume that $X$ has ind. increments:
-- If the mean is constant then X is a martingale.
-- If the mean is increasing then X is a sub-martingale.
-- If the mean is decreasing then X is a super-martingale.
-
-- Each summand of simple random walk has a mean 2p-1:
-- A simple random walk with $p = 1/2$ is a martingale.
-- A simple random walk with $p > 1/2$ is a sub-martingale.
-- A simple random walk with $p < 1/2$ is a super-martingale.
-
-- On the gambler's point of view:
-- A martingale corresponds to fair games.
-- A sub-margingale corresponds to favorable games.
-- A super-margingale corresponds to unfavorable games.
+If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_{s}) \geq X\_{s}$ a.s., then $X$ is called a [sub-martingale](). Similarly, if $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_s) \leq X\_s$ a.s., then $X$ is called a [super-martingale](). **(#3)**. We have seen that $X$ with ind. increments and a constant mean is a martingale. In the same vein, if the mean is increasing (decreasing) then X is a sub-martingale (super-martingale). For example, recall that each summand of simple random walk has a mean $2p-1$. If $p = 1/2$, then the simple random walk is a martingale. Moreover, if $p > 1/2$ ($p < 1/2$), then it is a sub-martingale (a super-martingale). On the gambler's point of view, a martingale corresponds to fair games, a sub-margingale corresponds to favorable games, and a super-margingale corresponds to unfavorable games. Note that all results about sub-martingales have dual statements for sup-martingales and vice versa.
 
 These three unique types of stochastic process have the following properties. // The martingale properties are preserved under sums of the stochastic processes (thus the collection of martingales with respect to a fixed filtration $F$ forms a vector space) // The sub-martingale and super-martingale properties are preserved under multiplication by a positive constant. // Jensen's inequality turns martingales into sub-martingales under appropriate conditions.
 
@@ -45,11 +30,13 @@ The Doob decomposition theorem: decomposes a basic stochastic process into a mar
 
 ## III
 ---
-stopping time theorem::: expectation of stopped martingale is not in general equal to that of a given martingale (i.e. the problem is that $\tau$ is too large), in fact, we have $\operatorname{E}\tau = \infty$ // The optional stopping theorem (or Doob's optional sampling theorem) which applies to doubling strategies states that 
+// stopping time theorem::: expectation of stopped martingale is not in general equal to that of a given martingale (i.e. the problem is that $\tau$ is too large), in fact, we have $\operatorname{E}\tau = \infty$ // The optional stopping theorem (or Doob's optional sampling theorem) which applies to doubling strategies states that 
 
-Doob's (maximal) inequality::: generalised Kolmogorov's inequality. // martingale convergence theorem::: Doob's martingale convergence theorems (If you're more analysis oriented, martingales, provide (IMO) the most natural proof of the Radon-Nikodym theorem (ok, for separable sigma algebras). The proof is an application of the Martingale Convergence Theorem) // martingale clt
+// Doob's (maximal) inequality::: generalised Kolmogorov's inequality. 
+
+// Doob's martingale convergence theorems::: If you're more analysis oriented, martingales, provide (IMO) the most natural proof of the Radon-Nikodym theorem (ok, for separable sigma algebras). The proof is an application of the Martingale Convergence Theorem) // martingale clt
 
 
 ## **
 ---
-**(#1)** In continuous time, the continuity of the sample paths $t \to X\_t$ and the filtration $t \to \mathcal{F}\_t$ must be provided. **(#2)** I.e. A partial sum process associated with ind. sequences is a martingale. **(#3)** All results about sub-martingales have dual statements for sup-martingales and vice versa.
+**(#1)** In continuous time, the continuity of the sample paths $t \to X\_t$ and the filtration $t \to \mathcal{F}\_t$ must be provided. **(#2)** I.e. A partial sum process associated with ind. sequences is a martingale.
