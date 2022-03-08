@@ -36,7 +36,7 @@ A state $i$ is ergodic if it is aperiodic and positive recurrent. If all states 
 
 왜 우리는 에르고딕 정리 (w/ Ergodic Markov Chains Theorem)에 관심을 가져야합니까? // 모든 마르코프 사슬이 장기적으로 우리의 예와 같이 단일 고정 분포로 수렴하지 않을 때, 에르 고딕 마르코프 체인 이라고하는 특별한 유형의 마르코프 체인 만이 이와 같이 단일 분포로 수렴하기 때문입니다. // MCMC는 강력한 머신 러닝 기술의 기초인데, 컴퓨터에서 마르코프 체인 시뮬레이션을 실행하여 정상적으로 풀기에는 너무 어렵거나 심지어 불가능한 복잡한 통계 문제에 대한 답을 얻기 위해 사용됩니다. // 에르 고딕 정리는 convergence을 보장하기 때문에 MCMC 방법을 사용하는 데 기본이됩니다. 우리가 MCMC 시뮬레이션을 설정할 때 Ergodic mc를 사용하는 한, 시뮬레이션에 의해 생성 된 데이터 포인트가 실제로 unique steady state로 converge함을 확신할 수 있습니다. // 다시한번 말하자면, any finite, irreducible, ergodic한 mc는 stationary 합니다.
 
-The first-order auto-regressive process is an example of a Markov chain, and a one-dimensional markov chain can be viewed as a random walk. // 마르코프 가정으로 구현한 모델은 이전 모든 상태를 고려한 모델보다 성능이 떨어질 가능성이 높음에도 불구하고, 마르코프 가정 없이 우리가 지금까지 지나온 상태들의 joint distribution를 구하는게 어렵기 때문에 사용한다. // Training phase에서 MLE를 진행할 때 overfitting을 avoid하기 위해서 probability를 smoothing시킨다.
+The first-order auto-regressive process is an example of a Markov chain, and a one-dimensional markov chain can be viewed as a random walk. // 마르코프 가정으로 구현한 모델은 이전 모든 상태를 고려한 모델보다 성능이 떨어질 가능성이 높음에도 불구하고, 마르코프 가정 없이 우리가 지금까지 지나온 상태들의 joint distribution를 구하는게 어렵기 때문에 사용한다. // Training phase에서 MLE를 진행할 때 overfitting을 avoid하기 위해서 probability를 smoothing시킨다. // Markov chain은 martingale과 harmonic function으로 연관되어 있다; [ref](https://www.randomservices.org/random/martingales/Properties.html)
 
 
 ## **
