@@ -38,11 +38,12 @@ If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{
 - A sub-margingale corresponds to favorable games.
 - A super-margingale corresponds to unfavorable games.
 
+The Doob decomposition theorem: decomposes a basic stochastic process into a martingale and a predictable process (a definition of predictable process will be followed). // The proof came up in 1953 and showed both the existence and the uniqueness. // the Krickeberg decom. (p.490) // the Riesz decom. (p.491) // I.e. Gaussian stochastic processes.
 
-
-A martingale $X$ is square-integrable if $\operatorname{E}X^{2}\_{t} < \infty$ for all $t \in T$, and the square of an $L^2$-martingale $X$ has zero mean, uncorrelated differences.
-
-More generally, for any stochastic process, we look at the Doob decomposition theorem: any submartingale $X = (X\_t)\_{t \in T}$ can be uniquely decomposed into the sum of a martingale $M = (X\_t)\_{t \in T}$ and an predictable process $A = (A\_t)\_{t \in T}$ starting with $A\_0 = 0$. That is, $X\_t = M\_t + A\_t$ for all $t \in T$. // We can further explore the theorem with a submartingale. // The proof came up in 1953 and showed both the existence and the uniqueness. // the Krickeberg decom. (p.490) // the Riesz decom. (p.491) // If the variables are uncorrelated, when summing the individual variances, we can use the linearity of expecation to ease computations. // I.e. Gaussian stochastic processes.
+- Properties:
+- The martingale properties are preserved under sums of the stochastic processes (thus the collection of martingales with respect to a fixed filtration $F$ forms a vector space).
+- The sub-martingale and super-martingale properties are preserved under multiplication by a positive constant.
+- Jensen's inequality turns martingales into sub-martingales under appropriate conditions.
 
 
 ## III
