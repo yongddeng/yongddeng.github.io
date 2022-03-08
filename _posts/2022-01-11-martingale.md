@@ -38,30 +38,18 @@ If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{
 - A sub-margingale corresponds to favorable games.
 - A super-margingale corresponds to unfavorable games.
 
-The Doob decomposition theorem: decomposes a basic stochastic process into a martingale and a predictable process (a definition of predictable process will be followed). // The proof came up in 1953 and showed both the existence and the uniqueness. // the Krickeberg decom. (p.490) // the Riesz decom. (p.491) // I.e. Gaussian stochastic processes.
+These three unique types of stochastic process have the following properties. // The martingale properties are preserved under sums of the stochastic processes (thus the collection of martingales with respect to a fixed filtration $F$ forms a vector space) // The sub-martingale and super-martingale properties are preserved under multiplication by a positive constant. // Jensen's inequality turns martingales into sub-martingales under appropriate conditions.
 
-- Properties:
-- The martingale properties are preserved under sums of the stochastic processes (thus the collection of martingales with respect to a fixed filtration $F$ forms a vector space).
-- The sub-martingale and super-martingale properties are preserved under multiplication by a positive constant.
-- Jensen's inequality turns martingales into sub-martingales under appropriate conditions.
+The Doob decomposition theorem: decomposes a basic stochastic process into a martingale and a predictable process (a definition of predictable process will be followed). // In discrete time, a process $X = (X\_t)\_{t \in T}$ being adapted to $F = (\mathcal{F}\_t)\_{t \in T}$ is predictable if $\sigma(X\_t) \subset \mathcal{F}\_{t-1}$ for all $t \in T$. // The proof came up in 1953 and showed both the existence and the uniqueness. // the Krickeberg decom. (p.490) // the Riesz decom. (p.491) // I.e. Gaussian stochastic processes.
 
 
 ## III
 ---
-Suppose $(\Omega, \mathcal{F}, F, P)$ is a filtered probability space. A random variable $\tau: \Omega \to T$ with respect to $F$ is called a [stopping time]() if $\lbrace \omega: \tau(\omega) \leq t \rbrace \in \mathcal{F}\_t$ for all $t \in T$. In particular, [stopped $\sigma$-algebra]() $\mathcal{F}\_{\tau} = \lbrace A \in \mathcal{F}\_{\infty}: A \cap \lbrace \tau \leq t \rbrace \in \mathcal{F}\_t, \,\forall t \in T \rbrace$, $\mathcal{F}\_{\infty} = \sigma(\bigcup\_{t} \mathcal{F}\_t)$ quantifies amount of information stacked up to $\tau$. 
-  
-For example, the first hitting time $\tau\_B = \inf \lbrace t: X\_t \in B, \, B \in \mathcal{B}\_\mathbb{R} \rbrace$ is a stopping time. If we let an event $\lbrace \tau\_B = t \rbrace = \lbrace X\_0 \notin B, \dots, X\_s \notin B, X\_t \in B \rbrace = \bigcap\_{r=0}^{s} {\lbrace X\_r \in B \rbrace}^c \cap \lbrace X\_t \in B \rbrace$, then it is quite clear that $\{\tau\_B = t\} \in \mathcal{F}\_t$, but $\tau\_{B}^{\prime} = \sup \lbrace t: X\_t \in B, \, B \in \mathcal{B}\_\mathbb{R} \rbrace$ is not a stopping time because the full trajectory of $X$ (i.e. on the entire $T$) has to be known **(#5)**.
-
-stopping time theorem::: Properties of stopping times (w/ sufficient condition for the integrability of a stopping time). // expectation of stopped martingale is not in general equal to that of a given martingale (i.e. the problem is that $\tau$ is too large), in fact, we have $\operatorname{E}\tau = \infty$ // The optional stopping theorem (or Doob's optional sampling theorem) which applies to doubling strategies states that
+stopping time theorem::: expectation of stopped martingale is not in general equal to that of a given martingale (i.e. the problem is that $\tau$ is too large), in fact, we have $\operatorname{E}\tau = \infty$ // The optional stopping theorem (or Doob's optional sampling theorem) which applies to doubling strategies states that 
 
 Doob's (maximal) inequality::: generalised Kolmogorov's inequality. // martingale convergence theorem::: Doob's martingale convergence theorems (If you're more analysis oriented, martingales, provide (IMO) the most natural proof of the Radon-Nikodym theorem (ok, for separable sigma algebras). The proof is an application of the Martingale Convergence Theorem) // martingale clt
 
 
 ## **
 ---
-**(#1)** In continuous time, the continuity of the sample paths $t \to X\_t$ and the filtration $t \to \mathcal{F}\_t$ must be provided. **(#2)** I.e. A partial sum process associated with ind. sequences is a martingale. **(#3)** All results about sub-martingales have dual statements for sup-martingales and vice versa. **(#5)** If $B$ is a closed set then $X$ has continuous sample paths. and an elementary application of first hitting times can be studied in the reflection principle for a Wiener process.
-
-
-// kolmogorov-doob inequality // doob's maximal inequality // 
-
-// In discrete time, a process $X = (X\_t)\_{t \in T}$ being adapted to $F = (\mathcal{F}\_t)\_{t \in T}$ is predictable if $\sigma(X\_t) \subset \mathcal{F}\_{t-1}$ for all $t \in T$.
+**(#1)** In continuous time, the continuity of the sample paths $t \to X\_t$ and the filtration $t \to \mathcal{F}\_t$ must be provided. **(#2)** I.e. A partial sum process associated with ind. sequences is a martingale. **(#3)** All results about sub-martingales have dual statements for sup-martingales and vice versa.
