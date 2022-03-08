@@ -23,15 +23,24 @@ A few adjustments in the definition induces another accessible martingales. We l
 ---
 If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_{s}) \geq X\_{s}$ a.s., then $X$ is called a [submartingale](). Similarly, if $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_s) \leq X\_s$ a.s., then $X$ is called a [supermartingale](). From the definition, a submartingale (supermartingale) has a monotonically increasing (monotonically decreasing) expectation, and a martingale is both a sub- and a super- martingale **(#3)**. 
 
-If m is increasing then X is a sub-martingale.
-If m is decreasing then X is a super-martingale.
+- Assume that $X$ has ind. increments:
+- If the mean is constant then X is a martingale.
+- If the mean is increasing then X is a sub-martingale.
+- If the mean is decreasing then X is a super-martingale.
 
-A simple random walk with $p = 1/2$ is a martingale
-A simple random walk with $p < 1/2$ is a super-martingale
-A simple random walk with $p > 1/2$ is a sub-martingale
+- Each summand of simple random walk has a mean 2p-1:
+- A simple random walk with $p = 1/2$ is a martingale.
+- A simple random walk with $p > 1/2$ is a sub-martingale.
+- A simple random walk with $p < 1/2$ is a super-martingale.
+
+- On the gambler's point of view:
+- A martingale corresponds to fair games.
+- A sub-margingale corresponds to favorable games.
+- A super-margingale corresponds to unfavorable games.
 
 
-A martingale $X$ is square-integrable if $\operatorname{E}X^{2}\_{t} < \infty$ for all $t \in T$, and the square of an $L^2$-martingale $X$ has zero mean, uncorrelated differences (i.e. independence => uncorrelation <=> may or may not be orthogonal), and furthermore, admits a decomposition of conditional second moments (p179) **(#4)**. //
+
+A martingale $X$ is square-integrable if $\operatorname{E}X^{2}\_{t} < \infty$ for all $t \in T$, and the square of an $L^2$-martingale $X$ has zero mean, uncorrelated differences.
 
 More generally, for any stochastic process, we look at the Doob decomposition theorem: any submartingale $X = (X\_t)\_{t \in T}$ can be uniquely decomposed into the sum of a martingale $M = (X\_t)\_{t \in T}$ and an predictable process $A = (A\_t)\_{t \in T}$ starting with $A\_0 = 0$. That is, $X\_t = M\_t + A\_t$ for all $t \in T$. // We can further explore the theorem with a submartingale. // The proof came up in 1953 and showed both the existence and the uniqueness. // the Krickeberg decom. (p.490) // the Riesz decom. (p.491) // If the variables are uncorrelated, when summing the individual variances, we can use the linearity of expecation to ease computations. // I.e. Gaussian stochastic processes.
 
@@ -49,7 +58,7 @@ martingale convergence theorem::: Doob's martingale convergence theorems (If you
 
 ## **
 ---
-**(#1)** In continuous time, the continuity of the sample paths $t \to X\_t$ and the filtration $t \to \mathcal{F}\_t$ must be provided. **(#2)** I.e. A partial sum process associated with ind. sequences is a martingale. **(#3)** All results about sub-martingales have dual statements for sup-martingales and vice versa. **(#4)** To be precise, such $X$ is merely a submartingale in general, and one has to compensate the process to exhibit a martingale (p183). The compensation is //. **(#5)** If $B$ is a closed set then $X$ has continuous sample paths. and an elementary application of first hitting times can be studied in the reflection principle for a Wiener process.
+**(#1)** In continuous time, the continuity of the sample paths $t \to X\_t$ and the filtration $t \to \mathcal{F}\_t$ must be provided. **(#2)** I.e. A partial sum process associated with ind. sequences is a martingale. **(#3)** All results about sub-martingales have dual statements for sup-martingales and vice versa. **(#5)** If $B$ is a closed set then $X$ has continuous sample paths. and an elementary application of first hitting times can be studied in the reflection principle for a Wiener process.
 
 
 // kolmogorov-doob inequality // doob's maximal inequality // 
