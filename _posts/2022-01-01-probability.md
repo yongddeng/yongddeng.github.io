@@ -8,7 +8,7 @@ use_math: true
 
 # Probability Theory
 ---
-Perused Amir Dembo's [Stanford STAT310](https://web.stanford.edu/class/stats310a/lnotes.pdf), Allan Gut's [Probability: A Graduate Course](https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf), along with [W1](https://www.randomservices.org), [W2](http://theanalysisofdata.com/), [W3](https://www.stat.berkeley.edu/~aldous/) in order to acquire the modern measure-theoretic foundations of probability theory. Whilst Stein's [Real Analysis III](http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf) introduced an outer measure, browsed its limitations, and then adopted measurable sets with sigma algebras, I would carefully put them in slightly different orders.
+Perused Amir Dembo's [Stanford STAT310](https://web.stanford.edu/class/stats310a/lnotes.pdf), Allan Gut's [Probability: A Graduate Course](https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf), along with [W1](https://www.randomservices.org), [W2](http://theanalysisofdata.com/), [W3](https://www.stat.berkeley.edu/~aldous/) in order to acquire the modern measure-theoretic foundations of probability theory. Recall that Elias M. Stein's [Real Analysis III](http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf) introduced an outer measure, browsed its limitations, and then adopted measurable sets with sigma algebras
 
 
 ## I
