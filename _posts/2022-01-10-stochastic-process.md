@@ -31,18 +31,11 @@ If $X$ is stationary, we have the [time average]() $\bar{x} = {1\over{2T}}\int_{
 
 ## III
 ---
-A random variable $\tau: \Omega \to T$ defined on $(\Omega, \mathcal{F}, F, P)$ is called a [stopping time]() with respect to $F$ if $\lbrace \tau \leq t \rbrace \in \mathcal{F}\_t$ for all $t \in T$, and all information stacked up to $\tau$ will be encoded to [stopped $\sigma$-algebra]() $\mathcal{F}\_{\tau} = \lbrace A \in \mathcal{F}\_{\infty}: A \cap \lbrace \tau \leq t \rbrace \in \mathcal{F}\_t, \,\forall t \in T \rbrace$
+Let $(\Omega, \mathcal{F}, P)$ be a probability space, $X = (X\_t)\_{t \in T}$ be a stochastic process, and $F = (\mathcal{F}\_t)\_{t \in T}$ be a [filtration]() representing monotonically increasing sub-$\sigma$-algebras $\mathcal{F}\_{0} \subseteq \mathcal{F}\_1 \subseteq \dots \subseteq \mathcal{F}\_{s} \subseteq \mathcal{F}\_{t} \subseteq \dots \subseteq \mathcal{F}$. In general, the [natural filtration]() $\mathcal{F}\_{t} = \sigma(X\_{s} \,\vert\, s \leq t)$ is used as the smallest filtration containing all information up to time $t$, and we say $X$ is [adapted to the filtration]() $F$ if $X\_{t}:\Omega \to \mathbb{R}$ is $\mathcal{F}\_{t}$-measurable for all $t \in T$.
 
-. A [first hitting time]() $\tau\_B = \inf \lbrace t: X\_t \in B \rbrace$ is certainly a stopping time as $\lbrace \tau\_B = t \rbrace = \lbrace X\_0 \notin B, \dots, X\_s \notin B, X\_t \in B \rbrace = \bigcap\_{r=0}^{s} {\lbrace X\_r \in B \rbrace}^c \cap \lbrace X\_t \in B \rbrace \in \mathcal{F}\_{t}$. In contrast, $\tau\_{B}^{\prime} = \sup \lbrace t: X\_t \in B \rbrace$ is not a stopping time since a full trajectory of $X$ throughout $T$ has to be known.
-
-
-Intuitively, this condition means that the "decision" of whether to stop at time $t$ must be based only on the information present at time $t$, not on any future information. Subsequently, 
-
-
-
+A random variable $\tau: \Omega \to T$ defined on $(\Omega, \mathcal{F}, F, P)$ is called a [stopping time]() with respect to $F$ if $\lbrace \tau \leq t \rbrace \in \mathcal{F}\_t$ for all $t \in T$, and all information stacked up to $\tau$ will be encoded to [stopped $\sigma$-algebra]() $\mathcal{F}\_{\tau} = \lbrace A \in \mathcal{F}\_{\infty}: A \cap \lbrace \tau \leq t \rbrace \in \mathcal{F}\_t, \,\forall t \in T \rbrace$. A [first hitting time]() $\tau\_B = \inf \lbrace t: X\_t \in B \rbrace$ is certainly a stopping time since $\lbrace \tau\_B = t \rbrace = \lbrace X\_0 \notin B, \dots, X\_s \notin B, X\_t \in B \rbrace = \bigcap\_{r=0}^{s} {\lbrace X\_r \in B \rbrace}^c \cap \lbrace X\_t \in B \rbrace \in \mathcal{F}\_{t}$. In contrast, $\tau\_{B}^{\prime} = \sup \lbrace t: X\_t \in B \rbrace$ is not a stopping time since a full trajectory of $X$ throughout $T$ has to be known. Intuitively, this condition means that the "decision" of whether to stop at time $t$ must be based only on the information present at time $t$, not on any future information.
 
 // Properties of stopping times (w/ sufficient condition for the integrability of a stopping time).
-
 
 
 ## IV
