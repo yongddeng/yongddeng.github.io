@@ -36,7 +36,10 @@ To be more technical, let $(\Omega, \mathcal{F}, P)$ be a probability space, $X 
 
 A random variable $\tau: \Omega \to T$ on a [filtered probability space]() $(\Omega, \mathcal{F}, F, P)$ is called a [stopping time]() with respect to $F$ if $\lbrace \tau \leq t \rbrace \in \mathcal{F}\_t$ for all $t \in T$, and all information stacked up to $\tau$ is encoded by a [stopped $\sigma$-algebra]() $\mathcal{F}\_{\tau} = \lbrace A \in \mathcal{F}\_{\infty}: A \cap \lbrace \tau \leq t \rbrace \in \mathcal{F}\_t, \,\forall t \in T \rbrace$. For example, a [first hitting time]() $\tau\_B = \inf \lbrace t: X\_t \in B \rbrace$ which denotes a time index $t$ that first // is definitely a stopping time since $\lbrace \tau\_B = t \rbrace = \lbrace X\_0 \notin B, \dots, X\_s \notin B, X\_t \in B \rbrace = \bigcap\_{r=0}^{s} {\lbrace X\_r \in B \rbrace}^c \cap \lbrace X\_t \in B \rbrace \in \mathcal{F}\_{t}$. In contrast, $\tau\_{B}^{\prime} = \sup \lbrace t: X\_t \in B \rbrace$ is not a stopping time since a full trajectory of $X$ throughout $T$ has to be provided in order to make a decision. 
 
-Provided that, if any arbitrary time $\tau \in T$ is a stopping time with respect to $F$, and $F$ is coarser than $G$, then $\tau$ is a stopping time with respect to $G$. // Intuitively, this condition means that the "decision" of whether to stop at time $t$ must be based only on the information present at time $t$, not on any future information.
+Provided that, if any arbitrary time $\tau \in T$ is a stopping time with respect to $F$, and $F$ is coarser than $G$, then $\tau$ is a stopping time with respect to $G$. Furthermore, if $\tau_1, \tau_2$ are stopping times with respect to $F$, then (i) $\tau_1 \vee \tau_2 = \max \lbrace \tau_1, \tau_2 \rbrace$; (ii) $\tau_1 \wedge \tau_2 = \min \lbrace \tau_1, \tau_2 \rbrace$; (iii) $\tau_1 + \tau_2$; are all a stopping time with respect to $F$.
+
+
+Intuitively, this condition means that the "decision" of whether to stop at time $t$ must be based only on the information present at time $t$, not on any future information.
 
 
 
