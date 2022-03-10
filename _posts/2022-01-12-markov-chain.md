@@ -29,7 +29,9 @@ Suppose $f\_{ii} = P(X\_{k} = i \;\text{for some}\; k>1 \,\vert\, X\_{1}=i)$ is 
 
 Provided that, we can calculate the [mean recurrence time]() by $\mu\_{ii} = \operatorname{E}t\_{ii}$, where $t\_{ii}$ is an elapsed time to returning $i$. The recurrent state $i$ is [positive recurrent]() if $\mu\_{ii} < \infty$, and [null recurrent]() if $\mu\_{ii} = \infty$.
 
- Furthermore, if $p\_{ii}(k) = 0$ whenever $k$ % $d \neq 0$ for all $k > d$, then $i$ has [period]() $d$ **(#5)**. Whilst we say a state $i$ is [periodic]() when $d>1$, or [aperiodic]() when $d=1$, an irreducible Markov chain is aperiodic if the states in the class have period $d=1$. // Suppose a recurrent state $i$ is the initial departure and $\lbrace t\_{ii}(l) \rbrace\_{1 < l \leq k}$ is a sequence of i.i.d. elapsed times. A proportion of time spent in $i$ until $l$-th returns is calculated by $l/\Sigma\_{m=1}^{l}t\_{ii}(m)$ such that $l/\Sigma\_{m=1}^{l}t\_{ii}(m) \to 1/\mu\_{ii} = \pi\_i$ as $k\to\infty$ due to the WLLN.
+ Furthermore, if $p\_{ii}(k) = 0$ whenever $k$ % $d \neq 0$ for all $k > d$, then $i$ has [period]() $d$ **(#5)**. Whilst we say a state $i$ is [periodic]() when $d>1$, or [aperiodic]() when $d=1$, an irreducible Markov chain is aperiodic if the states in the class have period $d=1$. // 
+ 
+ Suppose a recurrent state $i$ is the initial departure and $\lbrace t\_{ii}(l) \rbrace\_{1 < l \leq k}$ is a sequence of i.i.d. elapsed times. A proportion of time spent in $i$ until $l$-th returns is calculated by $l/\Sigma\_{m=1}^{l}t\_{ii}(m)$ such that $l/\Sigma\_{m=1}^{l}t\_{ii}(m) \to 1/\mu\_{ii} = \pi\_i$ as $k\to\infty$ due to the WLLN.
   
 
 ## III
