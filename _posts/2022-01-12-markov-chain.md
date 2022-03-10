@@ -27,13 +27,11 @@ The followings are jargons that are taken in the formal statements describing be
 
 Suppose $f\_{ii} = P(X\_{k} = i \;\text{for some}\; k>1 \,\vert\, X\_{1}=i)$ is a probability that a system departed from $i$ returns to $i$ for all $i \in \mathbb{S}$. We say $i$ is [recurrent]() if $f\_{ii} = 1$, and [transient]() if $f\_{ii} < 1$. That is, a recurrent state occurs infinitly often and a transient state occurs finitly often. In fact, we can assume that a probability of escaping a transient state $i$ follows $\operatorname{Bernoulli}(1-f\_{ii})$, so that a number of returns to $i$ during a $k$-steps follows $\text{Geom}(1-f\_{ii})$. Whereas, if we let $\Sigma\_{k=2}^{\infty}p\_{ii}(k) = \Sigma\_{k=2}^{\infty}\operatorname{E}[I\_i(X\_{t\_k})\,\vert\,X\_{t\_{1}}=i] = \operatorname{E}[\Sigma\_{k=2}^{\infty}I\_{i}(X\_{t\_k})\,\vert\,X\_{t\_1}=i]$ be a mean number of returns to a state $i$ **(#4)**, then $i$ is recurrent if and only if $\Sigma\_{k=2}^{\infty}p\_{ii}(k) = \infty$ and transient if and only if $\Sigma\_{k=2}^{\infty}p\_{ii}(k) < \infty$.
 
-Provided that, we can calculate the [mean recurrence time]() $\mu\_{ii} = \operatorname{E}t\_{ii}$, where $t\_{ii}$ is an elapsed time to returning $i$ from $i$. The recurrent state $i$ is [positive recurrent]() if $\mu\_{ii} < \infty$, and [null recurrent]() if $\mu\_{ii} = \infty$. In particular, we say $i$ has [period]() $d$ if $p\_{ii}(k) = 0$ whenever $k$ % $d \neq 0$ for all $k > d$ **(#5)**. That is, a state $i$ is [periodic]() if $d>1$, and [aperiodic]() if $d=1$,
+Provided that, we say $i$ has [period]() $d$ if $p\_{ii}(k) = 0$ whenever $k$ % $d \neq 0$ for all $k > d$ **(#5)**. That is, a state $i$ is [periodic]() if $d>1$, and [aperiodic]() if $d=1$. // Every state in a class has the same period. // A Markov chain is aperiodic if it is irreducible and the states in a class have period $d=1$. // A transient state, by deifinition, has period $1$. // Period, like recurrence and transience, is a class property.
+
+ // Note that we can define the [mean recurrence time]() $\mu\_{ii} = \operatorname{E}t\_{ii}$, where $t\_{ii}$ is an elapsed time to returning $i$ from $i$. The recurrent state $i$ is [positive recurrent]() if $\mu\_{ii} < \infty$, and [null recurrent]() if $\mu\_{ii} = \infty$. // Suppose a recurrent state $i$ is the initial departure and $\lbrace t\_{ii}(l) \rbrace\_{1 < l \leq k}$ is a sequence of i.i.d. elapsed times. A proportion of time spent in $i$ until $l$-th returns is calculated by $l/\Sigma\_{m=1}^{l}t\_{ii}(m)$ such that $l/\Sigma\_{m=1}^{l}t\_{ii}(m) \to 1/\mu\_{ii} = \pi\_i$ as $k\to\infty$ due to the WLLN.
+
  
- // Every state in a class has the same period. // A Markov chain is aperiodic if it is irreducible and the states in a class have period $d=1$. // A transient state, by deifinition, has period $1$.
-
- // Suppose a recurrent state $i$ is the initial departure and $\lbrace t\_{ii}(l) \rbrace\_{1 < l \leq k}$ is a sequence of i.i.d. elapsed times. A proportion of time spent in $i$ until $l$-th returns is calculated by $l/\Sigma\_{m=1}^{l}t\_{ii}(m)$ such that $l/\Sigma\_{m=1}^{l}t\_{ii}(m) \to 1/\mu\_{ii} = \pi\_i$ as $k\to\infty$ due to the WLLN.
-
- // Period, like recurrence and transience, is a class property.
   
 
 ## III
