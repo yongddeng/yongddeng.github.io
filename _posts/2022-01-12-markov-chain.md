@@ -8,7 +8,7 @@ use_math: true
 
 # Markov Chain
 ---
-Martingale property states that the future expectation of a stochastic process is equal to the current value, given all known information about the prior events. The Markov property states that a stochastic process essentially has "no memory" (i.e. the future is ind. to the present given the past). 모든 역사가 아닌 최근 과거에 주로 의존하는 즉각적인 미래의 common example은 weather forecast 이다. Probability theory의 기본 목표 중 하나인 stablisation을 mc로 formulate한 뒤 iteration을 돌리는 방식으로도 이룰 수 있습니다. 
+Martingale property denotes that the expectated value of the future event equals to the current value given all the past events. In contrast, The Markov property denotes that the future is ind. to the past. For example, weather forecast depends primarily on the current weather instead of the entire history. Probability theory의 기본 목표 중 하나인 stablisation을 mc로 formulate한 뒤 iteration을 돌리는 방식으로도 이룰 수 있습니다. 
 
 
 ## I
