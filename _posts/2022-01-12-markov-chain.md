@@ -8,9 +8,7 @@ use_math: true
 
 # Markov Chain
 ---
-Martingale property says that the expectated value of the future event equals to the current value given the entire past events. In contrast, the Markov property says that the future is ind. to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history.
-
- Probability theory의 기본 목표 중 하나인 stablisation을 mc로 formulate한 뒤 iterate해서 이룰 수 있다. 
+Martingale property says that the expectated value of the future event equals to the current value given the entire past events. In contrast, the Markov property says that the future is ind. to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. // Probability theory의 기본 목표 중 하나인 stablisation을 mc로 formulate한 뒤 iterate해서 이룰 수 있다. 
 
 
 ## I
@@ -37,7 +35,7 @@ A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Th
 
 A Markov chain is [reversible](https://cims.nyu.edu/~holmes/teaching/asa19/handout_Lecture3_2019.pdf) with respect to $\pi$ if it holds the [detailed balanced condition](https://en.wikipedia.org/wiki/Detailed_balance) $\pi\_{i}p\_{ij} = \pi_{j}p\_{ji}$ for all $i,j\in\mathbb{S}$. In particular, if $X$ is a general system and there exists $\pi$ such that the condition is held, then $\Sigma_{i}\pi\_{i}p\_{ij} = \Sigma_{i}\pi\_{j}p\_{ji} = \pi\_{j}\Sigma_{i}p\_{ji} = \pi\_{j}$ and so $X$ holds the global balance condition $\pi = \pi{P}$. Consequently, these underlie the framework called [Markov chain Monte Carlo](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo) (MCMC) **(#7)**, and supplement the [rejection sampling](https://www.youtube.com/watch?v=OXDqjdVVePY) that learns nothing from the last sample. The [Metropolis algorithm](https://www.youtube.com/watch?v=yCv2N7wGDCw) is a popular instance which uses symmetric conditional candidate density functions to return (i.e. after a [burn-in period](http://users.stat.umn.edu/~geyer/mcmc/burn.html)) sequences of numbers which we hope can reflect a target density function.
 
-Whilst MCMC can also run Bayesian inference, it may suffer the curse of dimensionality, whereby regions of higher probability tend to stretch and get lost in an increasing volume of space. Intuitively, a well-designed model that can learn all information from the whole records would outperform a model with the Markov property. However, computing the joint distribution of such model is impractical, and hence we naively assume the Markov property. The [PageRank](https://en.wikipedia.org/wiki/PageRank) algorithm used for Google's search engine is an industrial application of a markov chain. // Further topic // a Markov chain is related to a martingale by a harmonic function ([ref1.])(https://www.randomservices.org/random/martingales/Properties.html) // MCMC without likelihoods [ref2.](https://www.pnas.org/doi/pdf/10.1073/pnas.0306899100)
+Whilst MCMC can also run Bayesian inference, it may suffer the curse of dimensionality, whereby regions of higher probability tend to stretch and get lost in an increasing volume of space. Intuitively, a well-designed model that can learn all information from the whole records would outperform a model with the Markov property. However, computing the joint distribution of such model is impractical, and hence we naively assume the Markov property. The [PageRank](https://en.wikipedia.org/wiki/PageRank) algorithm used for Google's search engine is an industrial application of a markov chain. // Further topic // a Markov chain is related to a martingale by a harmonic function [ref1.](https://www.randomservices.org/random/martingales/Properties.html) // MCMC without likelihoods [ref2.](https://www.pnas.org/doi/pdf/10.1073/pnas.0306899100)
 
 
 ## **
