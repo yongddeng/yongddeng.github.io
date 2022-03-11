@@ -32,7 +32,7 @@ Provided that, we say $i$ has [period]() $d$ if $p\_{ii}(k) = 0$ whenever $k$ % 
 
 ## III
 ---
-A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Theory/Book%3A_Introductory_Probability_(Grinstead_and_Snell)/11%3A_Markov_Chains/11.03%3A_Ergodic_Markov_Chains) if it is aperiodic and positive recurrent, and thus an irreducible Markov chain is ergodic if the states are ergodic. In particular, ergodicity of a Markov chain follows if there exists a number $N$ such that any state $i$ can be reached from any other state $j$ in any number $n \leq N$. For example, a fully connected transition matrix (i.e. all transition probabilities are positive) satisfies this sufficient condition with $N = 1$. 
+A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Theory/Book%3A_Introductory_Probability_(Grinstead_and_Snell)/11%3A_Markov_Chains/11.03%3A_Ergodic_Markov_Chains) if it is aperiodic and positive recurrent, hence an irreducible Markov chain is ergodic if the states are ergodic. In particular, ergodicity of a Markov chain follows if there exists a number $N$ such that any state $i$ can be reached from any other state $j$ in any number $n \leq N$. For example, a fully connected transition matrix (i.e. all transition probabilities are positive) satisfies this sufficient condition with $N = 1$. 
  
  Initial state에 따라 converging하는 방향이 결정된다고 위에서 말 했는데 그런 와중에 a steady state is always unique under irreducibility (regardless of their initial state). 
  
