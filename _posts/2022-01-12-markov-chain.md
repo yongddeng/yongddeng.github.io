@@ -32,10 +32,7 @@ Provided that, we say $i$ has [period]() $d$ if $p\_{ii}(k) = 0$ whenever $k$ % 
 
 ## III
 ---
-A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Theory/Book%3A_Introductory_Probability_(Grinstead_and_Snell)/11%3A_Markov_Chains/11.03%3A_Ergodic_Markov_Chains) if it is aperiodic and positive recurrent, hence an irreducible Markov chain is ergodic if the states are ergodic. In particular, ergodicity of a Markov chain follows if there exists $N$ such that any state $i$ is reachable from any other state $j$ in any step $n \leq N$. For example, a fully connected transition matrix (i.e. $p\_{ij} > 0$ for all $i,j\in\mathbb{S}$) satisfies this sufficient condition with $N = 1$. Ergodicity shines because it guarantees the uniquness of a steady state (of a Markov chain) regardless of an initial state.
- 
- 보통은 Initial state에 따라 converging하는 방향이 결정된다
- 
+A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Theory/Book%3A_Introductory_Probability_(Grinstead_and_Snell)/11%3A_Markov_Chains/11.03%3A_Ergodic_Markov_Chains) if it is aperiodic and positive recurrent, hence an irreducible Markov chain is ergodic if the states are ergodic. In particular, ergodicity of a Markov chain follows if there exists $N$ such that any state $i$ is reachable from any other state $j$ in any step $n \leq N$. For example, a fully connected transition matrix (i.e. $p\_{ij} > 0$ for all $i,j\in\mathbb{S}$) satisfies this sufficient condition with $N = 1$. Ergodicity shines because it guarantees the uniquness of a steady state whilst the limit varies with an initial state.
  
  <= 에르고딕 정리라고 한다; Below paragraph is the case where the ergodicity shines.
 
