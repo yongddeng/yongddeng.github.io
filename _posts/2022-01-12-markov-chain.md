@@ -34,11 +34,15 @@ Provided that, we say $i$ has [period]() $d$ if $p\_{ii}(k) = 0$ whenever $k$ % 
 ---
 A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Theory/Book%3A_Introductory_Probability_(Grinstead_and_Snell)/11%3A_Markov_Chains/11.03%3A_Ergodic_Markov_Chains) if it is aperiodic and positive recurrent. If all states in an irreducible Markov chain are ergodic, then it is called an ergodic Markov chain. In particular, a Markov chain is ergodic if there is a number $N$ such that any state can be reached from any other state in any number of steps less or equal to a number $N$. A fully connected transition matrix (i.e. all transitions have a non-zero probability) holds the sufficiency with $N = 1$. Initial state에 따라 converging하는 방향이 결정된다고 위에서 말 했는데 그런 와중에 a steady state is always unique under irreducibility (regardless of their initial state). <= 이것을 에르고딕 정리라고 한다; 
 
-We say a Markov chain is [reversible](https://cims.nyu.edu/~holmes/teaching/asa19/handout_Lecture3_2019.pdf) with respect to $\pi$ if it holds the [detailed balanced condition]() $\pi\_{i}p\_{ij} = \pi_{j}p\_{ji}$ for all $i,j\in\mathbb{S}$. Thus a reversible Markov chain is more restrictive than a staionary one which holds the global balance condition $\pi = \pi{P}$. This particular system is the basis of a general sampling framework called the [Markov chain Monte Carlo]() (MCMC) **(#5)** methods which remedy the features of the [rejection sampling](https://www.youtube.com/watch?v=OXDqjdVVePY) method, i.e. the latter draws samples independently to each other.
- 
- For instance, [Metropolis]() designed an algorithm with a symmetric candidate dist. **(#6)**. // MCMC may also be used for parameter estimations under the Bayesian's rule. 
+We say a Markov chain is [reversible](https://cims.nyu.edu/~holmes/teaching/asa19/handout_Lecture3_2019.pdf) with respect to $\pi$ if it satisfies the [detailed balanced condition]() $\pi\_{i}p\_{ij} = \pi_{j}p\_{ji}$ for all $i,j\in\mathbb{S}$. That is, a reversible Markov chain is more restrictive than a staionary one which holds the global balance condition $\pi = \pi{P}$. This particular system is the basis of a general sampling framework called the [Markov chain Monte Carlo]() (MCMC) **(#5)** which remedy the features of the [rejection sampling](https://www.youtube.com/watch?v=OXDqjdVVePY), i.e. the latter draws samples independently to each other. For instance, [Metropolis]() designed an algorithm with a symmetric candidate dist. **(#6)**, which 
+
+
 
 the method generates sequences of random numbers that reflects a population dist..
+
+MCMC may also be used for parameter estimations under the Bayesian's rule. 
+
+
 
 // The first-order auto-regressive process is an example of a Markov chain, and a one-dimensional markov chain can be viewed as a random walk. A more popular application of markov chains is the [PageRank](https://math.libretexts.org/Bookshelves/Linear_Algebra/Understanding_Linear_Algebra_(Austin)/04%3A_Eigenvalues_and_eigenvectors/4.05%3A_Markov_chains_and_Google's_PageRank_algorithm) algorithm. 이전 모든 states를 considered/learnt한 model이 the Markov property를 assumption으로 하여 trained된 model을 would highly likely outperform 하겠지만, 우리가 지금까지 지나온 states들의 joint distribution를 구하는게 impractical하기 때문에 MC models들이 사용될 수 있다. We mention that, training phase에서 MLE를 할 때 probability를 smoothing시켜 prevent overfitting할 수 있다. Mathematically, Markov chain은 martingale과 harmonic function으로 연관되어 있다; [ref](https://www.randomservices.org/random/martingales/Properties.html)
 
