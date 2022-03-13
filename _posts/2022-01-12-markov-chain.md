@@ -26,17 +26,8 @@ The followings are jargons that are taken in the formal statements describing be
 
 Suppose $f\_{i} = P(X\_{k} = i \;\text{for some}\; k>1 \,\vert\, X\_{1}=i)$ is a probability that a Markov chain departed from $i$ returns to $i$ at least once, then $i$ is [recurrent]() if $f\_{i} = 1$, and [transient]() if $f\_{i} < 1$. That is, a recurrent state occurs infinitly often, and a transient state occurs finitly often. We can easily assume that a probability of escaping a transient state $i$ follows $\operatorname{Bernoulli}(1-f\_{i})$, and so a number of returns to $i$ within a $k$-steps follows $\text{Geom}(1-f\_{i})$. Consequently, if $p^{(k)}\_{ii}$ is a probability that a Markov chain departed from $i$ returns to $i$ after $k$-step, then $i$ is recurrent if and only if $\Sigma\_{k=2}^{\infty}p^{(k)}\_{ii} = \infty$, and transient if and only if $\Sigma\_{k=2}^{\infty}p^{(k)}\_{ii} < \infty$. Note that $p^{(k)}\_{ii}$ are ind. of an index $s$ on a conditioning.
 
-Subsequently, if $t\_{ii}$ is an elapsed time taken to returning $i$ from $i$, then $\mu\_{ii} = \operatorname{E}t\_{ii}$ is a [mean recurrence time](), and $i$ is said to be [positive recurrent]() if $\mu\_{ii} < \infty$, or [null recurrent]() if $\mu\_{ii} = \infty$. 
+Subsequently, let $t\_{ii}$ be an elapsed time taken to returning $i$ from $i$, so that $\mu\_{ii} = \operatorname{E}t\_{ii}$ is a [mean recurrence time](). We say $i$ is [positive recurrent]() if $\mu\_{ii} < \infty$, and [null recurrent]() if $\mu\_{ii} = \infty$. If, in addition, $i$ is the initial departure and $\lbrace t\_{ii}(l) \rbrace\_{1 < l \leq k}$ is a sequence of i.i.d. elapsed times, then a proportion of time spent in $i$ until $l$-th returns will by $l/\Sigma\_{m=1}^{l}t\_{ii}(m)$ **(#6)**. Furthermore, a state $i$ has [period]() $d = \gcd \lbrace k>1:p^{(k)}\_{ii}>0 \rbrace$ **(#4)**. Also, $i$ is said to be [periodic]() if $d>1$, and [aperiodic]() if $d=1$. Since periodicity, recurrence, and transience are a class property, every state in a class has the same period, and an irreducible Markov chain with period $d=1$ is aperiodic. 
 
-If, in addition, $i$ is the initial departure and $\lbrace t\_{ii}(l) \rbrace\_{1 < l \leq k}$ is a sequence of i.i.d. elapsed times, then a proportion of time spent in $i$ until $l$-th returns will by $l/\Sigma\_{m=1}^{l}t\_{ii}(m)$ **(#6)**.
-
-
-a state $i$ has [period]() $d = \gcd \lbrace k>1:p^{(k)}\_{ii}>0 \rbrace$ **(#4)**. Also, $i$ is said to be [periodic]() if $d>1$, and [aperiodic]() if $d=1$. Since periodicity, recurrence, and transience are a class property, every state in a class has the same period, and an irreducible Markov chain with period $d=1$ is aperiodic. 
-
-
-
-
- 
 
 ## III
 ---
