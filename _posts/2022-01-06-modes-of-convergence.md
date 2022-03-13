@@ -8,7 +8,7 @@ use_math: true
 
 # Mode of Convergence
 ---
-One of the basis of probability theory is the stabilisation of the relative frequencies. That is, given a sequence of events which may or may not be unchanging when such events go far enough into the sequence, we want to be as systematic as possible when predicting an event that is fundamentally unpredictable.
+One of the basis of probability theory is the stabilisation of the [relative frequencies](https://www.mathsisfun.com/data/relative-frequency.html). That is, given a sequence of events which may or may not be unchanging when such events go far enough into the sequence, we want to be as systematic as possible when predicting an event that is fundamentally unpredictable.
 
 
 ## I
