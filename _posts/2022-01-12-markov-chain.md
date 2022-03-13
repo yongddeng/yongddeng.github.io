@@ -22,11 +22,18 @@ We can now consider a state pmf $\pi(t) = [\pi\_{j}(t)]$, where $\pi\_{j}(t) = \
 
 ## II
 ---
-The followings are jargons that are taken in the formal statements describing behaviours of a Markov chain and the conditions under which a state pmf becomes steady. A state $j$ is [accessible]() from a state $i$, denoted by $i \rightarrow j$, if $p\_{ij}(k) > 0$ for some $k\geq{1}$. Whereas, $i$ is [absorbing]() if $p\_{ij}(k) = 0$ for some $k\geq{1}$ and all $j \in S$. If both $i \rightarrow j$ and $j \rightarrow i$, and thus $i \leftrightarrow j$, we say $i$ and $j$ [communicate]() with each other **(#3)** and belong to the same [class](). Whilst a Markov chain will be consisting of one or more disjoint communication classes, a system with a single class is said to be [irreducible]() in which every states in the chain communicate with each other (i.e. a state space is the class).
+The followings are jargons that are taken in the formal statements describing behaviours of a Markov chain and the conditions under which a state pmf becomes steady. A state $j$ is [accessible]() from a state $i$, denoted by $i \rightarrow j$, if $p\_{ij}(k) > 0$ for some $k\geq{1}$. Whereas, $i$ is [absorbing]() if $p\_{ij}(k) = 0$ for some $k\geq{1}$ and all $j \in S$. If both $i \rightarrow j$ and $j \rightarrow i$, and thus $i \leftrightarrow j$, we say $i$ and $j$ [communicate]() with each other **(#3)** and belong to the same [class](). Intuitively, a Markov chain will be consisting of one or more disjoint communication classes, and a system with a single class is said to be [irreducible]() in which every states in the chain communicate with each other (i.e. a state space is the class).
 
-Let $f\_{i} = P(X\_{k} = i \;\text{for some}\; k>1 \,\vert\, X\_{1}=i)$ be a probability that a system departed from $i$ returns to $i$ for all $i \in \mathbb{S}$, then $i$ is [recurrent]() if $f\_{i} = 1$, and [transient]() if $f\_{i} < 1$. That is, a recurrent state occurs infinitly often and a transient state occurs finitly often. We can easily assume that a probability of escaping a transient state $i$ follows $\operatorname{Bernoulli}(1-f\_{i})$, and thus a number of returns to $i$ during a $k$-steps follows $\text{Geom}(1-f\_{i})$. 
+Suppose $f\_{i} = P(X\_{k} = i \;\text{for some}\; k>1 \,\vert\, X\_{1}=i)$ is a probability that a system departed from $i$ returns to $i$ for all $i \in \mathbb{S}$, then $i$ is [recurrent]() if $f\_{i} = 1$, and [transient]() if $f\_{i} < 1$. That is, a recurrent state occurs infinitly often and a transient state occurs finitly often. We can easily assume that a probability of escaping a transient state $i$ follows $\operatorname{Bernoulli}(1-f\_{i})$, and thus a number of returns to $i$ during a $k$-steps follows $\text{Geom}(1-f\_{i})$. 
 
-Consequently, if we let $\Sigma\_{k=2}^{\infty}p\_{ii}(k) = \Sigma\_{k=2}^{\infty}\operatorname{E}[I\_i(X\_{k})\,\vert\,X\_{{1}}=i] = \operatorname{E}[\Sigma\_{k=2}^{\infty}I\_{i}(X\_{k})\,\vert\,X\_{1}=i]$ be a mean number of returns to a state $i$ **(#4)**, 
+Consequently, if we let $\Sigma\_{k=2}^{\infty}p\_{ii}(k) = \Sigma\_{k=2}^{\infty}\operatorname{E}[I\_i(X\_{k})\,\vert\,X\_{{1}}=i] = \operatorname{E}[\Sigma\_{k=2}^{\infty}I\_{i}(X\_{k})\,\vert\,X\_{1}=i]$ be 
+
+a mean number of returns to a state $i$ **(#4)** is provided by $\Sigma\_{k=1}^{\infty}p^{(k)}\_{ii}(k) I\_{(X\_{k}=i)}$
+
+
+$\Sigma\_{k=2}^{\infty}p\_{ii}(k) = \Sigma\_{k=2}^{\infty}\operatorname{E}[I\_i(X\_{k})\,\vert\,X\_{{1}}=i] = \operatorname{E}[\Sigma\_{k=2}^{\infty}I\_{i}(X\_{k})\,\vert\,X\_{1}=i]$
+
+
 
 then $i$ is recurrent if and only if $\Sigma\_{k=1}^{\infty}p^{(s)}\_{ii}(k) = \infty$, and transient if and only if $\Sigma\_{k=1}^{\infty}p^{(s)}\_{ii}(k) < \infty$.
 
