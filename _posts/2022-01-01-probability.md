@@ -31,9 +31,7 @@ A triple $(\Omega, \mathcal{F}, P)$, which we call a [probability space](https:/
 
 ## III
 ---
-
-
-Suppose $(A\_{n})\_{n \in \mathbb{N}}$ and $A$ are subsets of $\Omega$. If $(A\_{n})\_{n\in\mathbb{N}}$ is [strictly increasing](https://en.wikipedia.org/wiki/Monotonic_function) (strictly decreasing), i.e. $A\_{n} \subset A\_{n+1}$ ($A\_{n} \supset A\_{n+1}$), then $\lim\_{n \to \infty} A\_{n} = \bigcup\_{n=1}^{\infty} A\_{n}$ ($\lim\_{n \to \infty} A\_n = \bigcap\_{n=1}^{\infty} A\_{n}$) 
+Suppose $(A\_{n})\_{n \in \mathbb{N}}$ and $A$ are subsets of $\Omega$. If $(A\_{n})\_{n\in\mathbb{N}}$ is [strictly increasing](https://en.wikipedia.org/wiki/Monotonic_function) (strictly decreasing), that is, $A\_{n} \subset A\_{n+1}$ ($A\_{n} \supset A\_{n+1}$), then $\lim\_{n \to \infty} A\_{n} = \bigcup\_{n=1}^{\infty} A\_{n}$ ($\lim\_{n \to \infty} A\_n = \bigcap\_{n=1}^{\infty} A\_{n}$) 
 
 
 
