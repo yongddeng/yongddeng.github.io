@@ -8,7 +8,8 @@ use_math: true
 
 # Markov Chain
 ---
-Martingale property says that the expectated value of the future event equals to the current value given the entire past events. In contrast, the Markov property says that the future is ind. to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. // The stablisation of relative frequencies를 mc로 formulate한 뒤 iterate해서 이룰 수 있다.  //  a Markov chain is related to a martingale by a harmonic function [ref1.](https://www.randomservices.org/random/martingales/Properties.html)
+Loosely speaking, the Markov property states that the future is ind. to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A Markov chain is somewhat related to a martingale by a [harmonic function](https://www.randomservices.org/random/martingales/Properties.html).
+
 
 
 ## I
