@@ -8,7 +8,8 @@ use_math: true
 
 # Random Variable
 ---
-A random variable $X$ maps an event onto a measurable space where its distribution function lies. In fact, drawing a number of samples $X_1, X_2, \dots, X_n$ accumulates elements of randomness since each value of sample is indeterminate until an excution of experiment. Hence we use the letter $X$ and distinguish itself from an ordinary algebraic variable $x$ that is often assigned to a constant number.
+A random variable $X$ maps an event onto another measurable space where its distribution function lies, and the letter $X$ distinguishes itself from an ordinary algebraic variable $x$ that is often assigned to a constant. Note that, drawing samples $X_1, X_2, \dots, X_n$ accumulates elements of randomness since each value of sample is indeterminate until an excution of experiment. 
+
 
 
 ## I
