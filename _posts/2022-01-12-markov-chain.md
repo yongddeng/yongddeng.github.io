@@ -8,7 +8,7 @@ use_math: true
 
 # Markov Chain
 ---
-Loosely speaking, the Markov property states that the future is ind. to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A Markov chain is somewhat related to a martingale by a [harmonic function](https://www.randomservices.org/random/martingales/Properties.html).
+Loosely speaking, the Markov property states that the future is independent to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A Markov chain is somewhat related to a martingale by a [harmonic function](https://www.randomservices.org/random/martingales/Properties.html).
 
 
 
