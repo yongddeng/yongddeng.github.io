@@ -8,7 +8,7 @@ use_math: true
 
 # Law of Large Number
 ---
-Emperically, the more a fair dice is rolled, the closer normalised sums get to $3.5 \simeq (1+2+..+6)/6$. Thus we wonder if the mathematical definitions of convergence hold for sums of ind. random variables, and shall elaborate rigorous proof for the laws of large numbers (LLNs). It would smear away a wild randomness lies in a small sample which destabilises the relative frequencies.
+Emperically, the more a fair dice is rolled, the closer normalised sums get to $3.5 \simeq (1+2+..+6)/6$. Thus we wonder if the mathematical definitions of convergence hold for sums of ind. random variables, and shall read rigorous proof for the laws of large numbers. This would smear away a wild randomness lies in a small sample which destabilises the relative frequencies.
 
 
 ## I
