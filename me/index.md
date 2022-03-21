@@ -15,8 +15,8 @@ title: me
 - 2009-2010: Moved to the UK, enrolled and graduated [Liverpool Independent school](https://www.liverpoolcollege.org.uk/about-us/who-we-are).
 - 2014-2017: Enrolled and graduated from [King's College London](https://www.kcl.ac.uk/mathematics), suffered from anxiety disorders and depression.
 - 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), no longer wanted to be in the Finance industry.
-- 2018-2019: Worked at [Vingle](https://www.vingle.net/users/sign_up), entered the IT industry, joined the national guard.
-- 2019-2021: Worked at [Riiid](https://www.riiid.co/), got rejected from Stanford (apologise to the alumni whom were my referees), served the national guard.
+- 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), entered the IT industry, joined the national guard.
+- 2020-2021: Worked at [Riiid](https://www.riiid.co/), got rejected from Stanford, served the national guard.
 
 
 **20-30**
