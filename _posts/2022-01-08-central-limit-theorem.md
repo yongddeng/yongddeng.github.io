@@ -15,7 +15,19 @@ Both of the LLNs state that $\bar{X} = n^{-1}\Sigma_{k=1}^{n}X_k$ consists of i.
 ---
 Suppose $X \sim \operatorname{Bin}(n,p)$ is a binomially distributed random variable with $\operatorname{E}X = np$ and $\operatorname{Var}X = npq$, where $p>0$ and $p+q=1$. The [de Moivre–Laplace theorem]() shows $\binom{n}{h}p^{h}q^{n-h} \simeq \exp(-(h-np)^{2}/2npq)/\sqrt{2\pi{npq}}$ as $n \to \infty$, hence the binomial can be well approximated by the normal. Moreover, $Z_n = (X-np)/\sqrt{npq} \xrightarrow{d} Z$, and so $P(Z_n \leq z) \xrightarrow{p} \Phi(z)$ as $n\to\infty$, where $Z \sim \mathcal{N}(0,1)$ is continuous, $\Phi(z) = \int_{-\infty}^{z} f_Z(v)\,\mathrm{d}v$ and $f_Z(z) = \exp(-z^2/2)/\sqrt{2\pi}$ are the distribution and the density function of $Z$, respectively. de Moivre initially applied a normal to approximate the number of heads from the fair coin tosses **(#1)** and then Laplace extended the work.
 
-By definition, for any $Y \sim \mathcal{N}(\mu,\sigma^2)$, the first derivative of $f\_{Y}(y)$ is given by $f\_{Y}^{\prime}(y) = -\sigma^{-2}(y-\mu) \cdot f\_{Y}(y)$ such that $\int\_{-\infty}^{\infty} f\_{Y} = 1$, and so $[f^{\prime}_Y(y) / f\_{Y}(y)] \cdot [\sigma^{2} / (\mu-y)] = 1$. Naturally, the theorem holds if $f_X$ of some $X \sim \operatorname{Bin}(n,p)$ converges to $1$ as $n\to\infty$, and we can show that $[f^{\prime}\_{X}(x) / f\_{X}(x)] \cdot [npq / np-h] \to 1$ by using the [finite differences]() **(#2)**. Even though machines do calculations these days (i.e. it still eases pain of handwork for a binomial dist.), the theorem survives because it has nothing to do with the shape of dist. of $X$ (i.e. a population dist.). In particular, a sequence/collection of i.i.d. [Bernoulli trials]() with probability $p$ of success need not be identical.
+By definition, for any $Y \sim \mathcal{N}(\mu,\sigma^2)$, the first derivative of $f\_{Y}(y)$ is given by $f\_{Y}^{\prime}(y) = -\sigma^{-2}(y-\mu) \cdot f\_{Y}(y)$ such that $\int\_{-\infty}^{\infty} f\_{Y} = 1$, and so $[f^{\prime}_Y(y) / f\_{Y}(y)] \cdot [\sigma^{2} / (\mu-y)] = 1$. Naturally, the theorem can be proven by showing that $[f^{\prime}\_{X}(x) / f\_{X}(x)] \cdot [npq / np-h] \to 1$, 
+
+
+$[p(n,k+1)-p(n,k)]/p(n,k)$
+
+where $h = np + c\sqrt{npq}$ and c is any arbitrary nonzero number.
+
+the theorem holds if 
+
+$f_X$ of some $X \sim \operatorname{Bin}(n,p)$ converges to $1$ as $n\to\infty$, and we can show that $[f^{\prime}\_{X}(x) / f\_{X}(x)] \cdot [npq / np-h] \to 1$ by using the [finite differences]() **(#2)**. 
+
+
+Even though machines do calculations these days (i.e. it still eases pain of handwork for a binomial dist.), the theorem survives because it has nothing to do with the shape of dist. of $X$ (i.e. a population dist.). In particular, a sequence/collection of i.i.d. [Bernoulli trials]() with probability $p$ of success need not be identical.
 
 Suppose $(X\_n)\_{n \in \mathbb{N}}$ is a sequence of ind. random variables with $\operatorname{E}X_n = \mu_n$ and $\operatorname{Var}X_n = \sigma_{n}^2 < \infty$, thereby we define $S_n = \Sigma\_{k=1}^{n}X_k$ and $\operatorname{Var}S_n = s_n^2 = \Sigma\_{k=1}^{n}\sigma^{2}_k$. If $(X\_n)\_{n \in \mathbb{N}}$ holds [Lyapunov's condition](): $\lim\_{n\to\infty} s^{-(2+\delta)}_n \Sigma\_{k=1}^{n}\operatorname{E}{\vert X_k - \mu_k \vert}^{2+\delta} = 0$ for some $\delta > 0$, then the [Lyapunov's CLT]() guarantees $Z_n = s^{-1}_n \Sigma\_{k=1}^{n} (X_k-\mu_k) = (S_n-\operatorname{E}S_n)/\sqrt{\operatorname{Var}S_n} \xrightarrow{d} Z$ as $n\to\infty$. Lyapunov showed that the average behaviour is all that matters and a few exceptionally large individual $(2+\delta)$-moments are acceptable **(#3)**. That is, Lyapunov's condition restricts a contribution of each $\sigma^{2}_k$ onto $s^2_n$ to be negligible (when $n$ is large), thus realisation of $X_k$ cannot distort a convergence.
 
