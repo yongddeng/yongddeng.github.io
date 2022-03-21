@@ -15,16 +15,7 @@ Both of the LLNs state that $\bar{X} = n^{-1}\Sigma_{k=1}^{n}X_k$ consists of i.
 ---
 Suppose $X \sim \operatorname{Bin}(n,p)$ is a binomially distributed random variable with $\operatorname{E}X = np$ and $\operatorname{Var}X = npq$, where $p>0$ and $p+q=1$. The [de Moivre–Laplace theorem]() shows $\binom{n}{h}p^{h}q^{n-h} \simeq \exp(-(h-np)^{2}/2npq)/\sqrt{2\pi{npq}}$ as $n \to \infty$, hence the binomial can be well approximated by the normal. Moreover, $Z_n = (X-np)/\sqrt{npq} \xrightarrow{d} Z$, and so $P(Z_n \leq z) \xrightarrow{p} \Phi(z)$ as $n\to\infty$, where $Z \sim \mathcal{N}(0,1)$ is continuous, $\Phi(z) = \int_{-\infty}^{z} f_Z(v)\,\mathrm{d}v$ and $f_Z(z) = \exp(-z^2/2)/\sqrt{2\pi}$ are the distribution and the density function of $Z$, respectively. de Moivre initially applied a normal to approximate the number of heads from the fair coin tosses **(#1)** and then Laplace extended the work.
 
-By definition, for any $Y \sim \mathcal{N}(\mu,\sigma^2)$, the first derivative of $f\_{Y}(y)$ is given by $f\_{Y}^{\prime}(y) = -\sigma^{-2}(y-\mu) \cdot f\_{Y}(y)$ such that $\int\_{-\infty}^{\infty} f\_{Y} = 1$, and so $[f^{\prime}_Y(y) / f\_{Y}(y)] \cdot [\sigma^{2} / (\mu-y)] = 1$. Naturally, the theorem can be proven by showing that $[f^{\prime}\_{X}(x) / f\_{X}(x)] \cdot [npq / np-h] \to 1$, 
-
-
-$[p(n,k+1)-p(n,k)]/p(n,k)$
-
-where $h = np + c\sqrt{npq}$ and c is any arbitrary nonzero number.
-
-the theorem holds if 
-
-$f_X$ of some $X \sim \operatorname{Bin}(n,p)$ converges to $1$ as $n\to\infty$, and we can show that $[f^{\prime}\_{X}(x) / f\_{X}(x)] \cdot [npq / np-h] \to 1$ by using the [finite differences]() **(#2)**. 
+By definition, for any $Y \sim \mathcal{N}(\mu,\sigma^2)$, the first derivative of $f\_{Y}(y)$ is given by $f\_{Y}^{\prime}(y) = -\sigma^{-2}(y-\mu) \cdot f\_{Y}(y)$ such that $\int\_{-\infty}^{\infty} f\_{Y} = 1$, and so $[f^{\prime}_Y(y) / f\_{Y}(y)] \cdot [\sigma^{2} / (\mu-y)] = 1$. That is, one can use the [discrete derivative](https://calculus.subwiki.org/wiki/discrete%20derivative) with $h = np + c\sqrt{npq}$ (i.e. $c>0$ is any arbitrary number) to show that $[(p(n,k+1)-p(n,k))/p(n,k)] \cdot [npq / np-h] \to 1$ as $n\to\infty$, thus prove the theorem **(#2)**. 
 
 
 Even though machines do calculations these days (i.e. it still eases pain of handwork for a binomial dist.), the theorem survives because it has nothing to do with the shape of dist. of $X$ (i.e. a population dist.). In particular, a sequence/collection of i.i.d. [Bernoulli trials]() with probability $p$ of success need not be identical.
