@@ -4,6 +4,9 @@ title: me
 ---
 
 
+Arsenal, Art, Coffee, INTJ, IU, Tattoo
+
+
 **0-10**
 - 1994: Born in Yeonhui-dong, Seoul, South Korea.
 - 1995-1996: Temporarily raised in Philippines, back to South Korea.
