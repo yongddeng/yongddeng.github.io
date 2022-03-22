@@ -10,13 +10,13 @@ Arsenal, Art, Coffee, INTJ, IU, Tattoo
 **0-10**
 - 1994: Born in Yeonhui-dong, Seoul, South Korea.
 - 1995-1996: Temporarily raised in Philippines, back to South Korea.
-- 2001-2006: Enrolled at [Kyonggi Elementry school](https://namu.wiki/w/%EA%B2%BD%EA%B8%B0%EC%B4%88%EB%93%B1%ED%95%99%EA%B5%90), graduated from [Jamwon Elementary School](https://namu.wiki/w/%EC%84%9C%EC%9A%B8%EC%9E%A0%EC%9B%90%EC%B4%88%EB%93%B1%ED%95%99%EA%B5%90), suffered from tic disorders.
+- 2001-2006: Enrolled in [Kyonggi Elementry school](https://namu.wiki/w/%EA%B2%BD%EA%B8%B0%EC%B4%88%EB%93%B1%ED%95%99%EA%B5%90), graduated from [Jamwon Elementary School](https://namu.wiki/w/%EC%84%9C%EC%9A%B8%EC%9E%A0%EC%9B%90%EC%B4%88%EB%93%B1%ED%95%99%EA%B5%90), suffered from tic disorders.
 
 
 **10-20**
-- 2007-2008: Enrolled at [Sinbanpo Middle school](https://namu.wiki/w/%EC%8B%A0%EB%B0%98%ED%8F%AC%EC%A4%91%ED%95%99%EA%B5%90), dropped out after the 1st year.
-- 2009-2010: Moved to the UK, enrolled and graduated [Liverpool Independent school](https://www.liverpoolcollege.org.uk/about-us/who-we-are) (i.e. sixth form).
-- 2014-2017: Enrolled and graduated from [King's College London](https://www.kcl.ac.uk/mathematics), suffered from anxiety disorders and depression.
+- 2007-2008: Enrolled at [Sinbanpo Middle school](https://namu.wiki/w/%EC%8B%A0%EB%B0%98%ED%8F%AC%EC%A4%91%ED%95%99%EA%B5%90), dropped out after the 1st year, played computer games.
+- 2009-2014: Moved to the UK, graduated from [Liverpool Independent school](https://www.liverpoolcollege.org.uk/about-us/who-we-are) (i.e. sixth form).
+- 2014-2017: Graduated from [King's College London](https://www.kcl.ac.uk/mathematics), suffered from anxiety disorders and depression.
 - 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), no longer wanted to be in the Finance industry.
 - 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), entered the IT industry, joined the national guard.
 - 2020-2021: Worked at [Riiid](https://www.riiid.co/), got rejected from Stanford, fully served the national guard.
