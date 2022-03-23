@@ -22,7 +22,7 @@ We can access the full information about $X$ from the $\sigma$-algebra generated
 
 ## II
 ---
-For every $s, t \in T$ with $s \leq t$, a stochastic process $X$ has [independent increments]() (i.e. differences) if $X\_t - X\_s$ is independent of $\mathcal{F}\_s$, and [stationary increments]() if $F\_{X\_t - X\_s} = F\_{X\_{t-s} - X\_0}$. Furthermore, $X$ has independent and stationary increments if and only if $X$ is a partial sum process consists of a sequence $U = (U\_{t})\_{t \in T}$ of i.i.d. random variables such that $X_n = \Sigma_{t=1}^{n}U\_{t}$. A pdf (i.e. f.d.d.) of such process $X$ on $\mathbb{R}^n$ is then given by $f\_{X}(x) = f\_{1}(x\_{1})f\_{2-1}(x\_{2}-x\_{1}) \dots f\_{n-n-1}(x\_{n}-x\_{n-1})$ assumed that a dist. of $X\_{t}$ is known on $\mathbb{R}$ for all $t \in T$.
+For every $s, t \in T$ with $s \leq t$, a stochastic process $X$ has [independent increments]() (i.e. differences) if $X\_t - X\_s$ is independent of $\mathcal{F}\_s$, and [stationary increments]() if $F\_{X\_t - X\_s} = F\_{X\_{t-s} - X\_0}$. Furthermore, $X$ has independent and stationary increments if and only if $X$ is a partial sum process consists of a sequence $U = (U\_{t})\_{t \in T}$ of i.i.d. random variables such that $X_n = \Sigma_{t=1}^{n}U\_{t}$. A pdf (i.e. f.d.d.) of such process $X$ on $\mathbb{R}^n$ is given by $f\_{X}(x) = f\_{X\_1}(x\_{1})f\_{X\_2-X\_1}(x\_{2}-x\_{1}) \dots f\_{X\_n - X\_{n-1}}(x\_{n}-x\_{n-1})$ assumed that a dist. of $X\_{t}$ is known on $\mathbb{R}$ for all $t \in T$.
 
 
 
