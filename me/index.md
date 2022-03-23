@@ -14,11 +14,11 @@ Arsenal, Art, Coffee, INTJ, IU, Tattoo
 
 
 **10-20**
-- 2007-2008: Enrolled in [Sinbanpo Middle school](https://namu.wiki/w/%EC%8B%A0%EB%B0%98%ED%8F%AC%EC%A4%91%ED%95%99%EA%B5%90), dropped out after the 1st year, played computer games.
+- 2007-2008: Enrolled in [Sinbanpo Middle school](https://namu.wiki/w/%EC%8B%A0%EB%B0%98%ED%8F%AC%EC%A4%91%ED%95%99%EA%B5%90), dropped out after the 1st year, played computer games, traveled the Europe.
 - 2009-2014: Moved to the UK, graduated from [Liverpool Independent school](https://www.liverpoolcollege.org.uk/about-us/who-we-are) (i.e. sixth form).
 - 2014-2017: Graduated from [King's College London](https://www.kcl.ac.uk/mathematics), suffered from anxiety disorders and depression.
 - 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), decided not to puruse a career in the Finance industry.
-- 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), entered the IT industry, joined the national guard.
+- 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), joined the national guard.
 - 2020-2021: Worked at [Riiid](https://www.riiid.co/), got rejected from Stanford, fully served the national guard.
 
 
