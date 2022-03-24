@@ -1,87 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
+        xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {% for post in site.posts %}
+    <url>
+        <loc>{{ site.url }}{{ post.url }}.html</loc>
+        {% if post.lastmod == null %}
+        <lastmod>{{ post.date | date_to_xmlschema }}</lastmod>
+        {% else %}
+        <lastmod>{{ post.lastmod | date_to_xmlschema }}</lastmod>
+        {% endif %}
 
+        {% if post.sitemap.changefreq == null %}
+        <changefreq>weekly</changefreq>
+        {% else %}
+        <changefreq>{{ post.sitemap.changefreq }}</changefreq>
+        {% endif %}
 
-<url>
-  <loc>https://yongddeng.github.io/</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>1.00</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/me/</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/tag/tag1/</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220112/markov-chain</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220111/martingale</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220110/stochastic-process</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220109/laws-of-the-iterated-logarithm</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220108/central-limit-theorem</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220107/laws-of-large-number</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220106/modes-of-convergence</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220105/characteristic-function</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220104/inequality</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220103/expectation</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220102/random-variable</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://yongddeng.github.io/20220101/probability</loc>
-  <lastmod>2022-03-24T09:19:39+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
+        {% if post.sitemap.priority == null %}
+        <priority>0.5</priority>
+        {% else %}
+        <priority>{{ post.sitemap.priority }}</priority>
+        {% endif %}
 
-
+    </url>
+    {% endfor %}
 </urlset>

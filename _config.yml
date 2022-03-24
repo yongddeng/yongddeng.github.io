@@ -1,6 +1,6 @@
 permalink: /:year:month:day/:title
-url: description # Your url here
-baseurl: /project
+url: https://yongddeng.github.io/ # Your url here
+#baseurl: /project
 
 # variables
 name: Hikikomori # Your Site Name
@@ -11,8 +11,8 @@ google_verification: null
 include: [".htaccess"]
 exclude: ["README.md", "LICENSE"]
 
-# SEO management
-plugins: ['jekyll-paginate', 'jekyll-sitemap', 'jekyll-include-cache', 'jekyll-gist']
+# # SEO management
+# plugins: ['jekyll-paginate', 'jekyll-sitemap', 'jekyll-include-cache', 'jekyll-gist']
 
 # Sass
 sass:
