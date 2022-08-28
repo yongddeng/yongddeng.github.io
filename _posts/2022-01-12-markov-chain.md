@@ -8,7 +8,7 @@ use_math: true
 
 # Markov Chain
 ---
-The Markov property states that the future is independent to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A great tutorial on a set of sampling algorithms that are inspired by Monte Carlo methods (i.e. get one from the proposal dist and handle it with some criteria) and the Markov property can be found [here](https://www.youtube.com/watch?v=si76S7QqxTU&list=PLivJwLo9VCULQQkfmXK_ZXzPYc3JJ0Cpn&index=1).
+The Markov property states that the future is independent to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A great tutorial on a set of sampling algorithms built upon the Monte Carlo methods (i.e. get one from the proposal dist and handle it with some criteria) and the Markov property can be found [here](https://www.youtube.com/watch?v=si76S7QqxTU&list=PLivJwLo9VCULQQkfmXK_ZXzPYc3JJ0Cpn&index=1).
 
 
 ## I
