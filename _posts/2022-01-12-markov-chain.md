@@ -8,8 +8,7 @@ use_math: true
 
 # Markov Chain
 ---
-The Markov property states that the future is independent to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A Markov chain is somewhat related to a martingale by a [harmonic function](https://www.randomservices.org/random/martingales/Properties.html).
-
+The Markov property states that the future is independent to the past. Weather forecast is an iconic example which depends primarily on the current weather instead of the entire record of history. A great tutorial on a set of sampling algorithms that uses Monte Carlo methods (i.e. get one from the proposal dist and handle it with some criteria) and Markov property can be found [here](https://www.youtube.com/watch?v=si76S7QqxTU&list=PLivJwLo9VCULQQkfmXK_ZXzPYc3JJ0Cpn&index=1).
 
 
 ## I
@@ -36,7 +35,7 @@ A state $i$ is [ergodic](https://stats.libretexts.org/Bookshelves/Probability_Th
 
 A Markov chain is [reversible](https://cims.nyu.edu/~holmes/teaching/asa19/handout_Lecture3_2019.pdf) with respect to $\pi$ if it holds the [detailed balanced condition](https://en.wikipedia.org/wiki/Detailed_balance) $\pi\_{i}p\_{ij} = \pi_{j}p\_{ji}$ for all $i,j\in\mathbb{S}$. In particular, if $X$ is a general system and there exists $\pi$ such that the condition is held, then $\Sigma_{i}\pi\_{i}p\_{ij} = \Sigma_{i}\pi\_{j}p\_{ji} = \pi\_{j}\Sigma_{i}p\_{ji} = \pi\_{j}$ and so $X$ holds the global balance condition $\pi = \pi{P}$. These underlie the sampling framework called [Markov chain Monte Carlo](https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo) (MCMC) and remedy the fact that [rejection sampling](https://www.youtube.com/watch?v=OXDqjdVVePY) method only uses ind. observations. The [Metropolis algorithm](https://www.youtube.com/watch?v=yCv2N7wGDCw) is a popular instance which uses symmetric conditional candidate density functions to return (i.e. after a [burn-in period](http://users.stat.umn.edu/~geyer/mcmc/burn.html)) sequences of numbers which we hope can reflect a target density function.
 
-Whilst MCMC under the Bayesian settings can generate observations from the posterior (to estimate parameters $\theta$ given data $\mathbf{x}$), [P Marjoram (2003)](https://www.pnas.org/doi/pdf/10.1073/pnas.0306899100) attempted it without the use of likelihoods. MCMC may suffer the curse of dimensionality whereby regions of higher probability tend to stretch and get lost in an increasing volume of space. A well-designed model that can learn all information from the entire records may be more sophisticaed (or overfitted) than a partly conditioned model. In fact, computing the joint dist. of such model is impractical, and thus we naively assume the Markov property. The [PageRank](https://en.wikipedia.org/wiki/PageRank) developed by Larry Page and Sergey Brin in 1996 can be understood as a Markov chain.
+Whilst MCMC under the Bayesian settings can generate observations from the posterior (to estimate parameters $\theta$ given data $\mathbf{x}$), [P Marjoram (2003)](https://www.pnas.org/doi/pdf/10.1073/pnas.0306899100) attempted it without the use of likelihoods. MCMC may suffer the curse of dimensionality whereby regions of higher probability tend to stretch and get lost in an increasing volume of space. A well-designed model that can learn all information from the entire records may be more sophisticaed (or overfitted) than a partly conditioned model. In fact, computing the joint dist. of such model is impractical and thus we naively assume the Markov property. The [PageRank](https://en.wikipedia.org/wiki/PageRank) developed by Larry Page and Sergey Brin in 1996 can be understood as a Markov chain.
 
 
 ## **
