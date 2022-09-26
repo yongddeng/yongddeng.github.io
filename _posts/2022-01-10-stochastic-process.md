@@ -8,7 +8,7 @@ use_math: true
 
 # Stochastic Process
 ---
-The notes 10, 11, and 12 are based on Patrick Billingsley's [Probability and Measure]() and J.L. Doob's [Stochastic Processes](). A stochastic process is a vast object that can be grouped into various categories, thus I would properly read them later (i.e. with an extra [resource](https://www.stat.cmu.edu/~cshalizi/754/)) and just focus on discrete time processes for now.
+The notes 10, 11, and 12 are based on Patrick Billingsley's [Probability and Measure]() and J.L. Doob's [Stochastic Processes](). A stochastic process is a vast object that can be grouped into various categories, thus I would properly read them later (i.e. with an extra [resource](https://www.stat.cmu.edu/~cshalizi/754/)) and focus only on discrete time processes for now.
 
 
 ## I
