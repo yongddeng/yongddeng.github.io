@@ -16,7 +16,7 @@ Arsenal, Art, Coffee, INTJ, IU, Tattoo
 
 
 **20-29**
-- 2014-2017: Graduated from [King's College London](https://www.kcl.ac.uk/mathematics), suffered from anxiety disorders and depression.
+- 2014-2017: Graduated from [King's College London](https://www.kcl.ac.uk/mathematics), suffered from anxiety disorders and depression, back to South Korea.
 - 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), decided not to puruse a career in the Finance industry.
 - 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), joined the national guard.
 - 2020-2021: Worked at [Riiid](https://www.riiid.co/), got rejected by Stanford, fully served the national guard.
