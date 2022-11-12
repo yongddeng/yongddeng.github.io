@@ -20,7 +20,7 @@ Arsenal, Art, Coffee, INTJ, IU, Tattoo
 - 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), decided not to puruse futher careers in Finance/Consulting.
 - 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), joined the national guard.
 - 2020-2021: Worked at [Riiid](https://www.riiid.co/), got rejected by Stanford, fully served the national guard.
-- 2022: Ended an 8-months gap year, interviewed with Google, TikTok, Blind, Udemy, Palantir, Moloco, Boeing, Coupang, and etc.
+- 2022: Had an 8-months gap year, interviewed with Google, TikTok, Blind, Udemy, Palantir, Moloco, Boeing, Coupang, and etc.
 
 
 **30-39**
