@@ -4,7 +4,7 @@ title: me
 ---
 
 
-Arsenal, Art, Coffee, INTJ, IU, Tattoo
+Arsenal, Coffee, Tattoo
 
 
 **0-19**
