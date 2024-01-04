@@ -6,7 +6,7 @@ use_math: true
 ---
 
 
-# Martingale
+# (TBD) Martingale
 ---
 Originated from gambling, a player will make, on average, no profit with only a limited budget. Paul Lévy proved that the famous martingale startegy is fool. In sprit of Levy's work, a massive breakthrough was achieved by Joseph Doop. It is a fascinating framework that supports study of stochastic processes, and moreover, a modern probability theory.
 
