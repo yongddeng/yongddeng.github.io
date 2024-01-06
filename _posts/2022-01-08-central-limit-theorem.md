@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "08. central limit theorem"
-tags: tag1
+tags: probability
 use_math: true
 ---
 
