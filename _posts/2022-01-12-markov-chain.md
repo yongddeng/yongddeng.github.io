@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "12. markov chain"
-tags: tag1
+tags: probability
 use_math: true
 ---
 
