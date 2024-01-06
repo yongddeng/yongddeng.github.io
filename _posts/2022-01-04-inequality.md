@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "04. inequality"
-tags: probabable
+tags: probable
 use_math: true
 ---
 

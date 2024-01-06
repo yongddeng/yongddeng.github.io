@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "10. stochastic process"
-tags: probabable
+tags: probable
 use_math: true
 ---
 
