@@ -1,7 +1,7 @@
 ---
 layout: default
-title: "11. functional analysis"
-tags: tag2
+title: "01. functional analysis"
+tags: functional
 use_math: true
 ---
 
