@@ -22,7 +22,7 @@ A few adjustments of definitions induce another martingales. We let the [marting
 
 ## II
 ---
-If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_{s}) \geq X\_{s}$ a.s., then $X$ is called a [sub-martingale](). Also, if $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_s) \leq X\_s$ a.s., then $X$ is called a [super-martingale](). **(#3)**. For example, $X$ with ind. increments and a constant mean is a martingale, and is a sub-martingale (super-martingale) if its mean is increasing (decreasing). Note that a simple random walk for $p = 1/2$, in which each summand has a mean $2p-1$, is a martingale. If $p > 1/2$ ($p < 1/2$), then it is a sub-martingale (a super-martingale). That is, a martingale corresponds to fair games, a sub-margingale corresponds to favorable games, and a super-margingale corresponds to unfavorable games.
+If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_{s}) \geq X\_{s}$ a.s., then $X$ is called a [sub-martingale](). Also, if $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}\_s) \leq X\_s$ a.s., then $X$ is called a [super-martingale](). **(#3)**. For example, $X$ with ind. increments and a constant mean is a martingale, and is a sub-martingale (super-martingale) if its mean is increasing (decreasing). Note that a simple random walk for $p = 1/2$, of each summand with a mean $2p-1$, is a martingale **(4)**. That is, a martingale corresponds to fair games, a sub-margingale corresponds to favorable games, and a super-margingale corresponds to unfavorable games.
 
 These three unique types of stochastic process have the following properties. // The martingale properties are preserved under sums of the stochastic processes (thus the collection of martingales with respect to a fixed filtration $F$ forms a vector space) // The sub-martingale and super-martingale properties are preserved under multiplication by a positive constant. // Jensen's inequality turns martingales into sub-martingales under appropriate conditions.
 
@@ -40,4 +40,4 @@ The Doob decomposition theorem: decomposes a basic stochastic process into a mar
 
 ## **
 ---
-**(#1)** I.e. A partial sum process associated with ind. sequences is a martingale.
+**(#1)** I.e. A partial sum process associated with ind. sequences is a martingale. **(4)** Hence it is a sub-martingale (a super-martingale) for $p > 1/2$ ($p < 1/2$).
