@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "09. law of the iterated logarithm"
-tags: probability
+tags: probabable
 use_math: true
 ---
 

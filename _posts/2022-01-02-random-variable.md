@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "02. random variable"
-tags: probability
+tags: probabable
 use_math: true
 ---
 

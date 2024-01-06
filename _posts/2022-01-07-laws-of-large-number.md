@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "07. law of large number"
-tags: probability
+tags: probabable
 use_math: true
 ---
 

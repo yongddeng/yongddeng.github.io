@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "01. probability theory"
-tags: probability
+tags: probabable
 use_math: true
 ---
 

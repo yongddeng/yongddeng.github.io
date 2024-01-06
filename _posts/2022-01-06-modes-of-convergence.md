@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "06. mode of convergence"
-tags: probability
+tags: probabable
 use_math: true
 ---
 

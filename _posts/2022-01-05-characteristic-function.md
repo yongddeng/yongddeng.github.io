@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "05. characteristic function"
-tags: probability
+tags: probabable
 use_math: true
 ---
 

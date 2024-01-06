@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "03. expectated value"
-tags: probability
+tags: probabable
 use_math: true
 ---
 
