@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "06. mode of convergence"
-tags: tag1
+tags: probability
 use_math: true
 ---
 
@@ -51,4 +51,4 @@ The converse relation under the u.i. is a generalisation of the [Vitali converge
 
 ## **
 ---
-**(#1)** I.e. $X_n Y_n \to XY$ correspondingly to each mode of convergence. **(#2)** In measure theory, u.i. holds for an uncountable set of functions indexed by $I$, and a sequence is merely a countable set with $I=\mathbb{N}$. **(#3)** Given a collection $X = (X\_i)\_{i \in I}$, it means $X$ is bounded in norm as a subset of the vector space $L^1$, thus a finite collection of integrable r.v.s is u.i.. **(#4)** Given $(X,\Sigma,\mu)$, we say $f_n$ converges "globally" in measure to $f$ if $\lim\_{n\to\infty} \mu(\lbrace x \in X: {\vert f(x)-f_n(x) \vert} \geq \varepsilon \rbrace) = 0$, and "locally" if $\lim_{n\to\infty} \mu(\lbrace x \in F: {\vert f(x)-f_n(x) \vert} \geq \varepsilon \rbrace) = 0$, where $F \in \Sigma$ and $\mu(F) < \infty$; **(#5)** If $\mu(X) < \infty$, then the existence of a dominating integrable function $g$ can be replaced by the u.i. of the sequence $(f\_{n})_{n\in\mathbb{N}}$.
+**(#1)** X_n Y_n \to XY$ correspondingly to each mode of convergence. **(#2)** Measure theoretically, u.i. holds for an uncountable set of functions indexed by $I$, and a sequence is merely a countable set with $I=\mathbb{N}$. **(#3)** $X = (X\_i)\_{i \in I}$ is bounded in norm as a subset of the vector space $L^1$. A finite collection of integrable r.v.s are u.i.. **(#4)** Given $(X,\Sigma,\mu)$, we say $f_n$ converges "globally" in measure to $f$ if $\lim\_{n\to\infty} \mu(\lbrace x \in X: {\vert f(x)-f_n(x) \vert} \geq \varepsilon \rbrace) = 0$, and "locally" if $\lim_{n\to\infty} \mu(\lbrace x \in F: {\vert f(x)-f_n(x) \vert} \geq \varepsilon \rbrace) = 0$, where $F \in \Sigma$ and $\mu(F) < \infty$; **(#5)** If $\mu(X) < \infty$, then the existence of a dominating integrable function $g$ can be replaced by the u.i. of the sequence $(f\_{n})_{n\in\mathbb{N}}$.

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "07. law of large number"
-tags: tag1
+tags: probability
 use_math: true
 ---
 
@@ -40,6 +40,6 @@ While the WLLN is a theoretical concept describing the convergence of sample ave
 
 ## **
 ---
-**(#1)** In statistics, $\bar{X}_n$ is an unbiased estimator of $\mu$ if it converges in $L^2$. **(#2)** For a sequence $(X_n)\_{n\in\mathbb{N}}$ of i.i.d. r.v.s, we alter the condition to $\Sigma\_{k=1}^{n}P(\vert X_i \vert > x) = xP(\vert X_1 \vert > x) \to 0$ as $n \to \infty$, then $n^{-1}S_n - \mu_n \xrightarrow{p} 0$ as $n \to \infty$, where $\mu_n = \operatorname{E} X_1 I\_{\vert X_1 \vert \leq x}$. **(#3)** It holds because $\mu$ is a constant. **(#4)** The law shall be proven in terms of the convergence of a series, but it can also be done by using subsequence: if $X\_n \xrightarrow{p} X$, then $\exists$ a sub-sequence $(k\_n)\_{n\in\mathbb{N}}$ such that $X\_{k\_n} \xrightarrow{a.s.} X$.
+**(#1)** In statistics, $\bar{X}_n$ is called an unbiased estimator of $\mu$ if it converges in $L^2$. **(#2)** For a sequence $(X_n)\_{n\in\mathbb{N}}$ of i.i.d. r.v.s, we alter the condition to $\Sigma\_{k=1}^{n}P(\vert X_i \vert > x) = xP(\vert X_1 \vert > x) \to 0$ as $n \to \infty$, then $n^{-1}S_n - \mu_n \xrightarrow{p} 0$ as $n \to \infty$, where $\mu_n = \operatorname{E} X_1 I\_{\vert X_1 \vert \leq x}$. **(#3)** It holds because $\mu$ is a constant. **(#4)** The law shall be proven in terms of the convergence of a series, but it can also be done by using subsequence: if $X\_n \xrightarrow{p} X$, then $\exists$ a sub-sequence $(k\_n)\_{n\in\mathbb{N}}$ such that $X\_{k\_n} \xrightarrow{a.s.} X$.
 
 
