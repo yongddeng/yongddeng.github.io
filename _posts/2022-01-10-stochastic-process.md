@@ -8,7 +8,7 @@ use_math: true
 
 # Stochastic Process
 ---
-The next three pages (p.10-12) borrow Billingsley's [Probability and Measure]() and Doob's [Stochastic Processes](). A stochastic process is a vast object that can easily be [sub-grouped](https://www.stat.cmu.edu/~cshalizi/754/). It requires times and efforts to comprehend its intricacies, navigate its various components, and unveil the underlying patterns or behaviors that govern its evolution over time or across different dimensions.
+The next three pages (p.10-12) borrow Billingsley's [Probability and Measure]() and Doob's [Stochastic Processes](). A stochastic process is a vast object that can easily be [sub-grouped](https://www.stat.cmu.edu/~cshalizi/754/). It requires times and efforts to comprehend its intricacies, navigate its components, and unveil the underlying patterns or behaviors that govern its evolution over time or across different dimensions.
 
 
 ## I
