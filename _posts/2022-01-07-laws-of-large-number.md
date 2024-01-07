@@ -8,7 +8,7 @@ use_math: true
 
 # Law of Large Number
 ---
-Empirically, as a fair die undergoes more rolls, a normalised sums converge toward $3.5 \simeq n^{-1}\Sigma_{k}^{n} X\_{k}$. This prompts us to investigate whether the mathematical formulations of convergence apply to sums of independent random variables. We aim to delve into rigorous proofs for the LLNs. Such scrutiny is crucial as it mitigates the disruptive impact of wild randomness inherent in small samples.
+Empirically, as a fair die undergoes more rolls, a normalised sum converges toward $3.5 \simeq n^{-1}\Sigma_{k}^{n} X\_{k}$. This prompts us to investigate whether the mathematical formulations of convergence apply to sums of independent random variables. We aim to delve into rigorous proofs for the LLNs. Such scrutiny is crucial as it mitigates the disruptive impact of wild randomness inherent in small samples.
 
 
 ## I
