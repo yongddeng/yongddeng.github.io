@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "07. law of large number"
+title: "2207. law of large number"
 tags: probable
 use_math: true
 ---

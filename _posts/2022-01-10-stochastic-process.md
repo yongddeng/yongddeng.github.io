@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "10. stochastic process"
+title: "2210. stochastic process"
 tags: probable
 use_math: true
 ---

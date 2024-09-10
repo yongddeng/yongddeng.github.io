@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "05. characteristic function"
+title: "2205. characteristic function"
 tags: probable
 use_math: true
 ---

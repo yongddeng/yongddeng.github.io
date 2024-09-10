@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "08. central limit theorem"
+title: "2208. central limit theorem"
 tags: probable
 use_math: true
 ---

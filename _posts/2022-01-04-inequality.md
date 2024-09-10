@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "04. inequality"
+title: "2204. inequality"
 tags: probable
 use_math: true
 ---

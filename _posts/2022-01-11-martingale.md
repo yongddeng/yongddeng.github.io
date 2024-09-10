@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "11. martingale"
+title: "2211. martingale"
 tags: probable
 use_math: true
 ---

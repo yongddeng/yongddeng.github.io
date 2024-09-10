@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "02. random variable"
+title: "2202. random variable"
 tags: probable
 use_math: true
 ---

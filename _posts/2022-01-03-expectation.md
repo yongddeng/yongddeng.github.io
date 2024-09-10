@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "03. expectated value"
+title: "2203. expectated value"
 tags: probable
 use_math: true
 ---
