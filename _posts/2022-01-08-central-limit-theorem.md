@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "208. central limit theorem"
-tags: probable
+tags: math200
 use_math: true
 ---
 

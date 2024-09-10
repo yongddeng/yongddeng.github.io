@@ -1,11 +1,11 @@
 tag1:
-  name: probable
+  name: math200
 
 tag2:
-  name: functional
+  name: cs300
 
 tag3:
-  name: scholarly
+  name: cs400
 
 tag4:
-  name: glossary
+  name: math500

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "404. software development"
-tags: glossary
+tags: cs400
 use_math: true
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "403. programming language"
-tags: glossary
+tags: cs400
 use_math: true
 ---
 

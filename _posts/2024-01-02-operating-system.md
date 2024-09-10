@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "402. operating system"
-tags: glossary
+tags: cs400
 use_math: true
 ---
 

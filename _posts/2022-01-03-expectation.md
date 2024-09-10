@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "203. expectated value"
-tags: probable
+tags: math200
 use_math: true
 ---
 

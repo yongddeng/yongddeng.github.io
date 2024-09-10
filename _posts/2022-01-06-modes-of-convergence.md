@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "206. mode of convergence"
-tags: probable
+tags: math200
 use_math: true
 ---
 

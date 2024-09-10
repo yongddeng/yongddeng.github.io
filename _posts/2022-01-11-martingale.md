@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "211. martingale"
-tags: probable
+tags: math200
 use_math: true
 ---
 
