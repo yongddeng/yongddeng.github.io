@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "2402. programming language"
+title: "2401. operating system"
 tags: glossary
 use_math: true
 ---
@@ -8,3 +8,4 @@ use_math: true
 
 ## I. TBD
 ---
+//
