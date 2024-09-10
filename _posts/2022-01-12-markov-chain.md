@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "2212. markov chain"
+title: "212. markov chain"
 tags: probable
 use_math: true
 ---

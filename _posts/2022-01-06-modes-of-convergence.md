@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "2206. mode of convergence"
+title: "206. mode of convergence"
 tags: probable
 use_math: true
 ---

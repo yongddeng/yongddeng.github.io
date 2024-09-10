@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "2209. law of the iterated logarithm"
+title: "209. law of the iterated logarithm"
 tags: probable
 use_math: true
 ---

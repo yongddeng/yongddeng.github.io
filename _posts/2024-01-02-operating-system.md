@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "2401. operating system"
+title: "402. operating system"
 tags: glossary
 use_math: true
 ---
