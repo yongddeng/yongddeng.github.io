@@ -9,8 +9,8 @@ use_math: true
 # Operating System
 ---
 tbd...
-<!-- Once the kernel is successfully loaded, it takes over the full control of ...
 
+<!-- Once the kernel is successfully loaded, it takes over the full control of ...
 
 A quick recap from the undergraduate operating systems course: information is grouped into pages in memory, and sometimes, we need to transfer chunks of information from one page to another. This is another hassle we must contend with when transferring information from the CPU to the GPU or vice-versa.
 
