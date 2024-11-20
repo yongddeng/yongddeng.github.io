@@ -8,8 +8,16 @@ use_math: true
 
 # Operating System
 ---
-Once the kernel is successfully loaded, it takes over the full control of ...
+tbd...
+<!-- Once the kernel is successfully loaded, it takes over the full control of ...
 
+
+A quick recap from the undergraduate operating systems course: information is grouped into pages in memory, and sometimes, we need to transfer chunks of information from one page to another. This is another hassle we must contend with when transferring information from the CPU to the GPU or vice-versa.
+
+NVIDIA has a new unified memory feature that does automatic page-to-page transfers between the CPU and GPU for error-free GPU processing when the GPU occasionally runs out of memory. The authors use this feature to allocate paged memory for the optimizer states, which are then automatically evicted to CPU RAM when the GPU runs out of memory and paged back into GPU memory when the memory is needed in the optimizer update step.
+
+- https://wandb.ai/sauravmaheshkar/QLoRA/reports/What-is-QLoRA---Vmlldzo2MTI2OTc5
+- https://stackoverflow.com/questions/26891413/diff-between-logical-memory-and-physical-memory
 
 ## I
 ---
@@ -46,4 +54,4 @@ The main responsiblities of modern OS are ...
 
 - [Process Management](): Define how the OS handles active tasks (processes), assigning resources and CPU time. || [Process Life Cycle](): Introduce process states (e.g., New, Running, Waiting, Terminated). || [Scheduling Algorithms](): Explain scheduling types like Round-Robin, First-Come-First-Served, and Priority-based, emphasizing their impact on performance. || A [thread]() is the smallest unit of ...
 
-- [Device Management and Drivers](): Role of drivers in enabling communication between OS and hardware devices. || [Plug and Play]() (PnP): Describe how modern OSs automatically detect and configure new devices.
+- [Device Management and Drivers](): Role of drivers in enabling communication between OS and hardware devices. || [Plug and Play]() (PnP): Describe how modern OSs automatically detect and configure new devices. -->

@@ -8,7 +8,8 @@ use_math: true
 
 # Virtualisation
 ---
-...
+tbd...
+<!-- ...
 
 
 ## I
@@ -24,3 +25,6 @@ Hardware-level
 ## III
 ---
 OS-level
+
+
+https://docs.nvidia.com/datacenter/tesla/mig-user-guide/#concepts -->
