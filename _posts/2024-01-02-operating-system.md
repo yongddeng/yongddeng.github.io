@@ -25,16 +25,16 @@ A computer is ultimately a set of interconnected electronic components. The oper
 
 ## I
 ---
-### **1.1. The Origin: From Punch Cards to Linux**
+### **1.1. The Origin (Punch Cards)**
 <p style="margin-bottom: 12px;"> </p>
 
 In the earliest generation of electronic computers (1940s–50s), machines like the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an [operating system]() (OS) began to take shape in the 1950s with the introduction of [batch processing systems](), such as [GM-NAA I/O]() developed by General Motors for the [IBM 701](). These new systems grouped jobs into batches, automated job transitions, and reduced idle time.
 
-- <iframe width="500" height="280" src="https://www.youtube.com/embed/nwDq4adJwzM?si=JZexAZMHwrcAvPbN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> <p style="margin-bottom: 12px;"> </p>
-
 The 1960s marked the emergence of [multiprogramming]() and [time-sharing systems]() (TSS), which enabled concurrent execution of multiple programs in RAM by having the CPU rapidly switch between them. This shift supported interactive computing and drove projects such as MIT’s [Multics](), introducing foundational OS features such as [hierarchical file systems]() (HFS), [segmented memory](), [dynamic linking](), and user-level abstraction. These advances laid the groundwork for [Unix]() in the early 1970s, which emphasised a modular kernel design, hardware abstraction, and multi-user support. These principles remain central to modern OS design.
 
 <!-- The spread of [minicomputers](), including [programmed data processors]() (PDPs), helped popularise OS beyond institutional settings. -->
+
+- <iframe width="500" height="280" src="https://www.youtube.com/embed/nwDq4adJwzM?si=JZexAZMHwrcAvPbN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> <p style="margin-bottom: 12px;"> </p>
 
 The 1980s ushered in the era of personal computing, shifting OS development from [command-line interfaces]() (CLI) toward [graphical user interfaces]() (GUI) to enhance accessibility for non-technical users. Microsoft introduced [MS-DOS]() in 1981, a single-tasking CLI-based operating system, followed by successive versions of [Windows]() that adopted cooperative and later pre-emptive multitasking. Around the same time, Apple’s [Macintosh OS]() (macOS) brought the GUI into mainstream. In the 1990s, [Linux](), nspired by Unix, emerged as a free and open-source operating system, driving innovation across servers, mobile devices, and embedded systems.
 
@@ -91,6 +91,7 @@ Kernels can be classified into several architectures. A [monolithic kernel]() (e
 
 
 ### **1.4. System Call**
+<p style="margin-bottom: 12px;"> </p>
 
 System calls are the primary interface (i.e. APIs exposed by the kernel) through which user-space programs request services from the kernel. Because user programs run in restricted user mode, they are not permitted to directly access hardware or critical system resources. Instead, when a program needs to perform a privileged operation—such as reading from a file, allocating memory, or creating a new process—it issues a system call. This triggers a controlled context switch into kernel mode, where the requested operation is validated and executed. Once the operation is complete, control is returned to the user process along with any relevant results or error codes. This mechanism ensures both safety (by enforcing privilege boundaries) and consistency (by standardizing access to resources).
 
@@ -128,116 +129,3 @@ OS-level virtualization, exemplified by containers like Docker, isolates applica
 ### **2.1. Unix**
 todo...
 
-<!-- 
-<p style="margin-bottom: 12px;"> </p>
-
-OS Implementations have been evolving ... || Unix, first developed at AT&T’s Bell Labs in 1969 and released in 1971, revolutionized operating system design with its emphasis on portability, modularity, and simplicity. Unlike earlier systems tied to specific hardware, Unix was written in the C programming language, allowing it to be easily ported across different architectures. This innovation made Unix one of the first truly versatile operating systems. Its hierarchical file system introduced a logical and consistent method for organizing files and directories, while features like pipes and redirection enabled powerful command-line utilities to be combined for complex tasks. These characteristics set the foundation for Unix’s widespread adoption in academia, research, and enterprise environments.
-
-Unix introduced a philosophy of building small, modular tools that perform specific tasks well, which could be combined to achieve greater functionality. This approach not only made Unix extensible but also encouraged innovation in software development. Key principles, such as treating everything as a file (including devices), further simplified interactions between hardware and software. Over the decades, Unix evolved into various commercial and open-source derivatives, including BSD, AIX, and HP-UX, which retained its foundational principles while adding enhancements tailored to specific use cases.
-
-Today, Unix serves as the backbone of many modern operating systems, influencing everything from Linux to macOS. Its legacy lives on in the standardized POSIX interface, ensuring compatibility across Unix-like systems. Unix’s design principles remain relevant, providing a model for creating robust, efficient, and scalable software systems that have stood the test of time.
-
-<!-- [Unix](), first released in 1971, revolutionised OS design with portability, hierarchical file systems, and modularity. -->
-
-- <div style="position: relative; display: inline-block;"> <img src="https://i.namu.wiki/i/af_1VZUEG31QudreEWCK26cD48GtRjNMZs7lZHwt11YpYot2vfLhkNp21lsbmnHGXlUtFVE5C-QrLo_E5EYCI_Q5yqa580UIYd6elP38702QFu3h-OOyInfG3dD3ZbH-lzx9BzYKEi4j4OC_ynE0NA.svg" width="500"> <a href="https://namu.wiki/w/Unix" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
-
-### **3.2. Linux**
-<p style="margin-bottom: 12px;"> </p>
-
-Linux, introduced by Linus Torvalds in 1991, is an open-source operating system inspired by Unix. As a kernel, Linux became the foundation for a wide variety of distributions (distros), each tailored to different use cases. Unlike proprietary systems, Linux’s open-source nature encourages collaboration and innovation, allowing developers worldwide to contribute improvements. It inherits Unix’s modularity and hierarchical file system, making it familiar to those with Unix experience.
-
-Linux is highly adaptable, running on devices ranging from personal computers to servers, smartphones, and embedded systems. Its flexibility, combined with a strong focus on security and stability, has made it a favorite for developers, system administrators, and enterprises. Linux distributions often bundle the Linux kernel with system utilities and applications to form a complete operating system. Popular distros include Ubuntu, Fedora, Debian, and CentOS, each catering to specific audiences, from beginners to advanced users and enterprise environments.
-
-Despite being a descendant of Unix, Linux stands out due to its emphasis on community-driven development. The GPL (General Public License) ensures that Linux remains free to use, modify, and distribute. This has led to its widespread adoption in cloud computing, web hosting, and supercomputing. As a direct competitor to proprietary systems like Windows and macOS, Linux continues to grow, shaping the future of open-source computing.
-
-<!-- [Linux]() and [macOS](), as the main alternatives to Windows, are all decendants of Unix, and so have common on their structure and conventions. || The prior is an open-source OS that has led to the development of  -->
-
-<!-- [Disk operating system]() (DOS) also made a huge impact on personal computing. While DOS provided file systems like FAT12 and FAT16 which users could manage files on disk, directories, and applications through [command-line interfaces]() (CLI), it merely operated on basic hardware components and experienced limitations in memory access (i.e. 640KB), multitasking, and native support for [graphical user interfaces]() (GUI). Microsoft (through acquisition) rebranded it as MS-DOS in 1981, and later introduced a graphical interface with Windows 1.0 layered on top of MS-DOS in 1985. MS-DOS was compatible with IBM PCs in the 1980s, but shortly [Windows]() evolved into a standalone OS in the 1990s. -->
-
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-linux_overview.png" width="400"> <a href="https://www.instagram.com/p/DExccqLTHZo/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
-
-### **3.3. Linux Distro**
-<p style="margin-bottom: 12px;"> </p>
-
-Linux distributions, commonly referred to as distros, are complete operating systems built around the Linux kernel. They bundle system utilities, libraries, and applications to provide a cohesive user experience. Each distribution is tailored to specific user needs, whether it’s for general use, development, enterprise systems, or specialized environments. Popular examples include Ubuntu, known for its user-friendliness and beginner appeal, and Debian, a stable and community-driven distro that serves as the foundation for many others, including Ubuntu itself. Fedora offers cutting-edge software and is often used by developers, while CentOS provides a stable environment for servers.
-
-Enterprise distributions like Red Hat Enterprise Linux (RHEL) and SUSE Linux Enterprise are designed for corporate environments, offering professional support and long-term stability. In contrast, lightweight distros like Arch Linux and Alpine Linux cater to advanced users and specific use cases, such as minimalistic systems or containerized environments. The diversity of Linux distros ensures that users can find a version suited to their technical proficiency and requirements.
-
-The strength of Linux distributions lies in their customizability. Users can tailor the system to their preferences, choosing desktop environments (e.g., GNOME, KDE) or adding specific packages. The package management systems used by distros, such as APT for Debian-based systems or YUM/DNF for Red Hat-based ones, make software installation and updates seamless. This diversity and flexibility underscore the unique appeal of Linux in the computing world.
-
-### **3.4. Filesystem Hierarchy Standard**
-
-The Filesystem Hierarchy Standard (FHS) is a key convention defining the directory structure and layout of Unix-like operating systems. It provides guidelines for organizing files and directories to ensure consistency and predictability across systems. For instance, the root directory (”/”) serves as the base, with standard subdirectories like /bin for essential binaries, /etc for configuration files, and /var for variable data like logs and caches. This standardization simplifies system administration and software development by creating a predictable environment for locating files.
-
-FHS ensures that critical system components are logically separated. For example, /usr houses user-installed software, while /home contains personal files for individual users. Temporary files are stored in /tmp, ensuring they do not interfere with other parts of the system. This separation enhances both security and maintainability, making it easier to back up user data, update system files, or troubleshoot issues.
-
-While not all Unix-like systems strictly adhere to FHS, most Linux distributions follow it closely, ensuring interoperability and simplifying the learning curve for users and administrators. By providing a clear structure, FHS contributes to the reliability and organization of Unix-like systems, reinforcing their reputation for robustness and ease of use.
-
-
-## III
----
-### **2._. CPU Scheduling**
-<p style="margin-bottom: 12px;"> </p>
-
-
-### **2.1. Process Management**
-<p style="margin-bottom: 12px;"> </p>
-
-A process is an execution unit that requires hardware resources, such as CPU time and memory, to function. An OS handles processes by assigning resources and CPU time
-
-	•	Process states (e.g., running, waiting, ready).
-	•	Context switching.
-	•	Interprocess communication (IPC).
-	•	Deadlock handling.
-	•	Process synchronization.
-
-[Process Life Cycle]() introduces process states (e.g., New, Running, Waiting, Terminated) || [Scheduling Algorithms](): Explain scheduling types like Round-Robin, First-Come-First-Served, and Priority-based, emphasizing their impact on performance. || A [thread]() is the smallest unit of ...
- 
-- <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://pravin-hub-rgb.github.io/BCA/resources/sem2/images/process2.svg" width="500"> <a href="https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/unit2/index.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
-
-[Context switching]() refers to ...
-
-- <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://pravin-hub-rgb.github.io/BCA/resources/sem2/images/contextswitching.svg" width="500"> <a href="https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/unit2/index.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
-
-### **2.2. Memory Management**
-<p style="margin-bottom: 12px;"> </p>
-
-The main responsiblities of modern OS includes... [Memory Management](): Explain how the OS allocates, protects, and releases memory across applications, handling both RAM and virtual memory. || [Paging and Segmentation](): Cunks of memory are called pages. Explain these memory management techniques, their differences, and roles in efficient memory use. || [Virtual Memory](): Describe its role in extending physical memory and how the OS handles page replacement policies (e.g., Least Recently Used).
-
-<!-- Memory Allocation:
-	•	When a program requests memory (e.g., using malloc in C), the runtime library typically makes system calls like brk or mmap to ask the OS for memory.
-	•	The OS allocates memory from available resources, keeping track of which parts of memory are free or in use.
-	3.	Paging: If the system runs out of physical memory, the OS may use a swap file on disk to simulate more memory, moving data between RAM and disk as needed. -->
-
-
-<!-- A quick recap from the undergraduate operating systems course: information is grouped into pages in memory, and sometimes, we need to transfer chunks of information from one page to another. This is another hassle we must contend with when transferring information from the CPU to the GPU or vice-versa. 
-
-NVIDIA has a new unified memory feature that does automatic page-to-page transfers between the CPU and GPU for error-free GPU processing when the GPU occasionally runs out of memory. The authors use this feature to allocate paged memory for the optimizer states, which are then automatically evicted to CPU RAM when the GPU runs out of memory and paged back into GPU memory when the memory is needed in the optimizer update step.
-
-An operating system (OS) facilitates the execution of machine code by loading the binary executable into memory, setting up the process environment, and delegating its execution to the CPU. It reads the executable’s format (e.g., ELF, PE, or Mach-O), allocates memory, and initializes resources like the stack and heap. The CPU fetches and executes the machine code instructions directly, while the OS manages system calls, resource allocation, and interruptions to ensure smooth execution. Although the OS doesn’t interpret machine code itself, it plays a critical role in organizing and controlling its execution.
-
-- https://wandb.ai/sauravmaheshkar/QLoRA/reports/What-is-QLoRA---Vmlldzo2MTI2OTc5
-- https://stackoverflow.com/questions/26891413/diff-between-logical-memory-and-physical-memory -->
-
-
-### **2.3. File Management**
-<p style="margin-bottom: 12px;"> </p>
-
-A file is .... Note that a file is a passive storage entity for data, while a program is an active entity designed to manipulate data and perform actions, often using files as part of its operation....
-
-[File System](): Structure and manage data storage on drives, handling file creation, access, and organization. || [File Allocation Methods](): Briefly mention methods like contiguous allocation and inode-based systems. || [Journaling](): Discuss how modern file systems like NTFS and ext4 log changes before making them permanent, enhancing data integrity.
-
-### **2.4. Device Management**
-<p style="margin-bottom: 12px;"> </p>
-
-[Device Management and Drivers](): Role of drivers in enabling communication between OS and hardware devices. || [Plug and Play]() (PnP): Describe how modern OSs automatically detect and configure new devices. -->
-
-<!-- - responsible for memory allocation (stack and data regions); devs should be able to magage mem in heap region (e.g. malloc) -->
-
-<!-- Paging -->
-<!-- User mode (vs kernel model) -->
-<!-- File systems -->
-<!-- System calls -->
-<!-- Multitasking (multi-threading or multi-processing) -->
-
--->
