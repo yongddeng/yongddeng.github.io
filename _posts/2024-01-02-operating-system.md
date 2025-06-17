@@ -8,7 +8,7 @@ use_math: true
 
 # Operating System
 ---
-An operating system, often taken for granted, is less than a century old yet underpins nearly all computing devices today. Understanding the OS is essential for genuine programmers, as software operates within the abstractions and constraints imposed by the system, and one inevitably encounters it when moving from high-level language-specific code down to low-level hardware instructions.
+A computer is ultimately a set of interconnected electronic components. The operating system makes it usable by hiding complexity and offering a programmable interface. Though often taken for granted, the OS is less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions
 
 <!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/index.html -->
 <!-- https://www.jmeiners.com/lc3-vm/#:lc3.c -->
@@ -17,9 +17,6 @@ An operating system, often taken for granted, is less than a century old yet und
 <!-- https://youtu.be/eP_P4KOjwhs?si=gOPQIxLH6cQMk8vq -->
 
 <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/26QPDBe-NB8?si=J8FBjnS8tE8PHY5k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
-
-
-<!-- Once the kernel is successfully loaded, it takes over the full control of ...
 
 <!-- round robin, fifo, ... -->
 
@@ -33,18 +30,16 @@ An operating system, often taken for granted, is less than a century old yet und
 
 In the earliest generation of electronic computers (1940s–50s), machines like the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an [operating system]() (OS) began to take shape in the 1950s with the introduction of [batch processing systems](), such as [GM-NAA I/O]() developed by General Motors for the [IBM 701](). These new systems grouped jobs into batches, automated job transitions, and reduced idle time.
 
-The 1960s marked the emergence of [multiprogramming]() and [time-sharing systems](), which enabled concurrent execution by loading multiple programs into memory and having the CPU rapidly switch between them. This shift supported interactive computing and drove projects such as MIT’s Compatible Time-Sharing System (CTSS) and Multics, which introduced foundational OS features including [hierarchical file systems]() (HFS), [segmented memory](), [dynamic linking](), and user-level abstraction. These advances laid the groundwork for [Unix](), developed in the early 1970s, which emphasised a modular kernel design, hardware abstraction, and multi-user support, while these principles remain central to modern OS architecture.
+The 1960s marked the emergence of [multiprogramming]() and [time-sharing systems]() (TSS), which enabled concurrent execution of multiple programs in RAM by having the CPU rapidly switch between them. This shift supported interactive computing and drove projects such as MIT’s [Multics](), introducing foundational OS features such as [hierarchical file systems]() (HFS), [segmented memory](), [dynamic linking](), and user-level abstraction. These advances laid the groundwork for [Unix]() in the early 1970s, which emphasised a modular kernel design, hardware abstraction, and multi-user support. These principles remain central to modern OS design.
 
 <!-- The spread of [minicomputers](), including [programmed data processors]() (PDPs), helped popularise OS beyond institutional settings. -->
 
 The 1980s ushered in the era of personal computing, shifting OS development from [command-line interfaces]() (CLI) toward [graphical user interfaces]() (GUI) to enhance accessibility for non-technical users. Microsoft introduced [MS-DOS]() in 1981, a single-tasking CLI-based operating system, followed by successive versions of [Windows]() that adopted cooperative and later pre-emptive multitasking. Around the same time, Apple’s [Macintosh OS]() (macOS) brought the GUI into mainstream. In the 1990s, [Linux](), nspired by Unix, emerged as a free and open-source operating system, driving innovation across servers, mobile devices, and embedded systems.
 
-
 <iframe width="500" height="280" src="https://www.youtube.com/embed/nwDq4adJwzM?si=JZexAZMHwrcAvPbN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> <p style="margin-bottom: 15px;"> </p>
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-punch_card.png" width="500"> <a href="https://www.vbforums.com/showthread.php?900608-Punch-cards" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
-<!-- Apparently, the maximum utilisation of computer hardware is challenging since a computer is just a set of metal components, each has a unique and complex design, that are being wired up. Only the level of abstraction achieved by the operating system's kernel can free up users because it is relatively easier to communicate with the OS when borrowing compute power from hardware. Thereby we define a modern [operating system]() (OS) as an intermediary program which resides in RAM and manages hardware resources for its users and their applications through its kernel and system programs.  -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-punch_card.png" width="500"> <a href="https://www.vbforums.com/showthread.php?900608-Punch-cards" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
 <!-- History of OS... https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/intro/index.html -->
 
