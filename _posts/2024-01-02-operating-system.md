@@ -8,7 +8,7 @@ use_math: true
 
 # Operating System
 ---
-A computer is ultimately a set of interconnected electronic components. The operating system makes it usable by hiding complexity and offering a programmable interface. Though often taken for granted, the OS is less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions
+A computer is ultimately a set of interconnected peripheral. The [operating system](https://www.youtube.com/watch?v=26QPDBe-NB8) (OS) makes it usable by hiding complexity and offering a programmable interface. Though often taken for granted, the OS is less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions
 
 <!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/index.html -->
 <!-- https://www.jmeiners.com/lc3-vm/#:lc3.c -->
@@ -28,7 +28,7 @@ A computer is ultimately a set of interconnected electronic components. The oper
 ### **1.1. The Origin: Punch Card**
 <p style="margin-bottom: 12px;"> </p>
 
-In the earliest generation of electronic computers (1940s–50s), machines like the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an [operating system]() (OS) began to take shape in the 1950s with the introduction of [batch processing systems](), such as [GM-NAA I/O]() developed by General Motors for the [IBM 701](). These new systems grouped jobs into batches, automated job transitions, and reduced idle time.
+In the earliest generation of electronic computers (1940s–50s), machines such as the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an operating system began to take shape in the 1950s with the introduction of [batch processing systems](), such as [GM-NAA I/O]() developed by General Motors for the [IBM 701](). These new systems grouped jobs into batches, automated job transitions, and reduced idle time.
 
 The 1960s marked the emergence of [multiprogramming]() and [time-sharing systems]() (TSS), which enabled concurrent execution of multiple programs in RAM by having the CPU rapidly switch between them. This shift supported interactive computing and drove projects such as MIT’s [Multics](), introducing foundational OS features such as [hierarchical file systems]() (HFS), [segmented memory](), [dynamic linking](), and user-level abstraction. These advances laid the groundwork for [Unix]() in the early 1970s, which emphasised a modular kernel design, hardware abstraction, and multi-user support. These principles remain central to modern OS design. <!-- The spread of [minicomputers](), including [programmed data processors]() (PDPs), helped popularise OS beyond institutional settings. -->
 
