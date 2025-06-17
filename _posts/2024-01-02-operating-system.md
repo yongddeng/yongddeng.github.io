@@ -8,7 +8,7 @@ use_math: true
 
 # Operating System
 ---
-An operating system, that is often taken for granted, has existed for less than a century yet underpins nearly all computing devices today. Understanding the OS is indispensable for genuine programmers, as software programs do not run independently but operate within the abstractions and constraints imposed by the system. Nevertheless, one inevitably encounters the OS when moving from high-level language-specific code down to low-level hardware instructions.
+An operating system, often taken for granted, has existed for less than a century yet underpins nearly all computing devices today. Understanding the OS is essential for genuine programmers, as software operates within the abstractions and constraints imposed by the system. One inevitably encounters the OS when moving from high-level language-specific code down to low-level hardware instructions.
 
 <!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/index.html -->
 <!-- https://www.jmeiners.com/lc3-vm/#:lc3.c -->
@@ -39,7 +39,7 @@ The 1960s saw the birth of [multiprogramming]() and [time-sharing systems](), wh
 
 The 1980s ushered in the personal computing era, where OS development became focused on the [graphical user interfaces]() (GUI) over the traditional [command-line interfaces]() (CLI). Microsoft introduced [MS-DOS]() in 1981, followed by [Windows]() in subsequent years, ultimately becoming the dominant OS in the consumer market. Around the same time, Apple’s [Macintosh OS]() (macOS) brought GUI to the mainstream. Meanwhile, [Linux](), inspired by [Unix](), emerged in the 1990s as a free, open-source OS, fueling innovation across servers, mobile devices, and embedded systems.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/nwDq4adJwzM?si=JZexAZMHwrcAvPbN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="500" height="280" src="https://www.youtube.com/embed/nwDq4adJwzM?si=JZexAZMHwrcAvPbN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> <p style="margin-bottom: 12px;"> </p>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-punch_card.png" width="500"> <a href="https://www.vbforums.com/showthread.php?900608-Punch-cards" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
@@ -69,7 +69,7 @@ To interact with hardware or perform privileged operations, user-space software 
 
 Because these interfaces and behaviors vary across operating systems, most programs are OS-specific by default, and so they depend on a particular system’s binary format (e.g., ELF on Linux, PE on Windows), system call conventions, directory structure, and available runtime libraries. Cross-platform compatibility is possible but requires adhering to standardised APIs (such as [Portable Operating System InterFace for Unix](https://velog.io/@bjk1649/POSIX%EB%9E%80) (POSIX)) or using portability layers (e.g. JVM or Python interpreter). As a result, developers often write and compile programs with a specific OS target in mind, reinforcing the OS’s role as the defining execution context for all software.
 
-- <iframe width="560" height="315" src="https://www.youtube.com/embed/H4SDPLiUnv4?si=ml8bT-7fhG9_0xkU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+- <iframe width="500" height="280" src="https://www.youtube.com/embed/H4SDPLiUnv4?si=ml8bT-7fhG9_0xkU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> <p style="margin-bottom: 12px;"> </p>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-dual_mode.png" width="500"> <a href="https://velog.io/@ongddree/%EC%9A%B4%EC%98%81%EC%B2%B4%EC%A0%9C-%EC%9D%B4%EC%A4%91-%EB%8F%99%EC%9E%91-%EB%AA%A8%EB%93%9COS-dual-mode-operation" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>\ -->
  
