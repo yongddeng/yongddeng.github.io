@@ -69,9 +69,9 @@ While an API defines the functions and data structures a program uses to communi
 
 For instance, a simple file write operation might invoke *write()* in Linux, which passes [file descriptors]() and [buffers]() to the kernel via a syscall number stored in a specific register (rax in x86-64), while on Windows, a similar operation uses *WriteFile()* with a different ABI and kernel interface (i.e. syscall convension). Cross-platform compatibility thus requires adherence to standardised APIs like [portable operating system interface for unix]() (POSIX) or the use of portability layers such as the JVM or Python interpreter. Consequently, developers typically target a specific OS during compilation and linking, further reinforcing the OS as the definitive execution substrate and interface boundary for all software.
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-api_vs_abi.png" width="500"> <a href="https://kuleuven-diepenbeek.github.io/osc-course/ch1-introos/intro-os/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div>
- 
- 
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-api_vs_abi.png" width="500" height="670"> <a href="https://stackoverflow.com/questions/3784389/difference-between-api-and-abi" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+
+
 ### **1.3. Shell & Kernel**
 <p style="margin-bottom: 12px;"> </p>
 
