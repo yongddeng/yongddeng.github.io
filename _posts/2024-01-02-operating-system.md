@@ -40,7 +40,7 @@ A modern OS enforces a strict seperation between [user mode]() (unprivileged) an
 
 <!-- In practice, to perform privileged operations, user-space programs invoke [system calls](), which are well-defined control transfer routines that trigger a transition from user mode to kernel mode via a software interrupt, trap instruction, or CPU-specific syscall entry point.  -->
 
-As illustrated, the [application programming interface]() (API) provided by standard libraries (e.g. libc on Unix-like systems) abstracts the complexity of invoking system calls directly from user mode. That is, when a user-space program requires privileged functionality (e.g. spawning a process), it calls a high-level function via the API that internally issues one or more [system calls](). These serve as well-defined entry points into the kernel implemented via software interrupts, trap instructions, or CPU-specific instructions. The controlled interaction is preferred as it ensures that only trusted kernel code can access hardware or alter protected system state. <!-- This is typically implemented via a software interrupt, trap instruction, or CPU-specific instruction such as the syscall instruction on x86-64 -->
+As drawn below, the [application programming interface]() (API) provided by standard libraries (e.g. libc on Unix-like systems) abstracts the complexity of invoking system calls directly from user mode. That is, when a user-space program requires privileged functionality (e.g. spawning a process), it leverages a high-level API routine which internally issues one or more [system calls](). These serve as well-defined entry points into the kernel implemented through software interrupts, trap instructions, or CPU-specific instructions. This controlled interaction is preferred as it ensures that only trusted kernel code can access hardware or alter protected system state. <!-- This is typically implemented via a software interrupt, trap instruction, or CPU-specific instruction such as the syscall instruction on x86-64 -->
 
 In contrast to the high-level API, which defines data structures and function signatures, the [application binary interface](https://stackoverflow.com/questions/3784389/difference-between-api-and-abi) (ABI) governs how a compiled program communicates with the OS at the binary level. It specifies calling conventions (i.e. how params are sent from the program to the OS - typically via registers or the stack), register usage, and system call invocation method. ABI differences also encompass executable formats - {Linux: [executable and linkable format]() (ELF), Windows: [portable executable]() (PE)}, directory layouts, process models, and available runtime libraries. As a result, most programs are not only architecture-specific but also OS-dependent.
 
@@ -50,8 +50,8 @@ In Linux on [x86-64]() (i.e. the Intel and AMD CPU architecture), for instance, 
 
 ```
 section .data
-    msg		db	"Hello", 10		; "Hello\n"
-    msg_len	equ	$ - msg			; Length of the message
+    msg		db	"Hello", 10	; "Hello\n"
+    msg_len	equ	$ - msg		; Length of the message
 
 section .text
     global _start
@@ -72,9 +72,11 @@ _start:
 ### **1.3. Shell & Kernel**
 <p style="margin-bottom: 12px;"> </p>
 
-The operating system acts as an interface between user-level applications and hardware, and this mediation is chiefly realized through two core components: the shell and the kernel. The [shell]() is the outermost user-facing layer of the OS, providing a command-line or graphical interface through which users interact with the system. When a user issues a command—like listing files, launching a program, or moving data—the shell parses the input, interprets it, and forwards appropriate requests to the kernel. Popular shells include Bash (Bourne Again SHell), Zsh, and Fish for command-line interfaces, and graphical shells like GNOME Shell or Windows Explorer for GUI-based environments. Shells are themselves system programs running in user space, offering convenience and abstraction without requiring users to directly invoke low-level operations.
+Thus, interaction with the operating system kernel occurs through two primary interfaces: through standard libraries that encapsulate system calls, and through the shell as a user-facing command interpreter. In both cases, transitions from user mode to kernel mode are necessary to execute privileged operations. Although dual-mode operation is enforced by hardware (e.g. through the mode bit), the kernel and shell themselves are implemented in software.
 
-The [kernel](), in contrast, is the privileged core of the OS. It executes in kernel mode and is solely responsible for managing the system’s hardware resources—CPU, memory, storage, and I/O devices—ensuring secure and efficient operation of all processes. It handles process scheduling, memory management, file systems, device drivers, and inter-process communication (IPC). ... For example, Linux first operates on ...
+The [shell] is a user-space command interpreter which serves as the outermost interface of the OS. It parses commands (e.g. *ls*, *ps*, *cat*), resolves the appropriate executable, and initiates execution using system calls such as *fork()*, *execve()*, and *wait4()*. Advanced CLI shells (e.g. [Bourne Again Shell]() (Bash), [Zsh](), and [Fish]()) support scripting, I/O redirection, job control, and process substitution. Graphical environments (e.g. GNOME, Windows Explorer) offer visual frontends to the same kernel interfaces. Note that [terminal emulators]() (e.g. macOS Terminal, GNOME Terminal) merely host shell processes and should not be conflated with the shell itself.
+
+The [kernel](), running at the highest privilege level, is the core of the OS that mediates all access to hardware and protected resources. It is responsible for CPU scheduling, memory management, [inter-process communication]() (IPC), device control, and many others. Its architectures indeed vary. [Monolithic kernels]() (e.g. Linux)  integrate device drivers and system services into a single binary for performance. [Microkernels]() (e.g. seL4) retain only essential services (e.g. scheduling, IPC) in kernel space and delegate the rest to user space, enhancing modularity and fault isolation at the cost of overhead. [Hybrid kernels]() (e.g. XNU in macOS, NT in Windows) balance these approaches. Kernel design directly affects system performance, fault tolerance, and extensibility.
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="https://minnie.tuhs.org/CompArch/Lectures/Figs/unixarch.gif" width="500"> <a href="https://minnie.tuhs.org/CompArch/Lectures/week07.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
@@ -86,7 +88,6 @@ The [kernel](), in contrast, is the privileged core of the OS. It executes in ke
 
 <!-- https://velog.io/@juliejung98/%EC%89%98%EA%B3%BC-%EC%BB%A4%EB%84%90-Shell-Kernel -->
 
-Kernels can be classified into several architectures. A [monolithic kernel]() (e.g., Linux) includes all core services in a single large binary, providing fast performance through tight integration but making modularity more challenging. A [microkernel]() (e.g., MINIX, QNX) keeps only essential services in kernel space (such as scheduling and IPC), delegating others (like drivers and filesystems) to user space, which improves fault tolerance at the cost of performance. There are also [hybrid kernels]() (e.g., Windows NT, XNU in macOS), which blend aspects of both, and exokernels, which expose low-level hardware interfaces to user space for maximum customizability and minimal abstraction.
 
 <!-- https://www.josehu.com/technical/2021/05/24/os-kernel-models.html -->
 
@@ -97,10 +98,12 @@ Kernels can be classified into several architectures. A [monolithic kernel]() (e
 <!-- - <div style="position: relative; display: inline-block;"> <img src="https://kuleuven-diepenbeek.github.io/osc-course/img/OS-structure2.svg" width="500" height="140"> <a href="https://kuleuven-diepenbeek.github.io/osc-course/ch1-introos/intro-os/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
 
 
+
 ### **1.4. System Call**
 <p style="margin-bottom: 12px;"> </p>
 
-
+<!-- strace to monitor system calls -->
+<!-- https://www.youtube.com/watch?v=19_vVxmTfPg -->
 System calls in modern OS are the primary mechanism by which user-space programs request services from the kernel. Because direct access to hardware and critical resources is prohibited in user mode, programs must rely on the kernel to perform operations such as file I/O, memory allocation, process creation, and network communication. These requests are issued through system calls, which act as controlled entry points into kernel space. High-level programming interfaces provided by standard libraries (e.g. [libc](), [glibc](), or language runtimes such as Python’s *os* module) abstract these calls into user-friendly functions, translating them into low-level instructions that prepare the necessary registers and trigger the transition into kernel mode.
 
 This transition is supported by [dual-mode]() CPU operation, which enforces a strict boundary between user mode and kernel mode. When a system call is invoked—on x86-64, typically using the syscall instruction—the processor switches from [user mode]() to [kernel mode](), saving the user context and transferring control to a predefined system call handler in the kernel. The system call number (usually passed in a designated register) determines which kernel routine to execute, and the accompanying arguments are validated for correctness and security. After the operation completes, the kernel restores the original execution context and returns to user mode, resuming the program. This architecture ensures that while applications can access powerful system capabilities, they do so through a carefully controlled interface that preserves system integrity, prevents unauthorized access, and isolates faults.
@@ -122,6 +125,8 @@ System calls can be grouped into several broad categories, reflecting the types 
 <!-- - <iframe width="500" height="280" src="https://www.youtube.com/embed/eP_P4KOjwhs?si=wDkkO45KIt-r8pln" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-dual_mode.png" width="500"> <a href="https://velog.io/@ongddree/%EC%9A%B4%EC%98%81%EC%B2%B4%EC%A0%9C-%EC%9D%B4%EC%A4%91-%EB%8F%99%EC%9E%91-%EB%AA%A8%EB%93%9COS-dual-mode-operation" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>\ -->
+</div>
+
 
 <!-- 
 ### **1.4. OS Virtualisation**
@@ -148,3 +153,7 @@ OS-level virtualization, exemplified by containers like Docker, isolates applica
 
 ### **2.1. Unix**
 todo...
+
+### **2.1. Linux**
+### **2.1. Linux’s FHS**
+### **2.1. Linux Distributions**
