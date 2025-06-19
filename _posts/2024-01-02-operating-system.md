@@ -59,13 +59,36 @@ The 1980s ushered in the era of personal computing, shifting OS development from
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="https://429151971640327878.weebly.com/uploads/4/6/9/9/46999663/634347_orig.png" width="500"> <a href="https://429151971640327878.weebly.com/blog/introduction-to-operating-system" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
 
-While an API defines the functions and data structures a program uses to communicate with the OS, the [application binary interface](https://stackoverflow.com/questions/3784389/difference-between-api-and-abi) (ABI) governs how these interactions are encoded at the binary level. It includes details such as calling conventions (how parameters are passed and results returned), register usage, and system call invokation mechanism. ABI differences extend further to executable formats - {Linux: [executable and linkable format]() (ELF), Windows: [portable executable]() (PE)}, directory layouts, process management conventions, and available runtime libraries. Thus most programs are not only tied to specific hardware architectures but also the OS.
+While an API defines the functions and data structures a program uses to communicate with the OS, the [application binary interface](https://stackoverflow.com/questions/3784389/difference-between-api-and-abi) (ABI) governs how these interactions are encoded at the binary level. It includes details such as calling conventions (how parameters are passed and results returned), register usage, and [system call]() invocation mechanism. ABI differences extend further to executable formats - {Linux: [executable and linkable format]() (ELF), Windows: [portable executable]() (PE)}, directory layouts, process management conventions, and available runtime libraries. As a result, most programs are not only architecture-specific but also OS-dependent.
 
-For instance, a file write in Linux may call *write()*, that is translated into a [system call]() following the [x86-64]() (i.e. the 64-bit architecture used by Intel and AMD CPUs) calling convention. Specifically, the *system call number* which identifies the requested kernel service is placed in the [rax](https://www.cs.uaf.edu/2017/fall/cs301/lecture/09_11_registers.html) register, while the arguments (*file descriptor*, *buffer pointer*, *byte count*) are passed in ([rdi](), [rsi](), [rdx]()), respectively. In contrast, Windows uses *WriteFile()* with a different ABI and system call interface, and cross-platform compatibility relies on standard APIs such as the [portable operating system interface for unix]() (POSIX), or the portability layers such as the JVM or Python interpreter.
+<!-- In Linux on x86-64, for instance, a system call is invoked by placing the syscall number in the rax register and arguments in rdi, rsi, rdx, etc., then executing the syscall instruction. This syscall interface is one part of the ABI. Different platforms expose different ABIs, which extend beyond calling conventions to include executable formats (e.g., ELF on Linux, PE on Windows), directory layout conventions, process models, and runtime libraries. As a result, most programs are not only architecture-specific but also OS-dependent. -->
 
-<!-- That is, system calls, memory models, and binary formats differ across operating systems,  -->
+<!-- The relationship among APIs, syscalls, and the ABI can be understood as a layered interface between user programs and the operating system kernel. At the highest level, user-space programs invoke functions provided by standard libraries—such as the C standard library—which expose familiar APIs like write() or open(). These library functions internally rely on system calls, which are the formal entry points into kernel space, each identified by a syscall number. The ABI, in turn, specifies the low-level conventions required to perform these syscalls: how arguments are passed (e.g., which registers to use), how return values are handled, and how control is transferred to the kernel. While APIs provide portability and usability, and syscalls provide access to kernel features, the ABI ensures binary-level consistency across the hardware and OS boundary. -->
 
 - <div style="position: relative; display: inline-block; background-color: white;"> <img src="../assets/blog/2024-01-02-api_vs_abi.png" width="500"> <a href="https://www.sciencedirect.com/topics/computer-science/application-binary-interface" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+
+In Linux on [x86-64]() (i.e. the Intel and AMD CPU architecture), for instance, when calling *write()* through the C standard library API to output data to a file, a predefined system call that executes in kernel mode to perform the actual operation is invoked by placing the *syscall number* (e.g. 1) in the [rax](https://www.cs.uaf.edu/2017/fall/cs301/lecture/09_11_registers.html) register, while the args (*file descriptor*, *buffer pointer*, *byte count*) are passed accordingly in [rdi](), [rsi](), [rdx](). Whereas Windows uses *WriteFile()* with a different ABI and system call interface. Cross-platform compatibility relies on standard APIs such as the [portable operating system interface for unix]() (POSIX), or the portability layers such as the JVM or Python interpreter.
+
+```
+section .data
+    msg     db  "Hello", 10       ; "Hello\n"
+    msg_len equ $ - msg           ; Length of the message
+
+section .text
+    global _start
+
+_start:
+    mov     rax, 1          ; syscall number for write
+    mov     rdi, 1          ; file descriptor (stdout)
+    mov     rsi, msg        ; pointer to buffer
+    mov     rdx, msg_len    ; number of bytes
+    syscall                 ; invoke kernel
+
+    ; Exit the program (syscall 60)
+    mov     rax, 60         ; syscall number for exit
+    xor     rdi, rdi        ; exit code 0
+    syscall
+```
 
 ### **1.3. Shell & Kernel**
 <p style="margin-bottom: 12px;"> </p>
