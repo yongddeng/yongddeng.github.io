@@ -22,10 +22,10 @@ A computer is ultimately a set of interconnected peripheral. The [operating syst
 
 ## I
 ---
-### **1.1. The Origin: Punch Card**
+### **1.1. The Origin (Punch Card)**
 <p style="margin-bottom: 12px;"> </p>
 
-In the earliest generation of electronic computers (1940s–50s), machines such as the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an operating system began to take shape in the 1950s with the introduction of [batch processing systems](), such as [GM-NAA I/O]() developed by General Motors for the [IBM 701](). These new systems grouped jobs into batches, automated job transitions, and reduced idle time.
+In the earliest generation of electronic computers (1940s–50s), machines such as the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an operating system began to take shape in the 1950s with the introduction of [batch processing systems](). In particular, General Motors developed [GM-NAA I/O]() for the [IBM 701]() (aka. defense calculator) and this new system grouped jobs into batches, automated job transitions, and hence reduced idle time.
 
 The 1960s saw the rise of [multiprogramming]() and [time-sharing systems]() (TSS), enabling [concurrent execution]() of programs in memory by having the CPU rapidly switch between them. This shift supported interactive computing and drove projects such as MIT’s [Multics](), which introduced hierarchical file systems (HFS), segmented memory, dynamic linking, and user-level abstraction. While Multics proved too complex for its time, it directly inspired [Unix](), developed at AT&T Bell Labs in the early 1970s as a simpler system built around modular kernel design, hardware abstraction, and multi-user support. These principles remain central to modern OS design. <!-- The spread of [minicomputers](), including [programmed data processors]() (PDPs), helped popularise OS beyond institutional settings. -->
 
@@ -59,13 +59,13 @@ section .text
 _start:
     mov		rax, 1			; syscall number for write
     mov		rdi, 1			; file descriptor (stdout)
-    mov		rsi, msg		; pointer to buffer
-    mov		rdx, msg_len	; number of bytes
-    syscall					; invoke kernel
+    mov		rsi, msg			; pointer to buffer
+    mov		rdx, msg_len		; number of bytes
+    syscall						; invoke kernel
 
     ; Exit the program (syscall 60)
     mov		rax, 60			; syscall number for exit
-    xor		rdi, rdi		; exit code 0
+    xor		rdi, rdi			; exit code 0
     syscall
 ```
 
