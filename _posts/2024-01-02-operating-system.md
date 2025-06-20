@@ -22,7 +22,7 @@ A computer is ultimately a set of interconnected peripheral. The [operating syst
 
 ## I
 ---
-### **1.1. The Origin (Punch Card)**
+### **1.1. Overview**
 <p style="margin-bottom: 12px;"> </p>
 
 In the earliest generation of electronic computers (1940s–50s), machines such as the ENIAC were manually programmed in absolute machine code, with no system software to manage resources or automate tasks. Engineers operated these computers directly using [switches]() and [punch cards](), and programs were executed one at a time. The concept of an operating system began to take shape in the 1950s with the introduction of [batch processing systems](). In particular, General Motors developed [GM-NAA I/O]() for the [IBM 701]() (aka. defense calculator) and this new system grouped jobs into batches, automated job transitions, and hence reduced idle time.
@@ -74,7 +74,7 @@ _start:
 
 Thus, interaction with the operating system kernel occurs through two primary interfaces: through standard libraries that encapsulate system calls, and through the [shell]() as a user-facing command interpreter. In both cases, transitions from user mode to kernel mode are necessary to execute privileged operations. Although dual-mode operation is enforced by hardware (e.g. through the mode bit), the kernel and shell themselves are implemented in software. While the shell serves as the outermost interface of the OS, the [kernel](), running at the highest privilege level, is the core of the OS that mediates all access to hardware and protected resources
 
-Advanced CLI shells (e.g. [Bourne Again Shell]() (Bash), [Zsh](), and [Fish]()) support scripting, I/O redirection, job control, and process substitution. They parse commands (e.g. *ls*, *ps*, *cat*), resolves the appropriate executable, and initiates execution using system calls such as *fork()*, *exec()*, and *wait()*. Notice that [terminal emulators]() (e.g. macOS Terminal, GNOME Terminal) merely host shell processes and should not be conflated with the shell itself. Graphical environments (e.g. [GNOME](), [Windows Explorer]()) offer visual frontends to the same kernel interfaces. 
+Advanced CLI shells (e.g. [Bourne Again Shell]() (Bash), [Zsh](), and [Fish]()) support scripting, I/O redirection, job control, and process substitution. They parse commands (e.g. ```ls```, `ps`, *cat*), resolves the appropriate executable, and initiates execution using system calls such as *fork()*, *exec()*, and *wait()*. Notice that [terminal emulators]() (e.g. macOS Terminal, GNOME Terminal) merely host shell processes and should not be conflated with the shell itself. Graphical environments (e.g. [GNOME](), [Windows Explorer]()) offer visual frontends to the same kernel interfaces. 
 
 The kernel is responsible for CPU scheduling, memory management, [inter-process communication]() (IPC), device control, and many others. Its architectures indeed vary. [Monolithic kernels]() (e.g. Linux)  integrate device drivers and system services into a single binary for performance. [Microkernels]() (e.g. seL4) retain only essential services (e.g. scheduling, IPC) in kernel space and delegate the rest to user space, enhancing modularity and fault isolation at the cost of overhead. [Hybrid kernels]() (e.g. XNU in macOS, NT in Windows) balance these approaches. Kernel design directly affects system performance, fault tolerance, and extensibility.
 
