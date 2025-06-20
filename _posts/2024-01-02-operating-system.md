@@ -95,10 +95,8 @@ While the kernel is responsible for CPU scheduling, memory management, IPC, devi
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="https://kuleuven-diepenbeek.github.io/osc-course/img/OS-structure2.svg" width="500" height="140"> <a href="https://kuleuven-diepenbeek.github.io/osc-course/ch1-introos/intro-os/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
 
-### **1.4. System Call**
+### **1.4. System Call (TODO)**
 <p style="margin-bottom: 12px;"> </p>
-
-todo...
 
 <!-- - <iframe width="500" height="280" src="https://www.youtube.com/embed/H4SDPLiUnv4?si=ml8bT-7fhG9_0xkU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
@@ -149,20 +147,25 @@ OS-level virtualization, exemplified by containers like Docker, isolates applica
 
 ## II
 ---
-### **2.1. Unix**
+### **2.1. Unix (WIP)**
 <p style="margin-bottom: 12px;"> </p>
 
-It were [Ken Thompson]() and [Dennis Ritchie]() at Bell Labs who began building a lightweight OS on a spare [PDP-7]() minicomputer in 1969. The system, originally named “Unics” (i.e. a pun on Multics, standing for “Uniplexed Information and Computing Service”), stripped away unnecessary complexity and introduced foundational design principles: a [hierarchical file system]() (HFS), segmented memory, [dynamic linking](), a simple API for system calls, and a clear separation between kernel space and user-level utilities.
+It was [Ken Thompson]() and [Dennis Ritchie]() at Bell Labs who began building a lightweight OS on a spare [PDP-7]() minicomputer in 1969. The system, originally named “Unics” (i.e. a pun on Multics, standing for “Uniplexed Information and Computing Service”), stripped away unnecessary complexity and introduced foundational design principles: a [hierarchical file system]() (HFS), segmented memory, [dynamic linking](), a simple API for system calls, and a clear separation between kernel space and user-level utilities.
 
-A key innovation was Unix’s uniform treatment of I/O. Everything in Unix, including files, devices, pipes, even IPC endpoints, is treated as a file and represented by a file descriptor. This “everything is a file” abstraction, combined with the use of plain text for system configuration and output, made the system highly scriptable and composable. Small, single-purpose utilities could be chained together using pipes (\|) to perform complex tasks, promoting a design philosophy based on reusable components. This simplicity made Unix dramatically more flexible than its predecessors.
+A key innovation was Unix’s uniform treatment of I/O. Everything in Unix, including files, devices, pipes, even IPC endpoints, is treated as a file and represented by a [file descriptor](). This “everything is a file” abstraction, combined with the use of plain text for system configuration and output, made the system highly scriptable and composable. Small, single-purpose utilities could be chained together using pipes (\|) to perform complex tasks, promoting a design philosophy based on reusable components. This simplicity made Unix dramatically more flexible than its predecessors.
 
 As Unix evolved, Thompson and Ritchie developed the C programming language to address the need for a portable system-level language. The second major rewrite of Unix in the early 1970s, now in C, allowed it to be compiled and run on a wide range of hardware platforms. This separation from machine-dependent assembly code was revolutionary. Unix became the first widely portable operating system, and C became the de facto language for system-level programming. Both were shaped by the same team at Bell Labs, and their co-evolution laid the groundwork for modern OS development.
 
 - <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://swcarpentry.github.io/shell-novice/fig/standard-filesystem-hierarchy.svg" width="500" height="300"> <a href="https://swcarpentry.github.io/shell-novice/reference.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
-Although Bell Labs owned Unix, its parent company AT&T was a regulated monopoly under the 1934 Communications Act and a 1956 consent decree. This prohibited AT&T from commercialising computing products. As a result, Unix was licensed freely to universities and research institutions in _____, ________, _____. Blessedly, NAME1 and NAME2 at the University of California, Berkeley developed [Berkeley software distribution]() (BSD) as a _______. It introduced key enhancements such as a [TCP/IP]() stack, job control, and improved virtual memory. These features made BSD a foundation for many commercial Unix variants, including [SunOS](), [HP-UX](), and [AIX]().
 
-However, as always, vendor-specific extensions led to fragmentation across the Unix ecosystem. To mitigate this, the [IEEE]() introduced the [portable operating system interface]() (POSIX) standard in the late 1980s. POSIX defined a consistent set of APIs and command-line behaviours, allowing software to be portable across Unix-like systems. While not eliminating all incompatibilities, POSIX significantly unified the Unix landscape. Its influence remains strong in modern systems like Linux and macOS.
+<!-- Although Bell Labs owned Unix, its parent company AT&T was a regulated monopoly under the 1934 Communications Act and a 1956 consent decree. This prohibited AT&T from commercialising computing products. As a result, Unix was licensed freely to universities and research institutions. Blessedly, NAME1 and NAME2 at the University of California, Berkeley developed [Berkeley software distribution]() (BSD) as a _______. It introduced key enhancements such as a [TCP/IP]() stack, job control, and improved virtual memory. These features made BSD a foundation for many commercial Unix variants, including [SunOS](), [HP-UX](), and [AIX](). -->
+
+Building on the AT&T Unix source code, graduate student [Bill Joy]() from the [Computer Systems Research Group]() (CSRG) launched the [Berkeley software distribution]() (BSD) in 1978. BSD gradually evolved into a distinct OS, and played a pioneering role in shaping modern networked computing. With funding from [DARPA](), BSD developers integrated key networking features into the system, most notably the first implementation of the [TCP/IP]() protocol stack (i.e. a foundational component of today’s [internet]()). Over successive releases, the codebase diverged so substantially from AT&T Unix that, by the late 1980s, only a small fraction of original AT&T code remained. 
+
+Permissive licence of BSD, combined with its technical maturity, also made it highly attractive to commercial vendors. Variants such as SunOS, DEC Ultrix, and NeXTSTEP built directly on BSD foundations, as did later research and production systems in academia. BSD’s legacy lives on in its open-source descendants: FreeBSD, NetBSD, OpenBSD, and DragonFly BSD. These projects have since formed the basis for numerous modern systems, including Apple’s [Darwin](), which underpins macOS and iOS, and parts of Microsoft Windows’ networking stack. BSD-derived code has also appeared in consumer devices ranging from routers to games consoles such as PS5. 
+
+Nevertheless, vendor-specific extensions led to fragmentation across the Unix ecosystem. To mitigate this, the [IEEE]() introduced the [portable operating system interface]() (POSIX) standard in the late 1980s. POSIX defined a consistent set of APIs and command-line behaviours, allowing software to be portable across Unix-like systems. While not eliminating all incompatibilities, POSIX significantly unified the Unix landscape. ...
 
 <!-- - <iframe width="500" height="280" src="https://www.youtube.com/embed/HADp3emVABg?si=slBlmD7_ktsw0__u" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
