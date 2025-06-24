@@ -210,7 +210,7 @@ The [CPU scheduler](), a core kernel component, handles transitions between mutu
 
 - ...
 
-[Multiprocessing]() refers to the concurrent execution of multiple processes, either across distinct CPU cores or through rapid time-slicing on a single core. This model is extensively used to exploit hardware parallelism in compute-heavy domains such as machine learning. For instance, PyTorch’s *DataLoader* uses the Python multiprocessing module to spawn workers that fetch and transform batches in parallel. Since processes do not share memory by default, [inter-process communication]() (IPC) mechanisms such as pipes, UNIX domain [sockets](), and SMEM are required to coordinate work. SMEM enables low-latency access to common data structures, such as tensors in CUDA IPC or NumPy arrays via *multiprocessing.shared_memory*, while [message passing]() offers a safer abstraction for structured communication. <!-- Multiprocessing is particularly beneficial for parallel model evaluation, distributed training pipelines, or data augmentation at scale. -->
+[Multiprocessing]() refers to the concurrent execution of multiple processes across CPU cores or via time-slicing on a single core. This is widely used to harness parallelism in compute-intensive domains. Since processes are memory-isolated, [inter-process communication]() (IPC) such as pipes, UNIX domain [sockets](), and SMEM is essential. For example, PyTorch’s *DataLoader* uses Python’s *multiprocessing* module to spawn worker processes that load and transform batches concurrently. In particular, SMEM enables low-latency access to shared data such as CUDA tensors or NumPy arrays, while [message passing]() offers a safer abstraction for structured communication.
 
 - ...
 
@@ -222,6 +222,6 @@ In Python, true multithreading is limited by the Global Interpreter Lock (GIL), 
 
 Choosing between threads and processes depends on workload characteristics. I/O-bound tasks—such as data ingestion, network communication, or logging—can benefit from multithreading, particularly when coupled with non-blocking I/O and GIL-free libraries. Conversely, CPU-bound workloads—such as gradient computations, dataset pre-processing, or inference across CPU cores—typically demand multiprocessing despite its higher memory footprint and coordination cost. In production ML systems, process-based concurrency, shared memory, and remote procedure calls (RPC) are frequently combined to scale workloads across CPU cores, GPU devices, or even nodes in a distributed cluster. As such, process and thread management form a cornerstone of both system-level operating systems design and large-scale machine learning infrastructure.
 
-### **3.2. Memory Management**
+<!-- ### **3.2. Memory Management**
 ### **3.3. File Management**
-### **3.4. Device Management**
+### **3.4. Device Management** -->
