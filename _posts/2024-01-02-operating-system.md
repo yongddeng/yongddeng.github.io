@@ -44,6 +44,7 @@ While APIs define the data structures and function signatures available to progr
 
 - <div style="position: relative; display: inline-block; background-color: white;"> <img src="../assets/blog/2024-01-02-api_vs_abi.png" width="500"> <a href="https://www.sciencedirect.com/topics/computer-science/application-binary-interface" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
+
 On Linux running on [x86-64]() (i.e. the Intel and AMD CPU architecture), for instance, when calling *write()* via the C standard library to output data to a file, the predefined system call which executes in kernel mode to perform the actual operation is invoked by placing the "syscall number" (e.g. 1) in the [rax](https://www.cs.uaf.edu/2017/fall/cs301/lecture/09_11_registers.html) register, and arguments ("file descriptor", "buffer pointer", "byte count") are passed via [rdi](), [rsi](), and [rdx](), respectively. In contrast, Windows uses *WriteFile()* with a distinct ABI and system call interface. Cross-platform compatibility relies on standard APIs such as POSIX or the use of portability layers such as the JVM or Python interpreter.
 
 ```
@@ -72,7 +73,7 @@ _start:
 
 Accordingly, interaction with the OS kernel often occurs through two common interfaces: i) standard libraries that wrap system calls; ii) [shells]() which act as command interpreters; In both cases, transitions from user mode to kernel mode are necessary for any privileged operations. Specifically, the [kernel](), which operates at the highest privilege level, forms the operating system's core and mediates all access to hardware and protected resources, while the shell serves as the outermost user-facing interface. Note that the dual-mode architecture is enforced by hardware (e.g. using a mode bit), but both the kernel and shell themselves are implemented in software.
 
-Advanced CLI-based shells including [Bash](), [Zsh](), and [Fish]() can support scripting, I/O redirection, job control, and process substitution. They parse user commands (e.g. *ls*, *ps*, *cat*), resolves the appropriate binaries, and initiates execution using system calls such as *fork()*, *exec()*, and *wait()*. Notice that [terminal emulators]() merely host shell processes, and should not be confused with the shell itself. LikeGraphical environments including - {Linux: [GNOME](), Windows: [Explorer](), macOS: [Finder]()}, though they visually differentiate, offer a user-friendly layer that interfaces with the same underlying system calls and kernel services.
+Advanced CLI-based shells including [Bash](), [Zsh](), and [Fish]() can support scripting, I/O redirection, job control, and process substitution. They parse user commands (e.g. *ls*, *ps*, *cat*), resolves the appropriate binaries, and initiates execution using system calls such as *fork()*, *exec()*, and *wait()*. Notice that [terminal emulators]() merely host shell processes, and should not be confused with the shell itself. Likewise, graphical environments such as {Linux: [GNOME](), macOS: [Finder](), Windows: [Explorer]()}, though they visually differentiate, offer a user-friendly layer that interfaces with the same underlying system calls and kernel services.
 
 While the kernel manages low-level operations such as CPU scheduling, memory management, IPC, and device I/O, its architectural design critically affects system performance, modularity, and fault tolerance. [Monolithic kernels]() (e.g. Linux) bundle all core services into a single privileged binary, enabling fast in-kernel communication but increasing the risk of system-wide failure. [Microkernels]() (e.g. seL4) retain only minimal services (e.g. scheduling) in kernel space, delegating others (e.g. file systems) to user space to improve modularity and fault isolation. Meanwhile, [hybrid kernels]() (e.g. XNU in macOS) adopt a layered structure to reconcile these trade-offs.
 
@@ -145,7 +146,7 @@ OS-level virtualization, exemplified by containers like Docker, isolates applica
 
 ## II
 ---
-### **2.1. Unix (WIP)**
+### **2.1. Unix**
 <p style="margin-bottom: 12px;"> </p>
 
 Looking back at its origins, Unix emerged in 1969 at Bell Labs, when Ken Thompson and Dennis Ritchie repurposed a spare [PDP-7]() 18-bit minicomputer to develop a lightweight, interactive operating system. Initially dubbed “Unics” (i.e. a pun on the earlier Multics), the system abandoned the complexity of its predecessor in favour of simplicity and modularity. Its adoption of a [hierarchical file system]() (HFS), segmented memory, dynamic linking, and a minimal yet powerful API, demonstrate a new design philosophy that is focused on composability, portability, and clear separation of concerns between kernel-level mechanisms and user-space utilities.
@@ -164,12 +165,44 @@ As Unix variants proliferated, differences in system calls, utilities, and behav
 
 - <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Unix_timeline.en.svg/1000px-Unix_timeline.en.svg.png" width="500" height="300"> <a href="https://en.wikipedia.org/wiki/Unix-like" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
+<!-- - <div style="position: relative; display: inline-block;"> <img src="https://i.namu.wiki/i/af_1VZUEG31QudreEWCK26cD48GtRjNMZs7lZHwt11YpYot2vfLhkNp21lsbmnHGXlUtFVE5C-QrLo_E5EYCI_Q5yqa580UIYd6elP38702QFu3h-OOyInfG3dD3ZbH-lzx9BzYKEi4j4OC_ynE0NA.svg" width="500" height="320"> <a href="https://namu.wiki/w/Unix" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+
 <!-- - <iframe width="500" height="280" src="https://www.youtube.com/embed/HADp3emVABg?si=slBlmD7_ktsw0__u" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
-### **2.1. Linux**
-### **2.1. Linux’s FHS**
-### **2.1. Linux Distributions**
+### **2.2. Linux**
+<p style="margin-bottom: 12px;"> </p>
+
+Linux began in 1991 as a personal project by Linus Torvalds to develop a free, Unix-like kernel for the Intel 80386 architecture. Inspired by MINIX and licensed under the GPL, it quickly attracted contributions from developers worldwide and was paired with the GNU Project’s user-space tools to form a complete open-source operating system. Unlike proprietary Unix systems, which were tied to specific vendors, Linux grew through a decentralized, community-driven model and rapidly gained adoption across academia, hobbyist circles, and eventually industry.
+
+Architecturally, Linux uses a monolithic kernel, integrating core services such as process scheduling, virtual memory, networking, and file systems into a single privileged binary. To balance flexibility and modularity, it introduced support for loadable kernel modules (LKMs), allowing dynamic insertion of drivers and extensions at runtime. Written in portable C with clean hardware abstraction layers, Linux was quickly ported to multiple architectures beyond x86, including ARM, PowerPC, and SPARC. Over time, it incorporated advanced features such as control groups (cgroups), namespaces, epoll-based I/O, and pluggable schedulers, making it well-suited for containers, cloud platforms, and embedded systems.
+
+While Linux is not derived from any specific Unix source tree, it closely follows POSIX standards and Unix design principles, enabling compatibility with established Unix software. By the early 2000s, it had become the dominant OS for servers and infrastructure, displacing proprietary Unix in many environments. Today, Linux powers a wide range of systems—from Android smartphones and embedded IoT devices to enterprise data centers and all Top500 supercomputers—making it the most widely deployed Unix-like kernel in the world.
+
+<iframe width="500" height="280" src="https://www.youtube.com/embed/E0Q9KnYSVLc?si=Fere9hvODg0z0MtB" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+### **2.3. Linux FHS**
+<p style="margin-bottom: 12px;"> </p>
+
+As Linux distributions proliferated in the 1990s, inconsistencies in directory layouts across systems became a barrier to software portability and system maintenance. To address this, the Filesystem Hierarchy Standard (FHS) was introduced by the Linux Foundation to define a common directory structure and file placement for Unix-like systems. Although not universally enforced, most mainstream distributions—such as Debian, Fedora, and Arch—follow FHS conventions to varying degrees, ensuring predictability for users, package managers, and software developers.
+
+Under FHS, the root directory / serves as the top-level namespace, from which all other paths descend. Essential binaries and libraries needed for booting and single-user mode reside in /bin, /sbin, and /lib, while user home directories are located under /home, and configuration files under /etc. The /usr hierarchy holds secondary programs and libraries not required during early boot, and /var stores variable data such as logs, caches, and spool files. Temporary files reside in /tmp, and system-wide device files are represented under /dev, consistent with Unix’s “everything is a file” philosophy.
+
+This structure helps separate static and dynamic data, as well as system and user space, which in turn supports package management, backups, and cross-distribution compatibility. Some directories—such as /run for volatile runtime data or /srv for service data—reflect modern additions to accommodate newer usage patterns. While some distributions experiment with alternative layouts (e.g. /usr merge), adherence to FHS simplifies development, scripting, and administration across diverse Linux environments, particularly in multi-user or production systems.
+
+### **2.4. Linux Distribution**
+<p style="margin-bottom: 12px;"> </p>
+
+A Linux distribution (or “distro”) bundles the Linux kernel with a curated set of user-space utilities, libraries, configuration defaults, and package management tools to form a complete operating system. As the Linux kernel alone is insufficient for end users, distributions emerged to provide usable environments tailored to various audiences—ranging from desktop users and system administrators to developers, embedded engineers, and cloud providers. Early distributions such as Slackware (1993), Debian (1993), and Red Hat Linux (1995) laid the groundwork for today’s ecosystem.
+
+Each distribution makes distinct choices in areas such as init systems (e.g. systemd, OpenRC), packaging formats (e.g. .deb, .rpm, source-based), file system layout, release cadence, and included software stacks. For example, Debian emphasizes stability and is widely used as a base for derivatives like Ubuntu, which targets usability and long-term support for both desktops and servers. Red Hat Enterprise Linux (RHEL), and its derivatives like CentOS and AlmaLinux, prioritize commercial support and certification for enterprise workloads, while Arch Linux focuses on minimalism, rolling releases, and user control.
+
+Distributions also diverge in tooling and update strategies. Package managers like apt, dnf, and pacman streamline software installation and system updates, while meta-tools like snap or flatpak aim to standardize application delivery across distros. Despite differences, most distributions remain interoperable through shared adherence to standards like POSIX, FHS, and the Linux Standard Base (LSB). As such, the choice of distribution often reflects the target use case, administrative preferences, or hardware constraints, rather than incompatibilities in the underlying Linux system.
 
 
 ## III
 ---
+### **3.1. Process Management**
+<!-- <p style="margin-bottom: 12px;"> </p> -->
+### **3.2. Memory Management**
+### **3.3. File Management**
+### **3.4. Device Management**
