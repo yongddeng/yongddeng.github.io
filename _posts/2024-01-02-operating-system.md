@@ -169,7 +169,7 @@ As Unix variants proliferated, differences in system calls, utilities, and behav
 
 <!-- - <iframe width="500" height="280" src="https://www.youtube.com/embed/HADp3emVABg?si=slBlmD7_ktsw0__u" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
-### **2.2. Linux**
+<!-- ### **2.2. Linux**
 <p style="margin-bottom: 12px;"> </p>
 
 Linux began in 1991 as a personal project by Linus Torvalds to develop a free, Unix-like kernel for the Intel 80386 architecture. Inspired by MINIX and licensed under the GPL, it quickly attracted contributions from developers worldwide and was paired with the GNU Project’s user-space tools to form a complete open-source operating system. Unlike proprietary Unix systems, which were tied to specific vendors, Linux grew through a decentralized, community-driven model and rapidly gained adoption across academia, hobbyist circles, and eventually industry.
@@ -197,12 +197,31 @@ A Linux distribution (or “distro”) bundles the Linux kernel with a curated s
 Each distribution makes distinct choices in areas such as init systems (e.g. systemd, OpenRC), packaging formats (e.g. .deb, .rpm, source-based), file system layout, release cadence, and included software stacks. For example, Debian emphasizes stability and is widely used as a base for derivatives like Ubuntu, which targets usability and long-term support for both desktops and servers. Red Hat Enterprise Linux (RHEL), and its derivatives like CentOS and AlmaLinux, prioritize commercial support and certification for enterprise workloads, while Arch Linux focuses on minimalism, rolling releases, and user control.
 
 Distributions also diverge in tooling and update strategies. Package managers like apt, dnf, and pacman streamline software installation and system updates, while meta-tools like snap or flatpak aim to standardize application delivery across distros. Despite differences, most distributions remain interoperable through shared adherence to standards like POSIX, FHS, and the Linux Standard Base (LSB). As such, the choice of distribution often reflects the target use case, administrative preferences, or hardware constraints, rather than incompatibilities in the underlying Linux system.
-
+ -->
 
 ## III
 ---
 ### **3.1. Process Management**
-<!-- <p style="margin-bottom: 12px;"> </p> -->
+<p style="margin-bottom: 12px;"> </p>
+
+Each process executes within its own isolated virtual [address space](), comprising distinct code, data, heap, and stack segments. This isolation ensures protection between processes and underpins system stability. The OS kernel maintains per-process metadata via a structure known as the [process control block]() (PCB), which includes identifiers (PID/PPID), execution state, CPU register, memory mappings, scheduling parameters, and open file descriptors. A process holds the [process life cycle](): new (creation), ready (queued for CPU), running (actively scheduled), waiting (blocked on I/O, synchronisation, or an event), and terminated (completed or killed). 
+
+The [CPU scheduler](), a core kernel component, handles transitions between mutually exclusive process states and selects which ready process to run next. i) [Round-robin](): fixed time slices; ii) [priority scheduling](): fixed or dynamic priority queues; iii) [multi-level feedback queues]() (MLFQ): dynamically adjusts priorities based on CPU or I/O behaviour; are classical scheduling algorithms. <!-- Modern operating systems such as Linux use the [completely fair scheduler]() (CFS), which maintains a red-black tree to distribute CPU time proportionally by tracking each process’s virtual runtime. --> Each scheduling decision triggers a [context switch](), where the CPU saves the current process state and restores another. It is essential for multitasking, but incurs overhead from cache disruption, [TLB flushes](), and memory synchronisation, making efficient scheduling vital for the system.
+
+- ...
+
+[Multiprocessing]() refers to the concurrent execution of multiple processes, either across distinct CPU cores or through rapid time-slicing on a single core. This model is extensively used to exploit hardware parallelism in compute-heavy domains such as machine learning. For instance, PyTorch’s *DataLoader* uses the Python multiprocessing module to spawn workers that fetch and transform batches in parallel. Since processes do not share memory by default, [inter-process communication]() (IPC) mechanisms such as pipes, UNIX domain [sockets](), and SMEM are required to coordinate work. SMEM enables low-latency access to common data structures, such as tensors in CUDA IPC or NumPy arrays via *multiprocessing.shared_memory*, while [message passing]() offers a safer abstraction for structured communication. <!-- Multiprocessing is particularly beneficial for parallel model evaluation, distributed training pipelines, or data augmentation at scale. -->
+
+- ...
+
+Threads are lightweight execution units within a single process, sharing the same address space. Unlike processes, threads access common code, heap, and global variables, which facilitates fine-grained parallelism with reduced memory and context-switching overhead. Most modern OSs implement the 1:1 threading model (e.g. Linux NPTL), where each user thread maps to a distinct kernel thread. Alternative designs include M:1 (user-level multiplexing) and M:N (hybrid scheduling), though they are less common. Threads are independently scheduled by the kernel and require synchronisation mechanisms—such as mutexes, condition variables, spinlocks, and barriers—to ensure safe access to shared resources. Scheduling can be preemptive or cooperative, and mismanaged synchronisation can result in race conditions or deadlocks. In ML workloads, multithreading is exploited by performance-critical libraries such as OpenMP, MKL, or TensorRT to parallelise tensor operations like matrix multiplication and convolution, often within the same process.
+
+In Python, true multithreading is limited by the Global Interpreter Lock (GIL), which serialises execution of Python bytecode across threads. This constraint renders Python threads ineffective for CPU-bound tasks, including training loops and numerical computation. Instead, Python developers often resort to multiprocessing for parallel execution. Libraries such as joblib, torch.multiprocessing, and Ray provide high-level interfaces for spawning processes and sharing data across them efficiently. Nonetheless, many underlying ML libraries release the GIL during C/C++ compute-intensive operations, enabling a limited form of thread-level parallelism despite Python’s restrictions.
+
+- ...
+
+Choosing between threads and processes depends on workload characteristics. I/O-bound tasks—such as data ingestion, network communication, or logging—can benefit from multithreading, particularly when coupled with non-blocking I/O and GIL-free libraries. Conversely, CPU-bound workloads—such as gradient computations, dataset pre-processing, or inference across CPU cores—typically demand multiprocessing despite its higher memory footprint and coordination cost. In production ML systems, process-based concurrency, shared memory, and remote procedure calls (RPC) are frequently combined to scale workloads across CPU cores, GPU devices, or even nodes in a distributed cluster. As such, process and thread management form a cornerstone of both system-level operating systems design and large-scale machine learning infrastructure.
+
 ### **3.2. Memory Management**
 ### **3.3. File Management**
 ### **3.4. Device Management**
