@@ -224,6 +224,8 @@ In networked IPC, processes communicate over [sockets]() identified by [IP addre
 
 The thread-level parallelism in CPython has long been constrained by the [global interpreter lock]() (GIL), which is a mutex that serialises the execution of Python bytecode (i.e. one thread at a time) and was primarily implemented to simplify memory management through [reference counting](), thereby limiting the effectiveness of threading for CPU-bound operations such as matrix multiplication. However, compute-intensive extensions in native C/C++ code (e.g. Numpy or PyTorch - see the [discussion](https://discuss.pytorch.org/t/can-pytorch-by-pass-python-gil/55498)) can often <!-- temporarily --> release the GIL during execution, and thankfully, [PEP 703]() introduces a build-time option to remove the GIL in Python 3.13 albeit with changes to the C API.
 
+- - <div style="position: relative; display: inline-block;"> <img src="https://kuleuven-diepenbeek.github.io/osc-course/img/os/db_singlethreaded_twice_v2.png" width="500" height="320"> <a href="https://kuleuven-diepenbeek.github.io/osc-course/ch6-tasks/threads/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+
 ### **3.2. Memory Management**
 <p style="margin-bottom: 12px;"> </p>
 
