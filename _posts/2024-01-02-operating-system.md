@@ -8,7 +8,7 @@ use_math: true
 
 # Operating System
 ---
-A digital computer is ultimately a set of interconnected peripheral. The [operating system](https://www.youtube.com/watch?v=26QPDBe-NB8) (OS) makes it usable by hiding complexity and offering a programmable interface. Though often taken for granted, the OS is less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions.
+A digital computer is ultimately bare metal. The [operating system](https://www.youtube.com/watch?v=26QPDBe-NB8) (OS) makes it usable by hiding complexity and offering a programmable interface. Though often taken for granted, the OS is less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions.
 
 <!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/index.html -->
 <!-- https://www.jmeiners.com/lc3-vm/#:lc3.c -->
@@ -211,7 +211,7 @@ Distributions also diverge in tooling and update strategies. Package managers li
 
 Each process executes within its own isolated virtual [address space](), comprising distinct code, data, heap, and stack segments. This isolation ensures protection between processes and underpins system stability. The OS kernel maintains per-process metadata via a structure, known as the [process control block]() (PCB), which contains its identifiers (PID/PPID), execution state, CPU register, memory mappings, scheduling parameters, and open file descriptors. A process advances through a [life cycle](): new (creation), ready (queued for CPU), running (actively scheduled), waiting (blocked on I/O, synchronisation, or an event), and terminated (completed or killed). 
 
-The [CPU scheduler](), a core part of the kernel, manages transitions between the mutually exclusive states and determines which ready process to dispatch next. Classical scheduling algorithms may include i) [round-robin](): fixed time slices; ii) [priority scheduling](): fixed or dynamic priority queues; iii) [multi-level feedback queues]() (MLFQ): dynamically adjusts priorities based on process behaviours. In fact, [context switching]() follows process scheduling in which this incurs overhead from cache disruption, [translation lookaside buffer]() (TLB) flushes, and memory synchronisation. <!-- Modern operating systems such as Linux use the [completely fair scheduler]() (CFS), which maintains a red-black tree to distribute CPU time proportionally by tracking each process’s virtual runtime. --> Indeed, processes on a single core can be executed concurrently via appropriate time-slicing.
+The [CPU scheduler](), a core part of the kernel, manages transitions between the mutually exclusive states and determines which ready process to dispatch next. Classical scheduling algorithms may include i) [round robin](https://imbf.github.io/computer-science(cs)/2020/10/18/CPU-Scheduling.html): fixed time slices; ii) [priority scheduling](): fixed or dynamic priority queues; iii) [multi-level feedback queues]() (MLFQ): dynamically adjusts priorities based on process behaviours. In fact, [context switching]() follows process scheduling in which this incurs overhead from cache disruption, [translation lookaside buffer]() (TLB) flushes, and memory synchronisation. <!-- Modern operating systems such as Linux use the [completely fair scheduler]() (CFS), which maintains a red-black tree to distribute CPU time proportionally by tracking each process’s virtual runtime. --> Indeed, processes on a single core can be executed concurrently via appropriate time-slicing.
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="https://media.geeksforgeeks.org/wp-content/uploads/20231201161329/Process-Scheduler.png" width="500"> <a href="https://www.geeksforgeeks.org/operating-systems/process-schedulers-in-operating-system/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
@@ -221,22 +221,45 @@ As systems can execute multiple [cooperating processes](), scheduling should be 
 
 - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://notes.shichao.io/apue/figure_15.1.png" width="500" height="215"> <a href="https://notes.shichao.io/apue/ch15/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
-Given that [multiprocessing]() refers to concurrent execution of multiple processes, each with its own isolated address space and usually distributed across CPU cores, coordination between them must be achieved using IPC. For example, PyTorch’s *DataLoader* leverages Python’s *multiprocessing* module to spawn worker processes that load and transform batches concurrently, and it also extends shared memory with CUDA memory and IPC to efficiently share GPU tensors across cuda/tensor cores. Complementary approaches such as [Numba]() enable thread- or process-level parallelism through JIT compilation to machine code. <!-- slightly change the topic from local ipc to networked ipc -->
+[Multiprocessing]() refers to concurrent execution of separate processes, each with its own memory space, generally mapped to different CPU cores and coordinated via IPC. For instance, PyTorch's [DataLoader](https://discuss.pytorch.org/t/efficient-gpu-data-movement/63707) leverages Python's *multiprocessing* module <!--, with GPU tensor sharing between worker processes supported through CUDA-aware IPC, --> to parallelise data loading and improve input throughput. In distributed training, *torch.distributed* with [DistributedDataParallel]() (DDP) spawns one process per device (e.g., CPU/GPU) and synchronises gradients after every backward pass. DDP uses communication backends such as Gloo for CPU and [NVIDIA collective communication library]() (NCCL) for GPU to coordinate gradient updates across processes.
 
-In networked IPC, processes communicate over [sockets]() identified by [IP addresses]() and [ports](), which act as logical [endpoints]() directing traffic to the correct process. For example, web servers typically use port 80 (HTTP) or 443 (HTTPS), while SSH uses port 22. The OS maps ports to socket endpoints and manages connection queues to deliver [packets]() to the correct process. PyTorch also uses specific ports (e.g. [MASTER_PORT](https://tutorials.pytorch.kr/intermediate/dist_tuto.html)) for synchronisation during distributed training, typically over [transmission control protocol]() (TCP) or high-performance backends such as [NCCL](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html). As such, this networking concept remains central to distributed systems in the modern ML era.
+ <!-- employing communication backends such as [Gloo]() or [NCCL](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html). PyTorch also extends shared memory with CUDA-aware IPC for GPU tensor sharing.  -->
+
+<!-- . PyTorch also extends shared memory support through CUDA-aware IPC to enable GPU tensor sharing. Specifically,  -->
+
+<!-- Complementary tools like Numba offer thread- or process-level parallelism through JIT compilation to machine code. -->
+
+
+<!-- Multiprocessing enables the concurrent execution of multiple processes, each with its own isolated memory space and usually mapped to separate CPU cores. Since memory is not shared by default, coordination between processes must be handled using inter-process communication (IPC). In PyTorch, the DataLoader uses Python’s multiprocessing module to spawn worker processes that load and transform batches concurrently, improving input pipeline performance. For distributed training, PyTorch provides the torch.distributed package and its DistributedDataParallel (DDP) wrapper, which enables multiple processes—each with its own model replica—to compute gradients independently and synchronize them efficiently across processes after each backward pass. This design scales well across both multi-core CPUs and multi-GPU systems, with DDP using shared memory or CUDA-aware communication backends (like NCCL) to reduce synchronization overhead. Complementary approaches such as Numba offer thread- and process-level parallelism through JIT compilation to machine code, enabling further parallel acceleration in custom numerical routines. -->
+
+
+In networked IPC, processes communicate over [sockets]() identified by [IP addresses]() and [ports](), which act as logical [endpoints]() directing traffic to the correct process. For example, web servers typically use port 80 (HTTP) or 443 (HTTPS), while SSH uses port 22. The OS maps ports to socket endpoints and manages connection queues to deliver [packets]() to the correct process. PyTorch also uses specific ports (e.g. [MASTER_PORT](https://tutorials.pytorch.kr/intermediate/dist_tuto.html)) for synchronisation during distributed training, typically over [transmission control protocol]() (TCP) or high-performance backends such as NCCL. As such, this networking concept remains central to distributed systems in the modern ML era.
 
 - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://pylessons.com/media/Tutorials/YOLO-tutorials/YOLOv4-TF2-multiprocessing/1.png" width="500" height="220"> <a href="https://pylessons.com/YOLOv4-TF2-multiprocessing" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
 [Threads]() are lightweight execution units within a process that share the same virtual address space. This shared context enables fine-grained parallelism with lower memory overhead and faster context switches compared to processes. Most modern OSes implement the $1 \colon 1$ threading model (e.g. [native POSIX threads library]()) for each user thread to be directly mapped to a kernel thread, while $m \colon 1$ and $m \colon n$ (e.g. [Go]() programming language) models are less widely adopted.  Threads are independently scheduled by the kernel and require synchronisation primitives such as [mutexes](), [spinlocks](), and condition variables to prevent [race conditions]() and have stability.
 
-The thread-level parallelism in CPython has long been constrained by the [global interpreter lock]() (GIL), which is a mutex that serialises the execution of Python bytecode (i.e. one thread at a time) and was primarily implemented for [reference counting]() as its [garbage collection]() method, thereby limiting the effectiveness of threading for CPU-bound operations such as matrix multiplication. However, compute-intensive extensions in native C/C++ code (e.g. Numpy or PyTorch - see the [discussion](https://discuss.pytorch.org/t/can-pytorch-by-pass-python-gil/55498)) can often <!-- temporarily --> release the GIL during execution, and thankfully, [PEP 703]() introduces a build-time option to remove the GIL in Python 3.13 albeit with changes to the C API.
+The thread-level parallelism in CPython has long been constrained by the [global interpreter lock](https://www.youtube.com/watch?v=dyhKXCpkCGE) (GIL), which is a mutex that serialises the execution of Python bytecode (i.e. one thread at a time) and was primarily implemented for [reference counting]() involved in [garbage collection](), thereby limiting the effectiveness of threading for CPU-bound operations such as matrix multiplication. However, compute-intensive extensions in native C/C++ code (e.g. Numpy or PyTorch - see the [discussion](https://discuss.pytorch.org/t/can-pytorch-by-pass-python-gil/55498)) can often <!-- temporarily --> release the GIL during execution, and thankfully, [PEP 703]() introduces a build-time option to remove the GIL in Python 3.13 albeit with changes to the C API. <!-- Other Python implementation such as [Jython]() or [IronPython]() do not have a GIL. -->
 
 - <iframe width="500" height="280" src="https://www.youtube.com/embed/M9HHWFp84f0?si=B3pvCInh5IWetRvf" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ### **3.2. Memory Management**
 <p style="margin-bottom: 12px;"> </p>
 
-TODO...
-<!-- 
+- Virtual memory abstraction: Each process, including ML workloads, runs in an isolated address space; critical for protecting training processes or model serving instances from interfering with one another.
+- Paging and segmentation: Enables large memory spaces needed for loading models (e.g. transformer weights); paging can impact performance if model weights are frequently swapped.
+- Memory allocation strategies (from the ML perspective): Efficient allocators reduce fragmentation, especially important when allocating large GPU/CPU tensors.
+
 ### **3.3. File Management**
-### **3.4. Device Management** -->
+<p style="margin-bottom: 12px;"> </p>
+
+- File abstraction: ML workloads deal with large datasets and models as files — e.g. image datasets (COCO), model weights (e.g. .pt, .ckpt, .pb).
+- Filesystem hierarchy: Datasets and model checkpoints are often organized under /data, /models, or mounted cloud volumes (e.g. NFS, S3).
+- File access methods: Streaming (sequential access) is preferred for training datasets; memory-mapped files (e.g. mmap) can optimize inference workloads.
+- Mounting and VFS: Frameworks often run on VMs/containers that mount remote filesystems (e.g. GCS FUSE, AWS EFS).
+
+### **3.4. Device Management**
+<p style="margin-bottom: 12px;"> </p>
+
+- Device drivers: derive definition, NVIDIA CUDA drivers, AMD ROCm, or TPU runtime drivers allow the OS to interface with ML accelerators.
+- I/O scheduling: Efficient I/O scheduling is vital for high-throughput data pipelines and sharded dataset loading
