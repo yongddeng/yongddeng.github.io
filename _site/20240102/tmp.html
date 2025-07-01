@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>402. operating system</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>402. operating system</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 2, 2024</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="operating-system">Operating System</h1>
+<hr />
+<p>A computer is ultimately a set of interconnected electronic components. The operating system makes it usable by hiding complexity and offering a programmable interface. Though often taken for granted, the OS is less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions</p>
+
+<!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/index.html -->
+<!-- https://www.jmeiners.com/lc3-vm/#:lc3.c -->
+<!-- https://www.youtube.com/watch?v=ioJkA7Mw2-U -->
+<!-- https://www.youtube.com/watch?v=xFMXIgvlgcY -->
+<!-- https://youtu.be/eP_P4KOjwhs?si=gOPQIxLH6cQMk8vq -->
+
+<!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/26QPDBe-NB8?si=J8FBjnS8tE8PHY5k" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
+
+<!-- round robin, fifo, ... -->
+
+<!-- If data is large or its size varies, we use heap, and in stack, we just maintain a reference (i.e. pointer) to the value.... The *malloc* function in C internally uses *mmap* to free up a dedicated space and reclaim the OS for reusability. *free* does .... By using linked list, we do not need large amounts of contiguous memory, although the this data structure leads to decreased probabilities of cache hits. If our aim is to maintain compactness in our list, what we need is an array list (e.g. an array wrapped in the C struct with relevant metadata) -->
+
+<h2 id="i">I</h2>
+<hr />
+
+<!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/images/typesc.svg -->
+
+<!-- 
+### **1.4. OS Virtualisation**
+<p style="margin-bottom: 12px;"> </p>
+
+
+- https://insights.sei.cmu.edu/blog/virtualization-via-containers/
+
+- https://blog.bytebytego.com/p/what-are-the-differences-between
+
+- https://stackoverflow.com/questions/71955661/what-is-the-difference-between-containers-and-process-vms-not-system-vms  
+
+Virtualization abstracts hardware resources, enabling multiple virtual systems to run on a single physical machine as though each were operating independently. It improves resource utilization, isolation, and scalability, forming the backbone of modern computing environments. Hardware virtualization, achieved through hypervisors, is a key approach. Type 1 hypervisors like VMware ESXi run directly on hardware for high performance, while Type 2 hypervisors like VirtualBox operate atop an existing OS, providing ease of use at the cost of efficiency.
+
+OS-level virtualization, exemplified by containers like Docker, isolates applications within lightweight environments that share the host OS kernel. Containers are faster to deploy and consume fewer resources than virtual machines, making them ideal for microservices and cloud-native applications. However, their reliance on a shared kernel requires robust isolation mechanisms to maintain security.
+
+- <div style="position: relative; display: inline-block;"> <img src="https://insights.sei.cmu.edu/media/images/fourthpost_firstgraphic_092520.max-1280x720.format-webp.webp" width="500"> <a href="https://insights.sei.cmu.edu/blog/virtualization-via-containers/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
+
+<!-- Containersiation (i.e. OS-level virtualisation using a conainer) is ... || https://blog.bytebytego.com/p/what-are-the-differences-between -->
+
+<h2 id="ii">II</h2>
+<hr />
+
+<h3 id="21-unix"><strong>2.1. Unix</strong></h3>
+
+<!-- 
+Although Bell Labs owned Unix, its parent company AT&T was a regulated monopoly under the 1934 Communications Act and a 1956 consent decree. This prohibited AT&T from commercialising computing products. As a result, Unix was licensed freely to universities and research institutions. The influence of Unix deepened with the emergence of the [Berkeley Software Distribution]() (BSD) in the late 1970s. Initiated by [Bill Joy]() and the [Computer Systems Research Group]() (CSRG) at the University of California, Berkeley, BSD originally extended AT&T Unix with tools and utilities, but matured enough by the late 1980s to be a distinct OS. 
+
+Under DARPA funding, BSD introduced many features foundational to modern networked computing. It includes the first implementation of the [TCP/IP]() protocol stack which made BSD a reference platform for early [Internet]() research and deployment. Permissive licence of BSD, combined with its technical maturity, also made it highly attractive to commercial vendors. Variants such as SunOS, DEC Ultrix, and NeXTSTEP built directly on BSD foundations, as did later research and production systems in academia. Its legacy lives on in its open-source descendants: FreeBSD, NetBSD, OpenBSD, and DragonFly BSD. 
+
+These projects have since formed the basis for numerous modern systems, including Apple’s [Darwin](), which underpins macOS and iOS, and parts of Microsoft Windows’ networking stack. BSD-derived code has also appeared in consumer devices ranging from routers to games consoles such as [PS5](). Nevertheless, vendor-specific extensions led to fragmentation across the Unix ecosystem. To mitigate this, the [IEEE]() introduced the [portable operating system interface]() (POSIX) standard in the late 1980s. POSIX defined a consistent set of APIs and command-line behaviours, allowing software to be portable across Unix-like systems. While not eliminating all incompatibilities, POSIX significantly unified the Unix landscape. -->
+
+<!-- 
+<p style="margin-bottom: 12px;"> </p>
+
+OS Implementations have been evolving ... || Unix, first developed at AT&T’s Bell Labs in 1969 and released in 1971, revolutionized operating system design with its emphasis on portability, modularity, and simplicity. Unlike earlier systems tied to specific hardware, Unix was written in the C programming language, allowing it to be easily ported across different architectures. This innovation made Unix one of the first truly versatile operating systems. Its hierarchical file system introduced a logical and consistent method for organizing files and directories, while features like pipes and redirection enabled powerful command-line utilities to be combined for complex tasks. These characteristics set the foundation for Unix’s widespread adoption in academia, research, and enterprise environments.
+
+Unix introduced a philosophy of building small, modular tools that perform specific tasks well, which could be combined to achieve greater functionality. This approach not only made Unix extensible but also encouraged innovation in software development. Key principles, such as treating everything as a file (including devices), further simplified interactions between hardware and software. Over the decades, Unix evolved into various commercial and open-source derivatives, including BSD, AIX, and HP-UX, which retained its foundational principles while adding enhancements tailored to specific use cases.
+
+Today, Unix serves as the backbone of many modern operating systems, influencing everything from Linux to macOS. Its legacy lives on in the standardized POSIX interface, ensuring compatibility across Unix-like systems. Unix’s design principles remain relevant, providing a model for creating robust, efficient, and scalable software systems that have stood the test of time.
+
+<!-- [Unix](), first released in 1971, revolutionised OS design with portability, hierarchical file systems, and modularity. -->
+
+<h3 id="32-linux"><strong>3.2. Linux</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<p>Linux, introduced by Linus Torvalds in 1991, is an open-source operating system inspired by Unix. As a kernel, Linux became the foundation for a wide variety of distributions (distros), each tailored to different use cases. Unlike proprietary systems, Linux’s open-source nature encourages collaboration and innovation, allowing developers worldwide to contribute improvements. It inherits Unix’s modularity and hierarchical file system, making it familiar to those with Unix experience.</p>
+
+<p>Linux is highly adaptable, running on devices ranging from personal computers to servers, smartphones, and embedded systems. Its flexibility, combined with a strong focus on security and stability, has made it a favorite for developers, system administrators, and enterprises. Linux distributions often bundle the Linux kernel with system utilities and applications to form a complete operating system. Popular distros include Ubuntu, Fedora, Debian, and CentOS, each catering to specific audiences, from beginners to advanced users and enterprise environments.</p>
+
+<p>Despite being a descendant of Unix, Linux stands out due to its emphasis on community-driven development. The GPL (General Public License) ensures that Linux remains free to use, modify, and distribute. This has led to its widespread adoption in cloud computing, web hosting, and supercomputing. As a direct competitor to proprietary systems like Windows and macOS, Linux continues to grow, shaping the future of open-source computing.</p>
+
+<!-- [Linux]() and [macOS](), as the main alternatives to Windows, are all decendants of Unix, and so have common on their structure and conventions. || The prior is an open-source OS that has led to the development of  -->
+
+<!-- [Disk operating system]() (DOS) also made a huge impact on personal computing. While DOS provided file systems like FAT12 and FAT16 which users could manage files on disk, directories, and applications through [command-line interfaces]() (CLI), it merely operated on basic hardware components and experienced limitations in memory access (i.e. 640KB), multitasking, and native support for [graphical user interfaces]() (GUI). Microsoft (through acquisition) rebranded it as MS-DOS in 1981, and later introduced a graphical interface with Windows 1.0 layered on top of MS-DOS in 1985. MS-DOS was compatible with IBM PCs in the 1980s, but shortly [Windows]() evolved into a standalone OS in the 1990s. -->
+
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-linux_overview.png" width="400"> <a href="https://www.instagram.com/p/DExccqLTHZo/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
+
+<h3 id="33-filesystem-hierarchy-standard"><strong>3.3. Filesystem Hierarchy Standard</strong></h3>
+
+<p>The Filesystem Hierarchy Standard (FHS) is a key convention defining the directory structure and layout of Unix-like operating systems. It provides guidelines for organizing files and directories to ensure consistency and predictability across systems. For instance, the root directory (”/”) serves as the base, with standard subdirectories like /bin for essential binaries, /etc for configuration files, and /var for variable data like logs and caches. This standardization simplifies system administration and software development by creating a predictable environment for locating files.</p>
+
+<p>FHS ensures that critical system components are logically separated. For example, /usr houses user-installed software, while /home contains personal files for individual users. Temporary files are stored in /tmp, ensuring they do not interfere with other parts of the system. This separation enhances both security and maintainability, making it easier to back up user data, update system files, or troubleshoot issues.</p>
+
+<p>While not all Unix-like systems strictly adhere to FHS, most Linux distributions follow it closely, ensuring interoperability and simplifying the learning curve for users and administrators. By providing a clear structure, FHS contributes to the reliability and organization of Unix-like systems, reinforcing their reputation for robustness and ease of use.</p>
+
+<h3 id="34-linux-distro"><strong>3.4. Linux Distro</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<p>Linux distributions, commonly referred to as distros, are complete operating systems built around the Linux kernel. They bundle system utilities, libraries, and applications to provide a cohesive user experience. Each distribution is tailored to specific user needs, whether it’s for general use, development, enterprise systems, or specialized environments. Popular examples include Ubuntu, known for its user-friendliness and beginner appeal, and Debian, a stable and community-driven distro that serves as the foundation for many others, including Ubuntu itself. Fedora offers cutting-edge software and is often used by developers, while CentOS provides a stable environment for servers.</p>
+
+<p>Enterprise distributions like Red Hat Enterprise Linux (RHEL) and SUSE Linux Enterprise are designed for corporate environments, offering professional support and long-term stability. In contrast, lightweight distros like Arch Linux and Alpine Linux cater to advanced users and specific use cases, such as minimalistic systems or containerized environments. The diversity of Linux distros ensures that users can find a version suited to their technical proficiency and requirements.</p>
+
+<p>The strength of Linux distributions lies in their customizability. Users can tailor the system to their preferences, choosing desktop environments (e.g., GNOME, KDE) or adding specific packages. The package management systems used by distros, such as APT for Debian-based systems or YUM/DNF for Red Hat-based ones, make software installation and updates seamless. This diversity and flexibility underscore the unique appeal of Linux in the computing world.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<h3 id="25-ipc"><strong>2.5. IPC</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<h3 id="21-process-management"><strong>2.1. Process Management</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<p>A process is an execution unit that requires hardware resources, such as CPU time and memory, to function. An OS handles processes by assigning resources and CPU time</p>
+
+<pre><code>•	Process states (e.g., running, waiting, ready).
+•	Context switching.
+•	Interprocess communication (IPC).
+•	Deadlock handling.
+•	Process synchronization.
+</code></pre>
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="">Process Life Cycle</a> introduces process states (e.g., New, Running, Waiting, Terminated)</td>
+      <td> </td>
+      <td><a href="">Scheduling Algorithms</a>: Explain scheduling types like Round-Robin, First-Come-First-Served, and Priority-based, emphasizing their impact on performance.</td>
+      <td> </td>
+      <td>A <a href="">thread</a> is the smallest unit of …</td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>
+    <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://pravin-hub-rgb.github.io/BCA/resources/sem2/images/process2.svg" width="500" /> <a href="https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/unit2/index.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+  </li>
+</ul>
+
+<p><a href="">Context switching</a> refers to …</p>
+
+<ul>
+  <li>
+    <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://pravin-hub-rgb.github.io/BCA/resources/sem2/images/contextswitching.svg" width="500" /> <a href="https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/unit2/index.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+  </li>
+</ul>
+
+<h3 id="22-memory-management"><strong>2.2. Memory Management</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>The main responsiblities of modern OS includes… <a href="">Memory Management</a>: Explain how the OS allocates, protects, and releases memory across applications, handling both RAM and virtual memory.</td>
+      <td> </td>
+      <td><a href="">Paging and Segmentation</a>: Cunks of memory are called pages. Explain these memory management techniques, their differences, and roles in efficient memory use.</td>
+      <td> </td>
+      <td><a href="">Virtual Memory</a>: Describe its role in extending physical memory and how the OS handles page replacement policies (e.g., Least Recently Used).</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Memory Allocation:
+	•	When a program requests memory (e.g., using malloc in C), the runtime library typically makes system calls like brk or mmap to ask the OS for memory.
+	•	The OS allocates memory from available resources, keeping track of which parts of memory are free or in use.
+	3.	Paging: If the system runs out of physical memory, the OS may use a swap file on disk to simulate more memory, moving data between RAM and disk as needed. -->
+
+<!-- A quick recap from the undergraduate operating systems course: information is grouped into pages in memory, and sometimes, we need to transfer chunks of information from one page to another. This is another hassle we must contend with when transferring information from the CPU to the GPU or vice-versa. 
+
+NVIDIA has a new unified memory feature that does automatic page-to-page transfers between the CPU and GPU for error-free GPU processing when the GPU occasionally runs out of memory. The authors use this feature to allocate paged memory for the optimizer states, which are then automatically evicted to CPU RAM when the GPU runs out of memory and paged back into GPU memory when the memory is needed in the optimizer update step.
+
+An operating system (OS) facilitates the execution of machine code by loading the binary executable into memory, setting up the process environment, and delegating its execution to the CPU. It reads the executable’s format (e.g., ELF, PE, or Mach-O), allocates memory, and initializes resources like the stack and heap. The CPU fetches and executes the machine code instructions directly, while the OS manages system calls, resource allocation, and interruptions to ensure smooth execution. Although the OS doesn’t interpret machine code itself, it plays a critical role in organizing and controlling its execution.
+
+- https://wandb.ai/sauravmaheshkar/QLoRA/reports/What-is-QLoRA---Vmlldzo2MTI2OTc5
+- https://stackoverflow.com/questions/26891413/diff-between-logical-memory-and-physical-memory -->
+
+<h3 id="23-file-management"><strong>2.3. File Management</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<!-- - <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://swcarpentry.github.io/shell-novice/fig/standard-filesystem-hierarchy.svg" width="500" height="300"> <a href="https://swcarpentry.github.io/shell-novice/reference.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+
+<p>A file is …. Note that a file is a passive storage entity for data, while a program is an active entity designed to manipulate data and perform actions, often using files as part of its operation….</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="">File System</a>: Structure and manage data storage on drives, handling file creation, access, and organization.</td>
+      <td> </td>
+      <td><a href="">File Allocation Methods</a>: Briefly mention methods like contiguous allocation and inode-based systems.</td>
+      <td> </td>
+      <td><a href="">Journaling</a>: Discuss how modern file systems like NTFS and ext4 log changes before making them permanent, enhancing data integrity.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="24-device-management"><strong>2.4. Device Management</strong></h3>
+<p style="margin-bottom: 12px;"> </p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="">Device Management and Drivers</a>: Role of drivers in enabling communication between OS and hardware devices.</td>
+      <td> </td>
+      <td><a href="">Plug and Play</a> (PnP): Describe how modern OSs automatically detect and configure new devices. –&gt;</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- - responsible for memory allocation (stack and data regions); devs should be able to magage mem in heap region (e.g. malloc) -->
+
+<!-- Paging -->
+<!-- User mode (vs kernel model) -->
+<!-- File systems -->
+<!-- System calls -->
+<!-- Multitasking (multi-threading or multi-processing) -->
+
+<p>–&gt;</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

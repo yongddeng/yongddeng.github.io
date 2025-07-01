@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>211. martingale</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>211. martingale</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 11, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="tbd-martingale">(TBD) Martingale</h1>
+<hr />
+<p>Originated from gambling, a player will make, on average, no profit with only a limited budget. Paul Lévy proved that the famous martingale startegy is fool. In sprit of Levy’s work, a massive breakthrough was achieved by Joseph Doop. It is a fascinating framework that supports study of stochastic processes, and moreover, a modern probability theory.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>An adapted stochastic process $X$ on a filtered probability space $(\Omega, \mathcal{F}, F, P)$ is called a <a href="">martingale</a> if, for all $s, t \in T$ and $s \leq t$, it satisfies both (i) $X_{t} \in L^1$; (ii) $\operatorname{E}(X_{t} \vert \mathcal{F}_{s}) = X_{s}$ a.s.; The slower a filtration $t \to \mathcal{F}_t$ grows, the easier it is for $X$ to be a martingale. In continuous time, the continuity of the sample paths $t \to X_t$ and the filtration $t \to \mathcal{F}_t$ must be provided. //</p>
+
+<p>The tower property and the stability of $\operatorname{E}$ yields $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}_{s}) = \operatorname{E}[\operatorname{E}(X_{t} \,\vert\, \mathcal{F}_{t}) \,\vert\, \mathcal{F}_{s}] = \operatorname{E}[\operatorname{E}(X \,\vert\, \mathcal{F}_{s}) \,\vert\, \mathcal{F}_{t}]$. It implies the 2nd martingale property $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}_{s}) = \operatorname{E}(\operatorname{E}(X_{t} \,\vert\, \mathcal{F}_{t-h}) \,\vert\, \mathcal{F}_s) = \operatorname{E}(X_{t-h} \,\vert\, \mathcal{F}_s) = \dots = \operatorname{E}(X_{s+h} \,\vert\, \mathcal{F}_s) = X_s$ with some $h \geq 0$. In particular, all martingale has a constant mean $\operatorname{E}X_{t} = \operatorname{E}X_{0}$ for all $t \in T$. By construction, a martingale may be seen as a probabilistic flat line which can be used to model a fair game. A partial sum process $S = (S_t)_{t \in T}$ consists of $S_{t} = \Sigma_{s=0}^{t}X_s$ with ind. $X_s$ whose $\operatorname{E}X_s = 0$ is a popular example of a discrete-time martingale (i.e. the Poisson process and the <a href="">Wiener process/Brownian motion</a>).</p>
+
+<p>A few adjustments of definitions induce another martingales. We let the <a href="">martingale differences</a> (i.e increments) be $D_{0} = X_{0}$ and $D_{t} = X_{t} - X_{t-1}$ for all $t \in \mathbb{Z}^{+}$ <strong>(#1)</strong>, so that $X_{t}$ is the sum of $D_{s}$ for all $s \leq t$. An adapted stochastic process $D = (D_{t})_{t \in T}$ is a <a href="">martingale difference sequence</a> if, for all $s, t \in T$ and $s \leq t$, it satisfies both (i) $D_{t} \in L^1$; (ii) $\operatorname{E}(D_{t} \,\vert\, \mathcal{F}_{s}) = 0$ a.s.; This is almost trivial that $\operatorname{E}D_{t} = 0$ and $\operatorname{E}(D_{t} \,\vert\, \mathcal{F}_{s}) = 0$ a.s. for all $t, s \in \mathbb{Z}^{\geq}$ with $s&lt;t$. That is, a stochastic process $X$ with ind. increments and a constant mean can be refined as a martingale $D$ with a mean zero, where $X$ and $D$ are adpated to a common filtration $F$.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>If, for all $0 \leq s \leq t$, the identity is replaced by $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}_{s}) \geq X_{s}$ a.s., then $X$ is called a <a href="">sub-martingale</a>. Also, if $\operatorname{E}(X_{t} \,\vert\, \mathcal{F}_s) \leq X_s$ a.s., then $X$ is called a <a href="">super-martingale</a>. <strong>(#3)</strong>. For example, $X$ with ind. increments and a constant mean is a martingale, and is a sub-martingale (super-martingale) if its mean is increasing (decreasing). Note that a simple random walk with $p = 1/2$, in which a mean of each summand is given by $2p-1$, is a martingale <strong>(4)</strong>. That is, a martingale corresponds to fair games, a sub-margingale corresponds to favorable games, and a super-margingale corresponds to unfavorable games.</p>
+
+<p>These three unique types of stochastic process have the following properties. // The martingale properties are preserved under sums of the stochastic processes (thus the collection of martingales with respect to a fixed filtration $F$ forms a vector space) // The sub-martingale and super-martingale properties are preserved under multiplication by a positive constant. // Jensen’s inequality turns martingales into sub-martingales under appropriate conditions.</p>
+
+<p>The Doob decomposition theorem: decomposes a basic stochastic process into a martingale and a predictable process (a definition of predictable process will be followed). // In discrete time, a process $X = (X_t)_{t \in T}$ being adapted to $F = (\mathcal{F}_t)_{t \in T}$ is predictable if $\sigma(X_t) \subset \mathcal{F}_{t-1}$ for all $t \in T$. // The proof came up in 1953 and showed both the existence and the uniqueness. // the Krickeberg decom. (p.490) // the Riesz decom. (p.491) // I.e. Gaussian stochastic processes.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>// stopping time theorem::: expectation of stopped martingale is not in general equal to that of a given martingale (i.e. the problem is that $\tau$ is too large), in fact, we have $\operatorname{E}\tau = \infty$ // The optional stopping theorem (or Doob’s optional sampling theorem) which applies to doubling strategies states that</p>
+
+<p>// Doob’s (maximal) inequality::: generalised Kolmogorov’s inequality.</p>
+
+<p>// Doob’s martingale convergence theorems::: If you’re more analysis oriented, martingales, provide (IMO) the most natural proof of the Radon-Nikodym theorem (ok, for separable sigma algebras). The proof is an application of the Martingale Convergence Theorem) // martingale clt</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> I.e. A partial sum process associated with ind. sequences is a martingale. <strong>(4)</strong> Hence it is a sub-martingale (a super-martingale) for $p &gt; 1/2$ ($p &lt; 1/2$).</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

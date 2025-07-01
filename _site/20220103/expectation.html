@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>203. expectated value</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>203. expectated value</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 3, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="expected-value">Expected Value</h1>
+<hr />
+<p>The primitive idea came up in the mid-17th century during the study of the so-called problem of points. Later, Pafnuty Chebyshev in the mid-19th century established the expected value in terms of random variables. This page contains some definitions, properties, and thorems, but the finitness (i.e. integrability) will not be the main interest.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>Let $X: \Omega \to \mathbb{R}$ be a random variable. The <a href="https://en.wikipedia.org/wiki/Expected_value">expected value</a> of $X$ is the Lebesgue integral $\operatorname{E}X = \int_{\Omega} X\, \mathrm{d}P$, which we denote by $\mu_X$ or $\mu$ <strong>(#1)</strong>. If $X = X^+ - X^- = \max(X, 0) - \min(X, 0)$, then either one of $\operatorname{E}X = \operatorname{E}X^+ - \operatorname{E}X^-$ must be finite for all $\omega \in \Omega$ to confront having undefined $\infty - \infty$. We can express $\operatorname{E}X = \int_{\mathbb{R}} x\, \mathrm{d}F_X(x)$. If $X$ is continuous, then $\operatorname{E}X = \int_{\mathbb{R}} xf_X(x)\, \mathrm{d}x$. If $X$ is discrete, then $\operatorname{E}X = \sum_{k=1}^{n} x_{k}p_{x_{k}}$. Moreover, a random variable $Y = g(X)$ being mapped by a Borel function $g: \mathbb{R} \to \mathbb{R}$ yields $\operatorname{E}Y = \int_{\Omega} Y\,\mathrm{d}P$, and a random vector $\boldsymbol{X} = [X_1, \dots, X_n]^{\top}$ has a mean vector $\operatorname{E}\boldsymbol{X} = \operatorname{E}[X_1, \dots, X_n]^{\top} = [\operatorname{E}X_1, \dots, \operatorname{E}X_n]^{\top}$.</p>
+
+<p>An expecation is the <a href="https://en.wikipedia.org/wiki/Weighted_arithmetic_mean">weighted sum</a> $\Sigma_{i=1}^{n}x_{i}p_{i} = \mu$ with $\Sigma_{i=1}^{n}p_i = 1$. The operator $\operatorname{E}$ inherits useful properties of $\int$ including (i) non-degeneracy: if $\operatorname{E}\vert X \vert = 0$, then $X=0$; (ii) non-negativity: if $X \geq 0$, then $\operatorname{E}X \geq 0$; (iii) monotonicity: if $X \leq Y$, then $\operatorname{E}X \leq \operatorname{E}Y$; (iv) domination: if $\operatorname{E}X^\beta &lt; \infty$, then $\operatorname{E}X^\alpha &lt; \infty$ for any $0 &lt; \alpha &lt; \beta$; (v) linearity: $\operatorname{E}(aX + Y) = a\operatorname{E}X + \operatorname{E}Y$ for all $a \in \mathbb{R}$; (vi) multiplicativity: if $P(X \cap Y) \neq P(X)P(Y)$, then often $\operatorname{E}XY \neq \operatorname{E}X\operatorname{E}Y$, but the independence always guarantee the equality in $\operatorname{E}XY = \operatorname{E}X \operatorname{E}Y$;. The linearity may be desirable but <a href="https://en.wikipedia.org/wiki/Simpson%27s_paradox">Simpson’s paradox</a> avoids imprudently summing groups of variable.</p>
+
+<p>Assume that $(X_n)_{n\in\mathbb{N}}$ consists of a non-negative random variable $X_n$ such that $P(X_n \geq 0) = 1$, if $\lim_{n\to\infty} X_{n} = X$ pointwisely, then $\lim_{n\to\infty} \operatorname{E}X_{n} = \operatorname{E}X$ is not necessarily true. Although we cannot interchange limits and expectations at will, the followings provide sufficient conditions (i) <a href="https://en.wikipedia.org/wiki/Monotone_convergence_theorem">monotone convergence theorem</a>: assumes a pointwise convergent sequence is monotonic, i.e. $X_{n} \nearrow X$ as $n \to \infty$ and $\vert X \vert &lt; \infty$ <strong>(#2)</strong>; (ii) <a href="https://en.wikipedia.org/wiki/Dominated_convergence_theorem">dominated convergence theorem</a>: there exists a random variable $Y$ that dominates $X_{n}$: there exists $Y$ such that $\vert X_{n} \vert \leq Y$ for all $n \in \mathbb{N}$ and $\operatorname{E}\vert Y \vert &lt; \infty$; We call it <a href="https://math.stackexchange.com/questions/235511/explanation-of-the-bounded-convergence-theorem">bounded convergence theorem</a> if $Y \geq 0$ is a constant.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>A set of moments of a density is the fundamental descriptive statistics. The <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">$r$-th moment</a> and the <a href="https://en.wikipedia.org/wiki/Central_moment">$r$-th central moment</a> can be obtained by $\operatorname{E}X^r = \int_{\mathbb{R}} x^r \mathrm{d}F_X(x)$ and $\operatorname{E}(X - \operatorname{E}X)^r = \int_{\mathbb{R}} (x - \mu)^r \mathrm{d}F_X(x)$, respectively. Given that the 1st moment equals to the mean $\mu$, if we let $\mu_r$ be the $r$-th central moment, then $\mu_2 = \sigma^2$ is the variance, $\mu_3 / \sigma^3$ is the skewness, and $\mu_4 / \sigma^4$ is the kurtosis. Descriptive statistics are crucial in understanding $X$. However, we may further compute the <a href="https://arxiv.org/pdf/1209.4340.pdf">$r$-th absolute moment</a> $\operatorname{E}{\vert X \vert}^r = \int_{\mathbb{R}} {\vert x \vert}^r\, \mathrm{d}F_X(x)$ and also the $r$-th absolute central moment $\operatorname{E}{\vert X - \operatorname{E}X \vert}^r = \int_{\mathbb{R}} {\vert x - \mu \vert}^r\, \mathrm{d}F_X(x)$, if the four moments are insufficient.</p>
+
+<p>Let $m: \mathbb{R} \to \mathbb{R}$ be a <a href="https://en.wikipedia.org/wiki/Moment-generating_function">moment generating function</a> (mgf) defined by $m(t) = \operatorname{E}e^{tX}$, then its $r$-th derivative with respect to $x$, denoted by $m^{r}(0)$, is the $r$-th moment of $X$. While the existence of $m$ is not guaranteed, $F_{X_1} = F_{X_2}$ if and only if $m_{X_1}(t) = m_{X_2}(t)$ for all $t \in (-\varepsilon, \varepsilon)$ and $\varepsilon &gt; 0$, and also a set of well-defined moments exists if and only if the tails of $F_X$ are exponentially bounded. For example, a collection of all moments (i.e. $r \geq 1$) uniquely determines $F_X$ on a bounded interval (i.e. <a href="https://en.wikipedia.org/wiki/Hausdorff_moment_problem">Hausdorff moment problem</a>), but fails to determine the cdf on an unbounded intervals (i.e. <a href="https://en.wikipedia.org/wiki/Hamburger_moment_problem">Hamburger moment problem</a>) as the integral is infinite <strong>(#3)</strong>.</p>
+
+<p>If $m$ exists, then $m$ is analytic <strong>(#4)</strong>, and so it can be linearly approximated by <a href="https://en.wikipedia.org/wiki/Taylor_series">Taylor expansion</a> $f(x) = \Sigma_{k=0}^{\infty} {f^{k}(x_0)\over{k!}}(x-x_0)^k$. If we let $x_0 = 0$ for $f(x) = e^x = e^{x_0} + e^{x_0}(x-x_0) + {1\over{2!}}e^{x_0}(x-x_0)^2 + \dots$, then $f(x) = 1 + x + {1\over{2}}x^2 + \dots$. Likewise, if we have $m(t) = \operatorname{E}[1 + tX + {1\over{2}}t^2X^2 + \dots]$  around $x_{0}=0$, the linearity of $\operatorname{E}$ yields $m(t) = 1 + t\operatorname{E}X + {1\over{2}}t^2\operatorname{E}X^2 + \dots$ returning $\mu_r$ at $t=0$. If $f$ fails to have derivatives of all orders at a point or the Taylor series of $f$ within any neighborhood is divergent, then $f$ is not analytic at that point. Or, if a point $x_0$ centering the series equals to zero, then $f(x) = \Sigma_{k=0}^{\infty}{1\over{k!}}x^k$ is known as <a href="https://mathworld.wolfram.com/MaclaurinSeries.html">Maclaurin expansion</a>.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>Suppose $X:\Omega\to\mathbb{R}$ is an $L^1$-convergent random variable and $\mathcal{G} \subset \mathcal{F}$ is a <a href="https://math.stackexchange.com/questions/3029823/intuition-of-sub-sigma-algebra-definition">sub-$\sigma$-algebra</a> containing events relevant only to some partial information. A <a href="https://en.wikipedia.org/wiki/Conditional_expectation">conditional expectation</a> of $X|\mathcal{G}$ is any $\mathcal{G}$-measurable function $\operatorname{E}(X \vert \mathcal{G})$ such that $\int_{A}\operatorname{E}(X \vert \mathcal{G})\,\mathrm{d}P = \int_{A}X \,\mathrm{d}P$ for all $A\in\mathcal{G}$. $\operatorname{E}(X \vert \mathcal{G})$ differs from $X$ which may not have a well-defined $\operatorname{E}X = \int_{A} X\,\mathrm{d}P\vert_{\mathcal{G}}$. Also, if $X \in L^2(\Omega, \mathcal{F}, P)$, then $\operatorname{E}(X \vert \mathcal{G})$ is the <a href="https://math.libretexts.org/Bookshelves/Linear_Algebra/Interactive_Linear_Algebra_(Margalit_and_Rabinoff)/06%3A_Orthogonality/6.03%3A_Orthogonal_Projection">orthogonal projection</a> of $X$ to the subspace $L^2(\Omega, \mathcal{G}, P)$ and is the best predictor of all $\mathcal{G}$-measurable $Y \in L^2(\Omega, \mathcal{G}, P)$ such that $X-\operatorname{E}(X \vert \mathcal{G}) \perp L^2$. Note that $\operatorname{E}(Y \vert X = x)$ and $\operatorname{E}(Y \vert X) := \operatorname{E}[Y \vert \sigma(X)]$ is a scalar and a random variable, respectively.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Radon%E2%80%93Nikodym_theorem">Radon-Nikodym derivative</a>, which derives the pdf of a continuous random variable $X$, yields the existence of $\operatorname{E}(X\vert\mathcal{G})$. We let $\mu:A \to \int_{A} X\,\mathrm{d}P$ be a finite measure, then $\mu$ and $P$ are on an absolutely continuous sample space $(\Omega, \mathcal{F})$, and $\mu$ is continuous with respect to $P$. Also, if $g$ is the <a href="https://en.wikipedia.org/wiki/Inclusion_map">inclusion function</a> that maps $A$ contained in $\mathcal{G}$ to $\mathcal{F}$, then $\mu \circ g = \mu\vert_{\mathcal{G}}$ and $P \circ g = P\vert_{\mathcal{G}}$ are the restrictions of $\mu$ and $P$ (both on $\mathcal{G}$), respectively. Here $\mu\vert_{\mathcal{G}}$ is continuous with respect to $P\vert_{\mathcal{G}}$. The condition $P(g(\mathcal{G})) = 0$ implies $\mu(g(\mathcal{G})) = 0$ and also $\operatorname{E}(X\vert\mathcal{G}) = \mathrm{d}\mu\vert_{\mathcal{G}} / \mathrm{d}P\vert_{\mathcal{G}}$. The uniqueness holds if the <a href="https://web.ma.utexas.edu/users/gordanz/notes/conditional_expectation.pdf">versions</a> only differ on the sets with zero probability.</p>
+
+<p>The conditional expectation also inherits properties of the unconditional expectation. In fact, its own properties are fundamental to the study of martingales. These include (i) stability: if $X$ is $\mathcal{G}$-measurable, then $\operatorname{E}(X\,\vert\,\mathcal{G}) = X$ <strong>(#5)</strong>; (ii) <a href="https://en.wikipedia.org/wiki/Law_of_total_expectation">law of total expecation</a>: $\operatorname{E}[\operatorname{E}(X\vert\mathcal{G})] = \operatorname{E}X$; (iii) <a href="https://math.stackexchange.com/questions/41536/intuitive-explanation-of-the-tower-property-of-conditional-expectation">tower properties</a>: if $\mathcal{G}_1 \subset \mathcal{G}_2 \subset \mathcal{F}$, then $\operatorname{E}[\operatorname{E}(X\vert\mathcal{G}_2)\vert\mathcal{G}_1] = \operatorname{E}(X\vert\mathcal{G}_1)$, where $\operatorname{E}(X\vert\mathcal{G}_1) = \operatorname{E}[\operatorname{E}(X\vert\mathcal{G}_1)\vert\mathcal{G}_2]$ due to the stability. One can deduce $\operatorname{Var}(X\vert\mathcal{H}) = \operatorname{E}[(X-\operatorname{E}(X\vert\mathcal{H}))^2\vert\mathcal{H}] = \operatorname{E}(X\vert\mathcal{H})^2 - [\operatorname{E}(X\vert\mathcal{H})]^2$ and yield <a href="https://en.wikipedia.org/wiki/Law_of_total_variance">the law of total variance</a> $\operatorname{Var}X = \operatorname{E}[\operatorname{Var}(X\vert\mathcal{H})] + \operatorname{Var}[\operatorname{E}(X\vert\mathcal{H})]$ which underlies many popular hypothesis tests in statistics such as ANOVA.</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> $\operatorname{E}(\boldsymbol{1}_{A}) = P(A)$ for $A \in \Omega$. <strong>(#2)</strong> Recall the <a href="https://en.wikipedia.org/wiki/Dini%27s_theorem">Dini’s Theorem</a>. <strong>(#3)</strong> Let $f(x) = x^{-2}$ for all $x&gt;1$, then $m(t) = \int_{1}^{\infty} e^{tx}x^{-2}\,dx$ is divergent. <strong>(#4)</strong> In $\mathbb{R}$, we require $f \in C^{\omega} := \lbrace \text{a class of analytic functions} \rbrace$. Whereas, in $\mathbb{C}$, because $C^1 = C^\infty = C^\omega$, we only require $f \in C^1 := \lbrace \text{a class of holomorphic functions} \rbrace$. <strong>(#5)</strong> If $X$ is ind. to $\mathcal{G}$, then simply $\operatorname{E}(X \vert \mathcal{G})=\operatorname{E}X$.</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

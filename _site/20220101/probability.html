@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>201. probability theory</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>201. probability theory</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 1, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="probability-theory">Probability Theory</h1>
+<hr />
+<p>Stein’s <a href="http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf">Real Analysis III</a> outlined an outer measure, browsed its limitations, and adopted measurable sets with sigma algebras. I have perused Amir Dembo’s <a href="https://web.stanford.edu/class/stats310a/lnotes.pdf">Stanford STAT310</a> and Allan Gut’s <a href="https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf">Probability: A Graduate Course</a> along with $\lbrace$<a href="https://www.randomservices.org">W1</a>, <a href="http://theanalysisofdata.com/">W2</a>, <a href="https://www.stat.berkeley.edu/~aldous/">W3</a>$\rbrace$ to acquire the modern measure-theoretic foundations of probability theory.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>A <a href="https://en.wikipedia.org/wiki/Probability_theory">probability theory</a> is grounded in the framework of random <a href="https://en.wikipedia.org/wiki/Experiment_(probability_theory)">experiments</a> (i.e. trials) where the outcome is inherently uncertain prior to execution. A practical execution allows for repetitions under temporally or spatially analogous (or even consistent) conditions <strong>(#1)</strong>. Confidence gained from such repetitions can be futher enhanced with, or contended against our prior knowledge. The subject matter pertains to fully specified mathematical objects in contrast to <a href="https://en.wikipedia.org/wiki/Statistics">statistics</a> which deals with incomplete ones. We engage in the drawing, analysis, and visualisation of samples to determine an unbiased estimator for one or more unknown parameters in the latter.</p>
+
+<p>We call a set $\Omega$ a <a href="https://en.wikipedia.org/wiki/Sample_space">sample space</a>, an element of a set $\omega \in \Omega$ an <a href="https://en.wikipedia.org/wiki/Elementary_event">elementary event</a>, and a subset of a set $A \subseteq \Omega$ of $\lvert{A}\rvert \leq \lvert{\Omega}\rvert$ an <a href="https://en.wikipedia.org/wiki/Event_(probability_theory)">event</a>. $A$ is said to be occurred (not occurred) if $\omega \in A$ ($\omega \notin A$), and can be a generator for a <a href="https://en.wikipedia.org/wiki/%CE%A3-algebra">$\sigma$-algebra</a> $\mathcal{F} = \sigma(A)$ such that (i) $\Omega \in \mathcal{F}$; (ii) if $A \in \mathcal{F}$, then $A^{c} \in \mathcal{F}$; (iii) if $(A_{n})_{n \in \mathbb{N}} \in \mathcal{F}$, then $\bigcup_{n \in \mathbb{N}} A_n \in \mathcal{F}$; If one has $\sigma$-algebras $\mathcal{F}^* = \lbrace \mathcal{F}_0, \mathcal{F}_1, \dots \lvert \, A \subset \mathcal{F_n} \rbrace$, then $\mathcal{F}^*$ is said to be countably generated if there exists only countably many generators <strong>(#2)</strong>. The fundamental idea of a $\sigma$-algebra is to quantify the amount of tangible information from its generator and the largest $\sigma$-algebra yields an extremely friutful tuple $(\Omega, \mathcal{F})$.</p>
+
+<p>We are free to take a <a href="https://en.wikipedia.org/wiki/Power_set">power set</a> $\mathcal{F}_\Omega = \sigma(\Omega)$ for a finite or a countable $\Omega$, but the same set on an uncountable $\Omega$ (i.e. $\mathbb{R}$) violates the axioms as a sum of uncountably many probabilities $P(\Omega) = \Sigma_{\omega\in\Omega} p_\omega = \infty$. Hence we take the <a href="https://en.wikipedia.org/wiki/Borel_set">Borel $\sigma$-algebra</a> $\mathcal{B}_{\mathbb{R}} = \sigma(\mathcal{O} \subset \mathbb{R})$, the smallest $\sigma$-algebra containing every open subsets (that are measurable), and build an Euclidean space $(\mathbb{R}^n, \mathcal{B}_{\mathbb{R}^n})$. Besides, the <a href="https://en.wikipedia.org/wiki/Monotone_class_theorem">monotone class theorem</a> and the $\pi - \lambda$ theorem exist for an algebra and a $\pi$-system, respectively. If an algebra $A$ is a subset of a monotone class $\mathcal{M}$ <strong>(#3)</strong>, then the smallest $\sigma$-algebra $\sigma(A)$ is percisely equal to the smallest monotone class $\mathcal{M}(A)$.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>A <a href="https://en.wikipedia.org/wiki/Probability_measure">probability measure</a> $P: \mathcal{F} \to [0,1]$ defined on any $(\Omega, \mathcal{F})$ must be under the <a href="https://www.stat.berkeley.edu/~aldous/Real_World/kolmogorov.html">Kolmogorov axioms</a> (i) $P(A) \geq 0$ for any $A \in \mathcal{F}$; (ii) $P(\Omega) = 1$; (iii) if $(A_{n})_{n\in\mathbb{N}}$ is a set of pairwise disjoint events, then $P(\bigcup_{n=1}^{\infty} A_{n}) = \Sigma_{n=1}^{\infty} P(A_n)$ <strong>(#4)</strong>; It inherits useful properties of a measure including (i) zero probability: $P\left(\emptyset\right) = 0$; (ii) complement: $P(A^c) = 1 - P(A)$; (iii) monotonicity: if $A \subseteq B$, then $P(A) \leq P(B)$; (iv) sub-additivity: if $A \subseteq \bigcup_n A_n$, then $P(A) \leq \Sigma_n P(A_n)$;. In particular, the monotonicity yields a well-defined $P$ on the limits (if exists) of a sequence $(A_n)_{n\in\mathbb{N}}$ of events. Note that there exists non-empty sets with zero probability.</p>
+
+<p>By construction, if $P\left(\Omega\right) = \Sigma_{\omega\in\Omega}\, p_{\omega} = 1$ with $p_\omega \geq 0$ for all $\omega \in \Omega$, then a probability of $A$ occurring is given by $P(A) = \Sigma_{\omega\in{A}}\, p_\omega$. For instance, if the <a href="https://en.wikipedia.org/wiki/Continuous_uniform_distribution">uniform probability</a> $p_\omega = {\lvert \Omega \rvert}^{-1}$ is assigned to all elements of a finite $\Omega \subset \mathbb{R}$, then $P$ is the counting measure, or the <a href="https://en.wikipedia.org/wiki/Normal_distribution">Gaussian probability</a> $f(x) = {1 \over \sigma\sqrt{2\pi}} e^{-{1 \over 2}({x - \mu \over \sigma})^2}$ assigns non-equal values to the subsets. In discrete sense, given a set of non-negative integers $\Omega = \lbrace k: k \in \mathbb{N}_{0} \rbrace$ and an expected rate of occurrences $\lambda &gt; 0$, the <a href="https://en.wikipedia.org/wiki/Poisson_distribution">Poisson probability</a> $p_k = {\lambda^k\over{k!}}e^{-\lambda}$ which can be derived from the <a href="https://en.wikipedia.org/wiki/Binomial_distribution">binomial distribution</a> assigns measures to an event occurring $k$ times.</p>
+
+<p>If there exists $B \in \mathcal{F}$ such that $A \subset B$ with $P(B) = 0$ (i.e. $B$ is measurable), then $A \subset \Omega$ which may or may not be an element of $\mathcal{F}$ is a <a href="g/wiki/Null_set">null set</a>. We often restrict a <a href="https://en.wikipedia.org/wiki/Probability_space">probability space</a> $(\Omega, \mathcal{F}, P)$ to a <a href="https://math.stackexchange.com/questions/4095399/complete-probability-spaces">complete probability space</a> for the sake of measurability of null sets. The completion treats $A$ being measurable whenever $B$ is measurable. Besides, if there does not exists $\psi \in \Omega$ such that $P(\psi) &gt; P(\omega) &gt; 0$, then $\omega \in \Omega$ is an atom <strong>(#5)</strong>. It hints us that an uncountable $\Omega$ can make a <a href="https://en.wikipedia.org/wiki/Atom_(measure_theory)">non-atomic proability space</a>. I.e. the counting measure $\mu$ on $\Omega = \lbrace 1,2,\dots, 10 \rbrace$ takes a singleton $\lbrace j \rbrace$ as an atom, but the Lebesgue measure $\lambda$ on $\Omega = \mathbb{R}$ has no atom.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>Suppose $(A_{n})_{n \in \mathbb{N}}$ such that $A \subset \Omega$. If $(A_{n})_{n\in\mathbb{N}}$ is <a href="https://en.wikipedia.org/wiki/Monotonic_function">strictly increasing</a> (strictly decreasing), i.e. if $A_{n} \subset A_{n+1}$ ($A_{n} \supset A_{n+1}$), then $\lim_{n \to \infty} A_{n} = \bigcup_{n=1}^{\infty} A_{n}$ ($\lim_{n \to \infty} A_n = \bigcap_{n=1}^{\infty} A_{n}$). A limit of increasing unions of front segments $\bigcup_{k=1}^{n} A_{k} \subset \bigcup_{k=1}^{n+1} A_k$ is defined by $\lim_{n \to \infty} \bigcup_{k=1}^{n} A_k = \bigcup_{k=1}^{\infty} A_k$, and also a limit of decreasing unions of tail segments $\bigcup_{k=n}^{\infty} A_{k} \supset \bigcup_{k=n+1}^{\infty} A_{k}$ is defined by $\lim_{n\to\infty} \bigcup_{k=n}^{\infty} A_{k} = \bigcap_{n=1}^{\infty} \bigcup_{k=n}^{\infty} A_{k} = \limsup_{n\to\infty} A_{n}$. If $\lim_{n\to\infty} \bigcap_{k=n}^{\infty}A_{k} = \bigcup_{n=1}^{\infty}\bigcap_{k=n}^{\infty} A_{k} = \liminf_{n\to\infty} A_{n}$ is equal to $\limsup_{n\to\infty} A_{n}$, then $\liminf_{n\to\infty} A_{n} = \limsup_{n\to\infty} A_{n} = \lim_{n\to\infty} A_{n} = A$. Notice that the first equality is not true in general.</p>
+
+<p>$P$ on a <a href="http://www-groups.mcs.st-andrews.ac.uk/~john/analysis/Lectures/L8.html">bounded monotonic sequence</a> can be a continuous function <strong>(#6)</strong> as analogue to a real-valued function with well-defined limits. That is, if $A_n \nearrow A$ ($A_n \searrow A$) as $n \to \infty$, then $P(A_n) \nearrow P(A)$ ($P(A_n) \searrow P(A)$) as $n \to \infty$. In particular, based on the chain of probabilistic inequalities $P\left(\liminf_{n \to \infty}A_{n}\right) \leq \liminf_{n \to \infty} P\left(A_{n} \right) \leq \limsup_{n \to \infty} P\left(A_{n} \right) \leq P\left(\limsup_{n \to \infty} A_{n}\right)$, if $A_{n} \to A$ as $n \to \infty$, then $P\left(A_{n} \right) \to P(A)$ as $n \to \infty$. The interchange of a probability measure and a limit of a union is also allowed, thus we can express $\lim_{n \to \infty} P(\bigcup_{k=1}^{n} A_{k}) = P(\bigcup_{k=1}^{\infty} A_{k})$ and $\lim_{n \to \infty} P(\bigcup_{k=n}^{\infty} A_{n}) = P(\bigcap_{n=1}^{\infty} \bigcup_{k=n}^{\infty} A_{k}) = P(\limsup_{n\to\infty} A_{n})$.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Borel%E2%80%93Cantelli_lemma">Borel–Cantelli lemmas</a> state sufficient conditions for a convergence of a sequence $(A_n)_{n\in\mathbb{N}}$ of events. The 1st lemma states that if $\Sigma_{n=1}^{\infty} P(A_n) &lt; \infty$, then $P(A_n \text{ i.o.}) = P(\limsup_{n \to \infty} A_n) \leq \lim_{n\to\infty}\Sigma_{k=n}^{\infty}P(A_k) = 0$ <strong>(#7)</strong>, signifying that almost all $\omega\in\Omega$ belong to at most a finite number of events $A_n$. The 2nd lemma states that if $\Sigma_{n=1}^{\infty} P(A_n) = \infty$ and the events $A_n$ are independent, then $P(A_n \text{ i.o.}) = 1$. Nevertheless, desptie of their usabilities in mathematical proofs, the <a href="https://en.wikipedia.org/wiki/Infinite_monkey_theorem">infinite monkey theorem</a> which Émile Borel brought to the public encountered the pungent criticism and the 2nd lemma was considered to be quite nonsense.</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> In time: consecutive coin tosses; In space: throwing multiple coins at once; <strong>(#2)</strong> Let $\Omega = \lbrace 1,2,3 \rbrace$, $A_{0} = \lbrace 1 \rbrace$, $A_{1} = \lbrace 2,3 \rbrace$, then $\mathcal{F} := \sigma(A_0) = \sigma(A_1) = \lbrace \emptyset, \lbrace 1 \rbrace, \lbrace 2,3 \rbrace, \lbrace 1,2,3 \rbrace \rbrace$. <strong>(#3)</strong> $\mathcal{M}$ is a collection of sets that is closed under countable monotone unions and intersections. <strong>(#4)</strong> $A$ and $B$ are ind.: $P(A \cap B) = P(A)P(B)$; $A$ and $B$ are disjoint (mutually exclusive): $A \cap B = \emptyset$; <strong>(#5)</strong> $P(B) &gt; 0$ means that $\exists A \subset B$ s.t. $0 &lt; P(A) &lt; P(B)$. <strong>(#6)</strong> $f:D \to R$ is continuous at $x_0 \in D$ iff $\forall\varepsilon&gt;0\, \exists\delta&gt;0\, \forall{x}\in{D}$ s.t. $|x-x_0|&lt;\delta: |f(x)-f(x_0)|&lt;\varepsilon$. <strong>(#7)</strong> Let $X = [0,1]$, $E_k = [0, 1/2^k]$, and $\lambda$ be a Lebesgue measure, then $\Sigma_{k=1}^{\infty}\lambda(E_k)=1$, and so $\lambda\left(\lbrace x \in X: x \in E_{k} \;\forall k \in \mathbb{N} \rbrace \right) = 0$.</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

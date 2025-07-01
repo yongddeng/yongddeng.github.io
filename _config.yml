@@ -1,0 +1,27 @@
+permalink: /:year:month:day/:title
+url: https://yongddeng.github.io
+#baseurl: /project
+
+# variables
+name: Hikikomori # Your Site Name
+description: # Your description here
+google_verification: null
+
+# File management
+include: [".htaccess"]
+exclude: ["README.md", "LICENSE"]
+
+# # SEO management
+# plugins: ['jekyll-paginate', 'jekyll-sitemap', 'jekyll-include-cache', 'jekyll-gist']
+
+# Sass
+sass:
+  style: :compressed
+  sass_dir: _sass
+
+# Markdown
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter_opts:
+    disable : true

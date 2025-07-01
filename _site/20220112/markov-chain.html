@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>212. markov chain</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>212. markov chain</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 12, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="markov-chain">Markov Chain</h1>
+<hr />
+<p>The Markov property formally describes that the future is independent to the past. Weather forecast is an example which depends primarily on the current weather instead of the entire record of history. The <a href="https://www.youtube.com/watch?v=si76S7QqxTU&amp;list=PLivJwLo9VCULQQkfmXK_ZXzPYc3JJ0Cpn&amp;index=1">link</a> provides many sampling algorithms built upon the Monte Carlo methods and the Markov property.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>We call a stochastic process $X = (X_t)_{t \in T}$ consists of $\mathbb{S}$-valued random variables $X_{t}:\Omega \to \mathbb{S}$ a <a href="">Markov process</a> if it satisfies the <a href="https://en.wikipedia.org/wiki/Markov_property">Markov property</a> $P(X_{t} = x_{t} \,\vert\, X_{t-1} = x_{t-1}, \dots, X_{1} = x_1) = P(X_{t} = x_{t} \,\vert\, X_{t-1} = x_{t-1})$ for all $t \in T$. We primarily work with a discrete-time Markov process on a countable state space $\mathbb{S}$, called a <a href="https://en.wikipedia.org/wiki/Markov_chain">Markov chain</a>, and so a joint pmf for $t$ consecutive realisations is given by $P(X_{t}, X_{t-1}, \dots, X_{1}) = P(X_{t}\,\vert\,X_{t-1}) P(X_{t-1}\,\vert\,X_{t-2}) \dots P(X_{1}) = \prod_{s=1}^{t-1}P(X_{s+1}\,\vert\,X_{s}) P(X_{1})$. We focus on the initial <a href="">state probabilities</a> $\pi_{j}(1) = P(X_{1} = j)$ and the $1$-step <a href="">transition probabilities</a> $p_{ij}(s) = P(X_{s+1} = j \,\vert\, X_{s} = i)$, where $i, j \in \mathbb{S}$ <strong>(#1)</strong>.</p>
+
+<p>If $\mathbb{S}$ contains $n$ distinct elements (i.e. finite), then we can write a <a href="https://en.wikipedia.org/wiki/Stochastic_matrix">transition matrix</a> $\mathbf{P} = (p_{ij})$ with $\Sigma_{j \in \mathbb{S}}p_{ij} = 1$, where $\mathbf{P}$ is an $n \times n$ positive semi-definite matrix. If, in addition, it is <a href="">time-homogeneous</a> $P(X_{t} = j \,\vert\, X_{t-1} = i) = P(X_{t-1} = j \,\vert\, X_{t-2} = i)$ for all $t &gt; 2$, then the <a href="https://en.wikipedia.org/wiki/Chapman%E2%80%93Kolmogorov_equation">Chapman-Kolmogorov equation</a> yields $\mathbf{P}(k)\mathbf{P}(s) = \mathbf{P}(k+s) = [p_{ij}(k+s)]$. That is, the $k$-step transition matrix is equal to that of $k$-th power $\mathbf{P}^k = \mathbf{P}(k) = [p^{(k)}_{ij}(1)]$ <strong>(#2)</strong>. For instance, let $t=3$ and $h \in \mathbb{S}$ be an intermediate state in between $i$ and $j$, so we need $p^{(2)}_{ij}(1) = P(X_{3} = j \,\vert\, X_{1} = i) = \Sigma_{h}P(X_{3}=j \,\vert\, X_{2}=h) P(X_{2}=h \,\vert\, X_{1}=i) = \Sigma_{h}p_{ih}(1)p_{hj}(1)$ for the joint pmf.</p>
+
+<p>We now consider a state pmf $\pi(t) = [\pi_{j}(t)]$, where $\pi_{j}(t) = \Sigma_{i}p_{ij}\pi_{i}(t-1)$. If $\pi_{j}(t)\to\pi_{j}$ and $\pi_{i}(t-1)\to\pi_{i}$ as $t\to\infty$, then $\lim_{t\to\infty}\pi(t) = \pi$ is a stationary state pmf or a <a href="https://www.youtube.com/watch?v=4sXiCxZDrTU">steady state</a>, where $\pi$ is a $(1 \times n)$ row vector with $\Sigma_{j}\pi_{j} = 1$ and $\pi_{j} = \Sigma_{i}p_{ij}\pi_{i}$. In fact, the <a href="">Perron-Frobenius theorem</a> enumerates the eigenvalues of $\mathbf{P}$ by $1= \vert \lambda_{1} \vert &gt; \vert \lambda_{2} \vert \geq\cdots\geq \vert \lambda_{n} \vert$, and also its matrix notation $\pi\mathbf{P}=\pi$ is in the form $v^{\top}A = v^{\top}\lambda$. Thus, the left eigenvector $q_{1}$ of $q_{1}^{\top}\mathbf{P} = q^{\top}_{1}\lambda_{1}$ is a steady state, and the rate of convergence of $\pi(t)$ is in the order of $\lambda_2/\lambda_1$. A limiting distribution $\pi(1)\mathbf{P}^{\infty}=\pi$ of a time-homogeneous Markov chain, if exists, is always unique.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>We introduce a few jargons to read the formal statements describing behaviours of a Markov chain and the conditions under which a state pmf becomes steady. A state $j$ is <a href="">accessible</a> from a state $i$, denoted by $i \rightarrow j$, if $p_{ij}(s) &gt; 0$ for some $s\geq{1}$. Whereas, $i$ is <a href="">absorbing</a> if $p_{ij}(s) = 0$ for some $s\geq{1}$ and all $j \in S$. If both $i \rightarrow j$ and $j \rightarrow i$, and thus $i \leftrightarrow j$, we say $i$ and $j$ <a href="">communicate</a> with each other <strong>(#3)</strong> and belong to the same <a href="">class</a>. Intuitively, a Markov chain will be consisting of one or more disjoint communication classes, and a system with a single class is said to be <a href="">irreducible</a> in which all states in the chain communicate with each other.</p>
+
+<p>Suppose $f_{i} = P(X_{k} = i \;\text{for some}\; k&gt;1 \,\vert\, X_{1}=i)$ is a probability that a Markov chain departed from $i$ returns to $i$ at least once, then $i$ is <a href="">recurrent</a> if $f_{i} = 1$, and <a href="">transient</a> if $f_{i} &lt; 1$. That is, a recurrent state occurs infinitly often, and a transient state occurs finitly often. We can easily assume that a probability of escaping a transient state $i$ follows $\operatorname{Bernoulli}(1-f_{i})$, and a number of returns to $i$ within a $k$-steps follows $\text{Geom}(1-f_{i})$. Let $p^{(k)}_{ii}$ be a probability that a Markov chain departed from $i$ returns to $i$ after $k$-step, then $i$ is recurrent if and only if $\Sigma_{k=2}^{\infty}p^{(k)}_{ii} = \infty$, and transient if and only if $\Sigma_{k=2}^{\infty}p^{(k)}_{ii} &lt; \infty$, where $p^{(k)}_{ii}$ is ind. of an index $s$ on a conditioning.</p>
+
+<p>Let $t_{ii}$ be an elapsed time of returning to $i$ from $i$ such that $\mu_{ii} = \operatorname{E}t_{ii}$ is a <a href="">mean recurrence time</a>. We call $i$ a <a href="">positive recurrent</a> if $\mu_{ii} &lt; \infty$, and <a href="">null recurrent</a> if $\mu_{ii} = \infty$. If, in addition, $i$ is the initial departure and $\lbrace \tau_{ii}(s) \rbrace_{1 &lt; s \leq k}$ is a set of i.i.d. elapsed times, then a proportion of time spent in $i$ until $s$-th returns will by $s/\Sigma_{l=1}^{s}\tau_{ii}(l)$ such that $s/\Sigma_{l=1}^{s}\tau_{ii}(l) \to 1/\mu_{ii} = \pi_i$ as $k\to\infty$ by the WLLN. A state $i$ has <a href="">period</a> $d = \gcd \lbrace k&gt;1:p^{(k)}_{ii}&gt;0 \rbrace$ <strong>(#4)</strong>. We say $i$ is <a href="">periodic</a> if $d&gt;1$, and <a href="">aperiodic</a> if $d=1$. All state in a class share the same $d$ as periodicity, recurrence, and transience are a class property. An irreducible Markov of $d=1$ is aperiodic.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>A state $i$ is <a href="https://stats.libretexts.org/Bookshelves/Probability_Theory/Book%3A_Introductory_Probability_(Grinstead_and_Snell)/11%3A_Markov_Chains/11.03%3A_Ergodic_Markov_Chains">ergodic</a> if it is aperiodic and positive recurrent. An irreducible Markov chain is ergodic if the states are ergodic. Moreover, an ergodic system comes if there exists $N$ such that any state $i$ is reachable from any other state $j$ within any step $n \leq N$. For example, a fully connected transition matrix (i.e. $p_{ij} &gt; 0$ for all $i,j\in\mathbb{S}$) fulfils the sufficient condition with $N = 1$. A system with more than one state and just one out-going transition per state cannot be ergodic as it is either not irreducible or not aperiodic. Ergodicity shines because it provides a unique steady state which in general varies with an initial state pmf of a regular system.</p>
+
+<p>A Markov chain is <a href="https://cims.nyu.edu/~holmes/teaching/asa19/handout_Lecture3_2019.pdf">reversible</a> with respect to $\pi$ if it holds the <a href="https://en.wikipedia.org/wiki/Detailed_balance">detailed balanced condition</a> $\pi_{i}p_{ij} = \pi_{j}p_{ji}$ for all $i,j\in\mathbb{S}$. In particular, if $X$ is a general system and there exists $\pi$ such that the condition is held, then $\Sigma_{i}\pi_{i}p_{ij} = \Sigma_{i}\pi_{j}p_{ji} = \pi_{j}\Sigma_{i}p_{ji} = \pi_{j}$ and so $X$ holds the global balance condition $\pi = \pi{P}$. These yield a new sampling framework <a href="https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo">Markov chain Monte Carlo</a> (MCMC) and overcome the limitation of the <a href="https://www.youtube.com/watch?v=OXDqjdVVePY">rejection sampling</a> <strong>(5)</strong>. The <a href="https://www.youtube.com/watch?v=yCv2N7wGDCw">Metropolis algorithm</a> is a popular instance which uses symmetric conditional candidate density functions to return (i.e. after a <a href="http://users.stat.umn.edu/~geyer/mcmc/burn.html">burn-in period</a>) sequences of numbers which we hope can reflect a target density function.</p>
+
+<p>MCMC under the Bayesian settings can generate observations from the posterior (to estimate parameters $\theta$ given data $\mathbf{x}$) <strong>(6)</strong>. MCMC may suffer the curse of dimensionality whereby regions of higher probability tend to stretch and get lost in an increasing volume of space. A well-designed model that can learn all available information from the entire records may be more sophisticaed than a partly conditioned model. We naively assume the Markov property as computing the joint dist. of such model is impractical. The <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> developed by Larry Page and Sergey Brin in 1996 can be understood as a Markov chain.</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> Many results for Markov chains can be extended to chains with an uncountable state space, so-called Harris chains. <strong>(#2)</strong> We may eigen-decompose a trainsion matrix: $\mathbf{P}^k = \mathbf{Q}\mathbf{\Lambda}^k\mathbf{Q}^{-1}$, so that a diagonal opeartion makes a matrix multiplication more efficient. <strong>(#3)</strong> If $i \rightarrow h$ and $h \rightarrow j$, then $i \rightarrow j$. <strong>(#4)</strong> That is, $p^{(k)}_{ii} = 0$ whenever $k$ % $d \neq 0$ for all $k &gt; d$. <strong>(5)</strong> It merely uses ind. observations. <strong>(6)</strong> <a href="https://www.pnas.org/doi/pdf/10.1073/pnas.0306899100">P Marjoram (2003)</a> attempted the same without the use of likelihoods.</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>208. central limit theorem</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>208. central limit theorem</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 8, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="central-limit-theorem">Central Limit Theorem</h1>
+<hr />
+<p>The LLNs state that $\bar{X} = n^{-1}\Sigma_{k=1}^{n}X_k$, consist of i.i.d. realisations $X_1, \dots, X_n$ of $\operatorname{E}X_k = \mu$ and $\operatorname{Var}X_k = \sigma^2 &lt; \infty$, converges in prob. and a.s. to $\mu$, respectively. Whereas, the CLTs state that a scaled difference $n^{-1}\Sigma_{k=1}^{n}X_k - \mu$ converges in dist. to the standard normal. The Galton’s <a href="https://www.statisticshowto.com/galton-board/">quincunx</a> has ingeniously illustrated the fundamental idea behind the CLT.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>Let $X \sim \operatorname{Bin}(n,p)$ be a binomially distributed random variable of $\operatorname{E}X = np$ and $\operatorname{Var}X = npq$, where $p&gt;0$ and $p+q=1$. The <a href="">de Moivre–Laplace theorem</a> says a normal approaches to a binomial: $\binom{n}{h}p^{h}q^{n-h} \simeq \exp(-(h-np)^{2}/2npq)/\sqrt{2\pi{npq}}$ as $n \to \infty$. one can show that $Z_n = (X-np)/\sqrt{npq} \xrightarrow{d} Z$, and thus $P(Z_n \leq z) \xrightarrow{p} \Phi(z)$ as $n\to\infty$, where $Z \sim \mathcal{N}(0,1)$ is continuous, $\Phi(z) = \int_{-\infty}^{z} f_Z(v)\,\mathrm{d}v$ and $f_Z(z) = \exp(-z^2/2)/\sqrt{2\pi}$ are the distribution and the density function of $Z$, respectively. de Moivre initially applied a normal to approximate a number of heads occured by fair coin tosses <strong>(#1)</strong> and Laplace continued his legacy.</p>
+
+<p>By definition, for any $Y \sim \mathcal{N}(\mu,\sigma^2)$, the first-order derivative of its density function is given by $f_{Y}^{\prime}(y) = -\sigma^{-2}(y-\mu) \cdot f_{Y}(y)$ such that $\int_{-\infty}^{\infty} f_{Y} = 1$ and $[f^{\prime}_Y(y) / f_{Y}(y)] \cdot [\sigma^{2} / (\mu-y)] = 1$. One can prove the statement by instead computing its <a href="https://calculus.subwiki.org/wiki/discrete%20derivative">discrete derivative</a> $[(p_{X}(n,k+1)-p_{X}(n,k))/p_{X}(n,k)] \cdot [npq / np-h] \to 1$ as $n\to\infty$, where $c&gt;0$ and $h = np + c\sqrt{npq}$ <strong>(#2)</strong>. Despite recent computational advancements easing the handling of binomial distributions, the theorem endures mainly due to its applicability across all different probability distributions, and its validity stemming from its independence of the i.i.d. assumption over numerous trials.</p>
+
+<p>Let $(X_n)_{n \in \mathbb{N}}$ consists of ind. random variables $X_{k}$ such that $\operatorname{E}X_k = \mu_k$ and $\operatorname{Var}X_k = \sigma_{k}^2 &lt; \infty$, $S_n = \Sigma_{k=1}^{n}X_k$ be a partial sum, and $\operatorname{Var}S_n = \Sigma_{k=1}^{n}\sigma^{2}_k = s_n^2$. If $(X_n)_{n \in \mathbb{N}}$ holds <a href="">Lyapunov’s condition</a>: $\lim_{n\to\infty} s^{-(2+\delta)}_n \Sigma_{k=1}^{n}\operatorname{E}{\vert X_k - \mu_k \vert}^{2+\delta} = 0$ for some $\delta &gt; 0$, then the <a href="">Lyapunov’s CLT</a> states $Z_n = s^{-1}_n \Sigma_{k=1}^{n} (X_k-\mu_k) = (S_n-\operatorname{E}S_n)/\sqrt{\operatorname{Var}S_n} \xrightarrow{d} Z$ as $n\to\infty$. His study emphasises that the overall behavior is paramount, permitting a few exceptionally large $(2+\delta)$-moments. That is, the condition in essence ensures that the influence of $\sigma^{2}_k$ on $s^2_n$ becomes negligible as $n$ grows, mitigating distortions of a few undesirable summands $X_k$.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>The Lyapunov’s CLT remains true as long as $\sigma^{2}_k$ are not excessively large compared to $s^2_n$. Accordingly, if we assume <a href="">Lindeberg’s condition</a>: $\lim_{n\to\infty} s_n^{-2} \Sigma_{k=1}^{n}\operatorname{E}[(X_k - \mu_k)^{2} I_{\vert X_k - \mu_k \vert &gt; \varepsilon{s_n}}] = 0$ for all $\varepsilon&gt;0$, then the <a href="">Lindeberg-Feller’s CLT</a> guarantees that $Z_n = s_n^{-1}\Sigma_{k=1}^{n}(X_k - \mu_k) \xrightarrow{d} Z$ as $n \to \infty$. While the thoeorem merely holds the sufficiency ($\Rightarrow$: if), <a href="">Feller’s condition</a> holds the partial necessity ($\Leftarrow$: only if) by observing the two facts: (i) Lindeberg’s condition implies $\lim_{n\to\infty} \max_k \sigma_k^2/s_n^{2} = 0$; (ii) a sequence of ind. random variables $X_k$ which converges in dist. to $Z$ and holds $\lim_{n\to\infty} \max_k \sigma_k^2/s_n^{2} = 0$ implies Lindeberg’s condition;</p>
+
+<p>Suppose $\mu_{k}=0$ wlog and let $\varphi_{Z_n}(t) = \operatorname{E}e^{itZ}$ for $Z_{n} = S_{n}/s_{n}$ to study the convergence. If $S^{\prime}_{n} = \Sigma_{k=1}^{n}X^{\prime}_{k}$ with $X^{\prime}_{k} = X_{k} - \mu_{k}$, then $Z^{\prime}_{n} = S^{\prime}_{n} / s^{\prime}_{n} = S_{n} / s_{n} = Z_{n}$, where $s^{\prime}_{n} = s_{n}$. If the Lindeberg’s condition holds, we have $Z^{\prime}_{n} \xrightarrow{d} Z$ as $n\to\infty$ and $Z_{n} \xrightarrow{d} Z$, because $\operatorname{E}[(X_{k})^{2} I_{\vert X_{k} \vert &gt; \varepsilon{s_{n}}}] = \operatorname{E}[(X^{\prime}_{k})^{2} I_{\vert X^{\prime}_{k} \vert &gt; \varepsilon{s^{\prime}_{n}}}]$. We shall concentrate on the following as usual: $\varphi_{Z_{n}}(t) = \prod_{k=1}^{n}\varphi_{X_{k}}(t/s_{n}) = \exp(\Sigma_{k=1}^{n}\log(\varphi_{X_{k}}(t/s_{n}))) \to \exp(-t^2/2) = \varphi_{Z}(t)$ as $n\to\infty$ <strong>(#4)</strong>. It may be worth expanding $(S_{n})_{n\in\mathbb{N}}$ as a row-wise ind. <a href="">triangular arrays</a> $S_{n} = X_{n,1} + X_{n,2} + \dots + X_{n,n}$ to manifest generality and capability of the theorems.</p>
+
+<p>// For the other half, we bound $C_{1}(n) = \max_k s_{n}^{-2}\operatorname{E}(X^{2}_{k} I_{\vert X_{k} \vert \leq\varepsilon{s_{n}}}) + \max_k s_{n}^{-2} \operatorname{E}(X^{2}_k I_{\vert X_k \vert &gt;\varepsilon{s_n}}) \leq \varepsilon^2 + C_{2}(n)$ for any $\varepsilon &gt; 0$, where $C_{1}(n) = \max_{k}s_{n}^{-2}\sigma_{k}^2$ and $C_{2}(n) = s_{n}^{-2}\operatorname{E}(X^{2}_{k} I_{\vert X_{k} \vert &gt;\varepsilon{s_{n}}})$. Lindeberg’s condition implies $C_{2}(n) \to 0$ as $n\to\infty$ and so $C_{1}(n) \to 0$. In particular, $\mu_{k} = 0$ guarantees the existence of $k &lt; n$ such that $0 &lt; \sigma^2_{k}$ and the term $s^{-2}_{n} \sigma^2_{k} \to 0$ if $C_{1}(n) \to 0$. A numerator in Lindeberg’s condition seeks for all $X_{k}$ with $\operatorname{Var}(X_{k} I_{\vert X_{k} \vert &gt; \varepsilon{s_{n}}})$, but the one in Feller’s seeks for $X_{k}$ with $\max_{k} \operatorname{Var}X_{k}$ <strong>(#5)</strong>. At last, suppose $C_{1}(n) \to 0$ and $\varphi_{S_{n}/s_{n}}(t) \to \exp(-t^2/2)$ as $n\to\infty$, then we would show that $C_2(n) \to 0$ as $n\to\infty$.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>The <a href="">Lindeberg–Lévy’s CLT</a> gians popularity due to its simplicity. Suppose $(X_n)_{n \in \mathbb{N}}$ is a sequence of i.i.d. random variables with $\operatorname{E}X_n = \mu$ and $\operatorname{Var}X_n = \sigma^2 &lt; \infty$. The CLT states that $\bar{X}_n \xrightarrow{d} \mathcal{N}(\mu, \sigma^2/n)$ as $n\to\infty$, and so $\sqrt{n}(\bar{X}_n - \mu) \xrightarrow{d} \mathcal{N}(0, \sigma^2)$, or equivalently, $Z_n = \sigma^{-1}[\sqrt{n}(\bar{X}_n - \mu)] \xrightarrow{d} Z$ as $n\to\infty$. It is a fundamental of <a href="">statistical hypothesis tests</a> whereby we examine an assumption regarding a population parameter such as $\operatorname{E}X$. We can assume that the dist. of the sum of residuals $\Sigma_{k=1}^{n}\varepsilon^2_k$ is roughly normal when scaled by $1/n$, even if $\varepsilon^2_k = (X_k - \hat{X}_k)^2 \not \sim \mathcal{N}(0,\sigma^{2}_k)$. The <a href="">QQ plot</a> and/or the <a href="">Shapiro-Wilk test</a> studies the normality.</p>
+
+<p>As before, let $Z_n = (S_n - n\mu)/\sqrt{n\sigma^2} = \Sigma_{k=1}^{n}(X_k - \mu)/\sqrt{n\sigma^2} = \Sigma_{k=1}^{n}Y_{k}/\sqrt{n}$, where $Y_{k} = (X_{k} - \mu)/\sigma$ with $\operatorname{E}Y_{k}=0$ and $\operatorname{Var}Y_{k} = 1$. Thus the characteristic function is given by $\varphi_{Z_n}(t) = \varphi_{\Sigma_{k=1}^{n}Y_{n}/\sqrt{n}}(t) = \prod_{k=1}^{n}\varphi_{Y_k}(t/\sqrt{n}) = [\,\varphi_{Y_1}(t/\sqrt{n})\,]^n$. For all $t\in\mathbb{R}$, we can write $\varphi_{Z_n}(t) =[\, 1 - t^{2}/2n + \mathcal{o}(t^2/n) \,]^n \to \exp(-t^2/2)$ as $n \to \infty$ for the continuity theorem to complete proof. The convergence is uniform in $z \in \mathbb{R}$ such that $\lim_{n\to\infty}\sup_{z\in\mathbb{R}}{\vert P(\sqrt{n}(\bar{X}_n-\mu)) - \Phi(z/\sigma) \vert} = 0$, and so $\lim_{n\to\infty}Z_n = 0$ if $X$ is degenerate (i.e. $\sigma=0$). Lévy is renowned for employing a characteristic function and the continuity theorem to facilitate proofs.</p>
+
+<p>The Lindeberg–Lévy’s CLT is the special case of the above two. Under the i.i.d. assumption, whenever $\sigma^2 &lt; \infty$, the Feller’s condition yields $\sigma^2 / n\sigma^2 = 1/n \to 0$ as $n\to\infty$. In fact, if each realisation $\mathbf{X}_{n} = [X_{1}, \dots, X_{m}]^\top$ is an element of $\mathbb{R}^m$, then a sample mean is given by $\mathbf{\bar{X}}_{n} = n^{-1}\Sigma_{k=1}^{n}\mathbf{X}_{k}$ while summation is component-wise. Provided that $\mathbf{\mu} = \operatorname{E}\mathbf{X} = [\operatorname{E}X_{1}, \dots, \operatorname{E}X_{m}]^{\top}$ and $\operatorname{K}_{\mathbf{X}\mathbf{X}} = \operatorname{Var}\mathbf{X} = \operatorname{Cov}(\mathbf{X},\mathbf{X}) = \operatorname{E}[(\mathbf{X} - \mathbf{\mu})(\mathbf{X} - \mathbf{\mu})^{\top}] &lt; \mathbf{\infty}$, the multivariate CLT would yield $\sqrt{n}(\mathbf{\bar{X}}_{n}-\mathbf{\mu}) \xrightarrow{d} \mathcal{N}(0, \operatorname{K}_{\mathbf{X}\mathbf{X}})$ as $n\to\infty$. The <a href="">Berry–Esseen theorem</a> asserts a convergence rate of at least $n^{-1/2}$ with a finite 3rd central moment <strong>(#6)</strong>.</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> For $n$ coin tosses, if $X_k=\text{Head}$ for some $k=1,\dots,n$, then we record $h \text{ += } 1$. <strong>(#2)</strong> Other proof uses the Stirling’s formula. <strong>(#3)</strong> Recall that the skewness $\mu_3 / \sigma^3$ and the kurtosis $\mu_4 / \sigma^4$ are measures of the dist. function (i.e. $\mu_r$ is the $r$-th central moment). <strong>(#4)</strong> Whole proof is in <a href="https://www.youtube.com/watch?v=W4oMaExapVs">here</a>. <strong>(#5)</strong> E.g. Let $(X_n)_{n\in\mathbb{N}}$ be a set of uniformly bounded $X_k$ such that ${\vert X_k \vert} \leq M$ for all $k \leq n$. If $s_\infty = \infty$, then $\operatorname{E}[(X_k - \mu_k)^{2} I_{\vert X_k - \mu_k \vert &gt; \varepsilon{s_n}}] = \int_{\lbrace \vert X_k - \mu_k \vert &gt; \varepsilon{s_n} \rbrace} (X_k - \mu_k)^{2}\,\mathrm{d}F_k(x) \leq (2M)^2P(\vert X_k - \mu_k \vert &gt; \varepsilon{s_n}) \leq (2M)^2\sigma^2_k / \varepsilon^2{s^2_n}$, and thus Lindeberg’s condition is met. <strong>(#6)</strong> Shevtsova (2011) and  <a href="https://arxiv.org/pdf/0912.0726.pdf">Tyurin (2010)</a> reduced the error to 0.56. from 7.59 that of Esseen (1942). Besides, the <a href="https://digitalassets.lib.berkeley.edu/math/ucb/text/math_s6_v2_article-34.pdf">Stein’s method</a> is a general method to obtain bounds on the distance between two probability distributions.</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

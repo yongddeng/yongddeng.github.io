@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>207. law of large number</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>207. law of large number</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 7, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="law-of-large-number">Law of Large Number</h1>
+<hr />
+<p>Empirically, as a fair die undergoes more rolls, a normalised sum converges toward $3.5 \simeq n^{-1}\Sigma_{k}^{n} X_{k}$. This prompts us to investigate whether the mathematical formulations of convergence apply to sums of independent random variables. We aim to delve into rigorous proofs for the LLNs. Such scrutiny is crucial as it mitigates the disruptive impact of wild randomness inherent in small samples.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>The <a href="">weak law of large numbers</a> (WLLN) arises from weak convergence. Let $\bar{X}_n = n^{-1}S_n$ be a sample mean and $S_n = \Sigma_{k=1}^{n}X_k$ be a partial sum consists of ind. $X_k$ of $\operatorname{E}X_k = \mu$ and $\operatorname{Var}X_k = \sigma_k^2 &lt; \infty$. The linearity and ind. yield $\operatorname{E}\bar{X}_n = n^{-1}\Sigma_{k=1}^{n}\operatorname{E}X_k = \mu$ and $\operatorname{Var}\bar{X}_n = n^{-2}\Sigma_{k=1}^{n}\operatorname{Var}X_k = n^{-2}\Sigma_{k=1}^{n}\sigma_k^2$, respectively. Chebyshev’s inequality instantly leads to $\operatorname{Var}\bar{X}_n \to 0$ or $\bar{X}_n \xrightarrow{L2} \mu$ as $n \to \infty$, and thus $\bar{X}_n \xrightarrow{p} \mu$ as $n \to \infty$, as desired. If we consider $(X_n)_{n\in\mathbb{N}}$ consists of i.i.d random variables $X_n \sim \delta(\mu, \sigma^2)$ in which they have some common probability distribution $\delta$, then $\operatorname{Var}\bar{X}_n = n^{-1}\sigma^2$ indeed suffices the criteria for $L^2$-convergence <strong>(#1)</strong>.</p>
+
+<p>One may refine the WLLN with (problematic) divergent summands via truncation. If a non-random positive number $b_{n} \uparrow \infty$ satisfies (i) $\Sigma_{k=1}^{n}P(\vert X_{k} \vert &gt; b_{n}) \to 0$ <strong>(#2)</strong>; (ii) $\operatorname{Var}(b_{n}^{-1} \tilde{S}_{n}) \to 0$;, then a new sample mean $b_n^{-1} S_{n} \xrightarrow{p} \tilde \mu$ as $n \to \infty$, where $\tilde\mu = \operatorname{E}b_{n}^{-1}\tilde{S}_{n}$ and $\tilde{S}_{n} = \Sigma_{k=1}^{n}\tilde{X}_{k}$ consists of $\tilde{X}_{n} = X_{n} I_{\vert X_{n} \vert \leq b_{n}}$. If we bound $P(\vert b_{n}^{-1}S_{n} - \tilde{\mu} \vert &gt; \varepsilon) \leq P(S_{n} \neq \tilde{S}_{n}) + P(\vert b_{n}^{-1}\tilde{S}_{n} - \tilde{\mu} \vert &gt; \varepsilon)$ based on $\lbrace \vert b_{n}^{-1}S_{n} - \tilde{\mu} \vert &gt; \varepsilon \rbrace \subseteq \lbrace S_{n} \neq \tilde{S}_{n} \rbrace \cup \lbrace \vert b_{n}^{-1}\tilde{S}_{n} - \tilde{\mu} \vert &gt; \varepsilon \rbrace$, then $P(\vert b_{n}^{-1}\tilde{S}_{n} - \tilde\mu \vert &gt; \epsilon) \leq \epsilon^{-2}\operatorname{Var}(b_{n}^{-1} \tilde{S}_{n}) \to 0$, and furthermore, $P(S_{n} \neq \tilde{S}_{n}) \leq P(\bigcup_{k=1}^{n} \lbrace X_{k} \neq \tilde{X}_{k} \rbrace) \leq \Sigma_{k=1}^{n} P(X_{k} \neq \tilde{X}_{k}) = \Sigma_{k=1}^{n}P(\vert X_{k} \vert &gt; b_{n}) \to 0$. The WLLN holds under these criteria.</p>
+
+<p>A characteristic function and the assumption of a finite mean also appear in a nested proof. Given that $\varphi_{X+Y}(t) = \varphi_{X}(t)\varphi_{Y}(t)$ and $\varphi_{X/n}(t) = \varphi_X(t/n)$, one can use Taylor expansion $\varphi_X(t) = 1 + itX + {(itX)^2 \over 2!} + {(itX)^3 \over 3!} + \dots \simeq 1 + itX + \mathcal{o}(t)$, where the little $\mathcal{o}$ notation in $\mathcal{o}(t)$ denotes that a function vanishes more rapidly than $t$. Indeed, $\varphi_{\bar{X}_n}(t) = \varphi_{\Sigma_{k=1}^{n}n^{-1}X_k}(t) = [\varphi_{X/n}(t)]^n = [\varphi_X(t/n)]^n = [1 + {it\operatorname{E}X \over n} + \mathcal{o}({t \over n})]^n = [1 + {it \mu \over n} + \mathcal{o}({t \over n})]^n$, and thus $\varphi_{\bar{X}_n}(t) \to \varphi_\mu(t)$ as $n\to\infty$, where $\varphi_\mu(t) = e^{it\mu}$. Note that $F_{\bar{X}} \to \mu$ and $\bar{X} \xrightarrow{p} \mu$ as $n\to\infty$, based on the Levy’s continuity theorem <strong>(#3)</strong>.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>The <a href="">strong law of large numbers</a> (SLLN) arises from strong convergence <strong>(#4)</strong>. We let $S_n = \Sigma_{k=1}^{n}X_k$ be a partial sum consists of an ind. $X_k$ such that $(\mu_k, \sigma_k^2)$ is unspecified. The <a href="">Kolmogorov’s three-series theorem</a> states that, if $\operatorname{Var}S_\infty = \Sigma_{k=1}^{\infty}\operatorname{E}(X_k - \operatorname{E}X_k)^2$ converges (and so $\operatorname{E}S_\infty$), then $\Sigma_{k=1}^{\infty} (X_k - \operatorname{E}X_k)$ converges a.s.. Hence if the sum is finite, then summands that contribute to the sum converge to zero. As $\Sigma$ is linear, we restate $\Sigma_{k=1}^{n}(X_k - \operatorname{E}X_k) = \Sigma_{k=1}^{n}X_k - \operatorname{E}\Sigma_{k=1}^{n}X_k = S_n - \operatorname{E}S_n \xrightarrow{a.s.} 0$ as $n \to \infty$. In particular, if $\operatorname{E}S_\infty$ converges, then $S_n \xrightarrow{a.s.} \operatorname{E}S_n$ as $n \to \infty$. These could be sufficient criteria for the a.s. convergence of the SLLN.</p>
+
+<p>Given that Kolmogorov’s inequality assures $P(\max_{n\leq k\leq m}{\vert (S_k - \operatorname{E}S_k) - (S_n - \operatorname{E}S_n) \vert} &gt; \varepsilon) \leq \varepsilon^{-2}\operatorname{Var}(S_{m} + S_{n}) \to 0$ as $n \to \infty$, we use the <a href="">Kronecker’s lemma</a>, which is proved by <a href="">summation by parts</a> and the <a href="">Cesàro mean</a>, to link up the SLLN to the Kolmogorov’s two-series theorem. The lemma in the context of analysis states the following: Let $(x_{n})_{n\in\mathbb{N}}$ and $(b_{n})_{n\in\mathbb{N}}$ be sequences of real numbers, where $b_{n} &gt; 0$ and $b_{n} \uparrow \infty$. If $\Sigma_{n=1}^{\infty}b^{-1}_nx_n$ converges, then $b_{n}^{-1}\Sigma_{k=1}^{n}x_{k} \to 0$ as $n \to \infty$. Namely, a series of scaled individuals converges to zero if it has a finite limit and so is divisible by some large number.</p>
+
+<p>Provided that, if $\Sigma_{n=1}^{\infty}n^{-1}(X_n - \operatorname{E}X_n)$ converges a.s., then $n^{-1}\Sigma_{k=1}^{n}(X_n - \operatorname{E}X_n) \xrightarrow{a.s.} 0$ as $n \to \infty$, and hence $\bar{X}_n \xrightarrow{a.s.} \mu$. Moreover, if $\Sigma_{n=1}^{\infty}\operatorname{E}(n^{-1}X_n - \operatorname{E}n^{-1}X_n)^2 = \Sigma_{n=1}^{\infty}\operatorname{Var}(n^{-1}X_n) &lt; \infty$, then $\Sigma_{n=1}^{\infty} n^{-1}(X_n - \operatorname{E}X_n)$ converges a.s. due to the three-series theorem. That is to say, if $\sigma^{2}_k &lt; \infty$ for every $k\in\mathbb{N}$, then the preceding statement holds for the SLLN, and if $\sigma^{2}_k = \infty$ for some $k \in \mathbb{N}$, then $X_k$ can be truncated as usual. From the results, we can construct both $A = \lbrace \omega: \Sigma_{n=1}^{\infty}n^{-1}X_n &lt; \infty \rbrace$ and $B = \lbrace \omega: n^{-1}S_n(\omega) \to 0 \text{ as } n \to \infty \rbrace$, where $A \subset B$. This shows that the assumption and the lemma yield $P(A) = P(B) = 1$.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>In summary, if $(X_n)_{n\in\mathbb{N}}$ holds the WLLN, then $\vert \bar{X}_n - \mu \vert &gt; \epsilon$ occurs infinitely many times (but not necessarily at the equal interval). Similarly, if $(X_n)_{n\in\mathbb{N}}$ holds the SLLN, then $\vert \bar{X}_n - \mu \vert = 0$ almost surely. It means that $\vert \bar{X}_n - \mu \vert &gt; \epsilon$ occurs finitely many times and also $\lim_{n\to\infty} P(\vert \bar{X}_n - \mu \vert \leq \epsilon)=1$ for all $\epsilon &gt; 0$. Despite the superior strength of the SLLN compared to the WLLN, one may prefer the latter under the assumption of finite variance. Moreover, the practical infeasibility of obtaining an infinite sequence of realisations of a random variable underscores the unattainability of statistically or empirically implementing the SLLN.</p>
+
+<p>Let $M_{n} = 1/2(n+1)\log(n+1)$, and $X_{n}$ with $P(X_{n} = n+1) = P(X_{n} = -(n+1)) = M_{n}$ and $P(X_{n} = 0) = 1 - 2M_{n}$ be ind. such that $\operatorname{E}X_{n} = (n+1)M_{n} - (n+1)M_{n} + 0(1-2M_{n})$ and $\operatorname{Var}X_{n} = \operatorname{E}(X_{n} - \operatorname{E}X_{n})^2 = (n+1)/\log(n+1)$. The Chebyshev’s inequality bounds $P(\vert \bar{X}_{n} \vert \geq \epsilon) \leq \epsilon^{-2}\operatorname{E}\bar{X}^2_{n} = n^{-2}\epsilon^{-2}\Sigma_{k=1}^{\infty}\operatorname{Var}X_{k} \leq k(k+1)/ n^2\epsilon^2\log(k+1) \to 0$ as $n \to \infty$, and so $(X_{n})_{n\in\mathbb{N}}$ holds the WLLN. However, $\Sigma_{k=1}^{\infty}P(X_{n} = n+1) = \infty$ and $\lbrace X_{n} = n+1 \rbrace \subset {\vert S_{n} \vert \geq n/2} \cup \lbrace \vert S_{n-1} \vert \geq n/2 \rbrace$, leading the 2nd Borel-Canteli lemma $P(n^{-1}\vert S_{n} \vert \geq 1/2 \;\,\text{i.o.}) = 1$. Therefore, $P(\lim_{n\to\infty} \bar{X}_{n} = 0) &lt; 1$ and so we lack the SLLN.</p>
+
+<p>While the WLLN is a theoretical concept describing the convergence of sample averages, <a href="">Monte Carlo simulations</a> provide a practical means to observe and explore this convergence through the generation of random samples in computational experiments. For example, if a circle of radius $r$ lies in a square of length $2r$, then we record (i) $s \mathrel{+}= 1$ at each draws; (ii) $c \mathrel{+}= 1$ when a randomly generated $(x,y)$ sits in a circle (i.e. $x^2 + y^2 \leq r$). We obtain $P(x^2 + y^2 \leq r) = \pi{r}^2/4r^2$ by construction, and $4c/s$ converges to $\pi$ as $s$ (so dose $c$) increases. The <a href="https://en.wikipedia.org/wiki/Variance_reduction">variance reduction</a> may improve the experiment results. Each LLN are hugely credited to Bernoulli and Borel, respectively, and Markov later worked to neglect the independence assumption.</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> In statistics, $\bar{X}_n$ is called an unbiased estimator of $\mu$ if it converges in $L^2$. <strong>(#2)</strong> For a sequence $(X_n)_{n\in\mathbb{N}}$ of i.i.d. r.v.s, we alter the condition to $\Sigma_{k=1}^{n}P(\vert X_i \vert &gt; x) = xP(\vert X_1 \vert &gt; x) \to 0$ as $n \to \infty$, then $n^{-1}S_n - \mu_n \xrightarrow{p} 0$ as $n \to \infty$, where $\mu_n = \operatorname{E} X_1 I_{\vert X_1 \vert \leq x}$. <strong>(#3)</strong> It holds because $\mu$ is a constant. <strong>(#4)</strong> The law shall be proven in terms of the convergence of a series, but it can also be done by using subsequence: if $X_n \xrightarrow{p} X$, then $\exists$ a sub-sequence $(k_n)_{n\in\mathbb{N}}$ such that $X_{k_n} \xrightarrow{a.s.} X$.</p>
+
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>

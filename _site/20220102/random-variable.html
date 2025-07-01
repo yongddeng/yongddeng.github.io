@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
+    
+        <title>202. random variable</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
+    
+	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<div class="default_title">
+			<img src="/assets/img/mycomputer.png" />
+			
+				<h1>Hikikomori</h1>
+			
+		</div>
+		<ul class="topbar">
+	<a href="/me"><li><u>A</u>bout</li></a>
+	<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><li><u>L</u>inkedIn</li></a>
+	<!-- 
+		<a href="http://soundcloud.com/h01000110" target="_blank"><li><u>S</u>oundcloud</li></a>
+	-->
+</ul>
+		<div class="tag_list">
+			<ul id="tag-list">
+				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
+			<ul>
+				
+				
+				<li><a href="/tag/cs300/" title="cs300"><img src="/assets/img/folder.ico" />cs300</a></li>
+				
+				<li><a href="/tag/cs400/" title="cs400"><img src="/assets/img/folder.ico" />cs400</a></li>
+				
+				<li><a href="/tag/math200/" title="math200"><img src="/assets/img/folder.ico" />math200</a></li>
+				
+				<li><a href="/tag/math500/" title="math500"><img src="/assets/img/folder.ico" />math500</a></li>
+				
+			</ul>
+				</li>
+			</ul>
+		</div>
+		<div class="post_list">
+			
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/parallel-computing" title="Parallel Computing"><img src="/assets/img/file.ico" title="Parallel Computing" />Parallel Computing</a></li>
+					
+					<li><a href="/20240104/networking" title="Networking"><img src="/assets/img/file.ico" title="Networking" />Networking</a></li>
+					
+					<li><a href="/20240103/virtualisation" title="Virtualisation"><img src="/assets/img/file.ico" title="Virtualisation" />Virtualisation</a></li>
+					
+					<li><a href="/20240102/tmp" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
+			
+		</div>
+		<div class="post_total">
+			
+				<div class="left">20 object(s)</div>
+			
+			<div class="right">&nbsp;</div>
+		</div>
+	</div>
+	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>202. random variable</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 2, 2022</li>
+			</ul>
+			<div class="post_content">
+        		<h1 id="random-variable">Random Variable</h1>
+<hr />
+<p>A random variable $X$ maps an event onto a measurable space where its distribution function lies. The symbol $X$ distinguishes itself from an ordinary algebraic variable $x$ which is often assigned to a constant. That is, drawing samples $X_1, X_2, \dots, X_n$ is equivalent to gathering elements from randomness as each value is indeterminate until an excution of experiment.</p>
+
+<h2 id="i">I</h2>
+<hr />
+<p>Given $(\Omega, \mathcal{F})$ and $(\mathbb{S}, \mathcal{S})$, a map $X: \Omega \to \mathbb{S}$ is an $\mathbb{S}$-valued random variable if $X^{-1}(A) = \lbrace X \in A \rbrace = \lbrace \omega: X(\omega) \in A \rbrace \in \mathcal{F}$ for all $A \subset \mathbb{S}$, and we simply call $X: \Omega \to \mathbb{R}$ a <a href="https://en.wikipedia.org/wiki/Random_variable">random variable</a>. $X$ is discrete if $P(X \in A) = 1$ for a finite or countable $A \subset \mathbb{R}$, and/or continuous if $P(X = x) = 0$ for all $x \in \mathbb{R}$. Every $X$ has a <a href="https://en.wikipedia.org/wiki/Cumulative_distribution_function">distribution function</a> (cdf) $F_{X}(x) = P(X \leq x) = \mathbb{P}((-\infty, x])$ with an <a href="https://stats.stackexchange.com/questions/451503/what-is-an-induced-probability-function">induced probability measure</a> $\mathbb{P}$ <strong>(#1)</strong>. If $X$ is discrete, then $F_{X}(x) = \Sigma_{x_{j} \leq x} p_{x_{j}}$, where $p_{x_{j}} = P(X = x_j)$ is a <a href="https://en.wikipedia.org/wiki/Probability_mass_function">probability function</a> (pmf). If continuous, we have $F_X(x) = \int_{-\infty}^{x} f_X(t)\, \mathrm{d}t$, where $f_X = {\mathrm{d} \over \mathrm{d}x}F_X$ is a <a href="https://en.wikipedia.org/wiki/Probability_density_function">density function</a> (pdf).</p>
+
+<p>If $X: \Omega \to \mathbb{R}$ is a random variable and $g: \mathbb{R} \to \mathbb{R}$ is a Borel measurable function, then a composition $g \circ X: \Omega \to \mathbb{R}$ is a random variable. Namely, $P(Y \in B) = P(X \in g^{-1}(B))$ for every $B \subset \mathbb{R}$, where $g^{-1}(B) = \lbrace \omega: g(X(\omega)) \in B \rbrace \in \mathcal{B}_\mathbb{R}$, by the <a href="https://en.wikipedia.org/wiki/Change_of_variables">change of variable</a> which allows us to focus on on $X$. Moreover, if $X$ is discrete, then $Y$ is discrete, and thus $p_Y(y) = \Sigma_{\lbrace x\,:\, g(x)=y \rbrace} p_X(x)$. Note that $p_Y(y) = p_X(x)$ if and only if $g$ is injective (i.e. a one-to-one relationship). Whereas, if $X$ is continuous, then $Y$ can be discrete, continuous, or neither. One may prefer a simpler form $p_Y(y) = f_Y(y) = \int_{\lbrace x\,:\, g(x) = y \rbrace} f_X(x)\, \mathrm{d}x$.</p>
+
+<p>In $n$-dimensional spaces, we use a <a href="https://en.wikipedia.org/wiki/Multivariate_random_variable">random vector</a> $\boldsymbol{X}: \Omega \to \mathbb{R}^n$ as a multivariate function, and it also has a <a href="https://en.wikipedia.org/wiki/Joint_probability_distribution">joint distribution function</a> $F_{\boldsymbol{X}}(\boldsymbol{x}) = P(\boldsymbol{X} \leq \boldsymbol{x})$, where $\boldsymbol{x} = (x_1, \dots, x_n)$ and $\lbrace \boldsymbol{X} \leq \boldsymbol{x} \rbrace = \bigcap_{k=1}^{n} \lbrace X_k \leq x_k \rbrace = \lbrace X_1 \leq x_1, \dots, X_n \leq x_n \rbrace$ <strong>(#2)</strong>. For example, given that we have $\boldsymbol{X} = (X_1, X_2)$, the distribution of $X_1$ is given by summing up the joint probabilities of the variables other than $X_1$. Both $F_{X_1}(x_1) = P(X_1 \leq x_1, X_2 &lt; \infty)$ and $F_{X_2}(x_2) = P(X_1 &lt; \infty, X_2 \leq x_2)$ are called <a href="https://en.wikipedia.org/wiki/Marginal_distribution">marginal distribution functions</a> of $\boldsymbol{X}$. We want to ask whether knowing about an event occurring has influences on knowing about other events occuring.</p>
+
+<h2 id="ii">II</h2>
+<hr />
+<p>We say a sequence $(A_n)_{n\in\mathbb{N}}$ of events is <a href="https://en.wikipedia.org/wiki/Independence_(probability_theory)">independent</a> (ind.) if $P(\,\bigcap_{k=1}^{n} A_k) = \prod_{k=1}^{n} P(A_k)$ <strong>(#3)</strong>. A sequence $(X_n)_{n\in\mathbb{N}}$ is indeed ind. if $P(\,\bigcap_{k=1}^{n} \lbrace X_k \in B_k \rbrace ) = \prod_{k=1}^{n} P(X_k \in B_k)$, where $B_k \subset \mathbb{R}$ is Borel measurable. Desirably, by virtue of independence, the joint cdf is given by $F_{\mathbf{X}}(\mathbf{x}) = \prod_{k=1}^{n} F_{X_k}(x_k)$ for any $\mathbf{x} \in \mathbb{R}^n$. If, in addition, $X$ and $Y$ permit pdfs, then the <a href="https://en.wikipedia.org/wiki/Fubini%27s_theorem">Fubini’s theorem</a> yields $F_{X,Y}(x,y) = F_{X}(x)F_{Y}(y) := \int_{-\infty}^{(x,y)} f_{X,Y}(t,s)\, (\mathrm{d}t \times \mathrm{d}s) = \int_{-\infty}^{x} f_{X}(t)\, \mathrm{d}t \int_{-\infty}^{y} f_{Y}(s)\, \mathrm{d}s$ and thus $f_{X,Y}(x,y) = f_{X}(x)f_{Y}(y)$. Likewise, if ind. random variables $X$ and $Y$ permit pmfs, then we have $p_{X,Y}(x,y) = p_{X}(x)p_{Y}(y)$.</p>
+
+<p>However, if $A$ and $B$ are dependent (jointly distributed), then we must derive a <a href="https://en.wikipedia.org/wiki/Conditional_probability">conditional probability</a> $P(B \vert A) = P(A\cap{B}) / P(A)$ from the <a href="https://courses.lumenlearning.com/boundless-statistics/chapter/probability-rules">multiplication law</a> $P(A \cap B) = P(A \vert B)P(B) = P(B \vert A)P(A)$, where $P(A) &gt; 0$ is the normalising factor. The <a href="https://en.wikipedia.org/wiki/Bayes%27_theorem">Bayes’ theorem</a> denotes the reverse conditional probability $P(A \vert B) = P(B \vert A)P(A)/P(B)$, and the conditioning part (likelihood) can be either $P(A \vert B) = P(A)$ and $P(B \vert A) = P(B)$ whenever $A$ and $B$ are ind.. Assume that $(A_n)_{n\in\mathbb{N}}$ is the <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">partitions</a> of a discrete $\Omega$ <strong>(#4)</strong>, then the <a href="https://en.wikipedia.org/wiki/Law_of_total_probability">law of total probability</a> allows us to compute a marginal $P(B) = \Sigma_{k=1}^{n}P(A_k \cap B)= \Sigma_{k=1}^{n}P(B \vert A_k)P(A_k)$.</p>
+
+<p>For instance, if $X$ and $Y$ are discrete and dep., a <a href="https://en.wikipedia.org/wiki/Conditional_probability_distribution">conditional cdf</a> of $Y$ given $X=x$ is led by $F_{Y \vert X=x}(y) = \Sigma_{y_j\leq{y}}p_{y_{j} \vert X=x}$, where $p_{Y \vert X=x} = p_{X,Y}(x,y)/p_X(x)$ is a <a href="https://www.statlect.com/glossary/conditional-probability-mass-function">conditional pmf</a>. One may consider a marginal pmf $p_Y(y) = \Sigma_{x} p_{Y \vert X=x}(y)p_X(x)\, dx$ as a mean. If, however, $X$ and $Y$ are continuous, then $F_{Y \vert X=x}(y) = \int_{-\infty}^{y} f_{Y \vert X=x}(y_j)\, \mathrm{d}y_j$, where $f_{Y \vert X=x}(y) = f_{X,Y}(x,y)/f_X(x)$ is a <a href="https://www.statlect.com/glossary/conditional-probability-density-function">conditional pdf</a> of $Y$ given $X \in (x-\varepsilon, x+\varepsilon)$. Whereas, a random vector consists of ind. random variables directly produces marginals. Namely, $\boldsymbol{Z} = (X, Y)$ with a <a href="https://www.statlect.com/glossary/joint-probability-mass-function#:~:text=The%20joint%20probability%20mass%20function,be%20equal%20to%20that%20point.">joint pmf</a> $p_{\mathbf{Z}}(x,y)$ has <a href="https://www.statlect.com/glossary/marginal-probability-mass-function#:~:text=The%20marginal%20probability%20mass%20function,belong%20to%20the%20support%20and">marginal pmfs</a> $p_X(x) = \Sigma_{y} p_{\mathbf{Z}}(x,y)$ and $p_Y(y) = \Sigma_{x}p_{\mathbf{Z}}(x,y)$.</p>
+
+<h2 id="iii">III</h2>
+<hr />
+<p>Suppose $(\mathcal{F}_n)_{n\in\mathbb{N}}$ is a sequence of sub-$\sigma$-algebras $\mathcal{F}_n = \sigma(A_k: k \leq n) = \sigma(\bigcup_{k=1}^{n}A_k)$. If $\mathcal{G}_n = \sigma(A_k: k \geq n) = \sigma(\bigcup_{k=n}^{\infty} A_k)$, then $\mathcal{G} = \bigcap_{n=1}^{\infty} \mathcal{G}_n$ is the <a href="https://math.stackexchange.com/questions/3184787/what-is-the-tail-sigma-field">tail-$\sigma$-algebra</a> of $(\mathcal{F}_n)_{n\in\mathbb{N}}$. Namely, the set $\mathcal{G}$ contains information beyond time $n$ for any $n \in \mathbb{N}$ since each $\mathcal{G}_n$ contains information beyond time $n$. Furthermore, $\mathcal{F}_n \subseteq \mathcal{F}_{n+1}$ for all $n\in\mathbb{N}$, and also $\mathcal{G} \subset \mathcal{F} = \sigma(A_k: k \geq 1) = \sigma(\bigcup_{k \geq 1}\mathcal{F}_k)$. The <a href="https://en.wikipedia.org/wiki/Kolmogorov%27s_zero%E2%80%93one_law">Kolmogorov zero-one law</a> states that a probability of any <a href="https://math.stackexchange.com/questions/1047306/events-in-the-tail-sigma-algebra">tail event</a> $A \in \mathcal{G}$ is either $0$ or $1$ a.s., thus the occurrence of tail events can still be determined although a finite number of $\mathcal{F}_n$ at the front of a row are effaced. Note that we are refining the zero-one law.</p>
+
+<p>The same occurs in $\mathbb{R}$. Suppose $\mathcal{S}_{n} = \sigma(X_{k} : k \geq n) = \sigma(\bigcup_{k=n}^{\infty} X_{k})$ is ind. to each other. If $B \in \bigcap_{n=1}^{\infty}\mathcal{S}_{n}$ is a tail event, then $B$ belongs to every one of the $\sigma$-algebras $\lbrace \mathcal{S}_{n}, \mathcal{S}_{n+1}, \dots \rbrace$. That is, $B$ can be interpreted independently from any finite subsets of $\lbrace X_{k} : 1 \leq k \leq n \rbrace$, or equivalently, omission of the front has no impacts on the investigation (i.e. measure) of a tail event. The zero-one law implies that the limit exists either with probability $0$ or $1$ (depending on $F_{X_n}$), and so, if does, then exists $c = \lim_{n\to\infty} X_n$ with probability $1$. An event that a sequence converges or its sum converges indeed is a tail event <strong>(#5)</strong>.</p>
+
+<p>Note that $\limsup_{n\to\infty}X_n \in \mathcal{G}$ is a tail event because $\limsup_{n+N\to\infty}X_{n+N}$ with any $N \in \mathbb{N}$ is a generator of a tail-$\sigma$-algebra $\mathcal{G}$. We recall the Borel-Cantelli lemmas saying that $P(\limsup_{n\to\infty}X_n) \in \lbrace 0,1 \rbrace$. The 1st lemma merely shows that the probability of unions of the tail segments is at most the sum of the probability of each segments. However, the independence assumption in the 2nd lemma makes the tail-$\sigma$-algebras trivial (i.e. generated by a singleton; $\sigma(\Omega) = \lbrace \Omega, \emptyset \rbrace$), and the Komolgorov zero-one law (it dose not actually clarifies whether $0$ or $1$ is correct) enables us to clarify that the event occurs almost surely under the sufficient condition.</p>
+
+<h2>**</h2>
+<hr />
+<p><strong>(#1)</strong> If $H_0$ is examined on a continuous $X$, then one-sided <a href="https://en.wikipedia.org/wiki/P-value">p-value</a> is given by $\overline{F_X(x)} = 1 - F_X(x) = \operatorname{P}(X &gt; x)$. <strong>(#2)</strong> $X_1, \dots, X_n$ may or may not be on a common $\Omega$. If $F_{X_i} \neq F_{X_j}$ for all $i,j\in\mathbb{N}$ with $i \neq j$, then $(x_1, \dots, x_n) \in \mathcal{S}_1 \times \dots \times \mathcal{S}_n$ <strong>(#3)</strong> If $A$ and $B$ are ind., then so are $A$ and $B^c$, $A^c$ and $B$, and $A^c$ and $B^c$; If $X_1$ and $X_2$ are ind., then so are $g(X_1)$ and $g(X_2)$. <strong>(#4)</strong> $\lbrace A_n \rbrace_{n\in\mathbb{N}}$ is a <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">partition</a> of $\Omega$ iff (i) $\bigcup_{k=1}^{n}A_k = \Omega$; (ii) $A_i \cap A_j = \emptyset$ for all $1 \leq i \neq j \leq n$; We may assume that $A_k$ is measurable. <strong>(#5)</strong> Given an infinite #. of coin tosses, $X_n \in \lbrace H, T \rbrace$ and $\mathcal{B} = \lbrace X_{n}=H, \dots, X_{n+99}=H \; \text{i.o.} \rbrace$ is a generator and a tail event, respectively</p>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
+	<script src="/assets/js/001.js"></script>
+	<script src="/assets/js/002.js"></script>
+	<div class="footer">
+		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	</div>
+</body>
+</html>
