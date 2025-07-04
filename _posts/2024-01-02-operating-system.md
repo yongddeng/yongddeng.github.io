@@ -9,7 +9,7 @@ use_math: true
 # Operating System
 
 ---
-A digital computer is bare metal without the [operating system](https://www.youtube.com/watch?v=26QPDBe-NB8) (OS) in which it is often taken for granted while being less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions.
+A digital computer is bare metal without the [operating system](https://www.youtube.com/watch?v=26QPDBe-NB8) (OS) in which it is often taken for granted while being less than a century old yet underpins nearly all computing devices today. We inevitably encounter it when moving from high-level code down to low-level hardware instructions. yoonjobabo
 
 <!-- https://pravin-hub-rgb.github.io/BCA/resources/sem2/operating_sys/index.html -->
 <!-- https://www.jmeiners.com/lc3-vm/#:lc3.c -->
@@ -50,26 +50,25 @@ While APIs define the data structures and function signatures available to progr
 
 On Linux running on [x86-64]() (i.e. the Intel and AMD CPU architecture), for instance, when calling *write()* via the C standard library to output data to a file, the predefined system call which executes in kernel mode to perform the actual operation is invoked by placing the "syscall number" (e.g. 1) in the [rax](https://www.cs.uaf.edu/2017/fall/cs301/lecture/09_11_registers.html) register, while its args - ("file descriptor", "buffer pointer", "byte count") are passed via [rdi](), [rsi](), and [rdx](), respectively. In contrast, Windows uses *WriteFile()* with a distinct ABI and system call interface. Cross-platform compatibility of softwares is usually achieved by standardised APIs (e.g. POSIX) or the use of portability layers (e.g. the JVM or Python interpreter). <!-- which abstract away OS-specific details. -->
 
-```
-section .data
-    msg  db "Hello", 10 ; "Hello\n"
-    msg_len equ $ - msg  ; Length of the message
+    section .data
+          msg        db  "Hello", 10     ; "Hello\n"
+          msg_len   equ $ - msg       ; Length of the message
 
-section .text
-    global _start
+    section .text
+          global _start
 
-_start:
-    mov  rax, 1   ; syscall number for write
-    mov  rdi, 1   ; file descriptor (stdout)
-    mov  rsi, msg   ; pointer to buffer
-    mov  rdx, msg_len  ; number of bytes
-    syscall      ; invoke kernel
+    _start:
+          ; write(stdout, msg, msg_len)
+          mov     rax, 1                      ; syscall: write
+          mov     rdi, 1                       ; file descriptor: stdout
+          mov     rsi, msg                  ; buffer address
+          mov     rdx, msg_len          ; number of bytes to write
+          syscall
 
-    ; Exit the program (syscall 60)
-    mov  rax, 60   ; syscall number for exit
-    xor  rdi, rdi   ; exit code 0
-    syscall
-```
+          ; exit(0)
+          mov     rax, 60                    ; syscall: exit
+          xor       rdi, rdi                     ; status = 0
+          syscall
 
 ### **1.3. Shell & Kernel**
 
@@ -77,17 +76,11 @@ _start:
 
 Accordingly, interaction with the OS kernel often occurs through two common interfaces: i) standard libraries that wrap system calls; ii) [shells]() which act as command interpreters; In both cases, transitions from user mode to kernel mode are necessary for any privileged operations. Specifically, the [kernel](https://www.josehu.com/technical/2021/05/24/os-kernel-models.html), which operates at the highest privilege level, forms the operating system's core and mediates all access to hardware and protected resources, while the shell serves as the outermost user-facing interface. Note that the dual-mode architecture is enforced by hardware (e.g. using a mode bit), but both the kernel and shell themselves are implemented in software.
 
-Advanced CLI-based shells including [Bash](), [Zsh](https://github.com/ohmyzsh/ohmyzsh/wiki/Cheatsheet), and [Fish]() can support scripting, I/O redirection, job control, and process substitution. They parse user commands (e.g. *ls*, *ps*, *cat*), resolves the appropriate binaries, and initiates execution using system calls such as *fork()*, *exec()*, and *wait()*. [Terminal emulators]() such as Mac Terminal merely host shell processes and should not be mistaken for the shell itself. On graphical systems, user interaction is instead mediated via desktop environments - {Linux: [GNOME](), macOS: [Finder](), Windows: [Explorer]()} which provide a visual interface and invoke the same system calls and kernel services underneath. In fact, I use:
+Advanced CLI-based shells including [Bash](), [Zsh](https://github.com/ohmyzsh/ohmyzsh/wiki/Cheatsheet), and [Fish]() can support scripting, I/O redirection, job control, and process substitution. They parse user commands (e.g. *ls*, *ps*, *cat*), resolve appropriate binaries, and initiate execution through the system calls (e.g. *fork()*, *exec()*, and *wait()*). Note that [terminal emulators]() (e.g. Mac Terminal) merely host shell processes and should not be mistaken for the shell itself. On graphical systems, user interaction is instead mediated via desktop environments - {Linux: [GNOME](), macOS: [Finder](), Windows: [Explorer]()}, that provide a visual interface and invoke the same system calls and kernel services underneath. In fact, I use:
 
-<style>
-pre {
-  line-height: 1.5; /* 1.5 times the font size for spacing */
-  white-space: pre; /* default, no wrap */
-  max-width: none;  /* no max width */
-  overflow-x: auto; /* horizontal scrollbar if too wide */
-}
-</style>
-<pre>
+<!-- EMULATOR SECTION: CUSTOM STYLING APPLIED -->
+<div class="emulator">
+  <pre>
   🖥️ Emulator: iTerm2
   |
   +-- 🐚 Shell: Zsh
@@ -105,7 +98,19 @@ pre {
       |
       |     • Config: LazyVim
       |     • Plugins: custom configs/additions
-</pre>
+  </pre>
+</div>
+
+<!-- SCOPED STYLE ONLY FOR THE EMULATOR PRE BLOCK -->
+<style>
+.emulator pre {
+  line-height: 1.5;
+  white-space: pre;
+  max-width: none;
+  overflow-x: auto;
+  margin-bottom: 0.00rem; /* reduce vertical gap */
+}
+</style>
 
 While the kernel manages low-level operations such as CPU scheduling, memory management, IPC, and device I/O, its architectural design critically affects system performance, modularity, and fault tolerance. [Monolithic kernels]() (e.g. Linux) bundle all core services into a single privileged binary, enabling fast in-kernel communication but increasing the risk of system-wide failure. [Microkernels]() (e.g. seL4) retain only minimal services (e.g. scheduling) in kernel space, delegating others (e.g. file systems) to user space to improve modularity and fault isolation. Meanwhile, [hybrid kernels]() (e.g. XNU in macOS) adopt a layered structure to reconcile these trade-offs.
 
@@ -248,7 +253,7 @@ Distributions also diverge in tooling and update strategies. Package managers li
 
 Each process executes within its own isolated virtual [address space](), comprising distinct code, data, heap, and stack segments. This isolation ensures protection between processes and underpins system stability. The OS kernel maintains per-process metadata via a structure, known as the [process control block]() (PCB), which contains its identifiers (PID/PPID), execution state, CPU register, memory mappings, scheduling parameters, and open file descriptors. A process advances through a [life cycle](): new (creation), ready (queued for CPU), running (actively scheduled), waiting (blocked on I/O, synchronisation, or an event), and terminated (completed or killed).
 
-The [CPU scheduler](), a core part of the kernel, manages transitions between the mutually exclusive states and determines which ready process to dispatch next. Classical scheduling algorithms may include i) [round robin](https://imbf.github.io/computer-science(cs)/2020/10/18/CPU-Scheduling.html): fixed time slices; ii) [priority scheduling](): fixed or dynamic priority queues; iii) [multi-level feedback queues]() (MLFQ): dynamically adjusts priorities based on process behaviours. In fact, [context switching]() follows process scheduling in which this incurs overhead from cache disruption, [translation lookaside buffer]() (TLB) flushes, and memory synchronisation. <!-- Modern operating systems such as Linux use the [completely fair scheduler]() (CFS), which maintains a red-black tree to distribute CPU time proportionally by tracking each process’s virtual runtime. --> Indeed, processes on a single core can be executed concurrently via appropriate time-slicing.
+The [CPU scheduler](), a core part of the kernel, manages transitions between the mutually exclusive states and determines which ready process to dispatch next. Classical scheduling algorithms may include i) [round robin](https://imbf.github.io/computer-science(cs)/2020/10/18/CPU-Scheduling.html): fixed time slices; ii) [priority scheduling](): fixed or dynamic priority queues; iii) [multi-level feedback queues]() (MLFQ): dynamically adjusts priorities based on process behaviours. In fact, [context switching]() follows process scheduling in which this incurs overhead from cache disruption, TLB flushes, and memory synchronisation. <!-- Modern operating systems such as Linux use the [completely fair scheduler]() (CFS), which maintains a red-black tree to distribute CPU time proportionally by tracking each process’s virtual runtime. --> Indeed, processes on a single core can be executed concurrently via appropriate time-slicing.
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="https://media.geeksforgeeks.org/wp-content/uploads/20231201161329/Process-Scheduler.png" width="500"> <a href="https://www.geeksforgeeks.org/operating-systems/process-schedulers-in-operating-system/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
@@ -268,7 +273,7 @@ As systems can execute multiple [cooperating processes](), scheduling should be 
 
 <!-- Multiprocessing enables the concurrent execution of multiple processes, each with its own isolated memory space and usually mapped to separate CPU cores. Since memory is not shared by default, coordination between processes must be handled using inter-process communication (IPC). In PyTorch, the DataLoader uses Python’s multiprocessing module to spawn worker processes that load and transform batches concurrently, improving input pipeline performance. For distributed training, PyTorch provides the torch.distributed package and its DistributedDataParallel (DDP) wrapper, which enables multiple processes—each with its own model replica—to compute gradients independently and synchronize them efficiently across processes after each backward pass. This design scales well across both multi-core CPUs and multi-GPU systems, with DDP using shared memory or CUDA-aware communication backends (like NCCL) to reduce synchronization overhead. Complementary approaches such as Numba offer thread- and process-level parallelism through JIT compilation to machine code, enabling further parallel acceleration in custom numerical routines. -->
 
-In networked IPC, processes communicate over [sockets]() identified by [IP addresses]() and [ports](), which act as logical [endpoints]() directing traffic to the correct process. For example, web servers typically use port 80 (HTTP) or 443 (HTTPS), while SSH uses port 22. The OS maps ports to socket endpoints and manages connection queues to deliver [packets]() to the correct process. PyTorch also uses specific ports (e.g. [MASTER_PORT](https://tutorials.pytorch.kr/intermediate/dist_tuto.html)) for synchronisation during distributed training, normally over [transmission control protocol]() (TCP) or NCCL. As such, this networking concept remains central to distributed systems in the modern ML era.
+In networked IPC, processes communicate over [sockets]() identified by [IP addresses]() and [ports](), which act as logical [endpoints]() directing traffic to the correct process. For example, web servers typically use port 80 (HTTP) or 443 (HTTPS), while SSH uses port 22. The OS maps ports to socket endpoints and manages connection queues to deliver [packets]() to the correct process. PyTorch also uses specific ports (e.g. [MASTER_PORT](https://tutorials.pytorch.kr/intermediate/dist_tuto.html)) for synchronisation during distributed training, often over [transmission control protocol]() (TCP) or NCCL. As such, this networking concept remains central to distributed systems in the modern ML era.
 
 - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://pylessons.com/media/Tutorials/YOLO-tutorials/YOLOv4-TF2-multiprocessing/1.png" width="500" height="220"> <a href="https://pylessons.com/YOLOv4-TF2-multiprocessing" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
@@ -276,21 +281,31 @@ In networked IPC, processes communicate over [sockets]() identified by [IP addre
 
 The thread-level parallelism in CPython has long been constrained by the [global interpreter lock](https://www.youtube.com/watch?v=dyhKXCpkCGE) (GIL), which is a mutex that serialises the execution of Python bytecode (i.e. one thread at a time) and was primarily implemented for [reference counting]() involved in [garbage collection](), thereby limiting the effectiveness of threading for CPU-bound operations such as matrix multiplication. However, compute-intensive extensions in native C/C++ code (e.g. Numpy or PyTorch - see the [discussion](https://discuss.pytorch.org/t/can-pytorch-by-pass-python-gil/55498)) can often <!-- temporarily --> release the GIL during execution, and thankfully, [PEP 703]() introduces a build-time option to remove the GIL in Python 3.13 albeit with changes to the C API. <!-- Other Python implementation such as [Jython]() or [IronPython]() do not have a GIL. -->
 
-- <iframe width="500" height="280" src="https://www.youtube.com/embed/M9HHWFp84f0?si=B3pvCInh5IWetRvf" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+- ... <!-- <iframe width="500" height="280" src="https://www.youtube.com/embed/M9HHWFp84f0?si=B3pvCInh5IWetRvf" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
 ### **3.2. Memory Management**
 
 <p style="margin-bottom: 12px;"> </p>
 
-Modern OS kernels manage memory through a combination of hardware-level and software-level techniques, primarily via [virtual memory]() abstraction, and is responsible for how programs allocate, access, and release memory throughout their execution. This abstraction decouples logical memory seen by processes from the actual [physical memory](), enabling process isolation, efficient use of RAM, and safety against illegal memory access. Virtual memory is implemented using [page]() tables that map virtual addresses to physical frames, and memory accesses are mediated by the [memory management unit]() (MMU).
+Modern multi-process systems provide strong memory isolation, efficient resource sharing, and protection against fragmentation and [out-of-memory]() (OOM) conditions. Early systems which relied solely on physical memory allocation or simple segmentation struggled with these issues. Physical memory management (i.e. as seen in MS-DOS) offered limited protection as any process with an invalid [pointer]() could overwrite another's memory. Segmentation introduced logical divisions (e.g. code, heap, and stack) and some access protection, but quite suffered from external fragmentation and offered limited flexibility for sharing or reallocating memory dynamically.
 
-When a process accesses memory, the MMU translates virtual addresses into physical ones. If the requested page is not present in physical memory (i.e. [page fault]()), the OS intervenes to load it from secondary storage (typically from a [swap file]() or disk-backed mapping). Pages may be marked read-only, executable, or shared, allowing fine-grained access control. [Copy-on-write]() (COW) mechanisms are commonly used to optimise memory usage, particularly in *fork()*-based process creation — the child inherits the parent’s memory pages, which are duplicated only upon modification.
+[Virtual memory](), implemented in cooperation with hardware, abstracts [physical memory]() by providing each process with the illusion of a large, contiguous address space, decoupling logical layout from physical constraints. This decouples the logical layout from physical constraints and supports features such as protection and memory sharing (e.g. common libraries). The OS kernel divides the [address spaces]() into fixed-size units: (virtual-) [pages]() and (physical-) [page frames]() (commonly 4 KB). A process maintains a [page table]() (i.e. data structure) consists of [page table entries]() (PTEs), each of which holds metadata such as frame no., access permissions, and presence.
 
-Segmentation divides memory into variable-length logical segments (e.g. code, stack, heap), while paging divides memory into fixed-size blocks. While segmentation enables logical grouping, it suffers from external fragmentation and complex protection schemes. Paging, by contrast, simplifies allocation and protection but incurs internal fragmentation and requires multi-level page tables to manage large address spaces. Most modern systems combine both by using paged segments or adopt flat address spaces with hierarchical page tables (e.g. x86-64's 4-level paging).
+- <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/2024-01-02-pte.png" width="500" height="385"> <a href="https://sam4k.com/page-table-kernel-exploitation/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
-In LLM inference engines such as vLLM, the concept of memory paging is elevated to manage GPU memory efficiently at scale. vLLM introduces [paged attention]() to decouple memory allocation from attention key $K$ and value $V$ storage, enabling fine-grained, lazily allocated attention buffers. This reduces redundant memory copying and allows dynamic batching of input tokens, which significantly improves memory locality and throughput.
+<!-- Paging enables non-contiguous memory allocation and demand paging—where only accessed pages are loaded—supporting lazy allocation and efficient RAM utilisation. Modern CPUs support larger pages (e.g. 2 MB or 1 GB) to reduce address translation overhead at the expense of internal fragmentation, while the page size can be queried via system utilities (e.g. *getconf PAGE_SIZE* on Linux). Although physical memory typically refers to RAM, the memory space may also include device-mapped regions and persistent memory (e.g. via mmap).   ... for translation (i.e. mapping). … This abstraction also enables techniques such as copy-on-write (COW) and memory-mapped files. -->
 
-The OS kernel also handles dynamic memory allocation through system calls such as *brk()* and *mmap()*, with the latter being preferred in modern systems for allocating large or file-backed regions. Likely, user-space programs typically rely on standard libraries (e.g. *malloc()* in C, or memory allocators such as jemalloc or tcmalloc) that request and manage chunks of memory via these system calls. As mentioned, high-level languages such as Python or Java implement their own garbage collection and runtime memory models, relying heavily on the OS to provide underlying memory primitives.
+[Flat page tables]() are however infeasible at scale due to the vast number of pages which must be tracked. For instance, a 64-bit virtual address space divided into 4 KB pages (i.e. $2^{64} \div 2^{12} = 2^{52}$ pages) requires one 8-byte PTE (i.e. $2^{3}$ B) per page, totalling $2^{55}$ B, or, equivalently, 32 PB of page table memory per process. Even limiting the address space to 48 bits, as in x86-64, results in $2^{36}$ entries, requiring 512 GB of memory for a single flat page table. Consequently, modern architectures such as x86-64, ARM, and RISC-V adopt [multi-level page tables]() (e.g. four levels), which hierarchically partition the address space and instantiate only the needed portions.
+
+- <div style="position: relative; display: inline-block; background-color: white"> <img src="https://sam4k.com/content/images/2025/05/image-1.png" width="500" height="220"> <a href="https://sam4k.com/page-table-kernel-exploitation/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+
+Modern CPUs employ a [memory management unit]() (MMU) that traverses page tables during address translation. Embedded within the MMU is the [translation lookaside buffer]() (TLB), a small, associative cache that stores recent address translations. Unlike L1/L2 caches, which speed up direct memory access, the TLB caches only address mappings to avoid repeated [table walks](). Many partition the TLB into separate instruction (ITLB) and data (DTLB) caches to allow concurrent lookups. A [TLB hit]() allows resolution within a single cycle, but a [TLB miss]() yields a page walk followed by caching the result. Thus its size associativity, and replacement strategy really matter. <!-- especially when multi-level page table traversal may involve several memory accesses that are time-consuming. --> 
+
+At runtime, a page fault is triggered when a process accesses a page not currently backed by physical memory. The kernel responds by allocating a frame and filling it with the appropriate data either by zero-initialising a new page or loading content from [swap space]() or [memory-mapped files]() on disk. If physical memory is exhausted, a page replacement policy (e.g. FIFO, LRU, Clock) selects a victim to evict, and so [dirty pages]() are flushed to disk while [clean pages]() may be discarded. Although this enables [memory overcommitment]() (i.e. over available RAM), sustained faulting can eventually lead to [thrashing]() in which execution stalls due to excessive paging activity.
+
+- <div style="position: relative; display: inline-block; background-color: white"> <img src="https://userpages.umbc.edu/~squire/images/tlb1.jpg" width="500" height="365"> <a href="https://userpages.umbc.edu/~squire/cs411_l23.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://pages.cs.wisc.edu/~bart/537/lecturenotes/figures/s18.tlb.gif" width="500" height="365"> <a href="https://pages.cs.wisc.edu/~bart/537/lecturenotes/s17.html" target="_blank" style="position: absolute; top: 2px; right: 4px; font-size: 12px;">[src]</a> </div> -->
 
 <!-- a data buffer (or just buffer) is a region of memory used to store data temporarily while it is being moved from one place to another. -->
 
@@ -298,18 +313,20 @@ The OS kernel also handles dynamic memory allocation through system calls such a
 
 <p style="margin-bottom: 12px;"> </p>
 
-A file is a named, persistent sequence of bytes managed by the operating system and stored on physical or virtual media. It serves as an abstraction over raw storage, enabling programs to access data through a consistent interface. Although the OS treats a file as a linear byte stream with no intrinsic meaning, its extension—such as .txt for plain text or .mp3 for audio—often signals the format and intended interpretation of its contents. In practice, the file extension acts as a contract between applications and data, guiding how information is parsed, rendered, or executed.
+TODO...
 
-The data within a file may follow arbitrary formats depending on application needs: (i) structured (e.g. CSV, Parquet), (ii) semi-structured (e.g. JSON, XML), or (iii) binary (e.g. compiled code, images, or model checkpoints). In general-purpose computing, files may store text documents, scripts, or executables. In contrast, fields like machine learning and data engineering rely on file formats that embed schema or use compact binary layouts for performance. Examples include .h5 (HDF5), .parquet, and .arrow, which are designed for efficient, structured access and parallel processing at scale.
-
-The OS is responsible for file creation, access, naming, storage allocation, and metadata management. It exposes a hierarchical file system that maps human-readable paths (e.g. /home/user/data.csv) to physical data blocks. Key abstractions like inodes (in Unix-like systems) store metadata including file size, timestamps, ownership, and pointers to data blocks. The OS also enforces access control via permissions and user/group ownership and supports special files—such as symbolic links, device nodes, sockets, and FIFOs—that extend file semantics to hardware interfaces and inter-process communication.
-
-Interaction with files is mediated through file descriptors, small integers that index open file entries in a process-specific table managed by the kernel. Core file operations—open(), read(), write(), and close()—form the low-level interface exposed via system calls. For more advanced I/O, the mmap() system call allows files to be mapped directly into virtual memory, enabling efficient pointer-based access and inter-process sharing. Behind the scenes, the OS manages caches (e.g. page cache and buffer cache) to reduce disk latency and supports direct I/O or asynchronous I/O for performance-critical workloads.
-
-Several advanced mechanisms underpin modern file systems. Mounting attaches a file system (e.g. a USB stick or network volume) to a specific directory path within the global namespace. Journaling, used in systems like ext4 or XFS, logs metadata updates to support crash recovery. Advanced file systems such as ZFS and Btrfs offer features like copy-on-write, snapshots, checksumming, and compression for enhanced reliability. File locking (via flock() or fcntl()) helps avoid race conditions but can introduce deadlocks if not managed carefully. Virtual file systems like /proc and /sys expose live kernel and hardware state through file-like interfaces, enabling introspection tools to query memory usage, CPU load, or device health.
-
-In ML and LLM workflows, file handling is central to system performance and model scalability. Datasets are often stored in binary formats such as TFRecord, HDF5, or Apache Arrow, which support partial reads and parallel access across workers. PyTorch’s DataLoader leverages multiprocessing to fetch data from shared disks or cloud object stores mounted via FUSE drivers like s3fs. For inference, quantized model formats such as GPT-generated Unified Format (.gguf) or .pth are optimized for memory alignment, minimal I/O overhead, and streaming. Tools like llama.cpp use memory mapping or chunked loading to reduce memory footprint and accelerate loading. In distributed or multi-node environments, consistency and throughput are maintained via parallel file systems (e.g. Lustre) or eventual-consistency object stores (e.g. Amazon S3), which must support atomic writes and concurrent access to training logs, checkpoints, and model artifacts.
-
+<!-- A file is a named, persistent sequence of bytes managed by the operating system and stored on physical or virtual media. It serves as an abstraction over raw storage, enabling programs to access data through a consistent interface. Although the OS treats a file as a linear byte stream with no intrinsic meaning, its extension—such as .txt for plain text or .mp3 for audio—often signals the format and intended interpretation of its contents. In practice, the file extension acts as a contract between applications and data, guiding how information is parsed, rendered, or executed. -->
+<!---->
+<!-- The data within a file may follow arbitrary formats depending on application needs: (i) structured (e.g. CSV, Parquet), (ii) semi-structured (e.g. JSON, XML), or (iii) binary (e.g. compiled code, images, or model checkpoints). In general-purpose computing, files may store text documents, scripts, or executables. In contrast, fields like machine learning and data engineering rely on file formats that embed schema or use compact binary layouts for performance. Examples include .h5 (HDF5), .parquet, and .arrow, which are designed for efficient, structured access and parallel processing at scale. -->
+<!---->
+<!-- The OS is responsible for file creation, access, naming, storage allocation, and metadata management. It exposes a hierarchical file system that maps human-readable paths (e.g. /home/user/data.csv) to physical data blocks. Key abstractions like inodes (in Unix-like systems) store metadata including file size, timestamps, ownership, and pointers to data blocks. The OS also enforces access control via permissions and user/group ownership and supports special files—such as symbolic links, device nodes, sockets, and FIFOs—that extend file semantics to hardware interfaces and inter-process communication. -->
+<!---->
+<!-- Interaction with files is mediated through file descriptors, small integers that index open file entries in a process-specific table managed by the kernel. Core file operations—open(), read(), write(), and close()—form the low-level interface exposed via system calls. For more advanced I/O, the mmap() system call allows files to be mapped directly into virtual memory, enabling efficient pointer-based access and inter-process sharing. Behind the scenes, the OS manages caches (e.g. page cache and buffer cache) to reduce disk latency and supports direct I/O or asynchronous I/O for performance-critical workloads. -->
+<!---->
+<!-- Several advanced mechanisms underpin modern file systems. Mounting attaches a file system (e.g. a USB stick or network volume) to a specific directory path within the global namespace. Journaling, used in systems like ext4 or XFS, logs metadata updates to support crash recovery. Advanced file systems such as ZFS and Btrfs offer features like copy-on-write, snapshots, checksumming, and compression for enhanced reliability. File locking (via flock() or fcntl()) helps avoid race conditions but can introduce deadlocks if not managed carefully. Virtual file systems like /proc and /sys expose live kernel and hardware state through file-like interfaces, enabling introspection tools to query memory usage, CPU load, or device health. -->
+<!---->
+<!-- In ML and LLM workflows, file handling is central to system performance and model scalability. Datasets are often stored in binary formats such as TFRecord, HDF5, or Apache Arrow, which support partial reads and parallel access across workers. PyTorch’s DataLoader leverages multiprocessing to fetch data from shared disks or cloud object stores mounted via FUSE drivers like s3fs. For inference, quantized model formats such as GPT-generated Unified Format (.gguf) or .pth are optimized for memory alignment, minimal I/O overhead, and streaming. Tools like llama.cpp use memory mapping or chunked loading to reduce memory footprint and accelerate loading. In distributed or multi-node environments, consistency and throughput are maintained via parallel file systems (e.g. Lustre) or eventual-consistency object stores (e.g. Amazon S3), which must support atomic writes and concurrent access to training logs, checkpoints, and model artifacts. -->
+<!---->
 <!-- https://www.cs.miami.edu/home/visser/Courses/CSC322-09S/Content/UNIXUse/FileSystem.shtml -->
 <!-- https://www.reddit.com/r/linux/comments/qkm01c/a_refresher_on_the_linux_file_system_structure/ -->
 
