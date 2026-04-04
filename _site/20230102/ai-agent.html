@@ -6,14 +6,46 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
     
-        <title>Hikikomori</title>
-		<link rel="stylesheet" type="text/css" href="/assets/css/001.css">
+        <title>302. ai agent</title>
+		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
     
 	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
 	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
 	<script src="/assets/js/highlight.pack.js"></script>
 	<script>hljs.initHighlightingOnLoad();</script>
+	
+		<!--http://benlansdell.github.io/computing/mathjax/-->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    extensions: [
+      "tex2jax.js",
+      "MathMenu.js",
+      "MathZoom.js",
+      "AssistiveMML.js",
+      "a11y/accessibility-menu.js"
+    ],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    jax: ["input/TeX", "output/CommonHTML"],
+});
+MathJax.Hub.Register.MessageHook("Math Processing Error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
+        alert("Math Processing Error: "+message[1]);
+    });
+</script>
+<!-- You may add the following into MathJax.Hub.Config:
+CommonHTML: {
+    scale: 85
+}-->
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 	
 </head>
 <body>
@@ -75,51 +107,49 @@
 		</div>
 		<div class="post_list">
 			
-				
-					<ul>
-	
-	<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
-	
-	<li><a href="/20240105/virtualisation" title="405. virtualisation"><img src="/assets/img/file.ico" title="405. virtualisation" />405. virtualisation</a></li>
-	
-	<li><a href="/20240104/networking" title="404. networking"><img src="/assets/img/file.ico" title="404. networking" />404. networking</a></li>
-	
-	<li><a href="/20240103/concurrency" title="403. multitasking"><img src="/assets/img/file.ico" title="403. multitasking" />403. multitasking</a></li>
-	
-	<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
-	
-	<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
-	
-	<li><a href="/20230102/ai-agent" title="302. ai agent"><img src="/assets/img/file.ico" title="302. ai agent" />302. ai agent</a></li>
-	
-	<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
-	
-	<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
-	
-	<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
-	
-	<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
-	
-	<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
-	
-	<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
-	
-	<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
-	
-	<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
-	
-	<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
-	
-	<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
-	
-	<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
-	
-	<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
-	
-	<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
-	
-</ul>
-				
+				<ul>
+					
+					<li><a href="/20240201/functional-analysis" title="501. functional analysis"><img src="/assets/img/file.ico" title="501. functional analysis" />501. functional analysis</a></li>
+					
+					<li><a href="/20240105/virtualisation" title="405. virtualisation"><img src="/assets/img/file.ico" title="405. virtualisation" />405. virtualisation</a></li>
+					
+					<li><a href="/20240104/networking" title="404. networking"><img src="/assets/img/file.ico" title="404. networking" />404. networking</a></li>
+					
+					<li><a href="/20240103/concurrency" title="403. multitasking"><img src="/assets/img/file.ico" title="403. multitasking" />403. multitasking</a></li>
+					
+					<li><a href="/20240102/operating-system" title="402. operating system"><img src="/assets/img/file.ico" title="402. operating system" />402. operating system</a></li>
+					
+					<li><a href="/20240101/computer" title="401. dl compilation"><img src="/assets/img/file.ico" title="401. dl compilation" />401. dl compilation</a></li>
+					
+					<li><a href="/20230102/ai-agent" title="302. ai agent"><img src="/assets/img/file.ico" title="302. ai agent" />302. ai agent</a></li>
+					
+					<li><a href="/20230101/ml-paper" title="301. ml literature"><img src="/assets/img/file.ico" title="301. ml literature" />301. ml literature</a></li>
+					
+					<li><a href="/20220112/markov-chain" title="212. markov chain"><img src="/assets/img/file.ico" title="212. markov chain" />212. markov chain</a></li>
+					
+					<li><a href="/20220111/martingale" title="211. martingale"><img src="/assets/img/file.ico" title="211. martingale" />211. martingale</a></li>
+					
+					<li><a href="/20220110/stochastic-process" title="210. stochastic process"><img src="/assets/img/file.ico" title="210. stochastic process" />210. stochastic process</a></li>
+					
+					<li><a href="/20220109/laws-of-the-iterated-logarithm" title="209. law of the iterated logarithm"><img src="/assets/img/file.ico" title="209. law of the iterated logarithm" />209. law of the iterated logarithm</a></li>
+					
+					<li><a href="/20220108/central-limit-theorem" title="208. central limit theorem"><img src="/assets/img/file.ico" title="208. central limit theorem" />208. central limit theorem</a></li>
+					
+					<li><a href="/20220107/laws-of-large-number" title="207. law of large number"><img src="/assets/img/file.ico" title="207. law of large number" />207. law of large number</a></li>
+					
+					<li><a href="/20220106/modes-of-convergence" title="206. mode of convergence"><img src="/assets/img/file.ico" title="206. mode of convergence" />206. mode of convergence</a></li>
+					
+					<li><a href="/20220105/characteristic-function" title="205. characteristic function"><img src="/assets/img/file.ico" title="205. characteristic function" />205. characteristic function</a></li>
+					
+					<li><a href="/20220104/inequality" title="204. inequality"><img src="/assets/img/file.ico" title="204. inequality" />204. inequality</a></li>
+					
+					<li><a href="/20220103/expectation" title="203. expectated value"><img src="/assets/img/file.ico" title="203. expectated value" />203. expectated value</a></li>
+					
+					<li><a href="/20220102/random-variable" title="202. random variable"><img src="/assets/img/file.ico" title="202. random variable" />202. random variable</a></li>
+					
+					<li><a href="/20220101/probability" title="201. probability theory"><img src="/assets/img/file.ico" title="201. probability theory" />201. probability theory</a></li>
+					
+				</ul>
 			
 		</div>
 		<script>if(location.search.indexOf('tag=')!==-1){document.querySelector('.post_list').style.visibility='hidden'}</script>
@@ -131,6 +161,54 @@
 		</div>
 	</div>
 	
+        <div class="content">
+			<div class="post_title">
+				<img src="/assets/img/file.png" />
+				<h1>302. ai agent</h1>
+				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
+				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
+				<div class="btn"><span class="fa fa-window-minimize"></span></div>
+			</div>
+			<ul class="topbar">
+				<li>January 2, 2023</li>
+			</ul>
+			<div class="post_content">
+        		<ul>
+  <li>
+    <ol>
+      <li>
+        <h2 id="large-language-model-eg-transformers-decoder">Large Language Model (e.g. Transformer’s Decoder)</h2>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <ol>
+      <li>
+        <h2 id="model-context-protocol-by-anthropic-ie-new-era-of-api-for-llm">Model Context Protocol by Anthropic (i.e. new era of api for llm)</h2>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <ol>
+      <li>
+        <h2 id="agent">Agent</h2>
+      </li>
+    </ol>
+  </li>
+</ul>
+
+				
+					<br>
+<hr>
+<br>
+<div class="comment">
+	<p>I gathered words solely for my own purposes without any intention to break the rigorosity of the subjects.<br>
+	Well, I prefer eating corn in spiral <i class="fa fa-cutlery"></i>.</p>
+</div>
+				
+			</div>
+		</div>
+    
 	<script>
 		// Search index: includes 500 words per post for search matching
 		// Note: Consider reducing truncatewords value if number of posts increases significantly
@@ -140,7 +218,7 @@
 			{
 				title: "501. functional analysis",
 				url: "/20240201/functional-analysis",
-				content: "I. TBD\n\nGraduate Texts in Mathematics - A course in Functional Analysis\n",
+				content: "## I. TBD\n---\nGraduate Texts in Mathematics - A course in Functional Analysis",
 				tags: ["math500"]
 			},
 			
@@ -154,28 +232,28 @@
 			{
 				title: "404. networking",
 				url: "/20240104/networking",
-				content: "Networking Never wondered how typing a URL or calling an API “just works.” But beneath this apparent simplicity lies a complex orchestration of protocols, addressing schemes, data formats, and layered abstractions. Networking is not merely about sending data—it’s about ensuring it gets there correctly, efficiently, and securely across the globe. https://www.youtube.com/watch?v=JDh_lzHO_CA https://www.youtube.com/watch?v=p6ASAAMwgd8&amp;sttick=0 https://www.youtube.com/watch?v=D26sUZ6DHNQ https://www.youtube.com/watch?v=5VAM2QAGZIc https://www.youtube.com/watch?v=K9L9YZhEjC0&amp;t=951s https://www.youtube.com/watch?v=GAyZ_QgYYYo … I 🧩 Topic 1: Architecture and Protocol Layering 1.1 Historical Origins of Protocol Design Pre-ARPANET communication: telephony and circuit switching Rise of packet switching: efficiency, fault tolerance, shared lines ARPANET as the first general-purpose packet-switched network OSI vs TCP/IP: competing models, simplicity vs purity Influence of pragmatism in layered protocol design 1.2 TCP/IP Stack and Layer Encapsulation Layer abstraction: Link, Internet, Transport, Application Role of each layer and their interfaces Encapsulation/decapsulation: data wrapped at each layer Interoperability and network modularity Ethernet, IP, TCP, and protocols like HTTP and SSH 1.3 Addressing and Naming IP addresses and logical location (IPv4/IPv6) MAC addresses and physical NIC identification DHCP for dynamic IP allocation; ARP for local resolution DNS as a hierarchical namespace — critical for the web SSH and HTTP in name-resolution workflows 1.4 Protocol Data Units and Flow Example Layer-wise example: HTTP request over TCP/IP via Ethernet SSH as an encrypted interactive shell over TCP From socket to wire to remote process: full packet flow Packet framing, headers, payload, MTU considerations 1.5 Design Analogies: Filesystems, Syscalls, and Composability Networking I/O as generalised system I/O Socket API as the “syscall” interface of networking Layer isolation → similar to syscall/kernel boundaries Modular composition → like chaining Unix tools (e.g. pipes) 🔌 Topic 2: Sockets, Ports, and OS Abstractions 2.1 Sockets and System Calls socket(), bind(), listen(), accept() POSIX vs Windows APIs Blocking vs non-blocking modes Use in SSH, HTTP server/client patterns 2.2 Port Binding and Namespaces Port numbers and ranges (0–65535) Reserved ports (e.g. 22 for SSH, 80/443 for HTTP/S) Ephemeral ports and conflict handling ML service port usage and container binding 2.3 Multiplexing and Concurrency select(), poll(), epoll I/O readiness and concurrency models async/await and event loops ML agent servers and inference APIs 2.4 UNIX Domain Sockets and Local IPC AF_UNIX vs AF_INET IPC for containerised services (e.g. Docker daemon) PyTorch shared-process communication File-based addressing and permission semantics 2.5 Containerisation and Network Isolation Linux namespaces (netns), veth, bridges Docker port forwarding, Kubernetes Services NAT, iptables, and network sandboxing Virtual NICs in multi-node training clusters 🚦 Topic 3: Transport Layer Trade-offs and Performance 3.1 TCP and Reliable Byte Streams 3-way handshake and reliable delivery Sequence numbers, flow control, congestion management TCP in SSH, HTTP, and PyTorch DDP Latency and throughput characteristics 3.2 UDP and Lightweight Messaging Connectionless communication DNS, VoIP, and real-time systems MTU, fragmentation, and application-layer recovery UDP in NCCL and cluster broadcasts 3.3 ML System Implications: DDP and AllReduce PyTorch’s torch.distributed backends: TCP, NCCL, Gloo Multi-GPU, multi-host collective operations Topology-aware scheduling and backend tuning Performance impacts of RDMA and TCP congestion 3.4 Latency, Throughput, and Window Tuning Bandwidth-delay product TCP_NODELAY, socket buffer sizing ML sync...",
+				content: "# Networking --- Never wondered how typing a URL or calling an API “just works.” But beneath this apparent simplicity lies a complex orchestration of protocols, addressing schemes, data formats, and layered abstractions. Networking is not merely about sending data—it’s about ensuring it gets there correctly, efficiently, and securely across the globe. - https://www.youtube.com/watch?v=JDh_lzHO_CA - https://www.youtube.com/watch?v=p6ASAAMwgd8&sttick=0 - https://www.youtube.com/watch?v=D26sUZ6DHNQ - https://www.youtube.com/watch?v=5VAM2QAGZIc - https://www.youtube.com/watch?v=K9L9YZhEjC0&t=951s - https://www.youtube.com/watch?v=GAyZ_QgYYYo - ... ## I --- ## 🧩 Topic 1: Architecture and Protocol Layering ### 1.1 Historical Origins of Protocol Design - Pre-ARPANET communication: telephony and circuit switching - Rise of packet switching: efficiency, fault tolerance, shared lines - ARPANET as the first general-purpose packet-switched network - OSI vs TCP/IP: competing models, simplicity vs purity - Influence of pragmatism in layered protocol design ### 1.2 TCP/IP Stack and Layer Encapsulation - Layer abstraction: Link, Internet, Transport, Application - Role of each layer and their interfaces - Encapsulation/decapsulation: data wrapped at each layer - Interoperability and network modularity - Ethernet, IP, TCP, and protocols like HTTP and SSH ### 1.3 Addressing and Naming - IP addresses and logical location (IPv4/IPv6) - MAC addresses and physical NIC identification - DHCP for dynamic IP allocation; ARP for local resolution - DNS as a hierarchical namespace — critical for the web - SSH and HTTP in name-resolution workflows ### 1.4 Protocol Data Units and Flow Example - Layer-wise example: HTTP request over TCP/IP via Ethernet - SSH as an encrypted interactive shell over TCP - From socket to wire to remote process: full packet flow - Packet framing, headers, payload, MTU considerations ### 1.5 Design Analogies: Filesystems, Syscalls, and Composability - Networking I/O as generalised system I/O - Socket API as the \"syscall\" interface of networking - Layer isolation → similar to syscall/kernel boundaries - Modular composition → like chaining Unix tools (e.g. pipes) --- ## 🔌 Topic 2: Sockets, Ports, and OS Abstractions ### 2.1 Sockets and System Calls - *socket()*, *bind()*, *listen()*, *accept()* - POSIX vs Windows APIs - Blocking vs non-blocking modes - Use in SSH, HTTP server/client patterns ### 2.2 Port Binding and Namespaces - Port numbers and ranges (0–65535) - Reserved ports (e.g. 22 for SSH, 80/443 for HTTP/S) - Ephemeral ports and conflict handling - ML service port usage and container binding ### 2.3 Multiplexing and Concurrency - *select()*, *poll()*, *epoll* - I/O readiness and concurrency models - async/await and event loops - ML agent servers and inference APIs ### 2.4 UNIX Domain Sockets and Local IPC - *AF_UNIX* vs *AF_INET* - IPC for containerised services (e.g. Docker daemon) - PyTorch shared-process communication - File-based addressing and permission semantics ### 2.5 Containerisation and Network Isolation - Linux namespaces (*netns*), veth, bridges - Docker port forwarding, Kubernetes Services - NAT, iptables, and network sandboxing - Virtual NICs in multi-node training clusters --- ## 🚦 Topic 3: Transport Layer Trade-offs and Performance ### 3.1 TCP and Reliable Byte Streams - 3-way handshake and reliable delivery - Sequence numbers, flow control, congestion management - TCP in SSH, HTTP,...",
 				tags: ["cs400"]
 			},
 			
 			{
 				title: "403. multitasking",
 				url: "/20240103/concurrency",
-				content: "Multitasking A computer reads process’s code line-by-line that resides in RAM and a CPU executes instructions sequentially to … A single-core, or more explicitly, a process can handle multiple jobs if it can span threads, or the jobs themselves are I/O-bound. A multi-core processors leverage its powerful hardware and several processes perform the exact same job on different data (SIMT). The two physically different execution models explore the concept of concurrency involves managing multiple tasks that may interleave execution, while parallelism requires simultaneous execution on multiple processing units. This post explores the theoretical foundations, implementation patterns, and practical trade-offs across different programming paradigms, with particular attention to how language runtimes and operating systems coordinate to achieve efficient concurrent execution. Concurrency: Logical simultaneity—multiple tasks making progress through interleaved execution on a single or multiple cores. A concurrent system can handle multiple tasks even on a single-core CPU through time-slicing and context switching—the process by which the operating system saves the execution state (registers, program counter, stack pointer, memory mappings) of a currently running thread/process and restores the state of another, allowing the CPU to rapidly alternate between different execution contexts. This creates the illusion of simultaneous execution. Key characteristic: tasks start, run, and complete in overlapping time periods, but not necessarily simultaneously. Parallelism: Physical simultaneity—multiple tasks executing simultaneously on multiple processing units (cores, CPUs, or distributed nodes). Requires hardware support and is a subset of concurrency. True parallelism means tasks execute at the exact same instant across different execution units. Taxonomy: Task parallelism: different tasks on different processors (e.g., producer-consumer across cores) Data parallelism: same operation on different data partitions (e.g., SIMD, map-reduce) Pipeline parallelism: stages of computation distributed across processors Hybrid models: combining task and data parallelism Amdahl’s Law and Gustafson’s Law: Theoretical limits on speedup from parallelization. Amdahl’s Law shows diminishing returns when parallelizing a fixed-size problem with sequential bottlenecks. Gustafson’s Law argues that problem size often scales with available processors, making parallelization more effective in practice. Relationship to OS concepts: Concurrency is achieved through OS scheduling (time-slicing, preemption), while parallelism requires multiple hardware execution contexts. Modern systems combine both: concurrent scheduling of threads/processes across parallel cores. 1.2. Execution Models and Memory Models Shared memory vs message passing: Shared memory: Threads/processes on the same machine access a common physical address space (fast but requires synchronization). All threads can directly read/write the same memory locations, enabling low-latency communication but requiring careful synchronization to avoid race conditions. This model applies to CPU threads and processes on the same system. Message passing: Processes communicate via explicit channels or transfers (slower but better isolation). Data must be explicitly copied or transferred between separate address spaces. This includes: (1) distributed systems where processes run on different machines (e.g., Spark, Hadoop clusters, distributed databases like Cassandra, MongoDB shards), communicating over the network via message passing, (2) CPU-GPU communication where CPU and GPU have separate memory spaces connected via DMA (Direct Memory Access)—data must be explicitly transferred from CPU memory to GPU memory (and vice versa)...",
+				content: "# Multitasking --- A computer reads process's code line-by-line that resides in RAM and a CPU executes instructions sequentially to ... A single-core, or more explicitly, a process can handle multiple jobs if it can span threads, or the jobs themselves are I/O-bound. A multi-core processors leverage its powerful hardware and several processes perform the exact same job on different data (SIMT). The two physically different execution models explore the concept of concurrency involves managing multiple tasks that may interleave execution, while parallelism requires simultaneous execution on multiple processing units. This post explores the theoretical foundations, implementation patterns, and practical trade-offs across different programming paradigms, with particular attention to how language runtimes and operating systems coordinate to achieve efficient concurrent execution. - **Concurrency**: Logical simultaneity—multiple tasks making progress through interleaved execution on a single or multiple cores. A concurrent system can handle multiple tasks even on a single-core CPU through time-slicing and **context switching**—the process by which the operating system saves the execution state (registers, program counter, stack pointer, memory mappings) of a currently running thread/process and restores the state of another, allowing the CPU to rapidly alternate between different execution contexts. This creates the illusion of simultaneous execution. Key characteristic: tasks start, run, and complete in overlapping time periods, but not necessarily simultaneously. - **Parallelism**: Physical simultaneity—multiple tasks executing simultaneously on multiple processing units (cores, CPUs, or distributed nodes). Requires hardware support and is a subset of concurrency. True parallelism means tasks execute at the exact same instant across different execution units. - **Taxonomy**: - Task parallelism: different tasks on different processors (e.g., producer-consumer across cores) - Data parallelism: same operation on different data partitions (e.g., SIMD, map-reduce) - Pipeline parallelism: stages of computation distributed across processors - Hybrid models: combining task and data parallelism - **Amdahl's Law and Gustafson's Law**: Theoretical limits on speedup from parallelization. Amdahl's Law shows diminishing returns when parallelizing a fixed-size problem with sequential bottlenecks. Gustafson's Law argues that problem size often scales with available processors, making parallelization more effective in practice. - **Relationship to OS concepts**: Concurrency is achieved through OS scheduling (time-slicing, preemption), while parallelism requires multiple hardware execution contexts. Modern systems combine both: concurrent scheduling of threads/processes across parallel cores. ### **1.2. Execution Models and Memory Models** - **Shared memory vs message passing**: - **Shared memory**: Threads/processes on the same machine access a common physical address space (fast but requires synchronization). All threads can directly read/write the same memory locations, enabling low-latency communication but requiring careful synchronization to avoid race conditions. This model applies to CPU threads and processes on the same system. - **Message passing**: Processes communicate via explicit channels or transfers (slower but better isolation). Data must be explicitly copied or transferred between separate address spaces. This includes: (1) **distributed systems** where processes run on different machines (e.g., **Spark**, Hadoop clusters, distributed databases like Cassandra, MongoDB shards), communicating over the network via message passing, (2) **CPU-GPU communication** where CPU and GPU have separate memory spaces connected via **DMA (Direct...",
 				tags: ["cs400"]
 			},
 			
 			{
 				title: "402. operating system",
 				url: "/20240102/operating-system",
-				content: "Operating System A digital computer without an operating system (OS) is just bare metal. The OS is often overlooked, but this is a crucial invention that supports nearly all modern computing. We encounter it naturally when moving from high-level code to low-level hardware instructions. https://www.youtube.com/watch?v=ISJ44S5sZu8 https://www.youtube.com/watch?v=HbgzrKJvDRw https://www.youtube.com/watch?v=D26sUZ6DHNQ (UDS: unix domain sockets) https://www.youtube.com/watch?v=XNGfl3sfErc https://www.youtube.com/watch?v=H01FkDtllwc I 1.1. Overview The earliest generation of electronic computers (1940s–50s), such as the ENIAC, were programmed manually in pure machine code by rewiring circuits or feeding in punched cards. Programs ran in isolation, required laborious setup, and left machines idle between jobs. The concept of an OS emerged in the 1950s with batch processing systems which grouped similar jobs for sequential execution without manual intervention. A key example is GM-NAA I/O, developed for the IBM 701. The 701 was programmed in assembly, used control cards to interpret jobs and automate execution, and was later adapted to support high-level languages such as Fortran (1957). The 1960s marked a shift toward time-sharing systems (TSS) and multiprogramming, that permitted a concurrent execution of multiple programs residing in memory by rapidly switching the CPU among them. The evolution led to the development of Multics, a pioneering TSS, jointly built by AT&amp;T Bell Labs, GE, and MIT to support a robust, multi-user computing environment. However, discontent with its complexity prompted researchers at Bell Labs to develop Unix in the early 1970s. This newer and simpler OS incorporated a modular kernel, hardware abstraction, and multi-user support, in which these principles remain central to modern operating system design. The 1980s ushered in the era of personal computing, shifting OS development from command-line interfaces (CLI) to graphical user interfaces (GUI) to improve accessibility for non-technical users. Microsoft introduced MS-DOS in 1981, a single-tasking CLI-based OS, followed by successive versions of Windows that adopted cooperative and later preemptive multitasking. Around the same time, Apple’s Macintosh OS (aka. macOS) brought the GUI into mainstream. In the 1990s, Linux emerged as a free and open-source Unix-like alternative. Rooted in Unix philosophy, it became a foundation for innovation across servers, mobiles, and embedded systems. 1.2. Operating System A modern OS enforces a strict separation between user mode (unprivileged) and kernel mode (privileged). This hardware-supported principle protects the system by preventing unprivileged programs from directly accessing critical hardware resources. For example, application programs, such as the web browser, are generally run as unprivileged processes and must rely on the services exposed by the OS (e.g. file I/O or memory allocation). System programs including shells, compilers, daemons, and init systems, that also reside in user space, provide runtime infrastructure which interprets user instructions and translates them into requests the kernel can fulfill. As drawn below, the application programming interface (API) provided by standard libraries (e.g. libc on Unix-like systems) abstracts the complexity of invoking system calls directly from user mode. That is, when a user-space program requires privileged functionality (e.g. spawning a process), it leverages a high-level API routine which internally issues one or more system calls. These serve as well-defined...",
+				content: "# Operating System --- A digital computer without an [operating system](https://www.youtube.com/watch?v=26QPDBe-NB8) (OS) is just bare metal. The OS is often overlooked, but this is a crucial invention that supports nearly all modern computing. We encounter it naturally when moving from high-level code to low-level hardware instructions. - https://www.youtube.com/watch?v=ISJ44S5sZu8 - https://www.youtube.com/watch?v=HbgzrKJvDRw - https://www.youtube.com/watch?v=D26sUZ6DHNQ (UDS: unix domain sockets) - https://www.youtube.com/watch?v=XNGfl3sfErc - https://www.youtube.com/watch?v=H01FkDtllwc ## I --- ### **1.1. Overview** The earliest generation of electronic computers (1940s–50s), such as the ENIAC, were programmed manually in pure machine code by rewiring circuits or feeding in [punched cards](). Programs ran in isolation, required laborious setup, and left machines idle between jobs. The concept of an OS emerged in the 1950s with [batch processing systems]() which grouped similar jobs for sequential execution without manual intervention. A key example is [GM-NAA I/O](), developed for the [IBM 701](). The 701 was programmed in assembly, used control cards to interpret jobs and automate execution, and was later adapted to support high-level languages such as [Fortran]() (1957). The 1960s marked a shift toward [time-sharing systems]() (TSS) and [multiprogramming](), that permitted a [concurrent execution]() of multiple programs residing in memory by rapidly switching the CPU among them. The evolution led to the development of [Multics](), a pioneering TSS, jointly built by AT&T Bell Labs, GE, and MIT to support a robust, multi-user computing environment. However, discontent with its complexity prompted researchers at Bell Labs to develop [Unix]() in the early 1970s. This newer and simpler OS incorporated a modular kernel, hardware abstraction, and multi-user support, in which these principles remain central to modern operating system design. The 1980s ushered in the era of personal computing, shifting OS development from [command-line interfaces]() (CLI) to [graphical user interfaces]() (GUI) to improve accessibility for non-technical users. Microsoft introduced [MS-DOS]() in 1981, a single-tasking CLI-based OS, followed by successive versions of [Windows]() that adopted cooperative and later preemptive multitasking. Around the same time, Apple’s [Macintosh OS]() (aka. macOS) brought the GUI into mainstream. In the 1990s, [Linux]() emerged as a free and open-source Unix-like alternative. Rooted in Unix philosophy, it became a foundation for innovation across servers, mobiles, and embedded systems. - ### **1.2. Operating System** A modern OS enforces a strict separation between [user mode]() (unprivileged) and [kernel mode]() (privileged). This hardware-supported principle protects the system by preventing unprivileged programs from directly accessing critical hardware resources. For example, [application programs](), such as the web browser, are generally run as unprivileged processes and must rely on the services exposed by the OS (e.g. file I/O or memory allocation). [System programs]() including shells, compilers, [daemons](), and init systems, that also reside in user space, provide runtime infrastructure which interprets user instructions and translates them into requests the kernel can fulfill. As drawn below, the [application programming interface]() (API) provided by standard libraries (e.g. libc on Unix-like systems) abstracts the complexity of invoking system calls directly from user mode. That is, when a user-space program requires privileged functionality (e.g. spawning a process), it leverages a high-level API routine...",
 				tags: ["cs400"]
 			},
 			
 			{
 				title: "401. dl compilation",
 				url: "/20240101/computer",
-				content: "DL Compilation The cs400 covers the rudimentary elements of Computer Science and aims to enhance the work-related self-efficacy of someone only with a degree in Mathematics. This first post is intended to celebrate the announcement of torch.compile in early March 2023. Pytorch 1.0 was released in 2017 essentially to provide Python API wrapper around C++ kernel. https://www.youtube.com/watch?v=6hvJr0-adtg&amp;t=262s https://www.youtube.com/watch?v=A8tO4D1Gtc0 https://stackoverflow.com/questions/14690159/is-ascii-code-in-matter-of-fact-7-bit-or-8-bit I 1.1. Computer Charles Babbage’s Analytical Engine (1837) is widely regarded as the first conceptual design of a general-purpose digital computer. It featured an arithmetic logic unit (ALU), control flow with conditional branching and loops, and dedicated memory modules. Building on this lineage, Alan Turing proposed the Turing Machine (1936), laying the theoretical foundation for analysing computation and forming the basis of modern CS by formalising the limits of what machines can compute. The Electronic Numerical Integrator and Computer (ENIAC) (1945), developed by John Mauchly and J. Presper Eckert, is arguably the first programmable electronic digital computer. Although computers vary in size, processing power, and also purpose, they could still be categorised as follows: i) personal computers (PCs): are general-purpose systems used for tasks such as office productivity, web browsing, multimedia, and gaming; ii) mainframes: are optimised for high-volume transaction processing, large-scale database management, and mission-critical workloads that demand scalability and reliability; iii) supercomputers: offer extremely high computational throughput and are used for scientific applications such as climate modelling or molecular simulation; Programmers interact with computers by writing instructions that control hardware. At a high level, the motherboard provides the physical circuitry for implementing the key components of the Von Neumann architecture (1945). It serves as a central hub connecting the CPU socket, RAM slots, storage interfaces, I/O ports, and expansion slots via buses and chipsets. Modern motherboards support add-in cards such as GPUs, sound cards, and additional storage controllers to enhance performance or capabilities. Firmware, such as BIOS or UEFI, embedded in the motherboard performs power-on self-tests (POST) and then invokes a bootloader (e.g. GRUB on Linux or Boot Manager on Windows), which loads the kernel into RAM from storage. [src] 1.2. Central Processing Unit A central processing unit (CPU or processor) executes instructions, known as programs, via the fetch-decode-execute cycle. Modern CPUs feature multiple cores (e.g. 4 to 64) along with a floating-point unit (FPU) for efficient real-number computation, while each core includes its own arithmetic logic unit (ALU) and control unit (CU). CPUs also possess dedicated memory modules. The fastest form of memory, called the register, temporarily holds data and instructions immediately required by the CPU, while its cache hierarchy, often comprising {‘L1’: smallest-fastest, ‘L2’: larger-slower, ‘L3’: largest-shared across cores}, mitigates latency from slower main memory. Given clock speed refers to how quickly instructions are issued per second, a CPU’s word size refers the number of bits it can process in a single operation, and modern CPUs commonly employee 32-bit or 64-bit. Word size affects register width, data path size, and the design of the instruction set architecture (ISA), where instructions (represented in binary) abstract the underlying hardware...",
+				content: "# DL Compilation --- The cs400 covers the rudimentary elements of Computer Science and aims to enhance the work-related self-efficacy of someone only with a degree in Mathematics. This first post is intended to celebrate the announcement of *torch.compile* in early March 2023. Pytorch 1.0 was released in 2017 essentially to provide Python API wrapper around C++ kernel. - https://www.youtube.com/watch?v=6hvJr0-adtg&t=262s - https://www.youtube.com/watch?v=A8tO4D1Gtc0 - https://stackoverflow.com/questions/14690159/is-ascii-code-in-matter-of-fact-7-bit-or-8-bit ## I --- ### **1.1. Computer** Charles Babbage’s [Analytical Engine]() (1837) is widely regarded as the first conceptual design of a general-purpose digital computer. It featured an arithmetic logic unit (ALU), control flow with conditional branching and loops, and dedicated memory modules. Building on this lineage, Alan Turing proposed the [Turing Machine]() (1936), laying the theoretical foundation for analysing computation and forming the basis of modern CS by formalising the limits of what machines can compute. The [Electronic Numerical Integrator and Computer]() (ENIAC) (1945), developed by John Mauchly and J. Presper Eckert, is arguably the first programmable electronic digital computer. Although computers vary in size, processing power, and also purpose, they could still be categorised as follows: i) [personal computers]() (PCs): are general-purpose systems used for tasks such as office productivity, web browsing, multimedia, and gaming; ii) [mainframes](): are optimised for high-volume transaction processing, large-scale database management, and mission-critical workloads that demand scalability and reliability; iii) [supercomputers](): offer extremely high computational throughput and are used for scientific applications such as climate modelling or molecular simulation; Programmers interact with computers by writing instructions that control hardware. At a high level, the [motherboard]() provides the physical circuitry for implementing the key components of the [Von Neumann architecture]() (1945). It serves as a central hub connecting the CPU socket, RAM slots, storage interfaces, I/O ports, and expansion slots via [buses]() and [chipsets](). Modern motherboards support add-in cards such as GPUs, sound cards, and additional storage controllers to enhance performance or capabilities. [Firmware](), such as BIOS or UEFI, embedded in the motherboard performs [power-on self-tests]() (POST) and then invokes a bootloader (e.g. GRUB on Linux or Boot Manager on Windows), which loads the kernel into RAM from storage. - [src] ### **1.2. Central Processing Unit** A [central processing unit]() (CPU or processor) executes instructions, known as [programs](https://youtu.be/RU1u-js7db8?si=cGIkhRbh6XW_mr34), via the [fetch-decode-execute]() cycle. Modern CPUs feature multiple cores (e.g. 4 to 64) along with a [floating-point unit]() (FPU) for efficient real-number computation, while each core includes its own [arithmetic logic unit]() (ALU) and [control unit]() (CU). CPUs also possess dedicated memory modules. The fastest form of memory, called the [register](), temporarily holds data and instructions immediately required by the CPU, while its [cache hierarchy](), often comprising {'L1': smallest-fastest, 'L2': larger-slower, 'L3': largest-shared across cores}, mitigates latency from slower main memory. Given [clock speed]() refers to how quickly instructions are issued per second, a CPU’s [word size](http://cpuville.com/Projects/Original-CPU/programming.html) refers the number of bits it can process in a single operation, and modern CPUs commonly employee 32-bit or 64-bit. Word size affects register width, data path size, and the design of the [instruction set architecture](https://www.slideshare.net/slideshow/instruction-set-architecture-254097280/254097280#2)...",
 				tags: ["cs400"]
 			},
 			
