@@ -103,18 +103,21 @@
 					hljs.highlightBlock(block);
 				});
 				// Re-run line numbers (from 002.js)
-				if (typeof numbers === 'function') numbers();
+				try { if (typeof numbers === 'function') numbers(); } catch (e) {}
 				// Re-init maximize/minimize buttons (from 001.js)
 				var max = newContent.querySelectorAll('.btn')[1];
 				var min = newContent.querySelectorAll('.btn')[2];
 				if (max) max.addEventListener('click', maximize, false);
 				if (min) min.addEventListener('click', minimize, false);
 				// Re-render MathJax if present
-				if (window.MathJax && MathJax.typesetPromise) {
-					MathJax.typesetPromise([newContent]);
-				} else if (window.MathJax && MathJax.Hub) {
-					MathJax.Hub.Queue(['Typeset', MathJax.Hub, newContent]);
+				function typesetMathJax() {
+					if (window.MathJax && MathJax.Hub) {
+						MathJax.Hub.Queue(['Typeset', MathJax.Hub, newContent]);
+					} else {
+						setTimeout(typesetMathJax, 200);
+					}
 				}
+				typesetMathJax();
 			}
 			// Update page title
 			var newTitle = doc.querySelector('title');
