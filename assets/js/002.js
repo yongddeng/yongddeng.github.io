@@ -3,7 +3,7 @@
 
 function numbers () {
 	var fields = document.getElementsByTagName("code");
-	for (field in fields) {
+	for (var field = 0; field < fields.length; field++) {
 		var num = 0;
 		var select = fields[field].innerText;
 		var select_f = select.split(/\n/);
@@ -20,7 +20,7 @@ function numbers () {
 
 		fields[field].innerHTML = "";
 		fields[field].appendChild(tab);
-		for (line in select_f) {
+		for (var line = 0; line < select_f.length; line++) {
 			var row = document.createElement("tr");
 			var col = document.createElement("th");
 			var colc = document.createElement("th");
@@ -48,4 +48,4 @@ function numbers () {
 	}
 }
 
-window.onload = numbers();
+window.onload = numbers;
