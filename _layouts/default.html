@@ -72,6 +72,7 @@
 				</ul>
 			{% endunless %}
 		</div>
+		<script>if(location.search.indexOf('tag=')!==-1){document.querySelector('.post_list').style.visibility='hidden'}</script>
 		<div class="post_total">
 			{% if page.tag %}
 				<div class="left">{{ site.tags[page.tag] | size }} object(s)</div>
@@ -119,6 +120,7 @@
 	<script src="/assets/js/001.js"></script>
 	<script src="/assets/js/002.js"></script>
 	<script src="/assets/js/search.js"></script>
+	<script src="/assets/js/tag-filter.js"></script>
 	<div class="footer">
 		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
 	</div>
