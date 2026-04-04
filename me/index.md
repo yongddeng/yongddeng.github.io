@@ -4,7 +4,7 @@ title: me
 ---
 
 
-Arsenal, Coffee, Tattoo
+Arsenal, Bichon Frisé, Coffee, Tattoo
 
 
 **0-19**
@@ -17,10 +17,12 @@ Arsenal, Coffee, Tattoo
 
 **20-29**
 - 2014-2017: Graduated from [King's College London](https://www.kcl.ac.uk/mathematics), **I Really Like Reading Mathematics**, back to South Korea.
-- 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), decided not to puruse futher careers in Finance/Consulting.
+- 2017: Interned at [Mercer](https://www.mercer.com/) and [KPMG](https://home.kpmg/xx/en/home.html), decided not to pursue further careers in Finance/Consulting.
 - 2018-2020: Worked at [Vingle](https://www.vingle.net/users/sign_up), joined the national guard.
 - 2020-2021: Worked at [Riiid](https://www.riiid.co/), got rejected by Stanford, fully served the national guard.
-- 2022: Had an 8-months gap year, interviewed with Google, TikTok, Blind, Udemy, Palantir, Moloco, Boeing, Coupang, and etc.
+- 2022: Had an 8-months gap year, interviewed with Google, Palantir, Nvidia, Udemy, Blind, and others.
 
 
 **30-39**
+- 2023-2025: Worked at [Blind](https://www.teamblind.com/) as DS, transitioned to SWE/MLE, **I Got Married To My Life Partner**.
+- 2026: Pursuing MS in CS (ML) at [Georgia Institute of Technology](https://www.gatech.edu/).

@@ -36,10 +36,19 @@
 			<ul id="tag-list">
 				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
 			<ul>
+				{% assign academic_tags = 'math200,math500,cs300,cs400' | split: ',' %}
 				{% assign tags = site.tags | sort %}
 				{% for tag in tags %}
-				<li><a href="/tag/{{ tag | first | slugify }}/" title="{{ tag[0] | replace:'-', ' ' }}"><img src="/assets/img/folder.ico" />{{ tag[0] | replace:'-', ' ' }}</a></li>
+					{% assign tag_name = tag | first %}
+					{% if academic_tags contains tag_name %}
+					<li><a href="/tag/{{ tag_name | slugify }}/" title="{{ tag_name | replace:'-', ' ' }}"><img src="/assets/img/folder.ico" />{{ tag_name | replace:'-', ' ' }}</a></li>
+					{% endif %}
 				{% endfor %}
+			</ul>
+				</li>
+				<li><a href="/" ><img src="/assets/img/disk.png" />(D:)</a>
+			<ul>
+				{% comment %} Add general purpose tags here when you create them {% endcomment %}
 			</ul>
 				</li>
 			</ul>
@@ -92,8 +101,24 @@
 			</div>
 		</div>
     {% endif %}
+	<script>
+		// Search index: includes 500 words per post for search matching
+		// Note: Consider reducing truncatewords value if number of posts increases significantly
+		// to keep page load performance optimal
+		window.searchIndex = [
+			{% for post in site.posts %}
+			{
+				title: {{ post.title | jsonify }},
+				url: {{ post.url | jsonify }},
+				content: {{ post.content | strip_html | truncatewords: 500 | jsonify }},
+				tags: {{ post.tags | jsonify }}
+			}{% unless forloop.last %},{% endunless %}
+			{% endfor %}
+		];
+	</script>
 	<script src="/assets/js/001.js"></script>
 	<script src="/assets/js/002.js"></script>
+	<script src="/assets/js/search.js"></script>
 	<div class="footer">
 		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
 	</div>
