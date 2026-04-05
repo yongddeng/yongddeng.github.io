@@ -46,7 +46,13 @@
 				</li>
 				<li><a href="/" ><img src="/assets/img/disk.png" />(D:)</a>
 			<ul>
-				{% comment %} Add general purpose tags here when you create them {% endcomment %}
+				{% assign general_tags = 'pet' | split: ',' %}
+				{% for tag in tags %}
+					{% assign tag_name = tag | first %}
+					{% if general_tags contains tag_name %}
+					<li><a href="/tag/{{ tag_name | slugify }}/" title="{{ tag_name | replace:'-', ' ' }}"><img src="/assets/img/folder.ico" />{{ tag_name | replace:'-', ' ' }}</a></li>
+					{% endif %}
+				{% endfor %}
 			</ul>
 				</li>
 			</ul>
