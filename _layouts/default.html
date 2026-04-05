@@ -46,7 +46,7 @@
 				</li>
 				<li><a href="/" ><img src="/assets/img/disk.png" />(D:)</a>
 			<ul>
-				{% assign general_tags = 'pet' | split: ',' %}
+				{% assign general_tags = 'open' | split: ',' %}
 				{% for tag in tags %}
 					{% assign tag_name = tag | first %}
 					{% if general_tags contains tag_name %}

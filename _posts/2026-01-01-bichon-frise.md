@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "A Survey on the Bichon Frisé"
-tags: pet
+tags: open
 use_math: true
 ---
 
