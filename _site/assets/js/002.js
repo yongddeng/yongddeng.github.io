@@ -48,4 +48,4 @@ function numbers () {
 	}
 }
 
-window.onload = numbers();
+window.onload = numbers;

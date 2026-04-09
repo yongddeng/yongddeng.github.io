@@ -83,6 +83,20 @@
 		sessionStorage.removeItem('postListScrollTop');
 	}
 
+	// Swap the title-bar stylesheet to match the page kind. The layout loads
+	// 001.css on index/tag pages (default_title = navy) and 002.css on post
+	// pages (default_title = grey, post_title = navy). SPA navigation only
+	// swaps .content, so without this the post_title would inherit the grey
+	// wrapper background.
+	function setStylesheet(toPost) {
+		var link = document.querySelector('link[href$="/assets/css/001.css"], link[href$="/assets/css/002.css"]');
+		if (!link) return;
+		var target = toPost ? '/assets/css/002.css' : '/assets/css/001.css';
+		if (link.getAttribute('href') !== target) {
+			link.setAttribute('href', target);
+		}
+	}
+
 	// SPA-like navigation: intercept post link clicks to avoid full page reload
 	function loadPost(url) {
 		fetch(url).then(function(res) { return res.text(); }).then(function(html) {
@@ -98,6 +112,7 @@
 					var wrapper = document.querySelector('.wrapper');
 					wrapper.parentNode.insertBefore(newContent, wrapper.nextSibling);
 				}
+				setStylesheet(true);
 				// Re-run code highlighting
 				newContent.querySelectorAll('pre code').forEach(function(block) {
 					hljs.highlightBlock(block);
@@ -118,6 +133,10 @@
 					}
 				}
 				typesetMathJax();
+			} else {
+				// Navigated back to an index/tag page: close the open post.
+				if (oldContent) oldContent.remove();
+				setStylesheet(false);
 			}
 			// Update page title
 			var newTitle = doc.querySelector('title');

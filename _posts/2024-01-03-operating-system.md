@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "402. operating system"
+title: "403. operating system"
 tags: cs400
 use_math: true
 ---
@@ -87,7 +87,7 @@ Advanced CLI-based shells including [Bash](), [Zsh](https://github.com/ohmyzsh/o
 <!-- EMULATOR SECTION: CUSTOM STYLING APPLIED -->
 <div class="emulator">
   <pre>
-  🖥️ Emulator: iTerm2
+  🖥️ Emulator: Ghostty
   |
   +-- 🐚 Shell: Zsh
       |
@@ -195,7 +195,7 @@ OS-level virtualization, exemplified by containers like Docker, isolates applica
 
 Looking back at its origins, Unix emerged in 1969 at Bell Labs, when Ken Thompson and Dennis Ritchie repurposed a spare [PDP-7]() 18-bit minicomputer to develop a lightweight, interactive operating system. Initially dubbed “Unics” (i.e. a pun on the earlier Multics), the system abandoned the complexity of its predecessor in favour of simplicity and modularity. Its adoption of a [hierarchical file system]() (HFS), segmented memory, dynamic linking, and a minimal yet powerful API, demonstrate a new design philosophy that is focused on composability, portability, and clear separation of concerns between kernel-level mechanisms and user-space utilities.
 
-A foundational abstraction in Unix was its uniform treatment of input/output. By representing all I/O resources (e.g. files, devices, and IPC endpoints) as file descriptors, Unix allowed disparate resources to be accessed via the same read/write interface. This “everything is a file” model, combined with the system’s use of plain-text configuration and output, led the environment very scriptable. Programs inherently were designed as small, single-purpose utilities that could be chained together using [pipes]() (\|). For example, the command *cat log.txt \| grep error \| sort \| uniq -c* reads a log file, filters lines containing “error,” sorts them, and collapses duplicates into counts.
+A foundational abstraction in Unix was its uniform treatment of input/output. By representing all I/O resources (e.g. files, devices, and IPC endpoints) as file descriptors, Unix allowed disparate resources to be accessed via the same read/write interface. This “everything is a file” model, combined with the system’s use of plain-text configuration and output, made the environment very scriptable. Programs inherently were designed as small, single-purpose utilities that could be chained together using [pipes]() (\|). For example, the command *cat log.txt \| grep error \| sort \| uniq -c* reads a log file, filters lines containing “error,” sorts them, and collapses duplicates into counts.
 
 Another notable contribution was indeed portability. In the early 1970s, Unix was rewritten from assembly into the newly developed [C programming language](https://seriouscomputerist.atariverse.com/media/pdf/book/C%20Programming%20Language%20-%202nd%20Edition%20(OCR).pdf) that was also created by Ritchie at Bell Labs. C evolved from the earlier [B programming language]() (i.e. derived from BCPL) and introduced key features such as typed variables, structured control flow, and more direct memory manipulation. This decoupling from machine-specific assembly code enabled Unix to be recompiled on a wide variety of hardware platforms, marking it as the first widely portable operating system, and the co-evolution of Unix and C unlocked a generation of system-level programming. <!-- make it shorter* -->
 
@@ -315,25 +315,24 @@ At runtime, a [page fault]() is triggered when a process accesses a page not cur
 
 <p style="margin-bottom: 12px;"> </p>
 
-TODO...
+A file is a named, persistent sequence of bytes managed by the operating system and stored on physical or virtual media. It serves as an abstraction over raw storage, enabling programs to access data through a consistent interface. Although the OS treats a file as a linear byte stream with no intrinsic meaning, its extension—such as .txt for plain text or .mp3 for audio—often signals the format and intended interpretation of its contents. In practice, the file extension acts as a contract between applications and data, guiding how information is parsed, rendered, or executed.
 
-<!-- A file is a named, persistent sequence of bytes managed by the operating system and stored on physical or virtual media. It serves as an abstraction over raw storage, enabling programs to access data through a consistent interface. Although the OS treats a file as a linear byte stream with no intrinsic meaning, its extension—such as .txt for plain text or .mp3 for audio—often signals the format and intended interpretation of its contents. In practice, the file extension acts as a contract between applications and data, guiding how information is parsed, rendered, or executed. -->
-<!---->
-<!-- The data within a file may follow arbitrary formats depending on application needs: (i) structured (e.g. CSV, Parquet), (ii) semi-structured (e.g. JSON, XML), or (iii) binary (e.g. compiled code, images, or model checkpoints). In general-purpose computing, files may store text documents, scripts, or executables. In contrast, fields like machine learning and data engineering rely on file formats that embed schema or use compact binary layouts for performance. Examples include .h5 (HDF5), .parquet, and .arrow, which are designed for efficient, structured access and parallel processing at scale. -->
-<!---->
-<!-- The OS is responsible for file creation, access, naming, storage allocation, and metadata management. It exposes a hierarchical file system that maps human-readable paths (e.g. /home/user/data.csv) to physical data blocks. Key abstractions like inodes (in Unix-like systems) store metadata including file size, timestamps, ownership, and pointers to data blocks. The OS also enforces access control via permissions and user/group ownership and supports special files—such as symbolic links, device nodes, sockets, and FIFOs—that extend file semantics to hardware interfaces and inter-process communication. -->
-<!---->
-<!-- Interaction with files is mediated through file descriptors, small integers that index open file entries in a process-specific table managed by the kernel. Core file operations—open(), read(), write(), and close()—form the low-level interface exposed via system calls. For more advanced I/O, the mmap() system call allows files to be mapped directly into virtual memory, enabling efficient pointer-based access and inter-process sharing. Behind the scenes, the OS manages caches (e.g. page cache and buffer cache) to reduce disk latency and supports direct I/O or asynchronous I/O for performance-critical workloads. -->
-<!---->
-<!-- Several advanced mechanisms underpin modern file systems. Mounting attaches a file system (e.g. a USB stick or network volume) to a specific directory path within the global namespace. Journaling, used in systems like ext4 or XFS, logs metadata updates to support crash recovery. Advanced file systems such as ZFS and Btrfs offer features like copy-on-write, snapshots, checksumming, and compression for enhanced reliability. File locking (via flock() or fcntl()) helps avoid race conditions but can introduce deadlocks if not managed carefully. Virtual file systems like /proc and /sys expose live kernel and hardware state through file-like interfaces, enabling introspection tools to query memory usage, CPU load, or device health. -->
-<!---->
+The data within a file may follow arbitrary formats depending on application needs: (i) structured (e.g. CSV, Parquet), (ii) semi-structured (e.g. JSON, XML), or (iii) binary (e.g. compiled code, images, or model checkpoints). In general-purpose computing, files may store text documents, scripts, or executables. In contrast, fields like machine learning and data engineering rely on file formats that embed schema or use compact binary layouts for performance. Examples include .h5 (HDF5), .parquet, and .arrow, which are designed for efficient, structured access and parallel processing at scale.
+
+The OS is responsible for file creation, access, naming, storage allocation, and metadata management. It exposes a [hierarchical file system]() that maps human-readable paths (e.g. /home/user/data.csv) to physical data blocks. Key abstractions like [inodes]() (in Unix-like systems) store metadata including file size, timestamps, ownership, and pointers to data blocks. The OS also enforces access control via permissions and user/group ownership and supports special files—such as symbolic links, device nodes, sockets, and FIFOs—that extend file semantics to hardware interfaces and inter-process communication. On flash-based storage, the file system splits a file into block-sized chunks, and the drive's [flash translation layer]() (FTL) maps these logical blocks to physical pages scattered across different NAND blocks.
+
+- <img src="../assets/blog/2024-01-01-nand-flash.svg" width="500">
+
+Interaction with files is mediated through [file descriptors](), small integers that index open file entries in a process-specific table managed by the kernel. Core file operations—open(), read(), write(), and close()—form the low-level interface exposed via system calls. For more advanced I/O, the mmap() system call allows files to be mapped directly into virtual memory, enabling efficient pointer-based access and inter-process sharing. Behind the scenes, the OS manages caches (e.g. [page cache]() and buffer cache) to reduce disk latency and supports direct I/O or asynchronous I/O for performance-critical workloads.
+
+Several advanced mechanisms underpin modern file systems. [Mounting]() attaches a file system (e.g. a USB stick or network volume) to a specific directory path within the global namespace. [Journaling](), used in systems like ext4 or XFS, logs metadata updates to support crash recovery. Advanced file systems such as ZFS and Btrfs offer features like copy-on-write, snapshots, checksumming, and compression for enhanced reliability. File locking (via flock() or fcntl()) helps avoid race conditions but can introduce deadlocks if not managed carefully. Virtual file systems like /proc and /sys expose live kernel and hardware state through file-like interfaces, enabling introspection tools to query memory usage, CPU load, or device health.
+
 <!-- In ML and LLM workflows, file handling is central to system performance and model scalability. Datasets are often stored in binary formats such as TFRecord, HDF5, or Apache Arrow, which support partial reads and parallel access across workers. PyTorch’s DataLoader leverages multiprocessing to fetch data from shared disks or cloud object stores mounted via FUSE drivers like s3fs. For inference, quantized model formats such as GPT-generated Unified Format (.gguf) or .pth are optimized for memory alignment, minimal I/O overhead, and streaming. Tools like llama.cpp use memory mapping or chunked loading to reduce memory footprint and accelerate loading. In distributed or multi-node environments, consistency and throughput are maintained via parallel file systems (e.g. Lustre) or eventual-consistency object stores (e.g. Amazon S3), which must support atomic writes and concurrent access to training logs, checkpoints, and model artifacts. -->
-<!---->
-<!-- https://www.cs.miami.edu/home/visser/Courses/CSC322-09S/Content/UNIXUse/FileSystem.shtml -->
-<!-- https://www.reddit.com/r/linux/comments/qkm01c/a_refresher_on_the_linux_file_system_structure/ -->
 
-<!-- ### **3.4. Device Management**
+### **3.4. Device Management**
+
 <p style="margin-bottom: 12px;"> </p>
 
-- Device drivers: derive definition, NVIDIA CUDA drivers, AMD ROCm, or TPU runtime drivers allow the OS to interface with ML accelerators.
-- I/O scheduling: Efficient I/O scheduling is vital for high-throughput data pipelines and sharded dataset loading -->
+A [device driver]() is a kernel-level software component that translates generic OS commands into hardware-specific operations, enabling the kernel to interact with peripheral devices through a uniform interface. Drivers register with the kernel and expose standardised entry points (e.g. read, write, ioctl) so that user-space programs can access hardware via file descriptors under the "everything is a file" model. In the context of ML, accelerator drivers such as NVIDIA’s CUDA drivers, AMD’s ROCm stack, or Google’s TPU runtime mediate between high-level frameworks (e.g. PyTorch, JAX) and the underlying compute hardware. These drivers manage device memory allocation, kernel dispatch, and data transfer between host and device.
+
+[I/O scheduling]() determines the order in which I/O requests are serviced, balancing throughput, latency, and fairness. Classic disk schedulers (e.g. CFQ, Deadline, NOOP) were designed for rotational media where seek time dominates. Modern NVMe SSDs largely bypass traditional I/O schedulers due to their low latency and high parallelism, often using the simpler *none* or *mq-deadline* policies. For ML workloads, efficient I/O scheduling is vital for high-throughput data pipelines: sharded dataset loading, checkpoint writing, and log flushing all compete for disk bandwidth and benefit from asynchronous or prioritised I/O strategies.
