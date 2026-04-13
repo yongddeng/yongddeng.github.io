@@ -1,12 +1,12 @@
 ---
 layout: default
-title: "302. nn compilation"
+title: "302. dl compilation"
 tags: cs300
 use_math: true
 ---
 
 
-# NN Compilation
+# DL Compilation
 ---
 PyTorch began as a Python rewrite of [Torch7](https://en.wikipedia.org/wiki/Torch_(machine_learning)) (Lua-based, Ronan Collobert et al.) at Facebook AI Research in 2016–17, led by Adam Paszke, Soumith Chintala, and Sam Gross. Its define-by-run eager execution made it the framework of choice for researchers, but deployment and performance demanded compilation. This post traces that arc — from eager mode through TorchScript's limitations to the *torch.compile* stack announced in December 2022.
 

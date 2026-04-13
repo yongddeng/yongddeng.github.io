@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 445" font-family="monospace" font-size="13">
+  <!-- Background -->
+  <rect width="580" height="445" fill="white"/>
+
+  <!-- Title -->
+  <text x="18" y="16" font-weight="bold" font-size="14" fill="#333">Interfaces at Different Levels</text>
+
+  <!-- Software outer bracket -->
+  <line x1="14" y1="45" x2="14" y2="393" stroke="#888" stroke-width="1.5"/>
+  <line x1="14" y1="45" x2="22" y2="45" stroke="#888" stroke-width="1.5"/>
+  <line x1="14" y1="393" x2="22" y2="393" stroke="#888" stroke-width="1.5"/>
+  <text x="11" y="225" text-anchor="middle" fill="#888" font-size="10" font-weight="bold" transform="rotate(-90, 11, 225)">SW</text>
+
+  <!-- User space bracket (dashed, lighter) -->
+  <line x1="30" y1="45" x2="30" y2="313" stroke="#aaa" stroke-width="1" stroke-dasharray="4,2"/>
+  <line x1="30" y1="45" x2="38" y2="45" stroke="#aaa" stroke-width="1" stroke-dasharray="4,2"/>
+  <line x1="30" y1="313" x2="38" y2="313" stroke="#aaa" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="27" y="180" text-anchor="middle" fill="#aaa" font-size="9" font-weight="bold" transform="rotate(-90, 27, 180)">User</text>
+
+  <!-- Kernel space bracket (dashed, lighter) -->
+  <line x1="30" y1="322" x2="30" y2="393" stroke="#aaa" stroke-width="1" stroke-dasharray="4,2"/>
+  <line x1="30" y1="322" x2="38" y2="322" stroke="#aaa" stroke-width="1" stroke-dasharray="4,2"/>
+  <line x1="30" y1="393" x2="38" y2="393" stroke="#aaa" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="27" y="360" text-anchor="middle" fill="#aaa" font-size="9" font-weight="bold" transform="rotate(-90, 27, 360)">Kernel</text>
+
+  <!-- Hardware bracket -->
+  <line x1="14" y1="402" x2="14" y2="440" stroke="#888" stroke-width="1.5"/>
+  <line x1="14" y1="402" x2="22" y2="402" stroke="#888" stroke-width="1.5"/>
+  <line x1="14" y1="440" x2="22" y2="440" stroke="#888" stroke-width="1.5"/>
+  <text x="11" y="423" text-anchor="middle" fill="#888" font-size="10" font-weight="bold" transform="rotate(-90, 11, 423)">HW</text>
+
+  <!-- Labels on the left -->
+  <text x="52" y="73" font-weight="bold" fill="#555">Source</text>
+  <text x="52" y="173" font-weight="bold" fill="#555">Binary</text>
+  <text x="52" y="273" font-weight="bold" fill="#555">Runtime</text>
+  <text x="52" y="373" font-weight="bold" fill="#555">Kernel</text>
+  <text x="52" y="423" font-weight="bold" fill="#555">Processor</text>
+
+  <!-- Dashed separator lines -->
+  <line x1="100" y1="115" x2="530" y2="115" stroke="#ccc" stroke-dasharray="4"/>
+  <line x1="100" y1="215" x2="530" y2="215" stroke="#ccc" stroke-dasharray="4"/>
+  <line x1="100" y1="315" x2="530" y2="315" stroke="#ccc" stroke-dasharray="4"/>
+  <line x1="100" y1="395" x2="530" y2="395" stroke="#ccc" stroke-dasharray="4"/>
+
+  <!-- Source level boxes -->
+  <rect x="150" y="55" width="110" height="36" rx="4" fill="#f5f5f5" stroke="#bbb" stroke-width="1.5"/>
+  <text x="205" y="78" text-anchor="middle">program.c</text>
+
+  <rect x="330" y="55" width="110" height="36" rx="4" fill="#f5f5f5" stroke="#bbb" stroke-width="1.5"/>
+  <text x="385" y="78" text-anchor="middle">library.h</text>
+
+  <!-- API arrow -->
+  <line x1="260" y1="73" x2="325" y2="73" stroke="#7b1fa2" stroke-width="2" marker-end="url(#arrowPurple)"/>
+  <text x="292" y="65" text-anchor="middle" fill="#7b1fa2" font-size="11">import</text>
+
+  <!-- API label -->
+  <rect x="470" y="57" width="50" height="24" rx="3" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1"/>
+  <text x="495" y="74" text-anchor="middle" fill="#7b1fa2" font-weight="bold" font-size="12">API</text>
+
+  <!-- Compiler arrows down -->
+  <line x1="205" y1="91" x2="205" y2="155" stroke="#666" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <text x="205" y="130" text-anchor="middle" fill="#666" font-size="11">compiler</text>
+
+  <line x1="385" y1="91" x2="385" y2="155" stroke="#666" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <text x="385" y="130" text-anchor="middle" fill="#666" font-size="11">compiler</text>
+
+  <!-- Binary level boxes -->
+  <rect x="150" y="155" width="110" height="36" rx="4" fill="#ebebeb" stroke="#aaa" stroke-width="1.5"/>
+  <text x="205" y="178" text-anchor="middle">program.o</text>
+
+  <rect x="330" y="155" width="110" height="36" rx="4" fill="#ebebeb" stroke="#aaa" stroke-width="1.5"/>
+  <text x="385" y="178" text-anchor="middle">library.so</text>
+
+  <!-- ABI arrow (link) -->
+  <line x1="260" y1="173" x2="325" y2="173" stroke="#1565c0" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="292" y="165" text-anchor="middle" fill="#1565c0" font-size="11">link</text>
+
+  <!-- ABI label -->
+  <rect x="470" y="157" width="50" height="24" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="1"/>
+  <text x="495" y="174" text-anchor="middle" fill="#1565c0" font-weight="bold" font-size="12">ABI</text>
+
+  <!-- Loader arrows down -->
+  <line x1="205" y1="191" x2="205" y2="255" stroke="#666" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <text x="205" y="230" text-anchor="middle" fill="#666" font-size="11">loader</text>
+
+  <line x1="385" y1="191" x2="385" y2="255" stroke="#666" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <text x="385" y="230" text-anchor="middle" fill="#666" font-size="11">loader</text>
+
+  <!-- Runtime level boxes -->
+  <rect x="150" y="255" width="110" height="36" rx="4" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="205" y="278" text-anchor="middle">process</text>
+
+  <rect x="330" y="255" width="110" height="36" rx="4" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+  <text x="385" y="278" text-anchor="middle">library code</text>
+
+  <!-- ABI arrow (call) -->
+  <line x1="260" y1="273" x2="325" y2="273" stroke="#1565c0" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="292" y="265" text-anchor="middle" fill="#1565c0" font-size="11">call</text>
+
+  <!-- ABI label runtime -->
+  <rect x="470" y="257" width="50" height="24" rx="3" fill="#e3f2fd" stroke="#1565c0" stroke-width="1"/>
+  <text x="495" y="274" text-anchor="middle" fill="#1565c0" font-weight="bold" font-size="12">ABI</text>
+
+  <!-- Syscall arrow down -->
+  <line x1="195" y1="291" x2="195" y2="355" stroke="#c62828" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <text x="185" y="330" text-anchor="end" fill="#c62828" font-size="11">syscall</text>
+
+  <!-- Return arrow up -->
+  <line x1="215" y1="355" x2="215" y2="291" stroke="#c62828" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowRed)"/>
+  <text x="225" y="330" text-anchor="start" fill="#c62828" font-size="11">return</text>
+
+  <!-- Kernel box -->
+  <rect x="150" y="355" width="110" height="36" rx="4" fill="#fce4ec" stroke="#c62828" stroke-width="1.5"/>
+  <text x="205" y="378" text-anchor="middle">OS</text>
+
+  <!-- System ISA arrow down -->
+  <line x1="205" y1="391" x2="205" y2="410" stroke="#2e7d32" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- User ISA dotted line from runtime to CPU -->
+  <line x1="385" y1="291" x2="385" y2="425" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowGreen)"/>
+  <text x="385" y="355" text-anchor="middle" fill="#2e7d32" font-size="10">User ISA</text>
+  <text x="385" y="367" text-anchor="middle" fill="#2e7d32" font-size="9">(unprivileged)</text>
+
+  <!-- Hardware box -->
+  <rect x="150" y="410" width="110" height="30" rx="4" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+  <text x="205" y="430" text-anchor="middle">CPU</text>
+
+  <!-- ISA label -->
+  <rect x="470" y="407" width="50" height="24" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1"/>
+  <text x="495" y="424" text-anchor="middle" fill="#2e7d32" font-weight="bold" font-size="12">ISA</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#7b1fa2"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#1565c0"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#666"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#c62828"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2e7d32"/>
+    </marker>
+  </defs>
+</svg>

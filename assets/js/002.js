@@ -5,7 +5,7 @@ function numbers () {
 	var fields = document.getElementsByTagName("code");
 	for (var field = 0; field < fields.length; field++) {
 		var num = 0;
-		var select = fields[field].innerText;
+		var select = fields[field].innerHTML;
 		var select_f = select.split(/\n/);
 		var tab = document.createElement("table");
 
@@ -25,7 +25,7 @@ function numbers () {
 			var col = document.createElement("th");
 			var colc = document.createElement("th");
 			col.innerText = num + 1;
-			colc.innerText = select_f[line];
+			colc.innerHTML = select_f[line];
 			row.appendChild(col);
 			row.appendChild(colc);
 			tab.appendChild(row);
