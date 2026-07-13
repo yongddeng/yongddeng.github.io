@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "201. probability theory"
-tags: math200
+tags: maths200
 use_math: true
 ---
 

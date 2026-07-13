@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "209. law of the iterated logarithm"
-tags: math200
+tags: maths200
 use_math: true
 ---
 

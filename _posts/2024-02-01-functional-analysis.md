@@ -1,7 +1,7 @@
 ---
 layout: default
-title: "501. functional analysis"
-tags: math500
+title: "401. functional analysis"
+tags: maths400
 use_math: true
 ---
 

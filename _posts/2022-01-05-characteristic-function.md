@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "205. characteristic function"
-tags: math200
+tags: maths200
 use_math: true
 ---
 

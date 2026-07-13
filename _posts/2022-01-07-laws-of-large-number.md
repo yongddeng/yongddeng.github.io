@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "207. law of large number"
-tags: math200
+tags: maths200
 use_math: true
 ---
 

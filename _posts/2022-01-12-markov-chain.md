@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "212. markov chain"
-tags: math200
+tags: maths200
 use_math: true
 ---
 

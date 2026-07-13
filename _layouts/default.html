@@ -35,7 +35,7 @@
 			<ul id="tag-list">
 				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
 			<ul>
-				{% assign academic_tags = 'math200,math500,cs300,cs400' | split: ',' %}
+				{% assign academic_tags = 'maths200,maths400,cs300,cs600' | split: ',' %}
 				{% assign tags = site.tags | sort %}
 				{% for tag in tags %}
 					{% assign tag_name = tag | first %}
@@ -45,7 +45,7 @@
 				{% endfor %}
 			</ul>
 				</li>
-				<li><a href="/" ><img src="/assets/img/disk.png" />(D:)</a>
+				<li><a href="/tag/open/" ><img src="/assets/img/disk.png" />(D:)</a>
 			<ul>
 				{% assign general_tags = 'open' | split: ',' %}
 				{% for tag in tags %}
@@ -126,6 +126,7 @@
 	<script src="/assets/js/002.js"></script>
 	<script src="/assets/js/search.js"></script>
 	<script src="/assets/js/tag-filter.js"></script>
+	<script src="/assets/js/xref.js"></script>
 	<div class="footer">
 		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
 	</div>

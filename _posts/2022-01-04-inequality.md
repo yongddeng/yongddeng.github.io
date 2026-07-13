@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "204. inequality"
-tags: math200
+tags: maths200
 use_math: true
 ---
 
