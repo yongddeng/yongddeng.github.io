@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #fff; }
+  #wrap { width: 400px; margin: 0 auto; text-align: center; }
+  canvas { display: block; margin: 0 auto; background: #fff; }
+  .row { display: flex; justify-content: flex-start; align-items: center; gap: 14px; margin: 16px 0 6px 8px; }
+  button { font-size: 12px; padding: 3px 12px; border: 1px solid #bbb; border-radius: 4px; background: #fafafa; cursor: pointer; }
+  button:hover { background: #f0f0f0; }
+  label { font-size: 12px; color: #444; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  #stats { display: flex; justify-content: center; align-items: center; margin: 4px 0 6px; }
+  .stat { width: 120px; }
+  .stat .lbl { font-size: 9px; letter-spacing: 0.8px; color: #aaa; text-transform: uppercase; }
+  .stat .val { font-size: 12px; font-weight: 500; color: #333; font-variant-numeric: tabular-nums; }
+  .divider { width: 1px; height: 22px; background: #ddd; margin: 0 14px; }
+  #dl.dead { color: #b00020; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" width="400" height="216"></canvas>
+  <div id="stats">
+    <div class="stat"><div class="lbl">status</div><div class="val" id="status">Running</div></div>
+    <div class="divider"></div>
+    <div class="stat"><div class="lbl">deadlock</div><div class="val" id="dl">No</div></div>
+  </div>
+  <div class="row">
+    <button id="reset">Reset</button>
+    <button id="force">Trigger deadlock</button>
+    <label><input type="checkbox" id="ordered"> lock ordering (asymmetric)</label>
+  </div>
+</div>
+<script>
+(function () {
+  const N = 5, cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  cv.style.width = cv.width + 'px'; cv.style.height = cv.height + 'px';
+  cv.width *= dpr; cv.height *= dpr;
+  ctx.scale(dpr, dpr);
+  const cx = 200, cy = 120, R = 88, rP = 19, rF = 7;
+  const statusEl = document.getElementById('status');
+  const dlEl = document.getElementById('dl');
+  const orderedEl = document.getElementById('ordered');
+
+  // philosopher i sits between fork i (left) and fork (i+1)%N (right)
+  let ph, forks, dead, timer, meals;
+
+  function init() {
+    meals = 0;
+    ph = Array.from({length: N}, () => ({ state: 'thinking', held: [], wait: -1, t: rand(40, 360) }));
+    forks = Array(N).fill(-1); // -1 free, else holder index
+    dead = false;
+    statusEl.textContent = 'Running';
+    dlEl.textContent = 'No';
+    dlEl.className = 'val';
+  }
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function wanted(i) { // [first, second] forks in acquisition order
+    const left = i, right = (i + 1) % N;
+    if (orderedEl.checked) return left < right ? [left, right] : [right, left];
+    return [left, right]; // symmetric: everyone left-first
+  }
+
+  function step() {
+    if (dead) return;
+    for (let i = 0; i < N; i++) {
+      const p = ph[i];
+      if (--p.t > 0) continue;
+      const [f1, f2] = wanted(i);
+      if (p.state === 'thinking') { p.state = 'hungry'; p.t = 1; }
+      else if (p.state === 'hungry') {
+        const need = p.held.includes(f1) ? f2 : f1;
+        if (forks[need] === -1) { forks[need] = i; p.held.push(need); p.wait = -1; p.t = p.held.length === 1 ? rand(50, 110) : 1; }
+        else { p.wait = need; p.t = 20; }
+        if (p.held.length === 2) { p.state = 'eating'; p.t = rand(140, 280); }
+      }
+      else if (p.state === 'eating') {
+        p.held.forEach(f => forks[f] = -1);
+        p.held = []; p.state = 'thinking'; p.t = rand(70, 200);
+      }
+    }
+    // deadlock: every philosopher holds one fork and waits on an occupied one
+    if (ph.every(p => p.state === 'hungry' && p.held.length === 1 && p.wait !== -1 && forks[p.wait] !== -1)) {
+      dead = true;
+      statusEl.textContent = 'Blocked';
+      dlEl.textContent = 'Yes — circular wait';
+      dlEl.className = 'val dead';
+    }
+  }
+
+  function pos(angleIdx, r, offset) {
+    const a = -Math.PI / 2 + (angleIdx + (offset || 0)) * 2 * Math.PI / N;
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  }
+
+  function chopPos(f) { // home between neighbours; beside its holder when held
+    let [x, y] = pos(f, R - 38, -0.5);
+    const holder = forks[f];
+    if (holder !== -1) {
+      const [hx, hy] = pos(holder, R - 42);
+      x = x * 0.2 + hx * 0.8; y = y * 0.2 + hy * 0.8;
+    }
+    return [x, y];
+  }
+
+  function drawChop(f) { // a radial stick, dark when held
+    const [x, y] = chopPos(f);
+    const a = Math.atan2(y - cy, x - cx), L = 9;
+    ctx.beginPath();
+    ctx.moveTo(x - L * Math.cos(a), y - L * Math.sin(a));
+    ctx.lineTo(x + L * Math.cos(a), y + L * Math.sin(a));
+    ctx.strokeStyle = forks[f] === -1 ? '#bbb' : '#444';
+    ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    // table
+    ctx.beginPath(); ctx.arc(cx, cy, R - 38, 0, 7); ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.stroke();
+
+    for (let f = 0; f < N; f++) drawChop(f);
+
+    for (let i = 0; i < N; i++) {
+      const p = ph[i], [x, y] = pos(i, R);
+      // waiting arrow (dashed) toward the fork it awaits
+      if (p.wait !== -1 && !dead || (dead && p.wait !== -1)) {
+        const [fx, fy] = chopPos(p.wait);
+        ctx.beginPath(); ctx.setLineDash([4, 3]);
+        ctx.moveTo(x + (fx - x) * 0.3, y + (fy - y) * 0.3); ctx.lineTo(fx, fy);
+        ctx.strokeStyle = dead ? '#b00020' : '#e08a00'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      ctx.beginPath(); ctx.arc(x, y, rP, 0, 7);
+      ctx.fillStyle = { thinking: '#eee', hungry: '#f5c542', eating: '#7cb342' }[p.state];
+      if (dead && p.state === 'hungry') ctx.fillStyle = '#e57373';
+      ctx.fill(); ctx.strokeStyle = '#999'; ctx.stroke();
+      ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('P' + (i + 1), x, y);
+    }
+    // legend
+    ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+    const legCircles = [['#eee', 'thinking'], ['#f5c542', 'hungry'], ['#7cb342', 'eating']];
+    legCircles.forEach(([c, t], k) => {
+      ctx.beginPath(); ctx.arc(14, 16 + k * 16, 5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#999'; ctx.stroke();
+      ctx.fillStyle = '#888'; ctx.fillText(t, 24, 16 + k * 16);
+    });
+    const legLines = [['#bbb', [], 3, 'free'], ['#444', [], 3, 'taken'], ['#e08a00', [4, 3], 1.5, 'awaited']];
+    legLines.forEach(([c, dash, w, t], k) => {
+      const y = 16 + k * 16, x = 326;
+      ctx.beginPath(); ctx.setLineDash(dash); ctx.moveTo(x, y); ctx.lineTo(x + 12, y);
+      ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke();
+      ctx.setLineDash([]); ctx.lineCap = 'butt';
+      ctx.fillStyle = '#888'; ctx.fillText(t, x + 18, y);
+    });
+  }
+
+  function loop() { step(); draw(); timer = requestAnimationFrame(loop); }
+  document.getElementById('reset').onclick = init;
+  document.getElementById('force').onclick = function () {
+    orderedEl.checked = false; // the fatal state is unreachable under lock ordering
+    init();
+    for (let i = 0; i < N; i++) { // everyone holds its left, awaits its right
+      forks[i] = i;
+      ph[i] = { state: 'hungry', held: [i], wait: (i + 1) % N, t: 20 };
+    }
+  };
+  orderedEl.onchange = init;
+  init(); loop();
+})();
+</script>
+</body>
+</html>
