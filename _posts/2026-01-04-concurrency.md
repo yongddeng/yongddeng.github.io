@@ -29,6 +29,29 @@ III — The bill. Shared memory races (3.1), hardware reorders (3.2), primitives
 
 In one line: a scarcity of waiting solved by consolidation, a scarcity of computing solved by distribution, and the price of distribution paid in synchronisation.
 
+
+Hardware → OS → Application arc (three layers, the isolated/shared axis runs through all):
+
+  Hardware (CPU)              OS (nouns — what they are)          Application (verbs — how you wield them)
+  ──────────────              ─────────────────────────           ────────────────────────────────────────
+                        ┌──▶  process = resource-owning unit  ──▶ multiprocessing = parallelism via isolation
+  N cores ─ parallelism ┤          (isolated address space)                        (no races, IPC cost → "safe")
+  1 shared RAM/cache ───┤
+                        └──▶  thread  = scheduling unit       ──▶ multithreading = parallelism via sharing
+                                   (shared address space)                         (fast comms, synchronisation → "fast")
+
+Hardware gives both rows the same two things: N cores (physical parallelism, §601 multi-core turn) over ONE
+shared physical memory. The OS then packages that memory two ways — process ISOLATES it via virtual memory
+(§603#3.2), thread EXPOSES it — so isolation is a software construction on top of physically-shared RAM,
+while parallelism is the hardware given. The application turns each package into a technique.
+
+One proportion: process : thread :: isolation : sharing :: multiprocessing : multithreading :: safe : fast
+(N cores + one shared RAM are the common hardware root beneath both rows)
+
+§601 owns the hardware (cores, the multi-core turn), §603 the middle column (defines the entities),
+§604 the right (composes them into techniques). The isolated/shared address-space axis is the through-line.
+Never cross the diagonal: §604 discusses multiprocessing/multithreading (techniques), never process/thread as OS entities.
+
 {% endcomment %}
 
 
@@ -81,15 +104,15 @@ async/await — same waiter, same event loop, just much easier to read.
 
 <p style="margin-bottom: 12px;"> </p>
 
-[Concurrency]() is the logical simultaneity of tasks making progress through interleaved executions, whereas [parallelism]() is their physical simultaneity on different processing units (e.g. CPU/GPU). Concurrency appeared first and spanned from batch processing and time-sharing to GUIs (i.e. Multics $\to$ UNIX $\to$ UI thread), but remained as the concern of the OS scheduler and the toolkit's message loop. Two developments made it the application programmer's problem: i) networked services drove connections into the tens of thousands, exposing thread-per-connection limits; and ii) stalled clock speeds and the multi-core turn forced programs to be restructured explicitly.
+[Concurrency]() is the logical simultaneity of tasks making progress through interleaved executions, whereas [parallelism]() is their physical simultaneity on different processing units (e.g. CPU/GPU). Concurrency appeared first and spanned from batch processing and time-sharing to GUIs (i.e. Multics $\to$ UNIX $\to$ UI thread), but remained as the concern of the OS scheduler and the toolkit's message loop. Two developments pushed it onto the application programmer, who now composes the kernel's processes and threads (§603#3.1) rather than leaving them to the scheduler: i) networked services drove connections into the tens of thousands, exposing thread-per-connection limits; and ii) stalled clock speeds and the multi-core turn forced programs to be restructured explicitly.
  
 - <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/from_threads_to_coroutines.png" width="450"> <a href="https://medium.com/hesaptech/from-threads-to-coroutines-modern-concurrency-and-parallelism-explained-ac5484377722" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">E.g. single-core time-slicing is the 2nd case, and two independent programs on separate cores the 3rd.</div> </div>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/concurrency_vs_parallelism.png" width="400"> <a href="https://medium.com/womenintechnology/concurrency-parallelism-processes-threads-thread-safe-systems-1d4e7d351824" target="_blank" style="position: absolute; bottom: 2px; right: 4px; font-size: 12px;">[src]</a> </div> -->
  
-The former arrived with the web of the 1990s (§605#3.2) whose [I/O-bound]() workloads, such as network requests, disk reads, and database queries, spend most of their time waiting on external resources. The thread-per-connection model (e.g. a multithreaded server, one thread per client), the first answer to these workloads, assigns each connection its own kernel thread with a 1-8 MB user-space stack (§603#3.1). <!-- reminder: each thread gets its OWN stack + registers/PC, but SHARES the heap, code/data segments, and fd table with the other threads in the process. Stack is thread-private only by convention, not hardware protection (same address space), which is what makes data races possible (§III). Multiprocessing (§2.1) shares nothing, hence no races but needs IPC. --> The initial model fails at scale because those stacks exhaust memory and also the OS scheduler spends more time context-switching than doing useful work. This wall at ten thousand concurrent connections is known as the [C10K problem](http://www.kegel.com/c10k.html) (Dan Kegel, 1999). <!-- each stack is virtual and resident only as touched, alongside a 16 KB kernel stack for bookkeeping -->
+The former arrived with the web (§605#3.2), whose tasks are predominantly [I/O-bound](), spending most of their time waiting on the network and other external resources (e.g. disk reads, DB queries).<!-- rather than on computation --> As client connections surged into the thousands, the initial attempt was the [thread-per-connection model]() (e.g. a multithreaded server), which assigns every connection its own kernel thread with a 1-8 MB user-space stack (§603#3.1). <!-- reminder: each thread gets its OWN stack + registers/PC, but SHARES the heap, code/data segments, and fd table with the other threads in the process. Stack is thread-private only by convention, not hardware protection (same address space), which is what makes data races possible (§III). Multiprocessing (§2.1) shares nothing, hence no races but needs IPC. --> However, the model fails at scale because those stacks exhaust memory and the OS scheduler spends more time context-switching than doing useful work. This wall at $10^4$ concurrent connections is known as the [C10K problem](http://www.kegel.com/c10k.html) (Dan Kegel, 1999). <!-- each stack is virtual and resident only as touched, alongside a 16 KB kernel stack for bookkeeping -->
 
-If unbounded threads are the problem, the natural fix is to cap them with a fixed thread pool, yet this fares no better. A thread blocked in *read()* is descheduled by the OS and uses no CPU, <!-- which appears to cost nothing, --> but it remains tied to its connection and holds one of the pool's $N$ slots. Hence $N$ threads serve at most $N$ connections at once, and any beyond that wait until a thread frees, even though the CPU is idle and could serve them. <!-- The bottleneck is the thread, not the idle CPU. --> Neither extreme works since the fault lies in the choice of [I/O model]() rather than the thread count. Finding a better one, an event loop in which a single thread serves many connections (e.g. sockets), means first laying out the models on offer. <!-- an I/O model is the contract by which a program issues a request and learns of its completion -->
+If unbounded threads are the problem, a fixed thread pool bounds resource consumption but not concurrent capacity. A thread blocked in *read()* consumes no CPU <!-- which appears to cost nothing, --> yet still holds one of the pool's $N$ slots, and $N$ threads serve at most $N$ connections while further arrivals wait for a free slot. In effect, the scarce resource is the thread, not the idle CPU, because each connection pins one for the entire wait. The concurrency bound $N \gtrsim 10^4$ and the system-resource bound $N \ll 10^4$ leave no room for a viable $N$, so neither extreme cures a fault that lies in the [I/O model]() rather than the thread count, and reaching a better one first means surveying the I/O models on offer. <!-- an I/O model is the contract by which a program issues a request and learns of its completion -->
 
 {% comment %}
                         KERNEL                          │      APPLICATION
@@ -130,9 +153,29 @@ Two consequences make the point sharper:
 This is why N-thread pooling does not solve C10K: serving 10,000 clients at once would need N ~ 10,000 blocked threads, the memory/scheduler wall from p2. The fix is to stop pinning a thread per connection so one thread can service many.
 {% endcomment %}
 
-They divide along two orthogonal axes, [synchronous]() vs. [asynchronous]() and [blocking]() vs. [non-blocking](), which form the $2 \times 2$ matrix $R$ below. The first axis asks whether the I/O completes before the call returns or its completion is signalled later, and the second whether the call suspends the thread or returns instantly. Of the four cells the non-blocking pair is impractical, as $R_{01}$ squanders CPU busy-polling for readiness while $R_{11}$ awaited *io_uring* for genuine asynchronous completion. Accordingly, the thread-per-connection model $R_{00}$ gives way to the alternative $R_{10}$, staying in the blocking column while one thread waits on many connections at once. <!-- making waiting and working no longer compete for the same thread.-->
+Specifically, two binary choices form the $2 \times 2$ matrix $R$ below. Its row index, {[synchronous](), [asynchronous]()}, distinguishes whether the I/O completes before the call returns or its completion is signalled later. Whereas, its column index, {[blocking](), [non-blocking]()}, hinges on whether the call suspends the thread or returns instantly. The thread-per-connection model $R_{00}$ cedes to the event loop $R_{10}$, in which one thread multiplexes many connections while still parking on a single wait. <!-- making waiting and working no longer compete for the same thread.--> Non-blocking is less favoured since $R_{01}$ squanders CPU busy-polling readiness through repeated $\text{EAGAIN}$ returns and $R_{11}$ awaited *io_uring* for a general completion interface. 
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux_io.png" width="325"> <a href="https://developer.ibm.com/articles/l-async/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">Only the blocking col is common in practice; the non-blocking variants either busy-poll ($R_{01}$) or arrived only with <i>io_uring</i> ($R_{11}$).</div> </div>
+{% comment %}
+Blocking vs synchronous — pizza shop. Two axes:
+  blocking     = do you stand still at the counter (thread parked)?
+  synchronous  = is the pizza in hand when the interaction ends, or found out later (board/buzzer)?
+
+  R00  sync  + blocking      order and STAND at the counter until handed the pizza.
+                             wait (blocking), leave with it in hand (synchronous).       -> read()
+  R01  sync  + non-blocking  order, then ASK "ready?" every 10s; instant "no / no / here".
+                             never park, but keep pestering and collect it yourself.     -> read() + O_NONBLOCK (busy-poll)
+  R10  async + blocking      order, then STARE at the "order ready" board, doing nothing
+                             else until your number lights. stuck watching (blocking),
+                             but the result is announced later (async); one board serves
+                             every customer's order at once.                             -> select / epoll
+  R11  async + non-blocking  order, take a BUZZER, go sit down / do other things; it buzzes
+                             when ready. never waited, never asked — completion arrives.  -> AIO / io_uring
+
+R01 (pestering) is non-blocking yet synchronous; R10 (watching the board) is blocking yet
+asynchronous — which is why the two are separate axes. R00 (plain read) is both, where they get conflated.
+{% endcomment %}
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux_io.png" width="325"> <a href="https://developer.ibm.com/articles/l-async/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">The matrix as arranged in the linked article. Stevens (<i>UNIX Network Programming</i>) instead classes multiplexing as synchronous, reserving asynchronous for AIO alone.</div> </div>
 
 <!-- - <iframe width="500" height="285" src="https://www.youtube.com/embed/IMceN4_rieo?si=g-BBn2kbVFYctrXF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
@@ -142,7 +185,7 @@ They divide along two orthogonal axes, [synchronous]() vs. [asynchronous]() and 
 
 <p style="margin-bottom: 12px;"> </p>
 
-The shift from many blocked threads to one watchful thread is not merely a syscall swap but a change of paradigm to [event-driven programming]() (§602#1.1), which organises control flow around reactions to events rather than a fixed instruction sequence. The pattern long predates the C10K problem, seen already in the GUI [message loop]() dispatching clicks and keystrokes and in discrete-event simulators advancing by popping the next event off a queue (§603#1.1). Networking merely inherited its inversion of control, the runtime invoking the program's handlers as each descriptor becomes ready rather than the program itself calling down a fixed sequence.
+Serving many connections from one thread demanded change on both sides. The application restructured around an event loop, while the OS evolved new syscalls to wait on many descriptors at once. Such a program is governed by [event-driven programming]() (§602#1.1), a paradigm that organises control flow around reactions to events rather than a fixed instruction sequence. The pattern long predates the C10K problem and appears in the GUI [message loop]() dispatching clicks and keystrokes (§603#1.1).<!-- also in discrete-event simulators advancing by popping the next event off a queue, showing the pattern is domain-general, not I/O-specific --> Networking is another instance with the same inversion of control in which the runtime, not the program, invokes the handlers whenever a descriptor becomes ready.
 
 {% comment %}
 
@@ -154,9 +197,43 @@ The event loop is both: the loop calls your handlers (inverted) AND each handler
 
 {% endcomment %}
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/event_driven_arch.webp" width="375"> <a href="https://devworks.jp/blog/371" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/event_driven_arch.webp" width="390"> <a href="https://devworks.jp/blog/371" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div>
 
-Concretely, the [event loop]() is a single application thread that blocks on the kernel's multiplexing interface via a syscall (e.g. *epoll_wait()* in Linux, *kevent()* in BSD) until one or more watched descriptors become ready, whereupon it dispatches each to its registered handler (i.e. [callback]()). Each handler runs to completion before the thread resumes blocking in that syscall, <!-- beyond I/O readiness, the loop also tracks timers and pending callbacks --> thus a stalled handler freezes every connection the loop serves. Apparently, this block-and-dispatch cycle is a mechanism rather than a program, and often libraries realise over the readiness syscalls (e.g. *libuv* in Node.js, *asyncio* in Python). *Building it demanded change on both sides, the application restructuring around the loop while the kernel evolved new syscalls to make the waiting efficient.*
+The [event loop]() drives the invocation on a single application thread as a dispatcher rather than a program, running each ready handler to completion before returning to the wait, and thus lets the thread fan out across many connections instead of dedicating itself to one. Mechanically, it blocks on the kernel's multiplexing interface through a syscall (e.g. Linux: *epoll_wait()*, BSD: *kevent()*) until a watched descriptor becomes ready, then dispatches each ready descriptor to its registered handler (i.e. [callback]()). The same call also returns when a timeout set to the nearest scheduled timer elapses, which asyncio finds in $O(1)$ by keeping its timers in a [min-heap]() (i.e. the *heapq* module) keyed on deadline, so the loop runs due time-based callbacks even when no descriptor fires.<!-- libraries implement this dispatcher atop the readiness syscalls, e.g. libuv in Node.js, asyncio in Python (see 1.3). -->
+
+{% comment %}
+The event loop is NOT a new kind of thread. It is the same ordinary OS thread running
+different CODE. What changed is the shape of the code, not the thread. In C you write
+both shapes by hand and they look different:
+
+  // thread-per-connection: linear, blocks on read(). one thread per conn.
+  void handle(int conn) {
+      char buf[1024];
+      read(conn, buf, 1024);   // blocks here until data arrives
+      process(buf);
+      write(conn, ...);
+  }
+
+  // event loop: YOU write the while(1) + epoll_wait dispatcher.
+  while (1) {
+      int n = epoll_wait(epfd, events, MAX, -1);   // blocks here, on ALL fds
+      for (int i = 0; i < n; i++)
+          handle(events[i].fd);                    // dispatch to per-fd handlers
+  }
+
+In Python asyncio HIDES that while-loop. You never type it:
+
+  async def handle(conn):
+      data = await conn.read(1024)   # reads linear, but SUSPENDS here
+      ...
+  asyncio.run(handle(conn))          # the while-True + epoll_wait lives in here
+
+The await version looks like the linear C read() version, but underneath asyncio runs
+the exact same while-True: epoll_wait -> dispatch loop. Coroutines (1.3) let you write
+event-driven code in straight-line style while the loop runs hidden below. So: C = build
+the loop by hand, two designs look different; Python = loop hidden, async def disguises
+the event-driven version as linear code.
+{% endcomment %}
 
 {% comment %}
 "a handler that blocks stalls every connection" is the same failure as the 1.3 coroutine case ("a coroutine that computes without awaiting stalls every other task"). The handler/ callback here IS the coroutine there. But the culprit is not the missing `await` keyword, it is the missing YIELD POINT: control returns to the loop only at an await that actually suspends (awaits I/O). Three cases:
@@ -174,11 +251,55 @@ Rule: not "you forgot await" but "this coroutine held the single thread without 
 Cases 2 and 3 are the real hazards; case 1 is harmless.
 {% endcomment %}
 
-On the kernel's side, the I/O itself is performed as it always was, through device drivers, DMA, and interrupts (§603#3.3), while the application's loop only waits on readiness. A single thread suffices because I/O-bound work spends almost no CPU time per connection, consolidating thousands of per-thread blocking waits into one, though it binds the loop to a single core. Multi-core scaling therefore comes from multiprocessing rather than multithreading, running one event-loop worker per core (e.g. *uvicorn --workers 4*). Two web servers built on this model are [Nginx](https://www.youtube.com/watch?v=L0jMBrCEQNQ), a reverse proxy and HTTP server written in C, and [Uvicorn](), a Python server hosting async applications.
+{% comment %}
+
+--- the epoll_wait cycle, userspace | kernel ------------------------------------
+
+                     USERSPACE                        |        KERNEL
+                                                      |
+  await sock.read()  ----> register interest          |
+  (coroutine suspends)     epoll_ctl(fd) -------------+--> add fd to watch-set
+                                |                      |         |
+                                v                      |         v
+                          run other ready             |    kernel monitors fds,
+                          coroutines...               |    marks ready as data
+                                |                      |    arrives
+                          nothing runnable?            |         |
+                                v                      |         |
+                          epoll_wait() ---------------+--> thread SLEEPS, 0% CPU
+                          (thread parks)               |         |
+                          wakes, gets  <--------------+--- return: [ready fds]
+                          list of ready fds            |    (plain return, kernel
+                                |                      |     never calls our code)
+                                v                      |
+                          map fd -> handler            |
+                          (userspace table)            |
+                                v                      |
+  resume coroutine <------ call it  <-- THE CALLBACK    |
+  (past the await)                                     |
+
+Kernel side does NOT call back. epoll_wait() is a plain return that hands back the
+ready fds. The "callback" is entirely userspace: the loop maps each ready fd to the
+coroutine waiting on it and resumes it. Kernel = pull (we ask, it returns), not push.
+
+--- mapped to Python -----------------------------------------------------------
+
+- The loop IS asyncio's event loop, running on the main thread (asyncio.run() makes
+  the main thread the loop). One thread total. uvloop swaps the engine (libuv) but
+  keeps the same API; Uvicorn defaults to it when available.
+- epoll_ctl / epoll_wait are reached via the stdlib `selectors` module, which picks
+  epoll on Linux, kqueue on macOS/BSD. asyncio never calls epoll directly.
+- `await sock.read()` = "register this fd, suspend me, resume me when it fires."
+  The resume-after-await IS the callback; asyncio stored it as the fd's handler.
+- epoll_wait() takes a timeout = time until the next scheduled timer (loop.call_later),
+  so the loop wakes for timers too, not only fds. -1 = block forever, 0 = poll.
+{% endcomment %}
+
+The loop however changed only what the application waits on, not how the I/O itself is performed. That is, the kernel still performs this through device drivers, DMA, and interrupts (§603#3.3), signalling the event loop the moment a descriptor is ready for its read. One main thread then suffices because I/O-bound work spends almost no CPU per connection. It stands in for the thousands that thread-per-connection needed and collapses their blocking waits into a single one.<!-- between events the loop holds nothing but a table of parked handlers --> Its one limit is concurrency without parallelism, since a single loop occupies one core and every additional core takes another loop.
 
 - <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/event_loop.svg" width="450"> <a href="https://www.pythontutorial.net/python-concurrency/python-event-loop/" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">A task is one unit of work the loop drives, run until it would block on I/O, handed to the OS, then resumed once the OS signals completion.</div> </div>
 
-Beyond performing the I/O, the kernel must also watch it, the mechanism of [I/O multiplexing]() that lets many file descriptors (fds) share a single thread by having the kernel track their readiness on the application's behalf. Its implementations (i.e. syscall API) evolved from *select()* (4.2BSD, 1983, fixed fd limit, copies the entire fd set to the kernel on every call) $\to$ *poll()* (System V, 1986, dynamic, but still $O(n)$ scanning) $\to$ *epoll()* (Linux 2.5.44, 2002, registers fds once via *epoll_ctl* and returns only ready fds, achieving $O(1)$ per event) and *kqueue()* (FreeBSD, 2000). <!-- io_uring (Linux 5.1, 2019) is completion-based, not readiness multiplexing; see p6. --> In particular, *epoll()* supports two notification modes.
+Beyond performing the I/O, the kernel must also watch it through [I/O multiplexing](), which lets many file descriptors (fds) share a single thread by tracking their readiness on the application's behalf. Its implementations (the syscall API) evolved from *select()* (4.2BSD, 1983, fixed fd limit, copies the entire fd set to the kernel on every call) $\to$ *poll()* (System V, 1986, dynamic, but still $O(n)$ scanning) $\to$ *epoll()* (Linux 2.5.44, 2002, registers fds once via *epoll_ctl* and returns only ready fds, achieving $O(1)$ per event) and *kqueue()* (FreeBSD, 2000). <!-- io_uring (Linux 5.1, 2019) is completion-based, not readiness multiplexing; see p6. --> In particular, *epoll()* supports two notification modes.
 
 {% comment %}
 General multiplexing:     many consumers → one resource
@@ -188,13 +309,13 @@ General multiplexing:     many consumers → one resource
 I/O multiplexing:         many fds       → one thread
 {% endcomment %} 
 
-[Level-triggered]() (default) reports an fd as ready whenever data is available in its buffer, so the application can read partially and be reminded on the next *epoll_wait()* call. [Edge-triggered]() (*EPOLLET*) reports an fd only when its state changes (e.g. new data arrives), so the application must drain the entire buffer in a loop until *EAGAIN* or risk missing data. The former is the default in Python's *selectors* module and most event loop libraries (e.g. Go's *netpoller*) for its forgiving semantics, whereas the latter generates fewer notifications under high throughput and handles network I/O in Nginx<!-- also widely used as a load balancer and TLS terminator due to its event-driven architecture -->.
+[Level-triggered]() (default) reports an fd as ready whenever data is available in its buffer, so the application can read partially and be reminded on the next *epoll_wait()* call. [Edge-triggered]() (*EPOLLET*) reports an fd only when its state changes (e.g. new data arrives), so the application must drain the entire buffer in a loop until *EAGAIN* or risk missing data. The former is the default in Python's *selectors* module and most event loop libraries (e.g. Node.js's *libuv*) for its forgiving semantics, whereas the latter generates fewer notifications under high throughput and drives Nginx's network I/O and Go's *netpoller*<!-- Nginx is also widely used as a load balancer and TLS terminator due to its event-driven architecture -->.
 
-The trigger modes govern network descriptors, yet the loop's coverage is not total. The readiness model assumes a descriptor can be *not ready*, which holds for sockets that wait on the network but not for regular files, whose data is deemed always available even when fetching it stalls on disk latency. Hence such reads report ready yet the actual *read()* blocks, and Nginx offloads blocking disk I/O (e.g. serving large video files) to a thread pool to keep the event loop responsive. Only [*io_uring*](https://kernel.dk/io_uring.pdf) (Linux 5.1, 2019, $R_{11}$) closes this gap, as its completion-based interface reports the finished read rather than a readiness that regular files cannot express. The kernel's side is thereby complete, leaving the application's, its logic scattered across callbacks, as the remaining cost. <!-- per-event handlers scatter one connection's logic across disconnected callbacks -->
+The trigger modes govern network descriptors, yet the loop's coverage is not total. The readiness model assumes a descriptor can be *not ready*, which holds for sockets that wait on the network but not for regular files, whose data is deemed always available even when fetching it stalls on disk latency. Hence such reads report ready yet the actual *read()* blocks, and Nginx offloads blocking disk I/O (e.g. serving large video files) to a thread pool to keep the event loop responsive. Only [*io_uring*](https://kernel.dk/io_uring.pdf) (Linux 5.1, 2019) closes this gap, since its completion-based interface reports the finished read rather than a readiness that regular files cannot express. The kernel's side is thereby complete, leaving the application's, its logic scattered across callbacks, as the remaining cost. <!-- per-event handlers scatter one connection's logic across disconnected callbacks -->
 
 - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/epoll.png" width="400"> <a href="https://medium.com/@avocadi/what-is-epoll-9bbc74272f7c" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div>
 
-### **1.3. Coroutines (Python)**
+### **1.3. Coroutines**
 
 <p style="margin-bottom: 12px;"> </p>
 
@@ -277,7 +398,7 @@ Trace of one request:
 
 Coroutines do not replace the event loop but change its unit of work from a raw callback to a coroutine. A [coroutine](https://dl.acm.org/doi/10.1145/366663.366704) (Conway, 1963) generalises the ordinary [subroutine](), which runs from a single entry to completion, into a function that suspends at explicit points (*yield*, *await*) with its local state preserved and resumes exactly where it left off. Raw callbacks are error-prone and deeply nested (i.e. [callback hell]()), scattering one connection's logic across handlers and hand-threaded state, whereas a coroutine keeps that state in its local variables and its logic reads top to bottom as in the blocking style.
 
-The event loop schedules cooperatively, its coroutines yielding control explicitly rather than being preempted. This revives the model the OS abandoned for the timer interrupt (§603#3.1), safe again since one loop's tasks belong to one program rather than strangers the kernel must referee. Each *await* on I/O suspends the coroutine and hands its fd to the loop, whose single thread blocks in the *epoll_wait()* a C programmer would write by hand, making *async* / *await* portable across readiness mechanisms. The bargain still binds, as a coroutine that computes without awaiting stalls every other task, and CPU-bound work therefore belongs in the mechanisms that follow.
+The event loop schedules cooperatively, its coroutines yielding control explicitly rather than being preempted. This revives the model the OS abandoned for the timer interrupt (§603#3.1), safe again since one loop's tasks belong to one program rather than strangers the kernel must referee. Each *await* on I/O suspends the coroutine and hands its fd to the loop, whose single thread blocks in the *epoll_wait()* a C programmer would write by hand, making *async* / *await* portable across readiness mechanisms. The bargain still binds, since a coroutine that computes or calls a blocking function without reaching an *await* stalls every other task, so CPU-bound work belongs in the mechanisms that follow.
 
 {% comment %}
 Preemptive vs cooperative is a property of the scheduler, not a single object.
@@ -294,7 +415,7 @@ Neither preempts — there is no timer interrupt inside the loop. Preemption is 
 thread scheduler's job. So `while True: pass` in one coroutine hangs the whole loop.
 {% endcomment %}
 
-Switching between coroutines is correspondingly cheap, nanoseconds against the microseconds an OS thread context switch costs, as it saves only their own registers and stack pointer in user space, avoiding the kernel-mode transition a thread switch requires. This keeps a coroutine's cost in the language runtime rather than the scheduler, which is why one thread can hold far more of them than the machine could hold threads. Coroutines are a language-general construct, reaching C# (5.0, 2012) before Python and JavaScript, Kotlin, and Rust after, yet Python is the instructive case because its runtime hides that event loop most completely. <!-- [Stackful coroutines]() maintain their own stack (like threads but lighter), while [stackless coroutines]() use heap-allocated activation records. -->
+Switching between coroutines is cheap, nanoseconds against the microseconds an OS thread context switch costs, since it saves only a suspended frame in user space, avoiding the kernel-mode transition a thread switch requires. This keeps a coroutine's cost in the language runtime rather than the scheduler, which is why one thread can hold far more of them than the machine could hold threads. Coroutines are a language-general construct, reaching C# (5.0, 2012) before Python and the rest (JavaScript, Kotlin, Rust) after, yet Python is the instructive case because its runtime hides the event loop most completely. <!-- [Stackful coroutines]() maintain their own stack (like threads but lighter), while [stackless coroutines]() use heap-allocated activation records. -->
 
 {% comment %}
 Coroutines are a general concept, not Python-specific.
@@ -334,9 +455,9 @@ Full responsibility stack:
 
 - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/coroutine.png" width="375"> <a href="https://blog.eiler.eu/posts/20210512/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
-Python's initial coroutine implementation repurposed [generators]() (*yield*, Python 2.2), which already suspend and resume on demand, and two amendments generalised it by letting a generator: i) receive values (*send*, [PEP 342](https://peps.python.org/pep-0342/)); and ii) delegate to sub-generators (*yield from*, [PEP 380](https://peps.python.org/pep-0380/)). The [*asyncio*](https://docs.python.org/3/library/asyncio.html) module (3.4, 2014) later implemented the event loop on this machinery, a *while* loop that repeatedly runs coroutines and waits for I/O readiness through the [*selectors*]() module, a thin wrapper over the kernel's multiplexing syscalls. Python 3.5 (2015, [PEP 492](https://peps.python.org/pep-0492/)) added native *async* / *await* keywords, so coroutines became a first-class construct rather than disguised generators.
+Python's initial coroutine implementation repurposed [generators]() (*yield*, Python 2.2), which already suspend and resume on demand, and two amendments generalised it by letting a generator: i) receive values (*send*, [PEP 342](https://peps.python.org/pep-0342/)); and ii) delegate to sub-generators (*yield from*, [PEP 380](https://peps.python.org/pep-0380/)). The [*asyncio*](https://docs.python.org/3/library/asyncio.html) module (3.4, 2014) later implemented the event loop on this machinery, a *while* loop that repeatedly runs coroutines and waits for I/O readiness through the [*selectors*]() module, a thin wrapper over the kernel's multiplexing syscalls. Python 3.5 (2015, [PEP 492](https://peps.python.org/pep-0492/)) added native *async* / *await* keywords, so coroutines became a first-class construct rather than disguised generators, an *async def* function being a coroutine and each *await* its yield point.
 
-Yet the syntax alone creates no concurrency since awaiting a coroutine merely runs it inline. Concurrency arises when the loop drives many coroutines at once, each wrapped in a [Task](), its scheduled form, which the loop places on the [ready queue]() and advances as the awaited fd signals. For example, *asyncio.gather* launches many Tasks together, thus one thread interleaves thousands of outstanding requests, each parked at its own *await*. *asyncio.TaskGroup* (3.11, 2022) was later introduced to provide [structured concurrency](), which basically scopes sibling Tasks such that one failure cancels the rest, while *gather* leaves them a loose bundle that fails independently.
+Yet the syntax alone creates no concurrency since awaiting a coroutine merely runs it inline. Concurrency arises when the loop drives many coroutines at once, each wrapped in a [Task](), its scheduled form, which the loop places on the [ready queue]() and advances as the awaited fd signals. For example, *asyncio.gather* launches many Tasks together, thus one thread interleaves thousands of outstanding requests, each parked at its own *await*. *asyncio.TaskGroup* (3.11, 2022) was later introduced to provide [structured concurrency](), which scopes sibling Tasks so that one failure cancels the rest, while *gather* leaves them a loose bundle that fails independently.
 
 {% comment %}
 import asyncio    # event loop + coroutine scheduler
@@ -377,7 +498,19 @@ a, b = await asyncio.gather(fetch(url1), fetch(url2))
 \# both in flight, time ≈ max
 {% endcomment %}
 
-The entire arc, from thread-per-connection $\to$ event loops $\to$ coroutines, resurfaces in Python web frameworks. [Web Server Gateway Interface]() (WSGI) frameworks run on synchronous servers, which assign each request a thread or process in the blocking model, whereas [Asynchronous Server Gateway Interface]() (ASGI) frameworks run on asynchronous servers, which wrap each request in a Task on the asyncio loop. The server hence supplies request-level concurrency, while application programmers write nothing beyond *async def* handlers. The interface selection naturally follows the target workload: ASGI when I/O-bound at scale and WSGI otherwise.
+### **1.4. HTTP Servers**
+
+<p style="margin-bottom: 12px;"> </p>
+
+The entire arc (i.e. thread-per-connection $\to$ event loops $\to$ coroutines) resurfaces in Python web frameworks. Historically a Python application was bound to a particular server through CGI or mod_python, until the [web server gateway interface]() (WSGI, 2003) decoupled the two so that any compliant app runs on any compliant server, a contract the [asynchronous server gateway interface]() (ASGI, 2016) later generalised to the asynchronous model. A WSGI framework exposes a single synchronous callable *app(environ, start_response)* that the server invokes once per request, whereas an ASGI framework exposes an *async def app(scope, receive, send)* whose *receive* and *send* channels stream events across the asyncio loop.
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/wsgi-vs-asgi.png" width="425"> <a href="https://medium.com/@dynamicy/asgi-vs-wsgi-a-complete-guide-to-their-differences-and-fastapi-applications-9857f13c4521" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">E.g. ASGI admits long-lived connections (WebSocket, SSE) that WSGI's one-request-one-response contract cannot express.</div> </div>
+
+In practice, the ASGI side forms a stack of layers, each wrapping the one beneath. At the bottom, [*asyncio*]() (2014) is the event loop that drives the socket I/O via the OS (§603#2.2). [*Uvicorn*]() (2017), the ASGI server above it, runs the loop and turns each HTTP request into a coroutine call (e.g. *httptools* parses the raw bytes). [*FastAPI*]() (2018) atop the stack routes and validates the request into the *async def* handler the loop ultimately drives. Notice that ASGI is the contract between server and app, hence either side substitutes freely (e.g. Uvicorn $\leftrightarrow$ Hypercorn, FastAPI $\leftrightarrow$ Starlette), and even asyncio's loop engine may become [*uvloop*](), built on the same libuv as Node.js.
+
+Within a single worker any request that blocks stalls the rest because they all share the loop's single thread. One such offender is an ordinary *def* endpoint, which carries no *await* and would hold the thread through its whole body unless the framework runs it in a thread pool. The same hazard attends any blocking call reached from a coroutine (e.g. *time.sleep* instead of *asyncio.sleep*, a synchronous database driver), thus an async server demands async libraries throughout. CPU-bound work stalls the loop equally but merits a process pool rather than a thread pool, since only processes convert the host's remaining cores into parallelism.<!-- computation that never waits gains nothing from an event loop -->
+
+The loop occupies at most one core, however many the host offers, hence [*Gunicorn*]() (2010), a pre-fork master descended from Ruby's Unicorn, forks and supervises one Uvicorn worker per core by convention. The arrangement layers core-level parallelism over each loop's concurrency. In containerised deployments an orchestrator such as Kubernetes replaces the master and replicates single-worker containers for the same parallelism and resilience (§607#3.1). A reverse proxy such as [Nginx]() (2004, written in C) sits in front of the worker pool, where it terminates TLS and buffers slow clients such that the workers see only complete and fast requests.
 
 {% comment %}
 The ASGI stack layers, each wrapping the one below, so the programmer only writes
@@ -395,7 +528,7 @@ One line: Uvicorn runs asyncio; FastAPI runs on Uvicorn via ASGI. (libuv is Node
 equivalent of the asyncio+uvloop layer.)
 {% endcomment %}
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/wsgi-vs-asgi.png" width="425"> <a href="https://medium.com/@dynamicy/asgi-vs-wsgi-a-complete-guide-to-their-differences-and-fastapi-applications-9857f13c4521" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">E.g. ASGI admits long-lived connections (WebSocket, SSE) that WSGI's one-request-one-response contract cannot express.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/gunicorn-uvicorn.png" width="475"> <a href="https://github.com/alisharify7/gunicorn-uvicorn-nginx" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">Each tier owns one concern, Nginx the TLS and slow clients, Gunicorn the worker lifecycle, and each Uvicorn+uvloop worker the async request handling.</div> </div>
 
 
 ## II
@@ -407,22 +540,20 @@ equivalent of the asyncio+uvloop layer.)
 
 <!-- Progression: safe approach (multiprocessing) → fast approach (multithreading) → the cost of the fast approach (shared state) → naturally leads to §III Synchronisation -->
 
-[CPU-bound]() workloads (numerical computation, encryption, image processing) saturate the processor and benefit from true parallelism across multiple cores. Event loops solved the waiting problem, the first of the two developments raised earlier. The second, stalled clock speeds and the multi-core turn (§601#1.1), is the one that now bites, as computation needs real CPU time and exploiting multiple cores requires distributing work across multiple execution contexts. Most real systems are hybrid, with I/O stages feeding CPU stages in a pipeline (e.g. fetch data → transform → write) where the bottleneck shifts with load and data volume, and for the CPU stages two approaches exist, multiprocessing and multithreading.
+[CPU-bound]() workloads (e.g. numerical computation, compression, encryption) saturate the processor and benefit from true parallelism across multiple cores. Event loops solved the waiting that came with scaling connections, whereas stalled clock speeds and the multi-core turn are what now bite. Most real systems are hybrid, where I/O stages feed CPU stages in a pipeline (e.g. fetch → transform → write). More specifically, two approaches parallelise the CPU stages, multiprocessing and multithreading. They differ chiefly in whether the parallel work shares memory or stays isolated, hence in whether communication is cheap or synchronisation-free.
 
-Whichever approach distributes the work, [Amdahl's Law](https://en.wikipedia.org/wiki/Amdahl%27s_law) (1967) and [Gustafson's Law](https://en.wikipedia.org/wiki/Gustafson%27s_law) (1988) formalise the limits on the speedup it can earn. The former says that if a fraction $f$ of a program is sequential, the maximum speedup on $p$ processors is $1/(f + (1-f)/p)$, which tends to $1/f$ as $p \to \infty$, so even 5% sequential code caps speedup at 20×. The latter counters that problem size often scales with available processors, as practitioners enlarge the workload to fill the machine rather than hold it fixed, and the scaled speedup $f + (1-f)p$ grows without bound. The two laws thus answer different questions, how much faster a fixed problem can get versus how much more work the same wall-clock time can absorb.
+In fact, the speedup from adding processors is not automatic but bounded by a program's sequential fraction, as [Amdahl's Law](https://en.wikipedia.org/wiki/Amdahl%27s_law) (1967) and [Gustafson's Law](https://en.wikipedia.org/wiki/Gustafson%27s_law) (1988) formalise. The former sets the problem size fixed and says that, if a fraction $f$ of a program is sequential, the maximum speedup on $p$ processors is $1/(f + (1-f)/p) \to 1/f$ as $p \to \infty$ (e.g. $f = 0.05 \Rightarrow 1/f = 20$). The latter instead lets the problem grow with $p$, whereby the parallel part scales with $p$ while the serial part stays fixed, and yields the scaled speedup $f + (1-f)p$, linear in $p$. The two answer different questions: the speed gained on a fixed problem vs. the work gained in equal time.
 
-Of the two approaches, [multiprocessing]() is the safer, as it runs parallel work in separate processes, each with its own isolated address space. Since no memory is shared, there are no race conditions by construction, and a crash in one process cannot corrupt another. The trade-off is overhead, as each process requires its own page table, file descriptor table, and kernel bookkeeping, while communication between processes requires explicit IPC (§603#3.1).
+[Multiprocessing]() runs parallel work in separate processes (§603#3.1), each in its own address space. Because it shares no memory, it rules out data races by construction and isolates crashes, for instance one Chrome tab failing without bringing down the others, at the cost of a per-process page table, fd table, and kernel bookkeeping plus explicit IPC to communicate. Even so, fork-based multiprocessing underlies traditional web servers (Apache prefork), database engines (PostgreSQL, §606#3.3), and modern ASGI deployments (Gunicorn forking one Uvicorn worker per core). In Python, the *multiprocessing* module (2.6, 2008) and *ProcessPoolExecutor* (3.2, 2011) bypass the GIL by giving each worker process its own interpreter, and so its own cores. Each worker returns its result via serialisation (pickle, §605#4.1).
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/multiprocessing.webp" width="400"> <a href="https://towardsdatascience.com/deep-dive-into-multithreading-multiprocessing-and-asyncio-94fdbe0c91f0/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
-
-Python's *multiprocessing* module (2.6, 2008) and *ProcessPoolExecutor* (3.2, 2011) take this approach to bypass the [Global Interpreter Lock](https://wiki.python.org/moin/GlobalInterpreterLock) (GIL), a mutex that lets only one thread execute CPython bytecode at a time and thus denies CPU-bound threads multiple cores. Unlike an ordinary mutex, which guards a single data structure so that threads holding different locks still run in parallel, the GIL guards the whole interpreter, so spawning separate processes, each with its own GIL, is the only way to reclaim the cores. Their worker processes return results via serialisation (pickle). Fork-based multiprocessing is also how traditional web servers (Apache prefork) and database engines (e.g. PostgreSQL, §606#3.3) achieve parallelism.
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/multiprocessing.webp" width="525"> <a href="https://towardsdatascience.com/deep-dive-into-multithreading-multiprocessing-and-asyncio-94fdbe0c91f0/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
 
 
 ### **2.2. Multithreading**
 
 <p style="margin-bottom: 12px;"> </p>
 
-[Multithreading](), the faster of the two, trades that isolation away and runs parallel work in threads within the same process. Since all threads share the same address space (§603#3.2), they read and write the same heap (§602#1.3) and share the process's code, data/BSS segments, and kernel resources (file descriptor table, signal handlers) without any IPC mechanism, which makes communication fast but demands synchronisation. Each thread retains only a private stack and register set, and a context switch between threads of one process keeps the address space, avoiding the page-table swap and TLB flush a process switch pays (§603#3.1).
+[Multithreading]() trades isolation for a shared address space, partitioning the process's state such that every thread reads and writes the same regions (e.g. heap, text, data segments) and inherits the same kernel resources (e.g. fd table, signal dispositions), while private to each remain only its register set (PC included) and stack. It is lighter and so faster than multiprocessing, as communication reduces to ordinary memory access rather than IPC, but pays for it in synchronisation. The small private remainder also prices the switch. One between threads of a process leaves invariant the page table and TLB that one between processes must swap and flush (§603#3.1).
 
 <!--
 Analogy (people = cores, calculators = memory):
@@ -434,15 +565,23 @@ GIL:              2 people, 1 calculator, but only one is allowed to touch it
                   at a time. The other just waits. You have the cores but can't use them.
 -->
 
-Cheap as threads are to communicate across, they are not free to run, so [thread pools]() pre-create a fixed number and reuse them across tasks, amortising per-task creation cost while matching thread count to core count. What creation and switching cost in turn depends on the threading model, i.e. how [user threads](), those a language runtime creates and schedules in user space, map onto the kernel threads the OS schedules, and three such mappings exist.
+Yet the cost has not vanished. A thread reduces to a triple $($register set, stack, scheduler$)$, and whichever layer supplies the triple pays the same bill of creation, storage, and switching.<!-- the private pair (register set, stack) extended by a scheduler --> Namely, an application spawns $m$ [user threads](), each created by its runtime at an allocation and switched at a function call unseen by the kernel. By contrast, the kernel supplies $n$ [kernel threads](), each at a syscall and a kernel stack, orders of magnitude dearer, for they alone are dispatched onto cores. A threading model that fixes the ratio $m \colon n$ of user to kernel threads is hence a strategy for how much of the bill to pay at kernel prices by trading parallelism against abundance.<!-- parallelism, which only kernel threads reach; abundance, which only user-space cheapness affords -->
 
-The [$1 \colon 1$ model]() maps each user thread directly to a kernel thread. The kernel handles scheduling and can place threads on separate cores for true parallelism, but every thread creation requires a syscall and allocates a kernel stack (16 KB on x86-64 since Linux 3.15), so creation and context switching are expensive. The [$m \colon 1$ model]() ([green threads](), early Java on Solaris) multiplexes many user threads onto a single kernel thread, so creation and switching happen entirely in user space at negligible cost. The trade-off is that the kernel sees only one thread, so no two user threads can run on different cores simultaneously, and a single blocking syscall (e.g. disk I/O) stalls all of them. The [$m \colon n$ model]() (Go goroutines, Erlang processes) multiplexes $m$ user threads onto $n$ kernel threads ($m \gg n$) and combines cheap user-space switching with kernel-level parallelism across cores. A user-space [runtime scheduler]() assigns user threads to kernel threads and migrates them on blocking.
+The [$1 \colon 1$ model]() (POSIX threads, Windows threads), today's default, sets $n = m$, backing each user thread with its own kernel thread, as glibc's [native POSIX thread library]() (NPTL, 2003) does on Linux beneath C, Java, and CPython threads alike. <!-- The model won Linux once kernel threads and futexes grew cheap, NPTL's simplicity beating IBM's m:n NGPT. --> Its virtue is that the runtime does nothing, every user thread being directly schedulable, preempted by the kernel's timer interrupt, and delaying only itself when it blocks. Every operation is instead billed at kernel prices, and the cost scales as $O(m)$ in syscalls and memory alike, a *clone()* and a multi-MB stack per creation plus a kernel entry per block and wake, capping $m$ at the thousands, the earlier C10K wall.<!-- thread-per-connection's wall; also a ~16 KB kernel stack per thread -->
 
-Whichever model carries them, the threads still share memory, and a function or data structure is therefore [thread-safe]() only if multiple threads can call it concurrently without producing incorrect results. Thread safety is achieved either by avoiding shared mutable state entirely (immutability, thread-local storage) or by protecting it with synchronisation primitives, which the standard threading API supplies. On Unix-like systems that standard is [POSIX Threads]() (*pthreads*, POSIX.1c, 1995), providing *pthread_create*, *pthread_join*, *pthread_mutex_lock*, and related functions, and most languages wrap it into higher-level APIs (Python's *threading*, Java's *java.lang.Thread*, C++'s *std::thread*).
+<!-- the two remaining models answer a different question, not how to use every core but how to hold more concurrent flows than the kernel could ever afford to carry --> The [$m \colon 1$ model]() ([green threads](), early Java) drops the kernel's share to zero. The runtime keeps every triple and multiplexes all user threads onto the process's main thread, cheap enough to spawn one flow per task. The kernel however sees one thread, so nothing runs in parallel and one blocking syscall (e.g. disk I/O) stalls all $m$. The [$m \colon n$ model]() (Go goroutines, Erlang processes, Java virtual threads) instead splits the bill such that cheapness and parallelism coexist. The runtime keeps the $m$ triples while the kernel carries a constant $n$ of typical kernel threads ($m \gg n$, one per core), and a [runtime scheduler]() migrates user threads across the $n$ on blocking. <!-- the kernel contributes nothing special here: the runtime merely requests n ordinary kernel threads and stacks its own scheduler on the kernel's -->
 
-In CPython the GIL leaves multithreading effective for I/O-bound work, where a thread releases it while blocked in a syscall, but not for CPU-bound work. Python 3.13 (2024) introduced an experimental [free-threaded mode]() ([PEP 703](https://peps.python.org/pep-0703/)) that disables the GIL entirely, enabling true multithreaded parallelism for CPU-bound CPython code for the first time, and with it the full weight of the synchronisation problems that follow.
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/thread_design.png" width="450"> <a href="https://www.omscs-notes.com/operating-systems/thread-design-considerations/" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 12px; color: #888; margin-top: 4px;">Each layer supplies its own thread abstraction, scheduling, and synchronisation, joined only by the mapping.</div> </div>
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/python_gil.webp" width="400"> <a href="https://www.codecademy.com/article/understanding-the-global-interpreter-lock-gil-in-python" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+In practice, the $1 \colon 1$ default leaves threads too expensive to spawn per task, thus an application pre-creates a fixed number in a [thread pool]() and reuses them across tasks, amortising the creation cost. <!-- the OS only hands out kernel threads one clone() at a time; pooling is always the application layer or a library on its behalf --> Specifically, in Python, *ThreadPoolExecutor* is the explicit pool the application constructs and sizes. Libraries also provision one implicitly, as in i) *asyncio.to_thread*'s default executor; ii) FastAPI's $\sim$40-thread pool shielding its loop from *def* endpoints; and iii) OpenBLAS's worker threads beneath NumPy's linear algebra<!-- OpenBLAS is NumPy's default BLAS backend, MKL in some builds; also gRPC's server takes a ThreadPoolExecutor -->. Either way the size settles at the core count when CPU-bound and diverges as blocking rises when I/O-bound, since a blocked thread holds no core. <!-- in CPython the "CPU-bound pool" must be a process pool (GIL), unless the work releases the GIL (NumPy, hashing) --> <!-- FastAPI's def-endpoint pool is AnyIO's, via Starlette -->
+
+The same shared address space that made these threads cheap now threatens their correctness, since communication through common memory equally lets concurrent access corrupt it. A function or data structure is thus [thread-safe]() only if concurrent calls cannot corrupt its result, won either by avoiding shared mutable state (immutability, thread-local storage) or by guarding it with synchronisation primitives. On Unix-like systems those primitives are standardised as [POSIX Threads]() (*pthreads*, POSIX.1c, 1995), whose *pthread_create*, *pthread_mutex_lock*, and related calls most languages wrap into higher-level APIs (Python's *threading*, C++'s *std::thread*).
+
+More specifically, in CPython the [Global Interpreter Lock](https://wiki.python.org/moin/GlobalInterpreterLock) (GIL), a mutex admitting one thread to run bytecode at a time, withholds the parallelism *threading*'s real $1\colon1$ kernel threads would otherwise deliver. They speed only I/O-bound work, which releases the GIL while blocked in a syscall, never CPU-bound, which holds it throughout. <!-- the GIL is also handed off every ~5 ms (sys.getswitchinterval) so I/O-bound threads overlap --> The lock exists because even reading an object on the shared heap (§602#1.3) mutates its reference count, so per-object locks would number in the millions, their overhead crippling the single-threaded case Python (1991) was built for. One interpreter-wide lock collapses the millions to one at the price of multicore, a bargain struck by CPython, not the language, on the single-core machines of its day, and one sparing C extensions any change<!-- since refcounts are guarded wholesale -->.
+
+Python 3.13 (2024) took the other path, the one Greg Stein's 1999 patch first tried and was rejected for over its single-thread slowdown, now an experimental [free-threaded mode]() ([PEP 703](https://peps.python.org/pep-0703/)) that trades the single lock for per-object locking, eased by biased reference counting and immortal singletons, at the cost of a measurable single-thread overhead and C extensions that must opt in (*Py_mod_gil*). <!-- also deferred reference counting for hot globals (functions, modules) and a thread-safe mimalloc allocator --> The removal is staged, as 3.14 (2025, [PEP 779](https://peps.python.org/pep-0779/)) promoted the build from experimental to officially supported and restored the specialising interpreter that 3.13 had disabled for thread safety, narrowing the overhead toward the single digits, and 3.15 continues the convergence whose declared end state is one free-threaded default build. It is a trade worth making only now that idle cores cost more than the GIL ever saved, bringing true CPU-bound parallelism for the first time and with it the full weight of the synchronisation problems that follow.
+
+- <div style="display: inline-block;"> <iframe src="../assets/blog/memory-region.html" width="525" height="574" style="border: none; overflow: hidden; display: block;" scrolling="no"></iframe> <div style="font-size: 12px; color: #888; margin-top: 4px;">Under the GIL only 1 of 4 cores runs Python, whereas free-threaded runs 3 threads on 3 cores.</div> </div>
 
 
 <!--
@@ -503,7 +642,6 @@ m:n Model (Go goroutines, Erlang processes)
   ✓ blocking handled (runtime moves goroutine to another kernel thread)
 -->
 
-- ...
 
 ## III
 ---
@@ -569,7 +707,7 @@ These macros expand to the appropriate ISA instruction per architecture. -->
 
 <p style="margin-bottom: 12px;"> </p>
 
-Synchronisation primitives answer both problems at once, as they enforce atomicity over critical sections and insert the ordering that relaxed hardware omits. A [mutual exclusion lock]() (mutex) puts a waiting thread to sleep until the lock is released, while a [spinlock]() keeps the thread checking in a tight loop, skipping the context switch and thus faster when locks are held briefly on multicore machines but wasting cycles otherwise. <!-- another core can release the lock while the spinner runs; on a single core spinning merely delays the holder until the spinner is preempted --> A [reentrant lock]() (recursive mutex) maintains an acquisition count so the same thread can reacquire it without deadlocking against itself, and [read-write locks]() allow concurrent reads but exclusive writes for read-heavy workloads.
+[Synchronisation primitives]() answer both problems at once, as they enforce atomicity over critical sections and insert the ordering that relaxed hardware omits. A [mutual exclusion lock]() (mutex) puts a waiting thread to sleep until the lock is released, while a [spinlock]() keeps the thread checking in a tight loop, skipping the context switch and thus faster when locks are held briefly on multicore machines but wasting cycles otherwise. <!-- another core can release the lock while the spinner runs; on a single core spinning merely delays the holder until the spinner is preempted --> A [reentrant lock]() (recursive mutex) maintains an acquisition count so the same thread can reacquire it without deadlocking against itself, and [read-write locks]() allow concurrent reads but exclusive writes for read-heavy workloads.
 
 [Semaphores]() (Dijkstra, 1965) answer a second need beyond exclusion, namely coordination, by generalising the lock into an integer counter that holds the invariant $v \geq 0$, where *wait* decrements $v$ or blocks at zero and *signal* increments it. An initial value $N$ thus admits at most $N$ threads into a critical section simultaneously, and a [binary semaphore]() ($N = 1$) behaves like a mutex. Unlike a mutex, however, a semaphore has no owner, as any thread may signal it, which is what lets one thread wake another rather than merely unlock its own critical section. [Condition variables]() let a thread atomically release a lock and sleep until another thread signals that a predicate has changed, and the waiter must recheck the predicate in a loop because of [spurious wakeups]() <!-- (the thread may be woken without a signal) -->.
 
@@ -577,7 +715,7 @@ Synchronisation primitives answer both problems at once, as they enforce atomici
 
 [Lock-free]() data structures instead use atomics directly, where an update reads the old value, computes the new, and retries the CAS until no other thread has interfered (e.g. C++'s *std::atomic*, Java's *AtomicInteger*). This guarantees that some thread always makes progress even if others stall, whereas a lock holder preempted mid-section blocks every waiter. The subtlety is that a location can change from $A$ to $B$ and back to $A$ between the read and the CAS, which then succeeds though the state moved beneath it, known as the [ABA problem]().
 
-These primitives are best understood through classical synchronisation problems. The [producer-consumer]() (bounded buffer) problem has producers and consumers sharing a fixed-size buffer, and needs a mutex to protect it plus two semaphores (or condition variables) to block producers when it is full and consumers when it is empty. The [readers-writers]() problem schedules many readers and rare writers over one shared object without starving either side, and maps directly onto the read-write lock. Both illustrate that correct synchronisation fits the primitive to the access pattern rather than wrapping every operation in a lock, while scope matters equally, as one coarse lock serialises the very parallelism threads were meant to buy, whereas finer locks recover it only by setting a thread to hold several at once, the setup for a failure of the cure's own making.
+These primitives are best understood through classical synchronisation problems. The [producer-consumer]() (bounded buffer) problem has producers and consumers sharing a fixed-size buffer, and needs a mutex to protect it plus two semaphores (or condition variables) to block producers when it is full and consumers when it is empty. The [readers-writers]() problem schedules many readers and rare writers over one shared object without starving either side, and maps directly onto the read-write lock. Both illustrate that correct synchronisation fits the primitive to the access pattern rather than wrapping every operation in a lock, while scope matters equally, as one coarse lock serialises the very parallelism threads were meant to buy (the GIL being the extreme case), whereas finer locks, as in free-threaded CPython, recover it only by setting a thread to hold several at once, the setup for a failure of the cure's own making.
 
 {% comment %}
 Why two families exist — synchronisation answers TWO different needs, not one:

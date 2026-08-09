@@ -1,0 +1,172 @@
+<title>FastAPI agent server on a 4-core instance</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2024; --muted:#5a6672;
+    --line:#d3d8de; --frame:#98a2b3;
+    --io:#0e7c86; --io-soft:#dceef0; --io-ink:#0a5b63;
+    --cpu:#b5540b; --cpu-soft:#f6e3d1; --cpu-ink:#8f420a;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0f1417; --panel:#161c20; --ink:#e6e9ec; --muted:#9aa4ad;
+      --line:#2b343a; --frame:#3c474e;
+      --io:#42b8c4; --io-soft:#0f363b; --io-ink:#7fd6de;
+      --cpu:#e2953f; --cpu-soft:#38280f; --cpu-ink:#f0b779;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1417; --panel:#161c20; --ink:#e6e9ec; --muted:#9aa4ad;
+    --line:#2b343a; --frame:#3c474e;
+    --io:#42b8c4; --io-soft:#0f363b; --io-ink:#7fd6de;
+    --cpu:#e2953f; --cpu-soft:#38280f; --cpu-ink:#f0b779;
+  }
+  :root[data-theme="light"]{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2024; --muted:#5a6672;
+    --line:#d3d8de; --frame:#98a2b3;
+    --io:#0e7c86; --io-soft:#dceef0; --io-ink:#0a5b63;
+    --cpu:#b5540b; --cpu-soft:#f6e3d1; --cpu-ink:#8f420a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:960px;margin:0 auto;padding:40px 24px 56px;}
+  header{margin-bottom:8px;}
+  .eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;margin:0 0 8px;}
+  h1{font-size:clamp(22px,3.4vw,30px);margin:0 0 6px;letter-spacing:-.01em;
+    text-wrap:balance;}
+  .lede{margin:0;color:var(--muted);max-width:62ch;font-size:15px;}
+  .board{margin:26px 0 0;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px 18px 8px;overflow-x:auto;}
+  svg{display:block;width:100%;height:auto;min-width:640px;}
+  .legend{display:flex;flex-wrap:wrap;gap:18px 26px;margin:14px 2px 4px;
+    font-size:13px;color:var(--muted);}
+  .legend b{color:var(--ink);font-weight:600;}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:3px;
+    vertical-align:middle;margin-right:7px;}
+  .notes{margin:26px 0 0;padding:0;list-style:none;display:grid;gap:12px;}
+  .notes li{display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:14px;
+    color:var(--ink);}
+  .notes .k{color:var(--io);font-weight:700;font-family:var(--mono);font-size:13px;}
+  .notes code{font-family:var(--mono);font-size:12.5px;background:var(--io-soft);
+    color:var(--io-ink);padding:1px 6px;border-radius:5px;}
+  .foot{margin-top:22px;font-size:12.5px;color:var(--muted);}
+  /* SVG element styling via classes */
+  .frame-rect{fill:none;stroke:var(--frame);stroke-width:1.6;stroke-dasharray:5 5;}
+  .frame-label{fill:var(--muted);font:600 13px var(--sans);letter-spacing:.04em;}
+  .group-rect{fill:none;stroke:var(--line);stroke-width:1.4;}
+  .group-label{fill:var(--muted);font:600 12px var(--sans);letter-spacing:.05em;
+    text-transform:uppercase;}
+  .box-io{fill:var(--io-soft);stroke:var(--io);stroke-width:1.6;}
+  .box-cpu{fill:var(--cpu-soft);stroke:var(--cpu);stroke-width:1.6;}
+  .t-title{font:600 15px var(--sans);}
+  .t-io{fill:var(--io-ink);}
+  .t-cpu{fill:var(--cpu-ink);}
+  .t-sub{font:12px var(--mono);}
+  .t-sub-io{fill:var(--io);}
+  .t-sub-cpu{fill:var(--cpu);}
+  .edge-io{fill:none;stroke:var(--io);stroke-width:2.2;}
+  .edge-cpu{fill:none;stroke:var(--cpu);stroke-width:2.2;}
+  .edge-label{font:600 12px var(--mono);}
+  .el-io{fill:var(--io);} .el-cpu{fill:var(--cpu);}
+  .muted-txt{fill:var(--muted);font:12px var(--sans);}
+  .budget{font:600 14px var(--sans);fill:var(--ink);}
+  .budget em{font-style:normal;}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Deployment · Concurrency vs Parallelism</p>
+    <h1>FastAPI agent server on a 4-core instance</h1>
+    <p class="lede">A mixed workload: most requests are I/O-bound (LLM API calls) and belong on the event loop; a request that spawns a Python executor is CPU-bound and belongs in a separate process. Serve both by splitting the box asymmetrically.</p>
+  </header>
+
+  <div class="board">
+    <svg viewBox="0 0 900 470" role="img" aria-label="Architecture diagram of a FastAPI agent server on a four-core instance">
+      <defs>
+        <marker id="ar-io" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="el-io"/>
+        </marker>
+        <marker id="ar-cpu" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" class="el-cpu"/>
+        </marker>
+      </defs>
+
+      <!-- request chips (left) -->
+      <g>
+        <rect class="box-io" x="14" y="120" width="168" height="66" rx="10"/>
+        <text class="t-title t-io" x="30" y="150">I/O request</text>
+        <text class="t-sub t-sub-io" x="30" y="170">LLM API call</text>
+      </g>
+      <g>
+        <rect class="box-cpu" x="14" y="286" width="168" height="66" rx="10"/>
+        <text class="t-title t-cpu" x="30" y="316">compute request</text>
+        <text class="t-sub t-sub-cpu" x="30" y="336">subagent → executor</text>
+      </g>
+
+      <!-- 4-core instance frame -->
+      <rect class="frame-rect" x="220" y="40" width="662" height="392" rx="14"/>
+      <text class="frame-label" x="240" y="66">4-core instance</text>
+
+      <!-- event-loop group -->
+      <rect class="group-rect" x="244" y="92" width="252" height="300" rx="10"/>
+      <text class="group-label" x="258" y="116">Uvicorn workers · event loops</text>
+      <g>
+        <rect class="box-io" x="266" y="132" width="208" height="72" rx="9"/>
+        <text class="t-title t-io" x="284" y="164">worker 1</text>
+        <text class="t-sub t-sub-io" x="284" y="186">await api()  ·  stays on loop</text>
+      </g>
+      <g>
+        <rect class="box-io" x="266" y="286" width="208" height="72" rx="9"/>
+        <text class="t-title t-io" x="284" y="318">worker 2</text>
+        <text class="t-sub t-sub-io" x="284" y="340">await api()  ·  stays on loop</text>
+      </g>
+      <text class="muted-txt" x="266" y="242">1–2 loops serve hundreds</text>
+      <text class="muted-txt" x="266" y="260">of concurrent awaits</text>
+
+      <!-- executor pool group -->
+      <rect class="group-rect" x="560" y="212" width="298" height="180" rx="10"/>
+      <text class="group-label" x="576" y="236">Executor process pool</text>
+      <g>
+        <rect class="box-cpu" x="578" y="252" width="128" height="58" rx="9"/>
+        <text class="t-title t-cpu" x="596" y="280">proc 1</text>
+        <text class="t-sub t-sub-cpu" x="596" y="299">own GIL</text>
+      </g>
+      <g>
+        <rect class="box-cpu" x="716" y="252" width="128" height="58" rx="9"/>
+        <text class="t-title t-cpu" x="734" y="280">proc 2</text>
+        <text class="t-sub t-sub-cpu" x="734" y="299">own GIL</text>
+      </g>
+      <text class="muted-txt" x="578" y="338">queue · per-task timeout · killable</text>
+      <text class="muted-txt" x="578" y="356">real CPU parallelism</text>
+
+      <!-- edges -->
+      <!-- io request -> worker 1 -->
+      <path class="edge-io" d="M182,153 L260,163" marker-end="url(#ar-io)"/>
+      <!-- compute request -> worker 2 -->
+      <path class="edge-cpu" d="M182,319 L260,321" marker-end="url(#ar-cpu)"/>
+      <!-- worker 2 -> executor pool (run_in_executor) -->
+      <path class="edge-cpu" d="M474,320 C520,320 520,300 554,300" marker-end="url(#ar-cpu)"/>
+      <text class="edge-label el-cpu" x="486" y="292">run_in_executor()</text>
+
+      <!-- core budget strip -->
+      <text class="budget" x="240" y="418"><tspan class="el-io">~2 loop workers</tspan>  +  <tspan class="el-cpu">~2 executor procs</tspan>  ≈  4 cores</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--io)"></span><b>I/O path</b> — stays on the event loop</span>
+    <span><span class="dot" style="background:var(--cpu)"></span><b>CPU path</b> — offloaded to a separate process</span>
+  </div>
+
+  <ul class="notes">
+    <li><span class="k">1</span><span>The loop is <b>never</b> the CPU-bound part. Even on a compute request it only <code>await</code>s the result — the work runs in a distinct process the OS schedules on any free core, so don't pin cores to "loop vs compute".</span></li>
+    <li><span class="k">2</span><span><b>Not four Uvicorn workers.</b> Four event loops is overkill for I/O, and a compute burst then has no dedicated processes — it stalls a loop inline or oversubscribes the cores.</span></li>
+    <li><span class="k">3</span><span><b>Asymmetric split.</b> A few event-loop workers + an executor pool, total processes ≈ cores. Because the server leg is nearly pure I/O, spend most of the box on the executor.</span></li>
+    <li><span class="k">4</span><span><b>Concrete.</b> <code>gunicorn -k uvicorn.workers.UvicornWorker --workers 2</code> + <code>ProcessPoolExecutor(max_workers=2)</code>, with a queue and per-task timeout. Arbitrary code → prefer a killable subprocess per run.</span></li>
+  </ul>
+
+  <p class="foot">Optional: an Nginx reverse proxy in front terminates TLS and buffers slow clients. Containerised, drop Gunicorn and let Kubernetes replicate one-worker pods.</p>
+</div>
