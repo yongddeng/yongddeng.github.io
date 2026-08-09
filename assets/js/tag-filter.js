@@ -17,7 +17,7 @@
 		for (var i = 0; i < filtered.length; i++) {
 			var tagParam = activeTag ? '?tag=' + encodeURIComponent(activeTag) : '';
 			html += '<li><a href="' + filtered[i].url + tagParam + '" title="' + escapeHtml(filtered[i].title) + '">'
-				+ '<img src="/assets/img/file.ico" title="' + escapeHtml(filtered[i].title) + '" />'
+				+ '<img src="/assets/img/' + (filtered[i].icon || 'file.ico') + '" title="' + escapeHtml(filtered[i].title) + '" />'
 				+ escapeHtml(filtered[i].title) + '</a></li>';
 		}
 		html += '</ul>';

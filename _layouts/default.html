@@ -116,6 +116,7 @@
 			{
 				title: {{ post.title | jsonify }},
 				url: {{ post.url | jsonify }},
+				icon: {{ post.icon | default: 'file.ico' | jsonify }},
 				content: {{ post.content | strip_html | truncatewords: 500 | jsonify }},
 				tags: {{ post.tags | jsonify }}
 			}{% unless forloop.last %},{% endunless %}

@@ -40,7 +40,7 @@
 		} else {
 			html += results.length + ' result' + (results.length !== 1 ? 's' : '') + ' found</div><ul>';
 			for (var i = 0; i < results.length; i++) {
-				html += '<li><a href="' + results[i].url + '" data-index="' + i + '"><img src="/assets/img/file.ico" /><span>' + escapeHtml(results[i].title) + '</span></a></li>';
+				html += '<li><a href="' + results[i].url + '" data-index="' + i + '"><img src="/assets/img/' + (results[i].icon || 'file.ico') + '" /><span>' + escapeHtml(results[i].title) + '</span></a></li>';
 			}
 			html += '</ul>';
 		}
