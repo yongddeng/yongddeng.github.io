@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!-- drop shadow / 3d frame -->
+  <rect x="7" y="16" width="21" height="13" fill="#808080"/>
+  <!-- board body -->
+  <rect x="6" y="15" width="21" height="13" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+  <!-- clapper arm (raised) -->
+  <g transform="rotate(-20 7 16)">
+    <rect x="6" y="10" width="22" height="4" fill="#000000"/>
+    <rect x="8"  y="10" width="2" height="4" fill="#ffffff"/>
+    <rect x="13" y="10" width="2" height="4" fill="#ffffff"/>
+    <rect x="18" y="10" width="2" height="4" fill="#ffffff"/>
+    <rect x="23" y="10" width="2" height="4" fill="#ffffff"/>
+    <!-- yellow hinge -->
+    <rect x="6" y="10" width="2" height="2" fill="#ffd800"/>
+    <rect x="4" y="12" width="2" height="2" fill="#ffd800"/>
+  </g>
+  <!-- lower clapper teeth on board top -->
+  <rect x="6" y="15" width="21" height="2" fill="#000000"/>
+  <rect x="8"  y="15" width="2" height="2" fill="#ffffff"/>
+  <rect x="12" y="15" width="2" height="2" fill="#ffffff"/>
+  <rect x="16" y="15" width="2" height="2" fill="#ffffff"/>
+  <rect x="20" y="15" width="2" height="2" fill="#ffffff"/>
+  <rect x="24" y="15" width="2" height="2" fill="#ffffff"/>
+  <!-- countdown 3 2 1 -->
+  <text x="9"  y="26" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#e01010">3</text>
+  <text x="15" y="26" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#1030e0">2</text>
+  <text x="21" y="26" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#10a010">1</text>
+</svg>

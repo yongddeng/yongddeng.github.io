@@ -12,9 +12,6 @@ use_math: true
 
 {%comment%}
  
-- https://www.youtube.com/watch?si=8uSg5V92e4JLOzp6&v=IMceN4_rieo&feature=youtu.be
-- https://www.youtube.com/watch?v=M9HHWFp84f0&t=356s
-- https://www.youtube.com/watch?v=5sw9XJokAqw
 - https://beej.us/guide/bgnet/html/split/                                
 
 
