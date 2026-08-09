@@ -8,7 +8,9 @@
 	function escapeHtml(text) {
 		var div = document.createElement('div');
 		div.textContent = text;
-		return div.innerHTML;
+		// innerHTML escaping leaves double quotes intact, which would break
+		// out of title="..." attributes in renderPostList
+		return div.innerHTML.replace(/"/g, '&quot;');
 	}
 
 	function renderPostList(filtered, activeTag) {
@@ -57,6 +59,16 @@
 		updateObjectCount(posts.length);
 		updateTitleBar(null);
 	}
+
+	// Keep the active tag when closing a post: the layout's close (X) button
+	// links to "/", which would drop the filter and show all posts.
+	function fixCloseLink() {
+		var tag = new URLSearchParams(window.location.search).get('tag');
+		if (!tag) return;
+		var close = document.querySelector('.post_title a[href="/"]');
+		if (close) close.setAttribute('href', '/?tag=' + encodeURIComponent(tag));
+	}
+	fixCloseLink();
 
 	// Save post_list scroll position before navigating away
 	var postListDiv = document.querySelector('.post_list');
@@ -113,6 +125,16 @@
 					wrapper.parentNode.insertBefore(newContent, wrapper.nextSibling);
 				}
 				setStylesheet(true);
+				fixCloseLink();
+				// Scripts inserted via DOMParser are inert; recreate them so
+				// per-post scripts (e.g. the video rows) actually run.
+				newContent.querySelectorAll('script').forEach(function(old) {
+					var s = document.createElement('script');
+					if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
+					old.replaceWith(s);
+				});
+				// Re-wrap §-references in the fresh content (xref.js runs once at load)
+				if (typeof initXrefs === 'function') initXrefs();
 				// Re-run code highlighting
 				newContent.querySelectorAll('pre code').forEach(function(block) {
 					hljs.highlightBlock(block);
@@ -141,6 +163,9 @@
 			// Update page title
 			var newTitle = doc.querySelector('title');
 			if (newTitle) document.title = newTitle.textContent;
+		}).catch(function() {
+			// URL is already pushed; fall back to a normal page load
+			window.location.href = url;
 		});
 	}
 

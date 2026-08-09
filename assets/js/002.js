@@ -4,6 +4,9 @@
 function numbers () {
 	var fields = document.getElementsByTagName("code");
 	for (var field = 0; field < fields.length; field++) {
+		// Only number fenced blocks; splitting inline <code> on newlines
+		// would splice its single line away and blank the text.
+		if (!fields[field].closest("pre")) continue;
 		var num = 0;
 		var select = fields[field].innerHTML;
 		var select_f = select.split(/\n/);

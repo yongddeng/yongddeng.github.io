@@ -11,6 +11,10 @@
   };
 
   var cache = {};
+
+  // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
+  // post content, so this must be callable again, not run-once.
+  window.initXrefs = function () {
   var content = document.querySelector('.post_content');
   if (!content) return;
 
@@ -132,4 +136,7 @@
   content.addEventListener('mouseout', function (e) {
     if (e.target.classList.contains('xref')) hideTip();
   });
+  };
+
+  window.initXrefs();
 })();
