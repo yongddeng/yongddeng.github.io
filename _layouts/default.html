@@ -63,7 +63,7 @@
 				{% if page.title == 'me' or page.title == '404...' %}
 					<ul>
 						{% for post in site.posts %}
-						<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/file.ico" title="{{ post.title }}" />{{ post.title }}</a></li>
+						<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'file.ico' }}" title="{{ post.title }}" />{{ post.title }}</a></li>
 						{% endfor %}
 					</ul>
 				{% else %}
@@ -72,7 +72,7 @@
 			{% else %}
 				<ul>
 					{% for post in site.posts %}
-					<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/file.ico" title="{{ post.title }}" />{{ post.title }}</a></li>
+					<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'file.ico' }}" title="{{ post.title }}" />{{ post.title }}</a></li>
 					{% endfor %}
 				</ul>
 			{% endunless %}
@@ -90,7 +90,7 @@
 	{% if page.title %}
         <div class="content">
 			<div class="post_title">
-				<img src="/assets/img/file.png" />
+				<img src="/assets/img/{{ page.icon | default: 'file.png' }}" />
 				<h1>{{  page.title  }}</h1>
 				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
 				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
