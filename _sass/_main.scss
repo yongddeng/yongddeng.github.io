@@ -4,9 +4,9 @@
 	border-width: 2px;
 	border-style: $style;
 	@if $raised {
-		border-color: #fff8ff #000000 #000000 #fff8ff;
+		border-color: #ffffff #000000 #000000 #ffffff;
 	} @else {
-		border-color: #7f787f #fff8ff #fff8ff #7f787f;
+		border-color: #7f787f #ffffff #ffffff #7f787f;
 	}
 }
 
@@ -14,8 +14,167 @@ body {
 	background: #008082;
 	font-family: sans-serif, serif, monospace;
 	font-size: 13px;
+	padding-bottom: 36px;
+}
+.taskbar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1001;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 4px;
+	background: #c0c0c0;
+	border-top: 2px solid #ffffff;
+
+	button[hidden] {
+		display: none;
+	}
+
+	button {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		height: 24px;
+		padding: 0 8px;
+		font-size: 12px;
+		background: #c0c0c0;
+		@include bevel;
+		cursor: pointer;
+
+		img {
+			width: 16px;
+			height: 16px;
+			image-rendering: pixelated;
+		}
+	}
+
+	button:active {
+		border-color: #000000 #ffffff #ffffff #000000;
+	}
+
+	.task-start {
+		font-weight: bold;
+	}
+
+	.task-win {
+		width: 160px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		display: block;
+		text-align: left;
+		line-height: 20px;
+	}
+
+	.task-win.active {
+		border-color: #000000 #ffffff #ffffff #000000;
+		background: #dadada;
+		font-weight: bold;
+	}
+
+	.task-start-wrap {
+		position: relative;
+	}
+
+	.task-menu {
+		display: none;
+		position: absolute;
+		bottom: 100%;
+		left: 0;
+		margin-bottom: 4px;
+		min-width: 150px;
+		background: #c0c0c0;
+		@include bevel;
+
+		a {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 6px 14px;
+			font-size: 13px;
+			color: #000000;
+			text-decoration: none;
+			white-space: nowrap;
+
+			img {
+				width: 20px;
+				height: 20px;
+			}
+		}
+
+		a:hover {
+			background: #000080;
+			color: #ffffff;
+		}
+
+		.task-menu-sep {
+			margin: 3px 2px;
+			border-top: 1px solid #7f787f;
+			border-bottom: 1px solid #ffffff;
+		}
+
+		.task-menu-fine {
+			font-size: 11px;
+			color: #55505a;
+		}
+	}
+
+	.task-menu.open {
+		display: block;
+	}
+
+	.task-clock {
+		margin-left: auto;
+		padding: 3px 10px;
+		font-size: 12px;
+		@include bevel(false);
+	}
 }
 
+.desktop-icons {
+	position: fixed;
+	left: 8px;
+	top: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 26px;
+
+	// Needs a ~100px column left of the 800px window
+	@media (max-width: 909px) {
+		display: none;
+	}
+
+	a {
+		width: 84px;
+		text-align: center;
+		text-decoration: none;
+
+		img {
+			width: 32px;
+			height: 32px;
+			image-rendering: pixelated;
+			filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.45));
+		}
+
+		span {
+			display: inline-block;
+			margin-top: 4px;
+			padding: 1px 3px;
+			font-size: 12px;
+			color: #ffffff;
+			text-shadow: 1px 1px 0 #000000;
+			border: 1px dotted transparent;
+		}
+
+		&:hover span {
+			background: #000080;
+			border-color: #ffff00;
+		}
+	}
+}
 .wrapper, .content {
 	width: 800px;
 	margin: auto;
@@ -23,6 +182,12 @@ body {
 	background: #bfb8bf;
 	@include bevel;
 	padding: 2px 0;
+
+	// While the desktop-icon column is visible, anchor windows
+	// left of centre like a real Win98 desktop
+	@media (min-width: 910px) and (max-width: 1100px) {
+		margin-left: 100px;
+	}
 }
 .default_title, .post_title {
 	padding: 2px 4px 3px 4px;
@@ -39,6 +204,22 @@ body {
 		width: 14px;
 		height: 14px;
 		margin: 0 3px 0 0;
+		image-rendering: pixelated;
+	}
+}
+.default_title .btn {
+	background: #cccccc;
+	width: 13px;
+	height: 11px;
+	float: right;
+	@include bevel;
+	cursor: pointer;
+
+	span {
+		font-size: 11px;
+		position: relative;
+		left: 2px;
+		top: -2px;
 	}
 }
 .post_title {
@@ -89,6 +270,9 @@ ul.topbar {
 	padding: 0 10px;
 	margin: 3px 0 3px 0;
 	position: relative;
+	// The search box is absolutely positioned; keep the row from
+	// collapsing now that it can be the only child
+	min-height: 20px;
 
 	li {
 		display: inline-block;
@@ -99,22 +283,81 @@ ul.topbar {
 		color: #000000;
 	}
 
-	.search-container {
-		position: absolute;
-		right: 10px;
-		top: 0;
-		margin: 0;
-	}
 }
 .post_list, .tag_list, .post_content {
-	background: #fff8ff;
+	background: #fbfafb;
 	@include bevel(false, ridge groove groove ridge);
+}
+// Tag views are plain folders: files only, no drive tree
+.wrapper.folder-view {
+	.tag_list {
+		display: none;
+	}
+	.post_list {
+		width: 99%;
+	}
+}
+// Standalone folder window spawned by a desktop tag icon
+.folder-win {
+	width: 640px;
+
+	.post_content {
+		height: 320px;
+
+		ul {
+			list-style: none;
+			margin: 0;
+			padding: 4px;
+
+			li {
+				display: inline-block;
+				margin: 10px;
+				max-width: 16ch;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				text-align: center;
+
+				img {
+					display: block;
+					width: 32px;
+					height: 32px;
+					margin: 0 auto 8px;
+					image-rendering: pixelated;
+				}
+
+				a {
+					text-decoration: none;
+					color: #000000;
+
+					span {
+						padding: 1px 3px;
+						border: 1px dotted transparent;
+					}
+
+					&:hover span {
+						background: #000080;
+						color: #ffffff;
+						border-color: #ffff00;
+					}
+				}
+			}
+		}
+	}
+
+	.folder-status {
+		margin: 0 2px 2px;
+		font-size: 12px;
+		padding: 1px 6px;
+		border: 1px solid;
+		border-color: #888888 #dadada #dadada #888888;
+	}
 }
 .post_list {
 	width: 70.2%;
 	margin: 0 auto;
-	min-height: 180px;
-	max-height: 180px;
+	min-height: 280px;
+	max-height: 280px;
 	overflow-y: scroll;
 	display: inline-block;
 
@@ -132,13 +375,27 @@ ul.topbar {
 
 			img {
 				display: block;
+				width: 32px;
+				height: 32px;
 				margin: 0 auto;
 				margin-bottom: 8px;
+				image-rendering: pixelated;
 			}
 
 			a {
 				text-decoration: none;
 				color: #000000;
+
+				span {
+					padding: 1px 3px;
+					border: 1px dotted transparent;
+				}
+
+				&:hover span {
+					background: #000080;
+					color: #ffffff;
+					border-color: #ffff00;
+				}
 			}
 		}
 	}
@@ -146,8 +403,8 @@ ul.topbar {
 .tag_list {
 	width: 28%;
 	margin: 0 auto;
-	min-height: 180px;
-	max-height: 180px;
+	min-height: 280px;
+	max-height: 280px;
 	overflow-y: scroll;
 	display: inline-block;
 
@@ -170,6 +427,19 @@ ul.topbar {
 			white-space: nowrap;
 		}
 	}
+
+	// Search sits above the drive tree; its results render inline
+	// in the pane instead of as an overlay
+	.search_box {
+		margin: 6px 6px 8px;
+	}
+
+	.search-results {
+		position: static;
+		width: auto;
+		box-shadow: none;
+		margin-top: 3px;
+	}
 }
 #tag-list {
     background:transparent url(/assets/img/pixel-alt.png) repeat-y 15px 0;
@@ -183,7 +453,7 @@ ul.topbar {
     }
 }
 #tag-list li a {
-    background: #fff8ff;
+    background: #fbfafb;
     display:block;
 }
 #tag-list li ul li {
@@ -207,11 +477,35 @@ ul.topbar {
 		margin-right: 2px;
 	}
 }
+.content {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	min-width: 420px;
+	min-height: 300px;
+}
+// Win95 corner grip: sits above the content pane's scrollbar corner,
+// which swallows the browser-native resize handle
+.win-grip {
+	position: absolute;
+	right: 2px;
+	bottom: 2px;
+	width: 16px;
+	height: 16px;
+	z-index: 5;
+	cursor: nwse-resize;
+	background: linear-gradient(315deg,
+		#7f787f 0 2px, #ffffff 2px 4px, transparent 4px 6px,
+		#7f787f 6px 8px, #ffffff 8px 10px, transparent 10px 12px,
+		#7f787f 12px 14px, #ffffff 14px 16px, transparent 16px);
+}
 .post_content {
 	position: relative;
 	width: 98.5%;
-	min-height: 600px;
-	max-height: 600px;
+	height: 520px;
+	flex: 1 1 auto;
+	min-height: 0;
 	padding: 2px;
 	margin: 0 auto;
 	overflow-y: scroll;
@@ -302,7 +596,7 @@ ul.topbar {
 	}
 }
 .hljs {
-	background: #fff8ff;
+	background: #fbfafb;
 }
 pre code.numbered {
 	counter-reset: line;
@@ -345,24 +639,39 @@ pre code.numbered {
 }
 .search_box {
 	position: relative;
-	display: inline-block;
-	vertical-align: middle;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 3px;
 
 	input {
-		width: 140px;
+		flex: 1;
 		padding: 1px 3px;
 		@include bevel(false);
-		background: #fff8ff;
+		background: #fbfafb;
 		font-size: 12px;
 		font-family: sans-serif, serif, monospace;
 		line-height: 1;
 		height: 16px;
 		box-sizing: border-box;
-		vertical-align: middle;
 
 		&:focus {
 			outline: none;
 		}
+	}
+
+	#search-toggle {
+		width: 22px;
+		height: 18px;
+		padding: 0;
+		font-size: 10px;
+		background: #c0c0c0;
+		@include bevel;
+		cursor: pointer;
+	}
+
+	#search-toggle:active {
+		border-color: #000000 #ffffff #ffffff #000000;
 	}
 	
 	.search-results {
@@ -373,7 +682,7 @@ pre code.numbered {
 		width: 300px;
 		max-height: 400px;
 		overflow-y: auto;
-		background: #fff8ff;
+		background: #fbfafb;
 		@include bevel;
 		margin-top: 2px;
 		z-index: 1000;
@@ -609,7 +918,7 @@ pre code.numbered {
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 8px 12px;
-	background: #fff8ff;
+	background: #fbfafb;
 	font-size: 13px;
 
 	p { line-height: 150%; margin-bottom: 15px; }

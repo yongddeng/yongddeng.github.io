@@ -3,6 +3,13 @@
 	var searchResults = document.getElementById('search-results');
 	
 	if (!searchInput || !searchResults) return;
+
+	var searchToggle = document.getElementById('search-toggle');
+	if (searchToggle) {
+		searchToggle.addEventListener('click', function() {
+			searchInput.focus();
+		});
+	}
 	
 	var posts = window.searchIndex || [];
 	var currentResults = [];
@@ -40,7 +47,7 @@
 		} else {
 			html += results.length + ' result' + (results.length !== 1 ? 's' : '') + ' found</div><ul>';
 			for (var i = 0; i < results.length; i++) {
-				html += '<li><a href="' + results[i].url + '" data-index="' + i + '"><img src="/assets/img/' + (results[i].icon || 'file.ico') + '" /><span>' + escapeHtml(results[i].title) + '</span></a></li>';
+				html += '<li><a href="' + results[i].url + '" data-index="' + i + '"><img src="/assets/img/' + (results[i].icon || 'notepad.png') + '" /><span>' + escapeHtml(results[i].title) + '</span></a></li>';
 			}
 			html += '</ul>';
 		}

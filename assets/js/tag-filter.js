@@ -19,8 +19,8 @@
 		for (var i = 0; i < filtered.length; i++) {
 			var tagParam = activeTag ? '?tag=' + encodeURIComponent(activeTag) : '';
 			html += '<li><a href="' + filtered[i].url + tagParam + '" title="' + escapeHtml(filtered[i].title) + '">'
-				+ '<img src="/assets/img/' + (filtered[i].icon || 'file.ico') + '" title="' + escapeHtml(filtered[i].title) + '" />'
-				+ escapeHtml(filtered[i].title) + '</a></li>';
+				+ '<img src="/assets/img/' + (filtered[i].icon || 'notepad.png') + '" title="' + escapeHtml(filtered[i].title) + '" />'
+				+ '<span>' + escapeHtml(filtered[i].title) + '</span></a></li>';
 		}
 		html += '</ul>';
 		postListDiv.innerHTML = html;
@@ -52,12 +52,82 @@
 		renderPostList(filtered, tagName);
 		updateObjectCount(filtered.length);
 		updateTitleBar(tagName);
+		// A tag view is a plain folder: files only, no drive tree
+		document.querySelector('.wrapper').classList.add('folder-view');
 	}
 
 	function showAllPosts() {
 		renderPostList(posts, null);
 		updateObjectCount(posts.length);
 		updateTitleBar(null);
+		document.querySelector('.wrapper').classList.remove('folder-view');
+	}
+
+	// A tag folder opens as its own window (files only, no drive tree),
+	// coexisting with the My Computer explorer
+	function openFolderWindow(tagName) {
+		var existing = document.querySelector('.folder-win[data-tag="' + tagName + '"]');
+		if (existing) {
+			existing.dispatchEvent(new MouseEvent('mousedown'));
+			return;
+		}
+		var filtered = posts.filter(function(post) {
+			return post.tags.some(function(t) {
+				return t.toLowerCase().replace(/\s+/g, '-') === tagName.toLowerCase();
+			});
+		});
+		var items = '';
+		for (var i = 0; i < filtered.length; i++) {
+			items += '<li><a href="' + filtered[i].url + '" title="' + escapeHtml(filtered[i].title) + '">'
+				+ '<img src="/assets/img/' + (filtered[i].icon || 'notepad.png') + '" />'
+				+ '<span>' + escapeHtml(filtered[i].title) + '</span></a></li>';
+		}
+		var win = document.createElement('div');
+		win.className = 'content folder-win';
+		win.setAttribute('data-tag', tagName);
+		win.innerHTML =
+			'<div class="post_title"><img src="/assets/img/folder.ico" /><h1>' + escapeHtml(tagName) + '</h1>'
+			+ '<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a></div>'
+			+ '<div class="post_content"><ul>' + items + '</ul></div>'
+			+ '<div class="folder-status">' + filtered.length + ' object(s)</div>'
+			+ '<div class="win-grip"></div>';
+		document.body.insertBefore(win, document.querySelector('.taskbar'));
+		win.querySelector('ul').addEventListener('click', function(e) {
+			var link = e.target.closest('a');
+			if (!link) return;
+			e.preventDefault();
+			var href = link.getAttribute('href');
+			history.pushState(null, '', href);
+			loadPost(href);
+		});
+		placeWindow(win);
+		// 001.js picks it up (drag/raise/close/resize), taskbar adds a button
+		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+		win.dispatchEvent(new MouseEvent('mousedown'));
+	}
+
+	// Desktop icons: My Computer opens the full drive view, a tag icon
+	// opens that folder's own window
+	var desktopIcons = document.querySelector('.desktop-icons');
+	if (desktopIcons) {
+		desktopIcons.addEventListener('click', function(e) {
+			var link = e.target.closest('a');
+			if (!link) return;
+			var href = link.getAttribute('href');
+			var wrapper = document.querySelector('.wrapper');
+			var tagMatch = href && href.match(/^\/\?tag=([^&]+)/);
+			if (tagMatch) {
+				e.preventDefault();
+				openFolderWindow(decodeURIComponent(tagMatch[1]));
+			} else if (href === '/') {
+				e.preventDefault();
+				var wasHidden = wrapper.style.display === 'none';
+				wrapper.style.display = '';
+				showAllPosts();
+				if (wasHidden) placeWindow(wrapper);
+				wrapper.dispatchEvent(new MouseEvent('mousedown'));
+			}
+		});
 	}
 
 	// Keep the active tag when closing a post: the layout's close (X) button
@@ -69,6 +139,19 @@
 		if (close) close.setAttribute('href', '/?tag=' + encodeURIComponent(tag));
 	}
 	fixCloseLink();
+
+	// IE4 "web style" selection: hovering an icon reports it in the
+	// status bar (the right segment is otherwise a blank placeholder)
+	var statusRight = document.querySelector('.post_total .right');
+	if (statusRight) {
+		document.querySelector('.post_list').addEventListener('mouseover', function(e) {
+			var link = e.target.closest('a');
+			if (link) statusRight.textContent = link.getAttribute('title') || '';
+		});
+		document.querySelector('.post_list').addEventListener('mouseout', function() {
+			statusRight.innerHTML = '&nbsp;';
+		});
+	}
 
 	// Save post_list scroll position before navigating away
 	var postListDiv = document.querySelector('.post_list');
@@ -109,21 +192,68 @@
 		}
 	}
 
-	// SPA-like navigation: intercept post link clicks to avoid full page reload
+	// Closing the last post window (X button, handled in 001.js) must
+	// revert the title-bar stylesheet to the index look
+	document.addEventListener('content:swapped', function() {
+		if (!document.querySelector('.content')) setStylesheet(false);
+	});
+
+	// Place a freshly opened window like the OS would: try random spots
+	// and keep the one overlapping the open windows least (zero if it can)
+	function placeWindow(win) {
+		var others = [];
+		var wrapper = document.querySelector('.wrapper');
+		if (wrapper && wrapper !== win && wrapper.style.display !== 'none') others.push(wrapper.getBoundingClientRect());
+		document.querySelectorAll('.content').forEach(function(w) {
+			if (w !== win) others.push(w.getBoundingClientRect());
+		});
+		var ww = win.offsetWidth, wh = win.offsetHeight;
+		// Never cover the desktop-icon column
+		var icons = document.querySelector('.desktop-icons');
+		var minX = 0;
+		if (icons && getComputedStyle(icons).display !== 'none') {
+			minX = icons.getBoundingClientRect().right + 10;
+		}
+		var maxX = Math.max(minX, window.innerWidth - ww - 20);
+		var maxY = Math.max(40, window.innerHeight - wh - 60);
+		function overlap(x, y) {
+			var area = 0;
+			others.forEach(function(r) {
+				area += Math.max(0, Math.min(x + ww, r.right) - Math.max(x, r.left)) *
+					Math.max(0, Math.min(y + wh, r.bottom) - Math.max(y, r.top));
+			});
+			return area;
+		}
+		var best = null;
+		for (var i = 0; i < 12; i++) {
+			var x = minX + Math.round(Math.random() * (maxX - minX));
+			var y = 30 + Math.round(Math.random() * (maxY - 30));
+			var a = overlap(x, y);
+			if (!best || a < best.a) best = { x: x, y: y, a: a };
+			if (a === 0) break;
+		}
+		win.style.position = 'absolute';
+		win.style.margin = '0';
+		win.style.left = (best.x + window.scrollX) + 'px';
+		win.style.top = (best.y + window.scrollY) + 'px';
+	}
+
+	// SPA-like navigation: intercept post link clicks to avoid full page
+	// reload. Up to three post windows stay open; a fourth replaces the oldest.
 	function loadPost(url) {
 		fetch(url).then(function(res) { return res.text(); }).then(function(html) {
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(html, 'text/html');
 			var newContent = doc.querySelector('.content');
-			var oldContent = document.querySelector('.content');
+			var open = Array.prototype.slice.call(document.querySelectorAll('.content'));
 			if (newContent) {
-				if (oldContent) {
-					oldContent.replaceWith(newContent);
+				if (open.length >= 3) {
+					open[0].replaceWith(newContent);
 				} else {
-					// Insert before the searchIndex script
-					var wrapper = document.querySelector('.wrapper');
-					wrapper.parentNode.insertBefore(newContent, wrapper.nextSibling);
+					var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
+					anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				}
+				placeWindow(newContent);
 				setStylesheet(true);
 				fixCloseLink();
 				// Scripts inserted via DOMParser are inert; recreate them so
@@ -151,9 +281,10 @@
 				}
 				typesetMathJax();
 			} else {
-				// Navigated back to an index/tag page: close the open post.
-				if (oldContent) oldContent.remove();
+				// Navigated back to an index/tag page: close all post windows.
+				open.forEach(function(w) { w.remove(); });
 				setStylesheet(false);
+				document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 			}
 			// Update page title
 			var newTitle = doc.querySelector('title');

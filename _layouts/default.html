@@ -21,17 +21,23 @@
 	{% include mathjax.html %}
 </head>
 <body>
+	<div class="desktop-icons">
+		<a href="/"><img src="/assets/img/mycomputer.png" alt="" /><span>My Computer</span></a>
+		<a href="/?tag=cs600"><img src="/assets/img/folder.ico" alt="" /><span>cs600</span></a>
+		<a href="/20260109/videos"><img src="/assets/img/video.svg" alt="" /><span>699. videos</span></a>
+	</div>
 	<div class="wrapper">
 		<div class="default_title">
 			<img src="/assets/img/mycomputer.png" />
+			<div class="btn" id="desktop-close"><span class="fa fa-times"></span></div>
 			{% if page.tag %}
 				<h1>{{ page.tag }}</h1>
 			{% else %}
 				<h1>{{ site.name }}</h1>
 			{% endif %}
 		</div>
-		{% include topbar.html %}
 		<div class="tag_list">
+			{% include search.html %}
 			<ul id="tag-list">
 				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
 			<ul>
@@ -63,7 +69,7 @@
 				{% if page.title == 'me' or page.title == '404...' %}
 					<ul>
 						{% for post in site.posts %}
-						<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'file.ico' }}" title="{{ post.title }}" />{{ post.title }}</a></li>
+						<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span>{{ post.title }}</span></a></li>
 						{% endfor %}
 					</ul>
 				{% else %}
@@ -72,12 +78,22 @@
 			{% else %}
 				<ul>
 					{% for post in site.posts %}
-					<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'file.ico' }}" title="{{ post.title }}" />{{ post.title }}</a></li>
+					<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span>{{ post.title }}</span></a></li>
 					{% endfor %}
 				</ul>
 			{% endunless %}
 		</div>
-		<script>if(location.search.indexOf('tag=')!==-1){document.querySelector('.post_list').style.visibility='hidden'}</script>
+		<script>
+		// Pre-render decisions: hide the list until the tag filter runs, and
+		// land on a bare desktop when the icons are there to reopen things
+		(function () {
+			if (location.search.indexOf('tag=') !== -1) {
+				document.querySelector('.post_list').style.visibility = 'hidden';
+			} else if (window.matchMedia('(min-width: 910px)').matches) {
+				document.querySelector('.wrapper').style.display = 'none';
+			}
+		})();
+	</script>
 		<div class="post_total">
 			{% if page.tag %}
 				<div class="left">{{ site.tags[page.tag] | size }} object(s)</div>
@@ -90,7 +106,7 @@
 	{% if page.title %}
         <div class="content">
 			<div class="post_title">
-				<img src="/assets/img/{{ page.icon | default: 'file.png' }}" />
+				<img src="/assets/img/{{ page.icon | default: 'notepad.png' }}" />
 				<h1>{{  page.title  }}</h1>
 				<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a>
 				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
@@ -105,6 +121,7 @@
 					{% include comment.html %}
 				{% endif %}
 			</div>
+			<div class="win-grip"></div>
 		</div>
     {% endif %}
 	<script>
@@ -116,7 +133,7 @@
 			{
 				title: {{ post.title | jsonify }},
 				url: {{ post.url | jsonify }},
-				icon: {{ post.icon | default: 'file.ico' | jsonify }},
+				icon: {{ post.icon | default: 'notepad.png' | jsonify }},
 				content: {{ post.content | strip_html | truncatewords: 500 | jsonify }},
 				tags: {{ post.tags | jsonify }}
 			}{% unless forloop.last %},{% endunless %}
@@ -128,8 +145,20 @@
 	<script src="/assets/js/search.js"></script>
 	<script src="/assets/js/tag-filter.js"></script>
 	<script src="/assets/js/xref.js"></script>
-	<div class="footer">
-		<p>Code licensed under <a href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">MIT License</a></p>
+	<div class="taskbar">
+		<div class="task-start-wrap">
+			<button class="task-start" id="task-start"><img src="/assets/img/mycomputer.png" alt="" />Start</button>
+			<div class="task-menu" id="task-menu">
+				<a href="/me"><img src="/assets/img/aboutme.png" alt="" />About</a>
+				<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><img src="/assets/img/linkedin.webp" alt="" />LinkedIn</a>
+				<div class="task-menu-sep"></div>
+				<a class="task-menu-fine" href="https://github.com/h01000110/h01000110.github.io/blob/master/LICENSE" target="_blank">Code licensed under MIT</a>
+			</div>
+		</div>
+		<button class="task-win" id="task-desktop"><img src="/assets/img/mycomputer.png" alt="" />{{ site.name }}</button>
+		<span id="task-posts" style="display: flex; gap: 4px;"></span>
+		<span class="task-clock" id="task-clock"></span>
 	</div>
+	<script src="/assets/js/taskbar.js"></script>
 </body>
 </html>

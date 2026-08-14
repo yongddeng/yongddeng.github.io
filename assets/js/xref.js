@@ -13,10 +13,15 @@
   var cache = {};
 
   // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
-  // post content, so this must be callable again, not run-once.
+  // post content, so this must be callable again, not run-once. Walks
+  // every open post window; each is set up exactly once.
   function initXrefs() {
-  var content = document.querySelector('.post_content');
-  if (!content) return;
+    document.querySelectorAll('.post_content').forEach(function (c) {
+      if (!c.dataset.xref) { c.dataset.xref = '1'; setupContent(c); }
+    });
+  }
+
+  function setupContent(content) {
 
   // Wrap §4XX and §4XX#section occurrences in <span> elements
   var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
