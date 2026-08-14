@@ -106,7 +106,7 @@
 		<div class="win-grip"></div>
 	</div>
 	{% if page.title %}
-        <div class="content{% if page.winclass %} {{ page.winclass }}{% endif %}">
+        <div class="content{% if page.winclass %} {{ page.winclass }}{% endif %}" data-url="{{ page.url }}">
 			<div class="post_title">
 				<img src="/assets/img/{{ page.icon | default: 'notepad.png' }}" />
 				<h1>{{  page.title  }}</h1>

@@ -133,12 +133,13 @@
 		if (max) max.addEventListener("click", function () { maximize(content); });
 		if (min) min.addEventListener("click", function () { minimize(content); });
 
-		// X closes just this window; navigation only if it was the last one
+		// X closes just this window; when the last one goes, restore the
+		// desktop title and (only off "/") a clean URL
 		if (close) close.addEventListener("click", function (e) {
 			e.preventDefault();
 			content.remove();
 			if (!document.querySelector(".content")) {
-				history.pushState(null, "", "/");
+				if (location.pathname !== "/") history.pushState(null, "", "/");
 				document.title = document.querySelector(".default_title h1").textContent;
 			}
 			document.dispatchEvent(new CustomEvent("content:swapped", { detail: {} }));
@@ -152,9 +153,13 @@
 	function init () {
 		initWrapper();
 		document.querySelectorAll(".content").forEach(initWindow);
-		// Newest window (or the explorer, alone on load) starts focused
-		var wins = document.querySelectorAll(".content");
-		var front = wins.length ? wins[wins.length - 1] : document.querySelector(".wrapper");
+		// Focus whichever window is in front (highest z), so closing a
+		// background window never steals focus
+		var front = null, frontZ = -1;
+		document.querySelectorAll(".wrapper, .content").forEach(function (w) {
+			var z = parseInt(w.style.zIndex, 10) || 0;
+			if (w.style.display !== "none" && z >= frontZ) { frontZ = z; front = w; }
+		});
 		if (front) focusEl(front);
 	}
 

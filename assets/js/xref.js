@@ -23,12 +23,12 @@
 
   function setupContent(content) {
 
-  // Wrap §4XX and §4XX#section occurrences in <span> elements
-  var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
-  var nodes = [];
-  while (walker.nextNode()) nodes.push(walker.currentNode);
+    // Wrap §4XX and §4XX#section occurrences in <span> elements
+    var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
 
-  nodes.forEach(function (node) {
+    nodes.forEach(function (node) {
     if (/§\d{3}/.test(node.textContent)) {
       var frag = document.createDocumentFragment();
       var parts = node.textContent.split(/(§\d{3}(?:#[\d.]+)?)/);
@@ -47,10 +47,10 @@
       });
       node.parentNode.replaceChild(frag, node);
     }
-  });
+    });
 
-  // Fetch and cache post content
-  function fetchPost(id, cb) {
+    // Fetch and cache post content
+    function fetchPost(id, cb) {
     if (cache[id]) return cb(cache[id]);
     fetch(refs[id].url)
       .then(function (r) { return r.text(); })

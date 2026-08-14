@@ -129,16 +129,6 @@
 		});
 	}
 
-	// Keep the active tag when closing a post: the layout's close (X) button
-	// links to "/", which would drop the filter and show all posts.
-	function fixCloseLink() {
-		var tag = new URLSearchParams(window.location.search).get('tag');
-		if (!tag) return;
-		var close = document.querySelector('.post_title a[href="/"]');
-		if (close) close.setAttribute('href', '/?tag=' + encodeURIComponent(tag));
-	}
-	fixCloseLink();
-
 	// IE4 "web style" selection: hovering an icon reports its full path
 	// in the status bar (the right segment is otherwise a blank placeholder)
 	function pathFor(link) {
@@ -189,26 +179,6 @@
 		sessionStorage.removeItem('postListScrollTop');
 	}
 
-	// Swap the title-bar stylesheet to match the page kind. The layout loads
-	// 001.css on index/tag pages (default_title = navy) and 002.css on post
-	// pages (default_title = grey, post_title = navy). SPA navigation only
-	// swaps .content, so without this the post_title would inherit the grey
-	// wrapper background.
-	function setStylesheet(toPost) {
-		var link = document.querySelector('link[href$="/assets/css/001.css"], link[href$="/assets/css/002.css"]');
-		if (!link) return;
-		var target = toPost ? '/assets/css/002.css' : '/assets/css/001.css';
-		if (link.getAttribute('href') !== target) {
-			link.setAttribute('href', target);
-		}
-	}
-
-	// Closing the last post window (X button, handled in 001.js) must
-	// revert the title-bar stylesheet to the index look
-	document.addEventListener('content:swapped', function() {
-		if (!document.querySelector('.content')) setStylesheet(false);
-	});
-
 	// Place a freshly opened window like the OS would: try random spots
 	// and keep the one overlapping the open windows least (zero if it can)
 	function placeWindow(win) {
@@ -252,7 +222,9 @@
 	// SPA-like navigation: intercept post link clicks to avoid full page
 	// reload. Up to three post windows stay open; a fourth replaces the oldest.
 	function loadPost(url) {
-		var dup = document.querySelector('.content[data-url="' + url + '"]');
+		// One window per post: ?tag= variants of the same URL are the same post
+		var key = url.split('?')[0];
+		var dup = document.querySelector('.content[data-url="' + key + '"]');
 		if (dup) {
 			dup.dispatchEvent(new MouseEvent('mousedown'));
 			return;
@@ -269,10 +241,8 @@
 					var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
 					anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				}
-				newContent.setAttribute('data-url', url);
+				newContent.setAttribute('data-url', key);
 				placeWindow(newContent);
-				setStylesheet(true);
-				fixCloseLink();
 				// Scripts inserted via DOMParser are inert; recreate them so
 				// per-post scripts (e.g. the video rows) actually run.
 				newContent.querySelectorAll('script').forEach(function(old) {
@@ -300,14 +270,13 @@
 			} else {
 				// Navigated back to an index/tag page: close all post windows.
 				open.forEach(function(w) { w.remove(); });
-				setStylesheet(false);
 				document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 			}
 			// Update page title
 			var newTitle = doc.querySelector('title');
 			if (newTitle) document.title = newTitle.textContent;
 		}).catch(function() {
-			// URL is already pushed; fall back to a normal page load
+			// Network/parse trouble: fall back to a normal page load
 			window.location.href = url;
 		});
 	}

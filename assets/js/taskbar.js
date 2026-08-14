@@ -23,8 +23,8 @@
 		startMenu.classList.remove('open');
 	});
 
-	// One button per open window: the explorer (closable) and up to two
-	// post windows (SPA swaps included)
+	// One button per open window: the explorer (closable) and up to
+	// three post windows (SPA swaps included)
 	var wrapper = document.querySelector('.wrapper');
 	function syncWindows() {
 		var wins = document.querySelectorAll('.content');
@@ -73,9 +73,5 @@
 	desktopBtn.addEventListener('click', function () {
 		wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 		wrapper.dispatchEvent(new MouseEvent('mousedown'));
-	});
-	postBtn.addEventListener('click', function () {
-		var content = document.querySelector('.content');
-		if (content) content.scrollIntoView({ behavior: 'smooth' });
 	});
 })();
