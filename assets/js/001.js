@@ -25,11 +25,19 @@
 		}
 	}
 
-	// Click anywhere brings the window to the front
+	// Click anywhere brings the window to the front; only the front
+	// window's title bar renders navy
+	function focusEl (el) {
+		el.style.zIndex = ++zTop;
+		document.querySelectorAll(".wrapper, .content").forEach(function (w) {
+			w.classList.toggle("active-win", w === el);
+		});
+		document.dispatchEvent(new CustomEvent("window:focused"));
+	}
+
 	function raisable (el) {
 		el.addEventListener("mousedown", function () {
-			el.style.zIndex = ++zTop;
-			document.dispatchEvent(new CustomEvent("window:focused"));
+			focusEl(el);
 		});
 	}
 
@@ -59,6 +67,34 @@
 		});
 	}
 
+	// Resize from the corner grip; onResize (optional) runs per move.
+	// Double-clicking the grip restores the window's default size.
+	function resizable (el, onResize, onReset) {
+		var grip = el.querySelector(".win-grip");
+		if (!grip) return;
+		grip.addEventListener("dblclick", function () {
+			el.style.width = "";
+			el.style.height = "";
+			if (onReset) onReset();
+		});
+		grip.addEventListener("mousedown", function (e) {
+			var sw = el.offsetWidth, sh = el.offsetHeight;
+			var sx = e.clientX, sy = e.clientY;
+			function move (ev) {
+				el.style.width = Math.max(420, sw + ev.clientX - sx) + "px";
+				el.style.height = Math.max(300, sh + ev.clientY - sy) + "px";
+				if (onResize) onResize();
+			}
+			function up () {
+				document.removeEventListener("mousemove", move);
+				document.removeEventListener("mouseup", up);
+			}
+			document.addEventListener("mousemove", move);
+			document.addEventListener("mouseup", up);
+			e.preventDefault();
+		});
+	}
+
 	function initWrapper () {
 		var wrapper = document.querySelector(".wrapper");
 		if (!wrapper || wrapper.dataset.win) return;
@@ -67,6 +103,21 @@
 		raisable(wrapper);
 		var tbar = wrapper.querySelector(".default_title");
 		if (tbar) dragify(wrapper, tbar);
+		// The tree and file panes stretch to fill the resized window
+		resizable(wrapper, function () {
+			var chrome = wrapper.querySelector(".default_title").offsetHeight +
+				wrapper.querySelector(".post_total").offsetHeight + 14;
+			var h = Math.max(120, wrapper.clientHeight - chrome);
+			wrapper.querySelectorAll(".tag_list, .post_list").forEach(function (p) {
+				p.style.minHeight = h + "px";
+				p.style.maxHeight = h + "px";
+			});
+		}, function () {
+			wrapper.querySelectorAll(".tag_list, .post_list").forEach(function (p) {
+				p.style.minHeight = "";
+				p.style.maxHeight = "";
+			});
+		});
 	}
 
 	function initWindow (content) {
@@ -78,7 +129,6 @@
 		var max = content.querySelector(".btn_max");
 		var min = content.querySelector(".btn_min");
 		var close = tbar ? tbar.querySelector("a") : null;
-		var grip = content.querySelector(".win-grip");
 
 		if (max) max.addEventListener("click", function () { maximize(content); });
 		if (min) min.addEventListener("click", function () { minimize(content); });
@@ -96,28 +146,16 @@
 
 		raisable(content);
 		if (tbar) dragify(content, tbar);
-
-		// Resize from the corner grip
-		if (grip) grip.addEventListener("mousedown", function (e) {
-			var sw = content.offsetWidth, sh = content.offsetHeight;
-			var sx = e.clientX, sy = e.clientY;
-			function move (ev) {
-				content.style.width = Math.max(420, sw + ev.clientX - sx) + "px";
-				content.style.height = Math.max(300, sh + ev.clientY - sy) + "px";
-			}
-			function up () {
-				document.removeEventListener("mousemove", move);
-				document.removeEventListener("mouseup", up);
-			}
-			document.addEventListener("mousemove", move);
-			document.addEventListener("mouseup", up);
-			e.preventDefault();
-		});
+		resizable(content);
 	}
 
 	function init () {
 		initWrapper();
 		document.querySelectorAll(".content").forEach(initWindow);
+		// Newest window (or the explorer, alone on load) starts focused
+		var wins = document.querySelectorAll(".content");
+		var front = wins.length ? wins[wins.length - 1] : document.querySelector(".wrapper");
+		if (front) focusEl(front);
 	}
 
 	init();

@@ -42,7 +42,14 @@
 			if (!h1) return;
 			var b = document.createElement('button');
 			b.className = 'task-win' + (win === front ? ' active' : '');
-			b.textContent = h1.textContent;
+			var icon = win.querySelector('.post_title img');
+			if (icon) {
+				var i = document.createElement('img');
+				i.src = icon.getAttribute('src');
+				i.alt = '';
+				b.appendChild(i);
+			}
+			b.appendChild(document.createTextNode(h1.textContent));
 			b.addEventListener('click', function () {
 				win.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 				win.dispatchEvent(new MouseEvent('mousedown'));

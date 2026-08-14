@@ -67,6 +67,11 @@ body {
 		display: block;
 		text-align: left;
 		line-height: 20px;
+
+		img {
+			vertical-align: middle;
+			margin-right: 4px;
+		}
 	}
 
 	.task-win.active {
@@ -153,8 +158,10 @@ body {
 		text-decoration: none;
 
 		img {
+			display: block;
 			width: 32px;
 			height: 32px;
+			margin: 0 auto;
 			image-rendering: pixelated;
 			filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.45));
 		}
@@ -173,7 +180,34 @@ body {
 			background: #000080;
 			border-color: #ffff00;
 		}
+
+		// The clapperboard reads squashed at 32px square; let it breathe
+		// (slightly taller than wide, scaled down a notch)
+		img[src$="video.svg"] {
+			width: 32px;
+			height: 34px;
+		}
+
+		// Wide emoji: keep its natural aspect at icon height
+		img[src$="aubergine.png"] {
+			width: auto;
+			height: 36px;
+			image-rendering: auto;
+		}
+
+		// Smooth-shaded folder, not pixel art; wider than tall
+		img[src$="folder.png"] {
+			width: auto;
+			height: 21px;
+			image-rendering: auto;
+		}
 	}
+}
+.wrapper {
+	position: relative;
+	min-width: 420px;
+	min-height: 300px;
+	overflow: hidden;
 }
 .wrapper, .content {
 	width: 800px;
@@ -206,6 +240,14 @@ body {
 		margin: 0 3px 0 0;
 		image-rendering: pixelated;
 	}
+}
+// Title bars are grey by default; only the focused window's goes navy
+// (the .active-win class is managed by 001.js)
+.default_title, .post_title {
+	background: linear-gradient(to right, #808080, #b5b5b5);
+}
+.active-win .default_title, .active-win .post_title {
+	background: linear-gradient(to right, #00007f, #1084d0);
 }
 .default_title .btn {
 	background: #cccccc;
@@ -270,9 +312,6 @@ ul.topbar {
 	padding: 0 10px;
 	margin: 3px 0 3px 0;
 	position: relative;
-	// The search box is absolutely positioned; keep the row from
-	// collapsing now that it can be the only child
-	min-height: 20px;
 
 	li {
 		display: inline-block;
@@ -288,21 +327,26 @@ ul.topbar {
 	background: #fbfafb;
 	@include bevel(false, ridge groove groove ridge);
 }
-// Tag views are plain folders: files only, no drive tree
-.wrapper.folder-view {
-	.tag_list {
-		display: none;
-	}
-	.post_list {
-		width: 99%;
+// Compact "deck" window (e.g. the videos player): narrow, and the
+// content pane shrink-wraps instead of the fixed post height
+.content.deck-win {
+	width: 540px;
+	max-width: 100%;
+
+	.post_content {
+		height: auto;
+		flex: 1 1 auto;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
 	}
 }
 // Standalone folder window spawned by a desktop tag icon
 .folder-win {
-	width: 640px;
+	width: 500px;
 
 	.post_content {
-		height: 320px;
+		height: 280px;
 
 		ul {
 			list-style: none;
@@ -311,7 +355,7 @@ ul.topbar {
 
 			li {
 				display: inline-block;
-				margin: 10px;
+				margin: 10px 12px;
 				max-width: 16ch;
 				overflow: hidden;
 				text-overflow: ellipsis;
@@ -355,10 +399,11 @@ ul.topbar {
 }
 .post_list {
 	width: 70.2%;
+	box-sizing: border-box;
 	margin: 0 auto;
 	min-height: 280px;
 	max-height: 280px;
-	overflow-y: scroll;
+	overflow-y: auto;
 	display: inline-block;
 
 	ul {
@@ -402,10 +447,11 @@ ul.topbar {
 }
 .tag_list {
 	width: 28%;
+	box-sizing: border-box;
 	margin: 0 auto;
 	min-height: 280px;
 	max-height: 280px;
-	overflow-y: scroll;
+	overflow-y: auto;
 	display: inline-block;
 
 	img {
@@ -508,8 +554,10 @@ ul.topbar {
 	min-height: 0;
 	padding: 2px;
 	margin: 0 auto;
-	overflow-y: scroll;
-	overflow-x: scroll;
+	// auto, not scroll: an empty track with its full-width thumb reads
+	// as a pre-coloured bar when there is nothing to scroll
+	overflow-y: auto;
+	overflow-x: auto;
 
 	p {
 		line-height: 150%;

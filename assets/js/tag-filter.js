@@ -52,15 +52,12 @@
 		renderPostList(filtered, tagName);
 		updateObjectCount(filtered.length);
 		updateTitleBar(tagName);
-		// A tag view is a plain folder: files only, no drive tree
-		document.querySelector('.wrapper').classList.add('folder-view');
 	}
 
 	function showAllPosts() {
 		renderPostList(posts, null);
 		updateObjectCount(posts.length);
 		updateTitleBar(null);
-		document.querySelector('.wrapper').classList.remove('folder-view');
 	}
 
 	// A tag folder opens as its own window (files only, no drive tree),
@@ -96,9 +93,7 @@
 			var link = e.target.closest('a');
 			if (!link) return;
 			e.preventDefault();
-			var href = link.getAttribute('href');
-			history.pushState(null, '', href);
-			loadPost(href);
+			loadPost(link.getAttribute('href'));
 		});
 		placeWindow(win);
 		// 001.js picks it up (drag/raise/close/resize), taskbar adds a button
@@ -119,6 +114,10 @@
 			if (tagMatch) {
 				e.preventDefault();
 				openFolderWindow(decodeURIComponent(tagMatch[1]));
+			} else if (href && href.charAt(0) === '/' && href.length > 1) {
+				// Post shortcuts (e.g. 699. videos) open as SPA windows too
+				e.preventDefault();
+				loadPost(href);
 			} else if (href === '/') {
 				e.preventDefault();
 				var wasHidden = wrapper.style.display === 'none';
@@ -140,13 +139,25 @@
 	}
 	fixCloseLink();
 
-	// IE4 "web style" selection: hovering an icon reports it in the
-	// status bar (the right segment is otherwise a blank placeholder)
+	// IE4 "web style" selection: hovering an icon reports its full path
+	// in the status bar (the right segment is otherwise a blank placeholder)
+	function pathFor(link) {
+		var href = (link.getAttribute('href') || '').split('?')[0];
+		var post = null;
+		for (var i = 0; i < posts.length; i++) {
+			if (posts[i].url === href) { post = posts[i]; break; }
+		}
+		if (!post) return link.getAttribute('title') || '';
+		var tag = (post.tags && post.tags[0]) || '';
+		var drive = tag === 'open' ? 'D:' : 'C:';
+		return drive + '\\' + (tag ? tag + '\\' : '') + post.title;
+	}
+
 	var statusRight = document.querySelector('.post_total .right');
 	if (statusRight) {
 		document.querySelector('.post_list').addEventListener('mouseover', function(e) {
 			var link = e.target.closest('a');
-			if (link) statusRight.textContent = link.getAttribute('title') || '';
+			if (link) statusRight.textContent = pathFor(link);
 		});
 		document.querySelector('.post_list').addEventListener('mouseout', function() {
 			statusRight.innerHTML = '&nbsp;';
@@ -241,6 +252,11 @@
 	// SPA-like navigation: intercept post link clicks to avoid full page
 	// reload. Up to three post windows stay open; a fourth replaces the oldest.
 	function loadPost(url) {
+		var dup = document.querySelector('.content[data-url="' + url + '"]');
+		if (dup) {
+			dup.dispatchEvent(new MouseEvent('mousedown'));
+			return;
+		}
 		fetch(url).then(function(res) { return res.text(); }).then(function(html) {
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(html, 'text/html');
@@ -253,6 +269,7 @@
 					var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
 					anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				}
+				newContent.setAttribute('data-url', url);
 				placeWindow(newContent);
 				setStylesheet(true);
 				fixCloseLink();
@@ -295,13 +312,14 @@
 		});
 	}
 
+	// The URL is left untouched on purpose: a refresh always lands on
+	// the clean desktop, not whatever windows were open
 	postListDiv.addEventListener('click', function(e) {
 		var link = e.target.closest('a');
 		if (!link) return;
 		var href = link.getAttribute('href');
 		if (!href || href.startsWith('http')) return;
 		e.preventDefault();
-		history.pushState(null, '', href);
 		loadPost(href);
 	});
 

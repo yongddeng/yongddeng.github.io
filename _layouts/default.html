@@ -22,9 +22,10 @@
 </head>
 <body>
 	<div class="desktop-icons">
-		<a href="/"><img src="/assets/img/mycomputer.png" alt="" /><span>My Computer</span></a>
-		<a href="/?tag=cs600"><img src="/assets/img/folder.ico" alt="" /><span>cs600</span></a>
+		<a href="/"><img src="/assets/img/mycomputerv2.png" alt="" /><span>My Computer</span></a>
+		<a href="/?tag=cs600"><img src="/assets/img/folder.png" alt="" /><span>cs600</span></a>
 		<a href="/20260109/videos"><img src="/assets/img/video.svg" alt="" /><span>699. videos</span></a>
+		<a><img src="/assets/img/aubergine.png" alt="" /><span>untitled</span></a>
 	</div>
 	<div class="wrapper">
 		<div class="default_title">
@@ -102,9 +103,10 @@
 			{% endif %}
 			<div class="right">&nbsp;</div>
 		</div>
+		<div class="win-grip"></div>
 	</div>
 	{% if page.title %}
-        <div class="content">
+        <div class="content{% if page.winclass %} {{ page.winclass }}{% endif %}">
 			<div class="post_title">
 				<img src="/assets/img/{{ page.icon | default: 'notepad.png' }}" />
 				<h1>{{  page.title  }}</h1>
@@ -117,7 +119,7 @@
 			</ul>
 			<div class="post_content">
         		{{ content }}
-				{% if page.title %}
+				{% if page.title and page.no_comment != true %}
 					{% include comment.html %}
 				{% endif %}
 			</div>
@@ -147,7 +149,7 @@
 	<script src="/assets/js/xref.js"></script>
 	<div class="taskbar">
 		<div class="task-start-wrap">
-			<button class="task-start" id="task-start"><img src="/assets/img/mycomputer.png" alt="" />Start</button>
+			<button class="task-start" id="task-start">Start</button>
 			<div class="task-menu" id="task-menu">
 				<a href="/me"><img src="/assets/img/aboutme.png" alt="" />About</a>
 				<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><img src="/assets/img/linkedin.webp" alt="" />LinkedIn</a>
