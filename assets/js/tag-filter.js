@@ -133,19 +133,14 @@
 					if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
 					old.replaceWith(s);
 				});
-				// Re-wrap §-references in the fresh content (xref.js runs once at load)
-				if (typeof initXrefs === 'function') initXrefs();
-				// Re-run code highlighting
+				// Re-run code highlighting before announcing the swap: the
+				// line numbering in 002.js splits the highlighted markup.
 				newContent.querySelectorAll('pre code').forEach(function(block) {
 					hljs.highlightBlock(block);
 				});
-				// Re-run line numbers (from 002.js)
-				try { if (typeof numbers === 'function') numbers(); } catch (e) {}
-				// Re-init maximize/minimize buttons (from 001.js)
-				var max = newContent.querySelectorAll('.btn')[1];
-				var min = newContent.querySelectorAll('.btn')[2];
-				if (max) max.addEventListener('click', maximize, false);
-				if (min) min.addEventListener('click', minimize, false);
+				// Let every script re-init itself (xref tooltips, line
+				// numbers, window buttons) without this file knowing them.
+				document.dispatchEvent(new CustomEvent('content:swapped', { detail: { content: newContent } }));
 				// Re-render MathJax if present
 				function typesetMathJax() {
 					if (window.MathJax && MathJax.Hub) {

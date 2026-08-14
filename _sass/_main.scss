@@ -1,3 +1,15 @@
+// Win95 bevel: raised borders catch light from the top-left,
+// sunken ones are the inverse
+@mixin bevel($raised: true, $style: solid) {
+	border-width: 2px;
+	border-style: $style;
+	@if $raised {
+		border-color: #fff8ff #000000 #000000 #fff8ff;
+	} @else {
+		border-color: #7f787f #fff8ff #fff8ff #7f787f;
+	}
+}
+
 body {
 	background: #008082;
 	font-family: sans-serif, serif, monospace;
@@ -9,8 +21,7 @@ body {
 	margin: auto;
 	margin-top: 20px;
 	background: #bfb8bf;
-	border: 2px solid;
-	border-color: #fff8ff #000000 #000000 #fff8ff;
+	@include bevel;
 	padding: 2px 0;
 }
 .default_title, .post_title {
@@ -44,8 +55,7 @@ body {
 		width: 13px;
 		height: 11px;
 		float: right;
-		border: 2px solid;
-		border-color: #fff8ff #000000 #000000 #fff8ff;
+		@include bevel;
 
 		span {
 			font-size: 11px;
@@ -98,9 +108,7 @@ ul.topbar {
 }
 .post_list, .tag_list, .post_content {
 	background: #fff8ff;
-	border-width: 2px;
-	border-style: ridge groove groove ridge;
-	border-color: #7f787f #fff8ff #fff8ff #7f787f;
+	@include bevel(false, ridge groove groove ridge);
 }
 .post_list {
 	width: 70.2%;
@@ -296,6 +304,24 @@ ul.topbar {
 .hljs {
 	background: #fff8ff;
 }
+pre code.numbered {
+	counter-reset: line;
+
+	.code-line {
+		display: block;
+		counter-increment: line;
+
+		&::before {
+			content: counter(line);
+			display: inline-block;
+			min-width: 2ch;
+			padding: 0 8px 0 3px;
+			margin-right: 8px;
+			text-align: right;
+			border-right: 2px solid #777777;
+		}
+	}
+}
 .footer {
 	font-size: 12px;
 	margin: 30px 0 10px 0;
@@ -325,8 +351,7 @@ ul.topbar {
 	input {
 		width: 140px;
 		padding: 1px 3px;
-		border: 2px solid;
-		border-color: #7f787f #fff8ff #fff8ff #7f787f;
+		@include bevel(false);
 		background: #fff8ff;
 		font-size: 12px;
 		font-family: sans-serif, serif, monospace;
@@ -349,8 +374,7 @@ ul.topbar {
 		max-height: 400px;
 		overflow-y: auto;
 		background: #fff8ff;
-		border: 2px solid;
-		border-color: #fff8ff #000000 #000000 #fff8ff;
+		@include bevel;
 		margin-top: 2px;
 		z-index: 1000;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.1);
@@ -528,16 +552,12 @@ ul.topbar {
  
 ::-webkit-scrollbar-thumb {
 	background-color: #cccccc;
-	border-width: 2px;
-	border-style: groove ridge ridge groove;
-	border-color: #fff8ff #000000 #000000 #fff8ff;
+	@include bevel(true, groove ridge ridge groove);
 } /* this will style the thumb, ignoring the track */
- 
+
 ::-webkit-scrollbar-button {
 	background-color: #cccccc;
-	border-width: 2px;
-	border-style: groove ridge ridge groove;
-	border-color: #fff8ff #000000 #000000 #fff8ff;
+	@include bevel(true, groove ridge ridge groove);
 	background-position: center center;
 	background-repeat: no-repeat;
 
@@ -571,8 +591,7 @@ ul.topbar {
 	position: absolute;
 	z-index: 999;
 	background: #bfb8bf;
-	border: 2px solid;
-	border-color: #fff8ff #000000 #000000 #fff8ff;
+	@include bevel;
 	width: 350px;
 	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.35);
 }

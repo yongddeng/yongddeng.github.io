@@ -14,7 +14,7 @@
 
   // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
   // post content, so this must be callable again, not run-once.
-  window.initXrefs = function () {
+  function initXrefs() {
   var content = document.querySelector('.post_content');
   if (!content) return;
 
@@ -136,7 +136,8 @@
   content.addEventListener('mouseout', function (e) {
     if (e.target.classList.contains('xref')) hideTip();
   });
-  };
+  }
 
-  window.initXrefs();
+  initXrefs();
+  document.addEventListener('content:swapped', initXrefs);
 })();
