@@ -1,7 +1,5 @@
-// Start → System Properties: a tabbed dialog. General is the About
-// sheet; Display / Reading / Clock hold the settings, persisted in
-// localStorage and applied before first paint by the inline script in
-// default.html's <head>.
+// Start → System Properties: General is the About sheet, Settings holds
+// the controls. Persisted in localStorage, applied pre-paint from <head>.
 (function () {
 	var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '13px', clock: '12', font: 'arial' };
 	var FONTS = {
@@ -61,7 +59,7 @@
 		win.innerHTML =
 			'<div class="post_title"><span class="t-emoji">&#9881;&#65039;</span><h1>System Properties</h1>'
 			+ '<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a></div>'
-			+ '<div class="post_content set-sheet">'
+			+ '<div class="post_content">'
 			+ '<div class="set-tabs">'
 			+ '<span class="set-tab on">General</span>'
 			+ '<span class="set-tab">Settings</span>'
@@ -137,7 +135,6 @@
 			document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 		});
 
-		// Dialogs open centred, like the OS did
 		win.style.position = 'absolute';
 		win.style.margin = '0';
 		win.style.left = Math.max(10, window.scrollX + (window.innerWidth - 400) / 2) + 'px';

@@ -28,7 +28,7 @@
 		startMenu.classList.toggle('open');
 		closeSubs();
 	});
-	// Touch fallback for cascades: tapping a parent row toggles its submenu
+	// touch fallback: tapping a cascade row toggles its submenu
 	startMenu.addEventListener('click', function (e) {
 		var sub = e.target.closest('.has-sub');
 		if (sub && !e.target.closest('a')) {
@@ -43,14 +43,12 @@
 		closeSubs();
 	});
 
-	// One button per open window: the explorer (closable) and up to
-	// three post windows (SPA swaps included)
+	// One taskbar button per open window, in opening order
 	var wrapper = document.querySelector('.wrapper');
 	function syncWindows() {
 		var wins = Array.prototype.slice.call(document.querySelectorAll('.content'))
 			.sort(function(a, b) { return (a.dataset.seq || 0) - (b.dataset.seq || 0); });
 		var explorerOpen = wrapper && wrapper.style.display !== 'none';
-		// Only the front window's button renders pressed
 		var front = null, frontZ = -1;
 		if (explorerOpen) { frontZ = parseInt(wrapper.style.zIndex, 10) || 0; front = wrapper; }
 		wins.forEach(function (win) {

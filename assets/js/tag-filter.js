@@ -23,8 +23,7 @@
 	function escapeHtml(text) {
 		var div = document.createElement('div');
 		div.textContent = text;
-		// innerHTML escaping leaves double quotes intact, which would break
-		// out of title="..." attributes in renderPostList
+		// quotes escaped too: titles land inside title="..." attributes
 		return div.innerHTML.replace(/"/g, '&quot;');
 	}
 
@@ -53,15 +52,16 @@
 		}
 	}
 
-	function filterByTag(tagName) {
-		var filtered = posts.filter(function(post) {
-			for (var i = 0; i < post.tags.length; i++) {
-				if (post.tags[i].toLowerCase().replace(/\s+/g, '-') === tagName.toLowerCase()) {
-					return true;
-				}
-			}
-			return false;
+	function postsForTag(tagName) {
+		return posts.filter(function(post) {
+			return post.tags.some(function(t) {
+				return t.toLowerCase().replace(/\s+/g, '-') === tagName.toLowerCase();
+			});
 		});
+	}
+
+	function filterByTag(tagName) {
+		var filtered = postsForTag(tagName);
 		renderPostList(filtered, tagName);
 		updateObjectCount(filtered.length);
 		updateTitleBar(tagName);
@@ -73,19 +73,14 @@
 		updateTitleBar(null);
 	}
 
-	// A tag folder opens as its own window (files only, no drive tree),
-	// coexisting with the My Computer explorer
+	// A tag folder is its own window: files only, no drive tree
 	function openFolderWindow(tagName) {
 		var existing = document.querySelector('.folder-win[data-tag="' + tagName + '"]');
 		if (existing) {
 			existing.dispatchEvent(new MouseEvent('mousedown'));
 			return;
 		}
-		var filtered = posts.filter(function(post) {
-			return post.tags.some(function(t) {
-				return t.toLowerCase().replace(/\s+/g, '-') === tagName.toLowerCase();
-			});
-		});
+		var filtered = postsForTag(tagName);
 		var items = '';
 		for (var i = 0; i < filtered.length; i++) {
 			items += itemHtml(filtered[i]);
@@ -107,13 +102,12 @@
 			loadPost(link.getAttribute('href'));
 		});
 		placeWindow(win);
-		// 001.js picks it up (drag/raise/close/resize), taskbar adds a button
+		// 001.js adds drag/raise/close/resize, taskbar adds a button
 		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 		win.dispatchEvent(new MouseEvent('mousedown'));
 	}
 
-	// Explorer-style sorting: clicking the Date header reorders the
-	// sibling list, toggling ascending/descending
+	// Date header sorts the sibling list, toggling direction
 	document.addEventListener('click', function(e) {
 		var head = e.target.closest('.dh-date');
 		if (!head) return;
@@ -128,44 +122,41 @@
 		}).forEach(function(li) { list.appendChild(li); });
 	});
 
-	// Start menu shortcuts behave like desktop icons: tag entries open
-	// folder windows, post entries open post windows; external links and
-	// the settings row pass through untouched. Delegated on document:
-	// this script loads before the taskbar markup exists, so a direct
-	// #task-menu lookup here would silently bind to nothing.
+	// Tag shortcuts open folder windows, post shortcuts open post windows
+	function openShortcut(href) {
+		var tagMatch = href && href.match(/^\/\?tag=([^&]+)/);
+		if (tagMatch) {
+			openFolderWindow(decodeURIComponent(tagMatch[1]));
+			return true;
+		}
+		if (href && href.charAt(0) === '/' && href.length > 1) {
+			loadPost(href);
+			return true;
+		}
+		return false;
+	}
+
+	// Delegated: this script loads before the taskbar markup exists
 	document.addEventListener('click', function(e) {
 		var link = e.target.closest('#task-menu a');
 		if (!link) return;
 		var href = link.getAttribute('href') || '';
 		if (href === '#' || href.indexOf('http') === 0) return;
-		var tagMatch = href.match(/^\/\?tag=([^&]+)/);
 		e.preventDefault();
-		if (tagMatch) {
-			openFolderWindow(decodeURIComponent(tagMatch[1]));
-		} else if (href.charAt(0) === '/' && href.length > 1) {
-			loadPost(href);
-		}
+		openShortcut(href);
 	});
 
-	// Desktop icons: My Computer opens the full drive view, a tag icon
-	// opens that folder's own window
 	var desktopIcons = document.querySelector('.desktop-icons');
 	if (desktopIcons) {
 		desktopIcons.addEventListener('click', function(e) {
 			var link = e.target.closest('a');
 			if (!link) return;
 			var href = link.getAttribute('href');
-			var wrapper = document.querySelector('.wrapper');
-			var tagMatch = href && href.match(/^\/\?tag=([^&]+)/);
-			if (tagMatch) {
+			if (openShortcut(href)) {
 				e.preventDefault();
-				openFolderWindow(decodeURIComponent(tagMatch[1]));
-			} else if (href && href.charAt(0) === '/' && href.length > 1) {
-				// Post shortcuts (e.g. 699. videos) open as SPA windows too
-				e.preventDefault();
-				loadPost(href);
 			} else if (href === '/') {
 				e.preventDefault();
+				var wrapper = document.querySelector('.wrapper');
 				var wasHidden = wrapper.style.display === 'none';
 				wrapper.style.display = '';
 				showAllPosts();
@@ -175,8 +166,7 @@
 		});
 	}
 
-	// IE4 "web style" selection: hovering an icon reports its full path
-	// in the status bar (the right segment is otherwise a blank placeholder)
+	// Hovering a file reports its full path in the status bar
 	function pathFor(link) {
 		var href = (link.getAttribute('href') || '').split('?')[0];
 		var post = null;
@@ -200,33 +190,15 @@
 		});
 	}
 
-	// Save post_list scroll position before navigating away
+	// Apply the ?tag= filter (default.html hides the list pre-render)
 	var postListDiv = document.querySelector('.post_list');
-	postListDiv.addEventListener('click', function(e) {
-		var link = e.target.closest('a');
-		if (link) {
-			sessionStorage.setItem('postListScrollTop', postListDiv.scrollTop);
-		}
-	});
-
-	// On page load, check for ?tag= param and apply filter
-	// (inline script in default.html hides post_list early to prevent flash)
-	var params = new URLSearchParams(window.location.search);
-	var activeTag = params.get('tag');
+	var activeTag = new URLSearchParams(window.location.search).get('tag');
 	if (activeTag) {
 		filterByTag(activeTag);
 		postListDiv.style.visibility = 'visible';
 	}
 
-	// Restore scroll position
-	var savedScroll = sessionStorage.getItem('postListScrollTop');
-	if (savedScroll !== null) {
-		postListDiv.scrollTop = parseInt(savedScroll, 10);
-		sessionStorage.removeItem('postListScrollTop');
-	}
-
-	// Place a freshly opened window like the OS would: try random spots
-	// and keep the one overlapping the open windows least (zero if it can)
+	// Random spot overlapping the open windows least (zero if possible)
 	function placeWindow(win) {
 		var others = [];
 		var wrapper = document.querySelector('.wrapper');
@@ -265,15 +237,13 @@
 		win.style.top = (best.y + window.scrollY) + 'px';
 	}
 
-	// Post windows only: the explorer, folder windows and dialogs are
-	// never counted against, or replaced by, the cap
+	// Windows that count against the cap: posts only, not chrome
 	function openPosts() {
 		return Array.prototype.slice.call(document.querySelectorAll('.content')).filter(function(w) {
 			return !w.classList.contains('settings-win') && !w.classList.contains('folder-win');
 		});
 	}
 
-	// Win95 error box; replaces any previous one
 	function showError(message) {
 		var old = document.querySelector('.err-win');
 		if (old) old.remove();
@@ -286,10 +256,9 @@
 		box.querySelector('button').addEventListener('click', function() { box.remove(); });
 	}
 
-	// SPA-like navigation: intercept post link clicks to avoid full page
-	// reload. At most three post windows; a fourth is refused, Win95-style.
+	// Opens a post as a window; at most three, a fourth is refused
 	function loadPost(url) {
-		// One window per post: ?tag= variants of the same URL are the same post
+		// ?tag= variants of the same URL are the same post
 		var key = url.split('?')[0];
 		var dup = document.querySelector('.content[data-url="' + key + '"]');
 		if (dup) {
@@ -311,22 +280,17 @@
 				anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				newContent.setAttribute('data-url', key);
 				placeWindow(newContent);
-				// Scripts inserted via DOMParser are inert; recreate them so
-				// per-post scripts (e.g. the video rows) actually run.
+				// DOMParser scripts are inert; recreate them so they run
 				newContent.querySelectorAll('script').forEach(function(old) {
 					var s = document.createElement('script');
 					if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
 					old.replaceWith(s);
 				});
-				// Re-run code highlighting before announcing the swap: the
-				// line numbering in 002.js splits the highlighted markup.
+				// highlight before the swap event: 002.js splits this markup
 				newContent.querySelectorAll('pre code').forEach(function(block) {
 					hljs.highlightBlock(block);
 				});
-				// Let every script re-init itself (xref tooltips, line
-				// numbers, window buttons) without this file knowing them.
 				document.dispatchEvent(new CustomEvent('content:swapped', { detail: { content: newContent } }));
-				// Re-render MathJax if present
 				function typesetMathJax() {
 					if (window.MathJax && MathJax.Hub) {
 						MathJax.Hub.Queue(['Typeset', MathJax.Hub, newContent]);
@@ -336,21 +300,18 @@
 				}
 				typesetMathJax();
 			} else {
-				// Navigated back to an index/tag page: close all post windows.
+				// navigated to an index page: close all post windows
 				open.forEach(function(w) { w.remove(); });
 				document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 			}
-			// Update page title
 			var newTitle = doc.querySelector('title');
 			if (newTitle) document.title = newTitle.textContent;
 		}).catch(function() {
-			// Network/parse trouble: fall back to a normal page load
 			window.location.href = url;
 		});
 	}
 
-	// The URL is left untouched on purpose: a refresh always lands on
-	// the clean desktop, not whatever windows were open
+	// URL stays untouched: a refresh always lands on a clean desktop
 	postListDiv.addEventListener('click', function(e) {
 		var link = e.target.closest('a');
 		if (!link) return;
@@ -360,7 +321,6 @@
 		loadPost(href);
 	});
 
-	// Handle browser back/forward
 	window.addEventListener('popstate', function() {
 		loadPost(location.pathname + location.search);
 	});

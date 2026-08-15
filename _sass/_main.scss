@@ -231,13 +231,11 @@ body {
 		}
 	}
 }
-.wrapper {
+.wrapper, .content {
 	position: relative;
 	min-width: 420px;
 	min-height: 300px;
 	overflow: hidden;
-}
-.wrapper, .content {
 	width: 800px;
 	margin: auto;
 	margin-top: 20px;
@@ -798,12 +796,8 @@ ul.topbar {
 	}
 }
 .content {
-	position: relative;
 	display: flex;
 	flex-direction: column;
-	overflow: hidden;
-	min-width: 420px;
-	min-height: 300px;
 }
 // Win95 corner grip: sits above the content pane's scrollbar corner,
 // which swallows the browser-native resize handle
