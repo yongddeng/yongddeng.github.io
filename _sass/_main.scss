@@ -135,7 +135,6 @@ body {
 			background: #c0c0c0;
 			color: #000000;
 			@include bevel;
-			box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 		}
 
 		.has-sub:hover > .task-sub,
@@ -380,10 +379,17 @@ ul.topbar {
 		flex-direction: column;
 	}
 }
-// me.txt: the About page rendered as a plain Notepad file, but with
-// hyperlinks kept explicit (blue, underlined)
-.content.pad-win {
+// me.txt: the About page as an MS-DOS prompt that has run `type me.txt`
+.content.dos-win {
+	width: 820px;
+
+	.topbar { display: none; }
+
 	.post_content {
+		height: 280px;
+		background: #000000;
+		color: #c0c0c0;
+		-webkit-font-smoothing: antialiased;
 		font-family: "Courier New", monospace;
 		font-size: 12.5px;
 
@@ -392,9 +398,16 @@ ul.topbar {
 			margin-bottom: 10px;
 		}
 
+		.dos-cmd { color: #ffffff; }
+		.dos-yr { color: #55ffff; }
+
 		// Decade headers (**0-19** on their own line) as [0-19]
-		> p > strong:only-child::before { content: "["; }
-		> p > strong:only-child::after { content: "]"; }
+		> p > strong:only-child {
+			color: #ffff55;
+
+			&::before { content: "["; }
+			&::after { content: "]"; }
+		}
 
 		ul {
 			list-style: none;
@@ -411,10 +424,23 @@ ul.topbar {
 		}
 
 		a {
-			color: #0000ff;
+			color: #5555ff;
 			text-decoration: underline;
 		}
+
+		.dos-cursor {
+			display: inline-block;
+			width: 8px;
+			height: 13px;
+			background: #c0c0c0;
+			vertical-align: -2px;
+			animation: dos-blink 1s steps(1) infinite;
+		}
 	}
+}
+
+@keyframes dos-blink {
+	50% { opacity: 0; }
 }
 // Settings dialog, spawned by Start → Settings
 .content.settings-win {
@@ -606,6 +632,10 @@ ul.topbar {
 	width: 24px;
 	font-size: 17px;
 	text-align: center;
+}
+img.task-menu-ic {
+	height: 17px;
+	object-fit: contain;
 }
 // Explorer "Details" view: header row + one file per row with
 // Name / Type / Date columns. Used by the folder windows and My
