@@ -3,6 +3,6 @@ layout: default
 ---
 <ul>
 	{% for post in site.posts %}
-	<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span>{{ post.title }}</span></a></li>
+	<li data-date="{{ post.date | date: '%Y%m%d' }}"><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span class="nm">{{ post.title }}</span><span class="ty">{% if post.icon == 'video.svg' %}Media Clip{% else %}Notepad{% endif %}</span><span class="dt">{{ post.date | date: "%-d/%-m/%y" }}</span></a></li>
 	{% endfor %}
 </ul>

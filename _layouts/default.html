@@ -66,11 +66,12 @@
 			</ul>
 		</div>
 		<div class="post_list">
+			<div class="det-head"><span class="dh-name">Name</span><span class="dh-type">Type</span><span class="dh-date">Date</span></div>
 			{% unless page.date%}
 				{% if page.title == 'me' or page.title == '404...' %}
 					<ul>
 						{% for post in site.posts %}
-						<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span>{{ post.title }}</span></a></li>
+						<li data-date="{{ post.date | date: '%Y%m%d' }}"><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span class="nm">{{ post.title }}</span><span class="ty">{% if post.icon == 'video.svg' %}Media Clip{% else %}Notepad{% endif %}</span><span class="dt">{{ post.date | date: "%-d/%-m/%y" }}</span></a></li>
 						{% endfor %}
 					</ul>
 				{% else %}
@@ -79,7 +80,7 @@
 			{% else %}
 				<ul>
 					{% for post in site.posts %}
-					<li><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span>{{ post.title }}</span></a></li>
+					<li data-date="{{ post.date | date: '%Y%m%d' }}"><a href="{{  post.url }}" title="{{ post.title }}"><img src="/assets/img/{{ post.icon | default: 'notepad.png' }}" title="{{ post.title }}" /><span class="nm">{{ post.title }}</span><span class="ty">{% if post.icon == 'video.svg' %}Media Clip{% else %}Notepad{% endif %}</span><span class="dt">{{ post.date | date: "%-d/%-m/%y" }}</span></a></li>
 					{% endfor %}
 				</ul>
 			{% endunless %}
@@ -136,6 +137,8 @@
 				title: {{ post.title | jsonify }},
 				url: {{ post.url | jsonify }},
 				icon: {{ post.icon | default: 'notepad.png' | jsonify }},
+				date: {{ post.date | date: "%-d/%-m/%y" | jsonify }},
+				sortdate: {{ post.date | date: "%Y%m%d" | jsonify }},
 				content: {{ post.content | strip_html | truncatewords: 500 | jsonify }},
 				tags: {{ post.tags | jsonify }}
 			}{% unless forloop.last %},{% endunless %}

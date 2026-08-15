@@ -341,28 +341,40 @@ ul.topbar {
 		flex-direction: column;
 	}
 }
-// Explorer "List" view: 16px icon + name rows flowing into columns.
-// Used by the folder windows and My Computer's file pane.
-@mixin file-list-view {
+// Explorer "Details" view: header row + one file per row with
+// Name / Type / Date columns. Used by the folder windows and My
+// Computer's file pane.
+@mixin file-details-view {
+	.det-head {
+		display: flex;
+		background: #c0c0c0;
+		font-size: 12px;
+
+		span {
+			padding: 2px 8px;
+			box-sizing: border-box;
+			border: 1px solid;
+			border-color: #ffffff #000000 #000000 #ffffff;
+		}
+
+		.dh-name { flex: 1; }
+		.dh-type { width: 92px; }
+		.dh-date { width: 74px; cursor: pointer; }
+		.dh-date[data-dir="asc"]::after { content: " \25B4"; font-size: 9px; }
+		.dh-date[data-dir="desc"]::after { content: " \25BE"; font-size: 9px; }
+	}
+
 	ul {
 		list-style: none;
 		margin: 0;
-		padding: 4px 0;
-		height: 100%;
-		box-sizing: border-box;
-		display: flex;
-		flex-flow: column wrap;
-		align-content: flex-start;
-		overflow-x: auto;
+		padding: 2px 0 4px;
 
 		li {
-			width: 230px;
 			padding: 0;
 
 			a {
 				display: flex;
 				align-items: center;
-				gap: 6px;
 				padding: 3px 8px;
 				margin: 0;
 				text-decoration: none;
@@ -373,18 +385,37 @@ ul.topbar {
 					width: 16px;
 					height: 16px;
 					flex: none;
-					margin: 0;
+					margin: 0 6px 0 0;
 					image-rendering: pixelated;
 				}
 
-				span {
+				// The clapperboard's artwork carries more padding than the
+				// notepad's; render it a touch larger so they read equal
+				img[src$="video.svg"] {
+					width: 18px;
+					height: 18px;
+					margin: 0 4px 0 -1px;
+				}
+
+				.nm {
+					flex: 1;
 					overflow: hidden;
 					text-overflow: ellipsis;
 					padding: 1px 3px;
 					border: 1px dotted transparent;
 				}
 
-				&:hover span {
+				.ty, .dt {
+					flex: none;
+					box-sizing: border-box;
+					font-size: 12px;
+					color: #55505a;
+				}
+
+				.ty { width: 92px; padding-left: 8px; }
+				.dt { width: 74px; padding-left: 8px; }
+
+				&:hover .nm {
 					background: #000080;
 					color: #ffffff;
 					border-color: #ffff00;
@@ -399,7 +430,7 @@ ul.topbar {
 
 	.post_content {
 		height: 240px;
-		@include file-list-view;
+		@include file-details-view;
 	}
 
 	.folder-status {
@@ -418,7 +449,7 @@ ul.topbar {
 	max-height: 280px;
 	overflow-y: auto;
 	display: inline-block;
-	@include file-list-view;
+	@include file-details-view;
 }
 .tag_list {
 	width: 28%;

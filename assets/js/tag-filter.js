@@ -5,6 +5,21 @@
 	var posts = window.searchIndex || [];
 	var originalTitle = document.querySelector('.default_title h1').textContent;
 
+	var DET_HEAD = '<div class="det-head"><span class="dh-name">Name</span>'
+		+ '<span class="dh-type">Type</span><span class="dh-date">Date</span></div>';
+
+	function typeFor(icon) {
+		return icon === 'video.svg' ? 'Media Clip' : 'Notepad';
+	}
+
+	function itemHtml(post, tagParam) {
+		return '<li data-date="' + (post.sortdate || '') + '"><a href="' + post.url + (tagParam || '') + '" title="' + escapeHtml(post.title) + '">'
+			+ '<img src="/assets/img/' + (post.icon || 'notepad.png') + '" title="' + escapeHtml(post.title) + '" />'
+			+ '<span class="nm">' + escapeHtml(post.title) + '</span>'
+			+ '<span class="ty">' + typeFor(post.icon) + '</span>'
+			+ '<span class="dt">' + (post.date || '') + '</span></a></li>';
+	}
+
 	function escapeHtml(text) {
 		var div = document.createElement('div');
 		div.textContent = text;
@@ -15,12 +30,10 @@
 
 	function renderPostList(filtered, activeTag) {
 		var postListDiv = document.querySelector('.post_list');
-		var html = '<ul>';
+		var tagParam = activeTag ? '?tag=' + encodeURIComponent(activeTag) : '';
+		var html = DET_HEAD + '<ul>';
 		for (var i = 0; i < filtered.length; i++) {
-			var tagParam = activeTag ? '?tag=' + encodeURIComponent(activeTag) : '';
-			html += '<li><a href="' + filtered[i].url + tagParam + '" title="' + escapeHtml(filtered[i].title) + '">'
-				+ '<img src="/assets/img/' + (filtered[i].icon || 'notepad.png') + '" title="' + escapeHtml(filtered[i].title) + '" />'
-				+ '<span>' + escapeHtml(filtered[i].title) + '</span></a></li>';
+			html += itemHtml(filtered[i], tagParam);
 		}
 		html += '</ul>';
 		postListDiv.innerHTML = html;
@@ -75,9 +88,7 @@
 		});
 		var items = '';
 		for (var i = 0; i < filtered.length; i++) {
-			items += '<li><a href="' + filtered[i].url + '" title="' + escapeHtml(filtered[i].title) + '">'
-				+ '<img src="/assets/img/' + (filtered[i].icon || 'notepad.png') + '" />'
-				+ '<span>' + escapeHtml(filtered[i].title) + '</span></a></li>';
+			items += itemHtml(filtered[i]);
 		}
 		var win = document.createElement('div');
 		win.className = 'content folder-win';
@@ -85,7 +96,7 @@
 		win.innerHTML =
 			'<div class="post_title"><img src="/assets/img/folder.ico" /><h1>' + escapeHtml(tagName) + '</h1>'
 			+ '<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a></div>'
-			+ '<div class="post_content"><ul>' + items + '</ul></div>'
+			+ '<div class="post_content">' + DET_HEAD + '<ul>' + items + '</ul></div>'
 			+ '<div class="folder-status">' + filtered.length + ' object(s)</div>'
 			+ '<div class="win-grip"></div>';
 		document.body.insertBefore(win, document.querySelector('.taskbar'));
@@ -100,6 +111,22 @@
 		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 		win.dispatchEvent(new MouseEvent('mousedown'));
 	}
+
+	// Explorer-style sorting: clicking the Date header reorders the
+	// sibling list, toggling ascending/descending
+	document.addEventListener('click', function(e) {
+		var head = e.target.closest('.dh-date');
+		if (!head) return;
+		var list = head.parentNode.nextElementSibling;
+		if (!list || list.tagName !== 'UL') return;
+		var asc = head.dataset.dir !== 'asc';
+		head.dataset.dir = asc ? 'asc' : 'desc';
+		Array.prototype.slice.call(list.children).sort(function(a, b) {
+			var da = parseInt(a.dataset.date, 10) || 0;
+			var db = parseInt(b.dataset.date, 10) || 0;
+			return asc ? da - db : db - da;
+		}).forEach(function(li) { list.appendChild(li); });
+	});
 
 	// Desktop icons: My Computer opens the full drive view, a tag icon
 	// opens that folder's own window
