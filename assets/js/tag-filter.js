@@ -6,16 +6,19 @@
 	var originalTitle = document.querySelector('.default_title h1').textContent;
 
 	var DET_HEAD = '<div class="det-head"><span class="dh-name">Name</span>'
-		+ '<span class="dh-type">Type</span><span class="dh-date">Date</span></div>';
+		+ '<span class="dh-size" data-sort="size">Size</span>'
+		+ '<span class="dh-type">Type</span>'
+		+ '<span class="dh-date" data-sort="date">Date</span></div>';
 
 	function typeFor(icon) {
 		return icon === 'video.svg' ? 'Media Clip' : 'Notepad';
 	}
 
 	function itemHtml(post, tagParam) {
-		return '<li data-date="' + (post.sortdate || '') + '"><a href="' + post.url + (tagParam || '') + '" title="' + escapeHtml(post.title) + '">'
+		return '<li data-date="' + (post.sortdate || '') + '" data-size="' + (post.size || '') + '"><a href="' + post.url + (tagParam || '') + '" title="' + escapeHtml(post.title) + '">'
 			+ '<img src="/assets/img/' + (post.icon || 'notepad.png') + '" title="' + escapeHtml(post.title) + '" />'
 			+ '<span class="nm">' + escapeHtml(post.title) + '</span>'
+			+ '<span class="sz">' + (post.size || '') + '</span>'
 			+ '<span class="ty">' + typeFor(post.icon) + '</span>'
 			+ '<span class="dt">' + (post.date || '') + '</span></a></li>';
 	}
@@ -107,18 +110,31 @@
 		win.dispatchEvent(new MouseEvent('mousedown'));
 	}
 
-	// Date header sorts the sibling list, toggling direction
+	// "12KB" / "9.3MB" as a comparable number of kilobytes
+	function sizeValue(text) {
+		var m = /([\d.]+)\s*(KB|MB)/i.exec(text || '');
+		if (!m) return 0;
+		return parseFloat(m[1]) * (m[2].toUpperCase() === 'MB' ? 1024 : 1);
+	}
+
+	// Size and Date headers sort the sibling list, toggling direction
 	document.addEventListener('click', function(e) {
-		var head = e.target.closest('.dh-date');
+		var head = e.target.closest('.det-head [data-sort]');
 		if (!head) return;
 		var list = head.parentNode.nextElementSibling;
 		if (!list || list.tagName !== 'UL') return;
 		var asc = head.dataset.dir !== 'asc';
+		// only the sorted column carries an arrow
+		head.parentNode.querySelectorAll('[data-sort]').forEach(function(other) {
+			delete other.dataset.dir;
+		});
 		head.dataset.dir = asc ? 'asc' : 'desc';
+		var bySize = head.dataset.sort === 'size';
+		function valueOf(li) {
+			return bySize ? sizeValue(li.dataset.size) : (parseInt(li.dataset.date, 10) || 0);
+		}
 		Array.prototype.slice.call(list.children).sort(function(a, b) {
-			var da = parseInt(a.dataset.date, 10) || 0;
-			var db = parseInt(b.dataset.date, 10) || 0;
-			return asc ? da - db : db - da;
+			return asc ? valueOf(a) - valueOf(b) : valueOf(b) - valueOf(a);
 		}).forEach(function(li) { list.appendChild(li); });
 	});
 

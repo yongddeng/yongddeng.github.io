@@ -78,7 +78,7 @@
 			</ul>
 		</div>
 		<div class="post_list">
-			<div class="det-head"><span class="dh-name">Name</span><span class="dh-type">Type</span><span class="dh-date">Date</span></div>
+			<div class="det-head"><span class="dh-name">Name</span><span class="dh-size" data-sort="size">Size</span><span class="dh-type">Type</span><span class="dh-date" data-sort="date">Date</span></div>
 			{% unless page.date%}
 				{% if page.title == 'MS-DOS Prompt' or page.title == '404...' %}
 					<ul>
@@ -151,6 +151,7 @@
 				icon: {{ post.icon | default: 'notepad.png' | jsonify }},
 				date: {{ post.date | date: "%-d/%-m/%y" | jsonify }},
 				sortdate: {{ post.date | date: "%Y%m%d" | jsonify }},
+				size: {% capture psize %}{% include post-size.html post=post %}{% endcapture %}{{ psize | jsonify }},
 				content: {{ post.content | strip_html | truncatewords: 500 | jsonify }},
 				tags: {{ post.tags | jsonify }}
 			}{% unless forloop.last %},{% endunless %}

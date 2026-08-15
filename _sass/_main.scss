@@ -654,10 +654,12 @@ img.task-menu-ic {
 		}
 
 		.dh-name { flex: 1; }
+		.dh-size { width: 60px; text-align: right; }
 		.dh-type { width: 92px; }
-		.dh-date { width: 74px; cursor: pointer; }
-		.dh-date[data-dir="asc"]::after { content: " \25B4"; font-size: 9px; }
-		.dh-date[data-dir="desc"]::after { content: " \25BE"; font-size: 9px; }
+		.dh-date { width: 74px; }
+		[data-sort] { cursor: pointer; }
+		[data-dir="asc"]::after { content: " \25B4"; font-size: 9px; }
+		[data-dir="desc"]::after { content: " \25BE"; font-size: 9px; }
 	}
 
 	ul {
@@ -701,13 +703,14 @@ img.task-menu-ic {
 					border: 1px dotted transparent;
 				}
 
-				.ty, .dt {
+				.sz, .ty, .dt {
 					flex: none;
 					box-sizing: border-box;
 					font-size: 12px;
 					color: #55505a;
 				}
 
+				.sz { width: 60px; padding-right: 8px; text-align: right; }
 				.ty { width: 92px; padding-left: 8px; }
 				.dt { width: 74px; padding-left: 8px; }
 
@@ -1076,6 +1079,10 @@ pre code.numbered {
 	}
 }
 @media only screen and (max-width: 610px) {
+	// Name needs the room more than Size does
+	.dh-size, .sz {
+		display: none;
+	}
 	.tag_list {
 		width: 98.7%;
 	}

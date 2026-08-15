@@ -1,0 +1,7 @@
+{%- comment -%}Plausible 1995 file size, derived from post length so it tracks the real content{%- endcomment -%}
+{%- assign words = include.post.content | strip_html | number_of_words -%}
+{%- if include.post.icon == 'video.svg' -%}
+{{- words | divided_by: 40 | plus: 2 }}.{{ words | modulo: 9 }}MB
+{%- else -%}
+{{- words | divided_by: 170 | plus: 1 }}KB
+{%- endif -%}
