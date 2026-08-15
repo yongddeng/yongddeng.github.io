@@ -3,6 +3,7 @@
 
 (function () {
 	var zTop = 10;
+	var openSeq = 0;
 
 	function getWidth () {
 		return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName("body")[0].clientWidth;
@@ -123,6 +124,8 @@
 	function initWindow (content) {
 		if (content.dataset.win) return;
 		content.dataset.win = "1";
+		// Taskbar buttons keep opening order, not DOM order
+		content.dataset.seq = ++openSeq;
 		content.style.zIndex = ++zTop;
 
 		var tbar = content.querySelector(".post_title");
@@ -140,7 +143,8 @@
 			content.remove();
 			if (!document.querySelector(".content")) {
 				if (location.pathname !== "/") history.pushState(null, "", "/");
-				document.title = document.querySelector(".default_title h1").textContent;
+				// Tab title carries the site name, not the window title
+				document.title = document.body.dataset.site || "";
 			}
 			document.dispatchEvent(new CustomEvent("content:swapped", { detail: {} }));
 		});

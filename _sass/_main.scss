@@ -11,7 +11,7 @@
 }
 
 body {
-	background: #008082;
+	background: var(--desk, #008082);
 	font-family: sans-serif, serif, monospace;
 	font-size: 13px;
 	padding-bottom: 36px;
@@ -90,29 +90,57 @@ body {
 		bottom: 100%;
 		left: 0;
 		margin-bottom: 4px;
-		min-width: 150px;
 		background: #c0c0c0;
 		@include bevel;
 
-		a {
+		.task-items {
+			min-width: 172px;
+			padding: 2px;
+		}
+
+		a, .task-mi {
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			padding: 6px 14px;
+			padding: 6px 12px;
 			font-size: 13px;
 			color: #000000;
 			text-decoration: none;
 			white-space: nowrap;
-
-			img {
-				width: 20px;
-				height: 20px;
-			}
+			cursor: default;
 		}
 
-		a:hover {
+		.task-mi {
+			position: relative;
+		}
+
+		.task-arrow {
+			margin-left: auto;
+			font-size: 9px;
+		}
+
+		a:hover, .task-mi:hover {
 			background: #000080;
 			color: #ffffff;
+		}
+
+		// Cascading submenu: hover on desktop, click-toggle on touch
+		.task-sub {
+			display: none;
+			position: absolute;
+			left: 100%;
+			top: -4px;
+			min-width: 160px;
+			padding: 2px;
+			background: #c0c0c0;
+			color: #000000;
+			@include bevel;
+			box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		}
+
+		.has-sub:hover > .task-sub,
+		.has-sub.open > .task-sub {
+			display: block;
 		}
 
 		.task-menu-sep {
@@ -128,7 +156,7 @@ body {
 	}
 
 	.task-menu.open {
-		display: block;
+		display: flex;
 	}
 
 	.task-clock {
@@ -240,6 +268,19 @@ body {
 		margin: 0 3px 0 0;
 		image-rendering: pixelated;
 	}
+
+	// Emoji stand-in for windows without an icon asset
+	.t-emoji {
+		float: left;
+		font-size: 12px;
+		line-height: 14px;
+		margin: 0 3px 0 0;
+	}
+}
+.task-win .t-emoji {
+	vertical-align: middle;
+	margin-right: 4px;
+	font-size: 13px;
 }
 // Title bars are grey by default; only the focused window's goes navy
 // (the .active-win class is managed by 001.js)
@@ -324,7 +365,7 @@ ul.topbar {
 
 }
 .post_list, .tag_list, .post_content {
-	background: #fbfafb;
+	background: var(--paper, #fbfafb);
 	@include bevel(false, ridge groove groove ridge);
 }
 // Compact "deck" window (e.g. the videos player): narrow, and the
@@ -340,6 +381,233 @@ ul.topbar {
 		display: flex;
 		flex-direction: column;
 	}
+}
+// me.txt: the About page rendered as a plain Notepad file, but with
+// hyperlinks kept explicit (blue, underlined)
+.content.pad-win {
+	.post_content {
+		font-family: "Courier New", monospace;
+		font-size: 12.5px;
+
+		p {
+			line-height: 1.65;
+			margin-bottom: 10px;
+		}
+
+		// Decade headers (**0-19** on their own line) as [0-19]
+		> p > strong:only-child::before { content: "["; }
+		> p > strong:only-child::after { content: "]"; }
+
+		ul {
+			list-style: none;
+			margin: 0 0 14px 8px;
+
+			li {
+				padding: 2px 0;
+				line-height: 1.65;
+
+				&::before {
+					content: "- ";
+				}
+			}
+		}
+
+		a {
+			color: #0000ff;
+			text-decoration: underline;
+		}
+	}
+}
+// Settings dialog, spawned by Start → Settings
+.content.settings-win {
+	width: 400px;
+	min-width: 400px;
+	min-height: 0;
+
+	.set-tabs {
+		display: flex;
+		padding: 4px 4px 0;
+	}
+
+	.set-tab {
+		position: relative;
+		top: 2px;
+		padding: 3px 12px;
+		margin-right: 2px;
+		font-size: 12px;
+		background: #c0c0c0;
+		border: 2px solid;
+		border-color: #ffffff #000000 transparent #ffffff;
+		cursor: pointer;
+	}
+
+	.set-tab.on {
+		top: 0;
+		z-index: 2;
+		padding-bottom: 5px;
+		font-weight: bold;
+	}
+
+	.set-body {
+		position: relative;
+		z-index: 1;
+		margin: 0 4px;
+		padding: 12px;
+		min-height: 148px;
+		background: #c0c0c0;
+		@include bevel;
+	}
+
+	.set-pane {
+		display: none;
+	}
+
+	.set-pane.on {
+		display: block;
+	}
+
+	.set-sysrow {
+		display: flex;
+		gap: 16px;
+		align-items: flex-start;
+
+		img {
+			width: 48px;
+			height: auto;
+			image-rendering: auto;
+		}
+	}
+
+	.set-kv {
+		line-height: 1.9;
+
+		b {
+			font-weight: normal;
+			color: #444444;
+		}
+	}
+
+	.post_content {
+		width: auto;
+		box-sizing: border-box;
+		margin: 0 2px 2px;
+		height: auto;
+		flex: none;
+		font-size: 12px;
+		font-family: "Helvetica Neue", Arial, sans-serif;
+		background: #c0c0c0;
+		padding: 10px 12px;
+		overflow: visible;
+	}
+
+	// Win95 etched group box: dark inner line, light outer line
+	fieldset {
+		margin: 0 0 12px;
+		padding: 8px 10px 10px;
+		border: 1px solid;
+		border-color: #7f787f #ffffff #ffffff #7f787f;
+		outline: 1px solid #ffffff;
+		outline-offset: 0;
+	}
+
+	legend {
+		padding: 0 4px;
+	}
+
+	label {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		margin-right: 14px;
+		cursor: pointer;
+	}
+
+	.set-swatches {
+		display: flex;
+		gap: 6px;
+	}
+
+	.set-sw {
+		width: 34px;
+		height: 22px;
+		cursor: pointer;
+		@include bevel;
+	}
+
+	.set-sw.on {
+		outline: 1px dotted #000000;
+		outline-offset: 2px;
+	}
+
+	.set-btnrow {
+		display: flex;
+		justify-content: space-between;
+		padding: 10px 0 0;
+
+		button {
+			background: #c0c0c0;
+			@include bevel;
+			font-size: 12px;
+			padding: 3px 18px;
+			cursor: pointer;
+		}
+
+		button:active {
+			border-color: #000000 #ffffff #ffffff #000000;
+		}
+	}
+}
+// Win95 error box (tag-filter.js showError)
+.err-win {
+	position: fixed;
+	left: 50%;
+	top: 36%;
+	transform: translate(-50%, -50%);
+	width: 340px;
+	z-index: 3000;
+	background: #bfb8bf;
+	@include bevel;
+	padding: 2px;
+	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+
+	.err-body {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding: 16px 16px 10px;
+		font-size: 13px;
+
+		.err-ic {
+			font-size: 30px;
+		}
+
+		p {
+			margin: 0;
+			line-height: 1.5;
+		}
+	}
+
+	.err-btnrow {
+		text-align: center;
+		padding: 4px 0 12px;
+
+		button {
+			background: #c0c0c0;
+			@include bevel;
+			font-size: 12px;
+			padding: 3px 28px;
+			cursor: pointer;
+		}
+
+		button:active {
+			border-color: #000000 #ffffff #ffffff #000000;
+		}
+	}
+}
+.task-menu-ic {
+	width: 24px;
+	font-size: 17px;
+	text-align: center;
 }
 // Explorer "Details" view: header row + one file per row with
 // Name / Type / Date columns. Used by the folder windows and My
@@ -505,7 +773,7 @@ ul.topbar {
     }
 }
 #tag-list li a {
-    background: #fbfafb;
+    background: var(--paper, #fbfafb);
     display:block;
 }
 #tag-list li ul li {
@@ -554,6 +822,8 @@ ul.topbar {
 }
 .post_content {
 	position: relative;
+	font-size: var(--text, 13px);
+	font-family: var(--font, inherit);
 	width: 98.5%;
 	height: 520px;
 	flex: 1 1 auto;
@@ -650,7 +920,7 @@ ul.topbar {
 	}
 }
 .hljs {
-	background: #fbfafb;
+	background: var(--paper, #fbfafb);
 }
 pre code.numbered {
 	counter-reset: line;
@@ -702,7 +972,7 @@ pre code.numbered {
 		flex: 1;
 		padding: 1px 3px;
 		@include bevel(false);
-		background: #fbfafb;
+		background: var(--paper, #fbfafb);
 		font-size: 12px;
 		font-family: sans-serif, serif, monospace;
 		line-height: 1;
@@ -736,7 +1006,7 @@ pre code.numbered {
 		width: 300px;
 		max-height: 400px;
 		overflow-y: auto;
-		background: #fbfafb;
+		background: var(--paper, #fbfafb);
 		@include bevel;
 		margin-top: 2px;
 		z-index: 1000;
@@ -972,7 +1242,7 @@ pre code.numbered {
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 8px 12px;
-	background: #fbfafb;
+	background: var(--paper, #fbfafb);
 	font-size: 13px;
 
 	p { line-height: 150%; margin-bottom: 15px; }

@@ -128,6 +128,25 @@
 		}).forEach(function(li) { list.appendChild(li); });
 	});
 
+	// Start menu shortcuts behave like desktop icons: tag entries open
+	// folder windows, post entries open post windows; external links and
+	// the settings row pass through untouched. Delegated on document:
+	// this script loads before the taskbar markup exists, so a direct
+	// #task-menu lookup here would silently bind to nothing.
+	document.addEventListener('click', function(e) {
+		var link = e.target.closest('#task-menu a');
+		if (!link) return;
+		var href = link.getAttribute('href') || '';
+		if (href === '#' || href.indexOf('http') === 0) return;
+		var tagMatch = href.match(/^\/\?tag=([^&]+)/);
+		e.preventDefault();
+		if (tagMatch) {
+			openFolderWindow(decodeURIComponent(tagMatch[1]));
+		} else if (href.charAt(0) === '/' && href.length > 1) {
+			loadPost(href);
+		}
+	});
+
 	// Desktop icons: My Computer opens the full drive view, a tag icon
 	// opens that folder's own window
 	var desktopIcons = document.querySelector('.desktop-icons');
@@ -246,8 +265,29 @@
 		win.style.top = (best.y + window.scrollY) + 'px';
 	}
 
+	// Post windows only: the explorer, folder windows and dialogs are
+	// never counted against, or replaced by, the cap
+	function openPosts() {
+		return Array.prototype.slice.call(document.querySelectorAll('.content')).filter(function(w) {
+			return !w.classList.contains('settings-win') && !w.classList.contains('folder-win');
+		});
+	}
+
+	// Win95 error box; replaces any previous one
+	function showError(message) {
+		var old = document.querySelector('.err-win');
+		if (old) old.remove();
+		var box = document.createElement('div');
+		box.className = 'err-win active-win';
+		box.innerHTML = '<div class="post_title"><h1>Hikikomori</h1></div>'
+			+ '<div class="err-body"><span class="err-ic">&#9888;&#65039;</span><p>' + message + '</p></div>'
+			+ '<div class="err-btnrow"><button>OK</button></div>';
+		document.body.appendChild(box);
+		box.querySelector('button').addEventListener('click', function() { box.remove(); });
+	}
+
 	// SPA-like navigation: intercept post link clicks to avoid full page
-	// reload. Up to three post windows stay open; a fourth replaces the oldest.
+	// reload. At most three post windows; a fourth is refused, Win95-style.
 	function loadPost(url) {
 		// One window per post: ?tag= variants of the same URL are the same post
 		var key = url.split('?')[0];
@@ -256,18 +296,19 @@
 			dup.dispatchEvent(new MouseEvent('mousedown'));
 			return;
 		}
+		if (openPosts().length >= 3) {
+			showError('There is not enough memory to open another window. '
+				+ 'Close one of the open posts, and then try again.');
+			return;
+		}
 		fetch(url).then(function(res) { return res.text(); }).then(function(html) {
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(html, 'text/html');
 			var newContent = doc.querySelector('.content');
-			var open = Array.prototype.slice.call(document.querySelectorAll('.content'));
+			var open = openPosts();
 			if (newContent) {
-				if (open.length >= 3) {
-					open[0].replaceWith(newContent);
-				} else {
-					var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
-					anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
-				}
+				var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
+				anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				newContent.setAttribute('data-url', key);
 				placeWindow(newContent);
 				// Scripts inserted via DOMParser are inert; recreate them so

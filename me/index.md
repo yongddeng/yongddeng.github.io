@@ -1,6 +1,7 @@
 ---
 layout: me
-title: me
+title: me.txt
+winclass: pad-win
 ---
 
 
