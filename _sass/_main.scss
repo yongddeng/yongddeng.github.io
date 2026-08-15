@@ -341,52 +341,65 @@ ul.topbar {
 		flex-direction: column;
 	}
 }
+// Explorer "List" view: 16px icon + name rows flowing into columns.
+// Used by the folder windows and My Computer's file pane.
+@mixin file-list-view {
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 4px 0;
+		height: 100%;
+		box-sizing: border-box;
+		display: flex;
+		flex-flow: column wrap;
+		align-content: flex-start;
+		overflow-x: auto;
+
+		li {
+			width: 230px;
+			padding: 0;
+
+			a {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 3px 8px;
+				margin: 0;
+				text-decoration: none;
+				color: #000000;
+				white-space: nowrap;
+
+				img {
+					width: 16px;
+					height: 16px;
+					flex: none;
+					margin: 0;
+					image-rendering: pixelated;
+				}
+
+				span {
+					overflow: hidden;
+					text-overflow: ellipsis;
+					padding: 1px 3px;
+					border: 1px dotted transparent;
+				}
+
+				&:hover span {
+					background: #000080;
+					color: #ffffff;
+					border-color: #ffff00;
+				}
+			}
+		}
+	}
+}
 // Standalone folder window spawned by a desktop tag icon
 .folder-win {
 	width: 500px;
 
 	.post_content {
-		height: 280px;
-
-		ul {
-			list-style: none;
-			margin: 0;
-			padding: 4px;
-
-			li {
-				display: inline-block;
-				margin: 10px 12px;
-				max-width: 16ch;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
-				text-align: center;
-
-				img {
-					display: block;
-					width: 32px;
-					height: 32px;
-					margin: 0 auto 8px;
-					image-rendering: pixelated;
-				}
-
-				a {
-					text-decoration: none;
-					color: #000000;
-
-					span {
-						padding: 1px 3px;
-						border: 1px dotted transparent;
-					}
-
-					&:hover span {
-						background: #000080;
-						color: #ffffff;
-						border-color: #ffff00;
-					}
-				}
-			}
-		}
+		height: 240px;
+		@include file-list-view;
 	}
 
 	.folder-status {
@@ -405,45 +418,7 @@ ul.topbar {
 	max-height: 280px;
 	overflow-y: auto;
 	display: inline-block;
-
-	ul {
-		list-style: none;
-
-		li {
-			display: inline-block;
-			margin: 10px;
-			max-width: 16ch;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			text-align: center;
-
-			img {
-				display: block;
-				width: 32px;
-				height: 32px;
-				margin: 0 auto;
-				margin-bottom: 8px;
-				image-rendering: pixelated;
-			}
-
-			a {
-				text-decoration: none;
-				color: #000000;
-
-				span {
-					padding: 1px 3px;
-					border: 1px dotted transparent;
-				}
-
-				&:hover span {
-					background: #000080;
-					color: #ffffff;
-					border-color: #ffff00;
-				}
-			}
-		}
-	}
+	@include file-list-view;
 }
 .tag_list {
 	width: 28%;
