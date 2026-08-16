@@ -73,6 +73,14 @@
 	function resizable (el, onResize, onReset) {
 		var grip = el.querySelector(".win-grip");
 		if (!grip) return;
+		// A session restore sets the size directly, skipping the drag
+		el.addEventListener("win:relayout", function () {
+			if (onResize) onResize();
+		});
+		// Shut Down restores the default size, like the grip's double-click
+		el.addEventListener("win:reset", function () {
+			if (onReset) onReset();
+		});
 		grip.addEventListener("dblclick", function () {
 			el.style.width = "";
 			el.style.height = "";

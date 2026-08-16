@@ -623,6 +623,11 @@ ul.topbar {
 			cursor: pointer;
 		}
 
+		// the shutdown box asks Yes / No, the error box only OK
+		button + button {
+			margin-left: 10px;
+		}
+
 		button:active {
 			border-color: #000000 #ffffff #ffffff #000000;
 		}
