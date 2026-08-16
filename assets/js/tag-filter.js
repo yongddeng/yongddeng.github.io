@@ -63,21 +63,27 @@
 		});
 	}
 
+	// Which tag the explorer pane is filtered to, null for all posts
+	var explorerTag = null;
+
 	function filterByTag(tagName) {
 		var filtered = postsForTag(tagName);
 		renderPostList(filtered, tagName);
 		updateObjectCount(filtered.length);
 		updateTitleBar(tagName);
+		explorerTag = tagName;
 	}
 
 	function showAllPosts() {
 		renderPostList(posts, null);
 		updateObjectCount(posts.length);
 		updateTitleBar(null);
+		explorerTag = null;
 	}
 
-	// A tag folder is its own window: files only, no drive tree
-	function openFolderWindow(tagName) {
+	// A tag folder is its own window: files only, no drive tree.
+	// geom (optional) restores a saved position instead of a random one.
+	function openFolderWindow(tagName, geom) {
 		var existing = document.querySelector('.folder-win[data-tag="' + tagName + '"]');
 		if (existing) {
 			existing.dispatchEvent(new MouseEvent('mousedown'));
@@ -104,7 +110,7 @@
 			e.preventDefault();
 			loadPost(link.getAttribute('href'));
 		});
-		placeWindow(win);
+		placeWindow(win, geom);
 		// 001.js adds drag/raise/close/resize, taskbar adds a button
 		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
 		win.dispatchEvent(new MouseEvent('mousedown'));
@@ -214,8 +220,23 @@
 		postListDiv.style.visibility = 'visible';
 	}
 
-	// Random spot overlapping the open windows least (zero if possible)
-	function placeWindow(win) {
+	// Pin a window to saved coordinates, used when restoring a session.
+	// Clamped so the title bar stays reachable in a shrunken viewport.
+	function applyGeom(win, g) {
+		win.style.position = 'absolute';
+		win.style.margin = '0';
+		win.style.left = Math.max(0, Math.min(g.left || 0, window.innerWidth - 80)) + 'px';
+		win.style.top = Math.max(0, Math.min(g.top || 0, window.innerHeight - 60)) + 'px';
+		if (g.width) win.style.width = g.width + 'px';
+		if (g.height) win.style.height = g.height + 'px';
+		// 001.js re-stretches the panes of a restored-size explorer
+		win.dispatchEvent(new CustomEvent('win:relayout'));
+	}
+
+	// Random spot overlapping the open windows least (zero if possible),
+	// unless geom pins it to a remembered one
+	function placeWindow(win, geom) {
+		if (geom) return applyGeom(win, geom);
 		var others = [];
 		var wrapper = document.querySelector('.wrapper');
 		if (wrapper && wrapper !== win && wrapper.style.display !== 'none') others.push(wrapper.getBoundingClientRect());
@@ -272,21 +293,24 @@
 		box.querySelector('button').addEventListener('click', function() { box.remove(); });
 	}
 
-	// Opens a post as a window; at most three, a fourth is refused
-	function loadPost(url) {
+	// Opens a post as a window; at most three, a fourth is refused.
+	// opts.geom pins the position, opts.force waives the cap (session restore).
+	// Returns a promise so a restore can reopen windows in their saved order.
+	function loadPost(url, opts) {
+		opts = opts || {};
 		// ?tag= variants of the same URL are the same post
 		var key = url.split('?')[0];
 		var dup = document.querySelector('.content[data-url="' + key + '"]');
 		if (dup) {
 			dup.dispatchEvent(new MouseEvent('mousedown'));
-			return;
+			return Promise.resolve();
 		}
-		if (openPosts().length >= 3) {
+		if (!opts.force && openPosts().length >= 3) {
 			showError('There is not enough memory to open another window. '
 				+ 'Close one of the open posts, and then try again.');
-			return;
+			return Promise.resolve();
 		}
-		fetch(url).then(function(res) { return res.text(); }).then(function(html) {
+		return fetch(url).then(function(res) { return res.text(); }).then(function(html) {
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(html, 'text/html');
 			var newContent = doc.querySelector('.content');
@@ -295,7 +319,7 @@
 				var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
 				anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				newContent.setAttribute('data-url', key);
-				placeWindow(newContent);
+				placeWindow(newContent, opts.geom);
 				// DOMParser scripts are inert; recreate them so they run
 				newContent.querySelectorAll('script').forEach(function(old) {
 					var s = document.createElement('script');
@@ -323,11 +347,13 @@
 			var newTitle = doc.querySelector('title');
 			if (newTitle) document.title = newTitle.textContent;
 		}).catch(function() {
-			window.location.href = url;
+			// a restore of a post since renamed must not navigate away
+			if (!opts.force) window.location.href = url;
 		});
 	}
 
-	// URL stays untouched: a refresh always lands on a clean desktop
+	// URL stays untouched; session.js is what carries the desktop across a
+	// refresh, and Start > Shut Down is what clears it
 	postListDiv.addEventListener('click', function(e) {
 		var link = e.target.closest('a');
 		if (!link) return;
@@ -357,4 +383,14 @@
 			showAllPosts();
 		}
 	});
+
+	// session.js reopens windows through the same paths a click takes
+	window.desktop = {
+		loadPost: loadPost,
+		openFolderWindow: openFolderWindow,
+		filterByTag: filterByTag,
+		showAllPosts: showAllPosts,
+		applyGeom: applyGeom,
+		explorerTag: function() { return explorerTag; }
+	};
 })();
