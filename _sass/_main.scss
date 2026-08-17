@@ -345,21 +345,88 @@ body {
 		height: 10px;
 	}
 }
-ul.topbar {
-	list-style: none;
-	padding: 0 10px;
-	margin: 3px 0 3px 0;
-	position: relative;
+// Notepad-style Find dialogue, opened with Ctrl+F on the focused window
+.find-dlg {
+	position: absolute;
+	top: 26px;
+	right: 8px;
+	z-index: 6;
+	background: #c0c0c0;
+	@include bevel;
+	padding: 2px;
+	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 
-	li {
-		display: inline-block;
-		margin: 0 5px 0 0;
+	.find-dlg-tbar {
+		background: linear-gradient(to right, #00007f, #1084d0);
+		color: #ffffff;
+		font-size: 11px;
+		font-weight: bold;
+		padding: 2px 4px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
 	}
-	a {
-		text-decoration: none;
+
+	.find-dlg-x {
+		background: #cccccc;
 		color: #000000;
+		width: 13px;
+		height: 11px;
+		font-size: 9px;
+		font-weight: bold;
+		line-height: 9px;
+		text-align: center;
+		@include bevel;
+		cursor: pointer;
 	}
 
+	.find-dlg-body {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 8px 6px;
+	}
+
+	input {
+		width: 130px;
+		padding: 1px 3px;
+		@include bevel(false);
+		background: #ffffff;
+		font-size: 12px;
+		height: 18px;
+		box-sizing: border-box;
+
+		&:focus {
+			outline: none;
+		}
+	}
+
+	button {
+		width: 18px;
+		height: 18px;
+		padding: 0;
+		font-size: 7px;
+		background: #c0c0c0;
+		@include bevel;
+		cursor: pointer;
+
+		&:active {
+			border-color: #000000 #ffffff #ffffff #000000;
+		}
+	}
+
+	.find-count {
+		font-size: 11px;
+		color: #6b6b6b;
+		min-width: 26px;
+		text-align: right;
+	}
+}
+.find-hl {
+	background: #ffff00;
+}
+.find-hl.current {
+	background: #ff9632;
 }
 .post_list, .tag_list, .post_content {
 	background: var(--paper, #fbfafb);
@@ -382,8 +449,6 @@ ul.topbar {
 // me.txt: the About page as an MS-DOS prompt that has run `type me.txt`
 .content.dos-win {
 	width: 820px;
-
-	.topbar { display: none; }
 
 	.post_content {
 		height: 280px;
