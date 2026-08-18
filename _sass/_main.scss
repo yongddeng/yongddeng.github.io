@@ -235,7 +235,7 @@ body {
 	min-width: 420px;
 	min-height: 300px;
 	overflow: hidden;
-	width: 810px;
+	width: 750px;
 	margin: auto;
 	margin-top: 20px;
 	background: #bfb8bf;
@@ -246,6 +246,21 @@ body {
 	// left of centre like a real Win98 desktop
 	@media (min-width: 910px) and (max-width: 1100px) {
 		margin-left: 100px;
+	}
+}
+// Explorer window: grid keeps the status bar flush with the bottom edge
+// and lets both panes stretch when the window is grip-resized
+.wrapper {
+	display: grid;
+	grid-template-columns: 26% minmax(0, 1fr);
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	column-gap: 4px;
+	row-gap: 3px;
+	height: 340px;
+	padding: 2px 4px;
+
+	.default_title, .post_total {
+		grid-column: 1 / -1;
 	}
 }
 .default_title, .post_title {
@@ -896,23 +911,15 @@ img.task-menu-ic {
 	}
 }
 .post_list {
-	width: 72.2%;
 	box-sizing: border-box;
-	margin: 0 auto;
-	min-height: 280px;
-	max-height: 280px;
+	min-height: 0;
 	overflow-y: auto;
-	display: inline-block;
 	@include file-details-view;
 }
 .tag_list {
-	width: 26%;
 	box-sizing: border-box;
-	margin: 0 auto;
-	min-height: 280px;
-	max-height: 280px;
+	min-height: 0;
 	overflow-y: auto;
-	display: inline-block;
 
 	img {
 		height: 16px;
@@ -960,24 +967,52 @@ img.task-menu-ic {
     padding:0 0 0 20px;
 }
 .post_total {
+	display: flex;
+	column-gap: 4px;
+
 	.left, .right {
 		border: 1px solid;
 		border-color: #888888 #dadada #dadada #888888;
-		display: inline-block;
+		box-sizing: border-box;
 		padding: 1px 3px;
 	}
 	.left {
-		width: 31%;
-		margin-left: 2px;
+		flex: 0 0 26%;
 	}
 	.right {
-		width: 66%;
-		margin-right: 2px;
+		flex: 1 1 auto;
 	}
 }
 .content {
 	display: flex;
 	flex-direction: column;
+
+	// F1 status line: "Ready/Done" cell plus Win95 progress blocks that
+	// fill as the post is scrolled (assets/js/progress.js)
+	.post_total {
+		width: 98.5%;
+		margin: 3px auto 0;
+
+		.left {
+			flex: 1 1 auto;
+		}
+		.right {
+			flex: 0 0 150px;
+			display: flex;
+			column-gap: 2px;
+			padding: 3px 4px;
+
+			i {
+				flex: 1;
+			}
+			i.on {
+				background: #00007f;
+			}
+		}
+	}
+}
+.content.dos-win .post_total, .content.deck-win .post_total {
+	display: none;
 }
 // Win95 corner grip: sits above the content pane's scrollbar corner,
 // which swallows the browser-native resize handle
@@ -999,7 +1034,7 @@ img.task-menu-ic {
 	font-size: var(--text, 13px);
 	font-family: var(--font, inherit);
 	width: 98.5%;
-	height: 520px;
+	height: 500px;
 	flex: 1 1 auto;
 	min-height: 0;
 	padding: 2px;
@@ -1201,75 +1236,29 @@ pre code.numbered {
 		width: 97%;
 	}
 }
-@media only screen and (max-width: 810px) {
+@media only screen and (max-width: 760px) {
 	.wrapper {
 		width: 90%;
 	}
-	.post_total {
-		.left {
-			width: 35%;
-		}
-		.right {
-			float: right;
-			width: 62%;
-		}
-	}
 }
+// Narrow screens: drive tree stacks above the file list
 @media only screen and (max-width: 750px) {
+	.wrapper {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: auto auto minmax(0, 1fr) auto;
+		height: 480px;
+	}
 	.tag_list {
-		width: 99%;
+		max-height: 150px;
 	}
-	.post_list {
-		width: 99%;
-		float: left;
-	}
-	.post_total {
-		.left {
-			width: 36%;
-		}
-		.right {
-			float: right;
-			width: 60%;
-		}
+	.post_total .left {
+		flex-basis: 36%;
 	}
 }
 @media only screen and (max-width: 610px) {
 	// Name needs the room more than Size does
 	.dh-size, .sz {
 		display: none;
-	}
-	.tag_list {
-		width: 98.7%;
-	}
-	.post_list {
-		width: 98.7%;
-		float: left;
-	}
-	.post_total {
-		.left {
-			width: 35.7%;
-		}
-	}
-}
-@media only screen and (max-width: 520px) {
-	.post_total {
-		.left {
-			width: 34.5%;
-		}
-	}
-}
-@media only screen and (max-width: 410px) {
-	.post_total {
-		.left {
-			width: 34%;
-		}
-	}
-}
-@media only screen and (max-width: 375px) {
-	.post_total {
-		.left {
-			width: 33%;
-		}
 	}
 }
 ::-webkit-scrollbar {
