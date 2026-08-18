@@ -108,8 +108,22 @@
 			}
 			var sess = null;
 			try { sess = JSON.parse(sessionStorage.getItem('desk-session')); } catch (e) {}
+			// Pre-paint twin of applyGeom (tag-filter.js) so a restored
+			// window paints straight at its saved spot instead of jumping
+			// there; keep the clamping in sync with the original.
+			window.preGeom = function (win, g) {
+				if (!win || !g) return;
+				win.style.position = 'absolute';
+				win.style.margin = '0';
+				win.style.left = Math.max(0, Math.min(g.left || 0, window.innerWidth - 80)) + 'px';
+				win.style.top = Math.max(0, Math.min(g.top || 0, window.innerHeight - 60)) + 'px';
+				if (g.width) win.style.width = g.width + 'px';
+				if (g.height) win.style.height = g.height + 'px';
+			};
+			window.deskSess = sess;
 			if (sess && sess.explorer) {
 				if (sess.explorer.hidden) document.querySelector('.wrapper').style.display = 'none';
+				else preGeom(document.querySelector('.wrapper'), sess.explorer.geom);
 			} else if (!tagged && window.matchMedia('(min-width: 910px)').matches) {
 				document.querySelector('.wrapper').style.display = 'none';
 			}
@@ -127,6 +141,15 @@
 	</div>
 	{% if page.title %}
         <div class="content{% if page.winclass %} {{ page.winclass }}{% endif %}" data-url="{{ page.url }}">
+			<script>
+			// Runs while this window's div is still open, ahead of first
+			// paint of its contents; session.js re-applies the same geom.
+			(function (win) {
+				(window.deskSess && window.deskSess.windows || []).forEach(function (w) {
+					if (w.kind === 'post' && w.id === win.dataset.url) preGeom(win, w.geom);
+				});
+			})(document.currentScript.parentElement);
+			</script>
 			<div class="post_title">
 				<img src="/assets/img/{{ page.icon | default: 'notepad.png' }}" />
 				<h1>{{  page.title  }}</h1>
