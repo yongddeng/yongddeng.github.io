@@ -235,7 +235,7 @@ body {
 	min-width: 420px;
 	min-height: 300px;
 	overflow: hidden;
-	width: 800px;
+	width: 810px;
 	margin: auto;
 	margin-top: 20px;
 	background: #bfb8bf;
@@ -345,6 +345,89 @@ body {
 		height: 10px;
 	}
 }
+// Notepad-style menu bar: File (date, close), Edit (find), View (outline)
+ul.topbar {
+	list-style: none;
+	display: flex;
+	padding: 0 2px;
+	margin: 1px 0 3px 0;
+	position: relative;
+
+	.tb-menu {
+		position: relative;
+	}
+	.tb-label {
+		display: inline-block;
+		padding: 1px 7px;
+		font-size: 13px;
+		line-height: 17px;
+		cursor: default;
+
+		&::first-letter {
+			text-decoration: underline;
+		}
+	}
+	.tb-menu.open > .tb-label {
+		background: #00007f;
+		color: #ffffff;
+	}
+	.tb-drop {
+		display: none;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		z-index: 7;
+		min-width: 165px;
+		max-height: 330px;
+		overflow-y: auto;
+		background: #c0c0c0;
+		@include bevel;
+		padding: 2px;
+		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		white-space: nowrap;
+	}
+	.tb-menu.open > .tb-drop {
+		display: block;
+	}
+	.tb-item {
+		display: flex;
+		justify-content: space-between;
+		gap: 20px;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 3px 16px 3px 20px;
+		font-size: 12px;
+		font-family: inherit;
+		text-align: left;
+		text-decoration: none;
+		background: none;
+		border: 0;
+		color: #000000;
+		cursor: default;
+
+		&:hover {
+			background: #00007f;
+			color: #ffffff;
+		}
+	}
+	.tb-static {
+		color: #6b6b6b;
+
+		&:hover {
+			background: none;
+			color: #6b6b6b;
+		}
+	}
+	.tb-sub {
+		padding-left: 36px;
+	}
+	.tb-sep {
+		height: 0;
+		border-top: 1px solid #808080;
+		border-bottom: 1px solid #ffffff;
+		margin: 3px 1px;
+	}
+}
 // Notepad-style Find dialogue, opened with Ctrl+F on the focused window
 .find-dlg {
 	position: absolute;
@@ -449,6 +532,8 @@ body {
 // me.txt: the About page as an MS-DOS prompt that has run `type me.txt`
 .content.dos-win {
 	width: 820px;
+
+	.topbar { display: none; }
 
 	.post_content {
 		height: 280px;

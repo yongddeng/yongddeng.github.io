@@ -21,7 +21,7 @@
 	function minimize (content) {
 		var cont = content.querySelector(".post_content");
 		if (getWidth() > 900) {
-			content.style.width = "800px";
+			content.style.width = "810px";
 			cont.style.width = "98.5%";
 		}
 	}

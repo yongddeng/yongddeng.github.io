@@ -127,15 +127,20 @@
 		return state;
 	}
 
+	function openFind(win) {
+		if (!win || !win.querySelector('.post_content')) return false;
+		var state = getState(win);
+		state.dlg.style.display = '';
+		state.input.focus();
+		state.input.select();
+		return true;
+	}
+	// Also opened from the Edit menu (menubar.js)
+	window.openFind = openFind;
+
 	document.addEventListener('keydown', function (e) {
 		if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-			var win = document.querySelector('.content.active-win');
-			if (!win || !win.querySelector('.post_content')) return;
-			e.preventDefault();
-			var state = getState(win);
-			state.dlg.style.display = '';
-			state.input.focus();
-			state.input.select();
+			if (openFind(document.querySelector('.content.active-win'))) e.preventDefault();
 		}
 	});
 })();
