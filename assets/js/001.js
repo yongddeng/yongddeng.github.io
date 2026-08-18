@@ -21,7 +21,7 @@
 	function minimize (content) {
 		var cont = content.querySelector(".post_content");
 		if (getWidth() > 900) {
-			content.style.width = "810px";
+			content.style.width = "750px";
 			cont.style.width = "98.5%";
 		}
 	}
@@ -122,21 +122,8 @@
 		raisable(wrapper);
 		var tbar = wrapper.querySelector(".default_title");
 		if (tbar) dragify(wrapper, tbar);
-		// The tree and file panes stretch to fill the resized window
-		resizable(wrapper, function () {
-			var chrome = wrapper.querySelector(".default_title").offsetHeight +
-				wrapper.querySelector(".post_total").offsetHeight + 14;
-			var h = Math.max(120, wrapper.clientHeight - chrome);
-			wrapper.querySelectorAll(".tag_list, .post_list").forEach(function (p) {
-				p.style.minHeight = h + "px";
-				p.style.maxHeight = h + "px";
-			});
-		}, function () {
-			wrapper.querySelectorAll(".tag_list, .post_list").forEach(function (p) {
-				p.style.minHeight = "";
-				p.style.maxHeight = "";
-			});
-		});
+		// The grid layout stretches the tree and file panes on its own
+		resizable(wrapper);
 	}
 
 	function initWindow (content) {

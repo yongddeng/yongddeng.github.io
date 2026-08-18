@@ -22,9 +22,9 @@
 			function g(k, d) { try { return localStorage.getItem('set-' + k) || d; } catch (e) { return d; } }
 			r.style.setProperty('--desk', g('desk', '#008082'));
 			r.style.setProperty('--paper', g('paper', '#fbfafb'));
-			r.style.setProperty('--text', g('text', '13px'));
+			r.style.setProperty('--text', g('text', '12px'));
 			var fonts = { arial: '"Helvetica Neue", Arial, sans-serif', georgia: 'Georgia, "Times New Roman", serif', courier: '"Courier New", monospace' };
-			r.style.setProperty('--font', fonts[g('font', 'arial')] || fonts.arial);
+			r.style.setProperty('--font', fonts[g('font', 'georgia')] || fonts.georgia);
 		})();
 	</script>
 	<script src="/assets/js/highlight.pack.js"></script>
@@ -158,6 +158,10 @@
 					{% include comment.html %}
 				{% endif %}
 			</div>
+			<div class="post_total">
+				<div class="left">Ready</div>
+				<div class="right"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+			</div>
 			<div class="win-grip"></div>
 		</div>
     {% endif %}
@@ -186,6 +190,7 @@
 	<script src="/assets/js/xref.js"></script>
 	<script src="/assets/js/find.js"></script>
 	<script src="/assets/js/menubar.js"></script>
+	<script src="/assets/js/progress.js"></script>
 	<div class="taskbar">
 		<div class="task-start-wrap">
 			<button class="task-start" id="task-start">Start</button>

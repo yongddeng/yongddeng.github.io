@@ -1,7 +1,7 @@
 // Start → System Properties: General is the About sheet, Settings holds
 // the controls. Persisted in localStorage, applied pre-paint from <head>.
 (function () {
-	var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '13px', clock: '12', font: 'arial' };
+	var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '12px', clock: '12', font: 'georgia' };
 	var FONTS = {
 		arial: '"Helvetica Neue", Arial, sans-serif',
 		georgia: 'Georgia, "Times New Roman", serif',
