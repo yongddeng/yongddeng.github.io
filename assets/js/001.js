@@ -33,8 +33,18 @@
 		document.querySelectorAll(".wrapper, .content").forEach(function (w) {
 			w.classList.toggle("active-win", w === el);
 		});
-		document.dispatchEvent(new CustomEvent("window:focused"));
+		document.dispatchEvent(new CustomEvent("window:focused", { detail: { el: el } }));
 	}
+
+	// The address bar tracks the front window: a post's permalink when a
+	// post is in front, "/" otherwise (explorer, folder windows). Replace,
+	// not push: focus clicks must not pile up history entries.
+	document.addEventListener("window:focused", function (e) {
+		var url = e.detail.el.dataset.url || "/";
+		if (location.pathname + location.search !== url) {
+			history.replaceState(null, "", url);
+		}
+	});
 
 	function raisable (el) {
 		el.addEventListener("mousedown", function () {

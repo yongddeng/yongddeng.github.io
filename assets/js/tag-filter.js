@@ -319,6 +319,12 @@
 				var anchor = open.length ? open[open.length - 1] : document.querySelector('.wrapper');
 				anchor.parentNode.insertBefore(newContent, anchor.nextSibling);
 				newContent.setAttribute('data-url', key);
+				// A click-opened post gets a history entry so Back walks the
+				// opened posts. Not on restore (force), and not on popstate
+				// re-entry, where location already matches key.
+				if (!opts.force && location.pathname !== key) {
+					history.pushState(null, '', key);
+				}
 				placeWindow(newContent, opts.geom);
 				// DOMParser scripts are inert; recreate them so they run
 				newContent.querySelectorAll('script').forEach(function(old) {
@@ -352,8 +358,6 @@
 		});
 	}
 
-	// URL stays untouched; session.js is what carries the desktop across a
-	// refresh, and Start > Shut Down is what clears it
 	postListDiv.addEventListener('click', function(e) {
 		var link = e.target.closest('a');
 		if (!link) return;
