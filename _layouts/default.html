@@ -134,6 +134,24 @@
 				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
 				<div class="btn btn_min"><span class="fa fa-window-minimize"></span></div>
 			</div>
+			<ul class="topbar">
+				<li class="tb-menu"><span class="tb-label">File</span>
+					<div class="tb-drop">
+						<span class="tb-item tb-static">{{ page.date | date: '%B %-d, %Y' }}</span>
+						<div class="tb-sep"></div>
+						<a class="tb-item" href="/">Close</a>
+					</div>
+				</li>
+				<li class="tb-menu"><span class="tb-label">Edit</span>
+					<div class="tb-drop">
+						<button type="button" class="tb-item" data-act="find">Find...<span class="tb-key">Ctrl+F</span></button>
+						<button type="button" class="tb-item" data-act="selectall">Select All<span class="tb-key">Ctrl+A</span></button>
+					</div>
+				</li>
+				<li class="tb-menu"><span class="tb-label">View</span>
+					<div class="tb-drop tb-outline"></div>
+				</li>
+			</ul>
 			<div class="post_content">
         		{{ content }}
 				{% if page.title and page.no_comment != true %}
@@ -167,6 +185,7 @@
 	<script src="/assets/js/tag-filter.js"></script>
 	<script src="/assets/js/xref.js"></script>
 	<script src="/assets/js/find.js"></script>
+	<script src="/assets/js/menubar.js"></script>
 	<div class="taskbar">
 		<div class="task-start-wrap">
 			<button class="task-start" id="task-start">Start</button>
