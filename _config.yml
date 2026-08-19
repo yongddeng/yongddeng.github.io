@@ -6,6 +6,7 @@ url: https://yongddeng.github.io
 name: Hikikomori # Your Site Name
 description: # Your description here
 google_verification: null
+cloudflare_analytics_token: d39f12a22c66442389e654cf251872e5
 
 # File management
 include: [".htaccess"]
