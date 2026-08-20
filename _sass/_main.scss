@@ -436,6 +436,29 @@ ul.topbar {
 	.tb-sub {
 		padding-left: 36px;
 	}
+	// Keyword flyout beside a hovered outline row; fixed so it escapes the
+	// outline's max-height scroll and the window's overflow:hidden
+	.tb-arr {
+		margin-left: auto;
+		font-size: 9px;
+	}
+	.tb-fly {
+		display: none;
+		position: fixed;
+		z-index: 9;
+		min-width: 165px;
+		max-height: 330px;
+		overflow-y: auto;
+		background: #c0c0c0;
+		@include bevel;
+		padding: 2px;
+		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		white-space: nowrap;
+	}
+	.tb-item.fly-open {
+		background: #00007f;
+		color: #ffffff;
+	}
 	.tb-sep {
 		height: 0;
 		border-top: 1px solid #808080;
@@ -525,6 +548,9 @@ ul.topbar {
 }
 .find-hl.current {
 	background: #ff9632;
+}
+.kw-flash {
+	background: #ffff00;
 }
 .post_list, .tag_list, .post_content {
 	background: var(--paper, #fbfafb);
