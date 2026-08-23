@@ -1355,7 +1355,8 @@ pre code.numbered {
 	overflow-x: hidden;
 	padding: 8px 12px;
 	background: var(--paper, #fbfafb);
-	font-size: 13px;
+	font-size: var(--text, 12px);
+	font-family: var(--font, inherit);
 
 	p { line-height: 150%; margin-bottom: 15px; }
 	a { color: #0000ff; cursor: default; }
