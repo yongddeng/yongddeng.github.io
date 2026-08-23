@@ -107,7 +107,8 @@
       }
 
       // Scroll to section if specified
-      if (section) {
+      function scrollToSection() {
+        if (!section) return;
         var headings = body.querySelectorAll('h1, h2, h3, h4');
         for (var j = 0; j < headings.length; j++) {
           if (headings[j].textContent.indexOf(section + '.') !== -1) {
@@ -115,6 +116,14 @@
             break;
           }
         }
+      }
+
+      // Fetched HTML is pre-MathJax; typeset the $...$ runs, then scroll
+      // once heights have settled
+      if (window.MathJax && MathJax.Hub) {
+        MathJax.Hub.Queue(['Typeset', MathJax.Hub, body], scrollToSection);
+      } else {
+        scrollToSection();
       }
     });
   }
