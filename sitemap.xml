@@ -31,7 +31,9 @@ layout: null
     {% endunless %}
   {% endfor %}
   {% for page in site.pages %}
-    {% unless page.sitemap.exclude == "yes" %}
+    {% comment %} Only rendered pages: a layout excludes CSS, source maps, the
+         sitemap itself and the raw Google verification file. {% endcomment %}
+    {% unless page.layout == nil or page.layout == empty or page.sitemap.exclude == "yes" %}
     <url>
       <loc>{{ site.url }}{{ page.url | remove: "index.html" }}</loc>
       {% if page.sitemap.lastmod %}

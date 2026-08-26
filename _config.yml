@@ -4,16 +4,12 @@ url: https://yongddeng.github.io
 
 # variables
 name: Hikikomori # Your Site Name
-description: # Your description here
-google_verification: null
+description: Notes on mathematics and computer science.
 cloudflare_analytics_token: d39f12a22c66442389e654cf251872e5
 
 # File management
 include: [".htaccess"]
 exclude: ["README.md", "LICENSE"]
-
-# # SEO management
-# plugins: ['jekyll-paginate', 'jekyll-sitemap', 'jekyll-include-cache', 'jekyll-gist']
 
 # Sass
 sass:
