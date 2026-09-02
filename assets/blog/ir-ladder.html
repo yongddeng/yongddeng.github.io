@@ -1,0 +1,18 @@
+<body style="margin: 0; background: white;">
+<div style="position: relative; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;"> <div style="position: relative; flex-shrink: 0; width: 315px; background: white;"> <img src="https://raw.githubusercontent.com/t-vi/acdl2020/cb556dbbd19c7eaee3627c799e5abf1168522bc8/Ch15_F4_PyTorch_calling_pytorch.svg" width="100%"> <a href="https://github.com/t-vi/acdl2020/blob/master/pytorch_introduction.ipynb" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> <div style="flex-shrink: 0;"><div style="background: white; border: 1px solid #ccc; border-radius: 4px; padding: 5px 7px; max-width: 250px; font-family: monospace; font-size: 7px; line-height: 1.4; overflow-x: auto;">
+    <div style="display: flex; gap: 12px;"><span style="width: 66px; flex-shrink: 0; color: #666;">Python source</span><span>y = x @ w</span></div>
+    <div style="display: flex; gap: 12px;"><span style="width: 66px; flex-shrink: 0; color: #666;">CPython bytecode</span><span>LOAD_FAST x · LOAD_FAST w · BINARY_OP @</span></div>
+    <div style="border-top: 1px dashed #999; color: #999; font-style: italic; margin-top: 4px; padding: 2px 0 4px;">capture, only the tensor operations cross out of Python</div>
+    <div style="border: 1px solid #ddd; border-radius: 3px; background: #f7f7f7; margin: 4px 0; padding: 4px 6px;">
+      <div style="display: flex; gap: 12px;"><span style="width: 62px; flex-shrink: 0; color: #d0312d;">TorchScript IR</span><span>%y : Tensor = aten::matmul(%x, %w)</span></div>
+      <div style="display: flex; gap: 12px;"><span style="width: 62px; flex-shrink: 0; color: #666;">Torch IR (FX)</span><span>%y = call_function[torch.matmul]</span></div>
+      <div style="display: flex; gap: 12px;"><span style="width: 62px; flex-shrink: 0; color: #666;">ATen IR (FX)</span><span>%y = aten.mm(%x, %w)</span></div>
+      <div style="color: #999; font-style: italic; margin-top: 2px;">one altitude in three notations, one node per operation</div>
+    </div>
+    <div style="border-top: 1px dashed #999; color: #999; font-style: italic; padding: 2px 0 8px;">the cliff, node becomes loops, matmul unrecoverable below</div>
+    <div style="display: flex; gap: 12px;"><span style="width: 66px; flex-shrink: 0; color: #666;">Inductor IR</span><span>for i0, i1: load(x) · load(w) · store(y)</span></div>
+    <div style="display: flex; gap: 12px;"><span style="width: 66px; flex-shrink: 0; color: #666;">Triton IR</span><span>%c = tt.dot %a, %b</span></div>
+    <div style="display: flex; gap: 12px;"><span style="width: 66px; flex-shrink: 0; color: #666;">LLVM IR</span><span>%3 = fadd float %1, %2</span></div>
+    <div style="display: flex; gap: 12px;"><span style="width: 66px; flex-shrink: 0; color: #666;">PTX</span><span>fma.rn.f32 %f4, %f1, %f2, %f3</span></div>
+  </div></div> <svg style="position: absolute; left: 170px; top: 0; width: 220px; height: 100%; pointer-events: none; overflow: visible;" viewBox="0 0 220 240" preserveAspectRatio="none"><defs><marker id="irlad-ah" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#d0312d"/></marker></defs><path d="M 46 38 C 130 10, 160 50, 176 88" fill="none" stroke="#d0312d" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#irlad-ah)"/></svg> </div>
+</body>
