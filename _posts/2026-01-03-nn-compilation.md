@@ -1,7 +1,7 @@
 ---
 layout: default
-title: "302. dl compilation"
-tags: cs300
+title: "6xx. dl compilation"
+tags: cs600
 use_math: true
 ---
 
