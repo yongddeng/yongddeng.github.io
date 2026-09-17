@@ -5,10 +5,9 @@ tags: cs600
 use_math: true
 ---
 
-
 # Virtualisation
 ---
-> Hardware used to dictate what software could do. Virtualisation inverted that relationship. Since IBM CP-40 (1967), the story has been to "abstract the machine away" $\to$ "slice it thinner" $\to$ "pack more workloads onto fewer boxes". Began with hypervisors that virtualise entire computers, then containers that isolate without duplicating the kernel, and now orchestrators that manage thousands of both.
+> Hardware used to dictate what software could do until virtualisation inverted the relationship. Since IBM CP-40 (1967), the story has run "abstract the machine away" $\to$ "slice it thinner" $\to$ "pack more workloads onto fewer boxes". Hypervisors virtualise entire computers, containers isolate without duplicating the kernel, and orchestrators now manage thousands of both.
 
 <!-- - https://www.youtube.com/watch?v=zh0OMXg2Kog -->
 
@@ -26,19 +25,11 @@ Vertical (across sections): moving up the stack
 
 <p style="margin-bottom: 12px;"> </p>
 
-A [virtual machine]() (VM) is a software abstraction of a physical computer (e.g. CPU, RAM, SSD, NIC) that an unmodified guest OS boots. Such a system VM virtualises the full hardware, while a process VM (e.g. JVM, PVM, §602#3.1) does only bytecode ISA for a single program. [Virtualisation]() executes guest code natively on the host ISA and intercepts only sensitive operations, admitting many isolated workloads on a machine that historically ran merely one application at 10-15% utilisation. It is distinct from [emulation](), that does not execute guest code on the host CPU but translates a foreign ISA entirely in software, as when QEMU in TCG mode runs an ARM guest on an x86 host.
+A [virtual machine]() (VM) is a software abstraction of a physical computer (e.g. CPU, RAM, NIC) solid enough that an unmodified guest OS boots on it. This full-hardware form is known as the [system VM](), as opposed to the process VM (§602#3.1). How guest instructions reach the physical CPU spans an axis. Specifically, [emulation]() translates instructions of a foreign ISA in software (e.g. the [quick emulator]() (QEMU) running an x86 guest on an ARM host). Whereas, [virtualisation]() executes guest code natively on the host with shared ISA, and intercepts the instructions touching privileged machine state. So, one machine carries isolated workloads, not one application at 10-15% utilisation.
 
-The component that performs this interception is the [hypervisor]() (aka. [VM monitor]()), which creates, schedules, and manages VMs. [Type 1 hypervisors]() run directly on host hardware without an underlying OS (e.g. VMware ESXi, MS Hyper-V: {Azure}). [Type 2 hypervisors]() run as applications on a conventional OS (e.g. VirtualBox, VMware Workstation), trading performance and isolation for convenience. KVM: {AWS, GCP} sits between the two, a kernel module that turns Linux itself into a Type 1 hypervisor while reusing Linux features, such as scheduler, memory allocator, and device drivers, rather than implementing its own.
+The component that performs this interception is the [hypervisor]() (aka. [VM monitor]()), which creates, schedules, and manages VMs. [Type 1 hypervisors]() run directly on host hardware without an underlying OS (e.g. VMware ESXi, MS Hyper-V: Azure). [Type 2 hypervisors]() run as applications on a conventional OS (e.g. VMware Workstation), trading performance and isolation for convenience. The [kernel-based VM]() (KVM, 2007) is a Linux kernel module, making the kernel itself the hypervisor, as in Type 1 by privilege yet Type 2 by packaging. Hence, KVM reuses Linux's features (e.g. the scheduler, memory allocator, and device drivers), and both AWS and GCP build their clouds on it.
 
-[Popek and Goldberg (1974)](https://dl.acm.org/doi/10.1145/361011.361073) formalised the condition under which such interception can rest on hardware privilege alone. Specifically, an instruction is i) [sensitive]() if it alters the machine's configuration or behaves differently according to it, and ii) [privileged]() if it traps when executed outside the highest privilege level. Where sensitive $\subseteq$ privileged, deprivileging the guest makes every sensitive operation trap of its own accord, and [trap-and-emulate]() suffices. IBM mainframes satisfied the inclusion and virtualised cleanly for decades. x86 instead executes a number of sensitive instructions in user mode without trapping and forces software workarounds.
-
-{% comment %}
-1. Guest runs ALL code directly on the CPU at a lower privilege level.
-2. Normal instructions (arithmetic, loads, branches) execute at full speed, no intervention.
-3. Privileged instructions trap (hardware exception) → hypervisor emulates that one instruction → returns control.
-4. 99%+ of instructions never involve the hypervisor.
-5. x86 problem: some sensitive instructions don't trap, they silently execute with wrong results, so the hypervisor never gets to intercept them.
-{% endcomment %}
+[Popek and Goldberg (1974)](https://dl.acm.org/doi/10.1145/361011.361073) formalised when such interception can rest on hardware privilege alone. It states that deprivileging the guest makes every sensitive instruction trap of its own accord, and [trap-and-emulate]() suffices where sensitive $\subseteq$ privileged, with an instruction being i) [sensitive](): if it alters or depends on the machine's configuration; and ii) [privileged](): if it traps outside the highest privilege level. For example, IBM's System/370 satisfied the inclusion by design and virtualised cleanly for decades. x86 instead executes a number of sensitive instructions in user mode without trapping, and therefore, falls outside the theorem and forces software workarounds. 
 
 {% comment %}
 1. 1960s: IBM mainframes virtualised cleanly (CP-40, 1967). P-G formalised why it worked (1974). Trap-and-emulate was sufficient.
@@ -49,11 +40,12 @@ The component that performs this interception is the [hypervisor]() (aka. [VM mo
 §I follows logical dependency (theory → CPU problem → all resources) rather than strict chronology.
 {% endcomment %}
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/hypervisor.webp" width="300" height="150"> <a href="https://microkerneldude.org/2010/10/14/much-ado-about-type-2/" target="_blank" style="position: absolute; top: 2px; left: 2px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Type 1 owns the hardware, type 2 sits on a host OS.</div> </div>
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/trap-and-emulate.webp" width="350"> <br><span style="font-size: 11px; color: #555;">trap-and-emulate on a Type 1 hypervisor</span> <a href="https://dev.to/mdraevich/virtualization-emulation-explained-in-a-top-down-fashion-2of8" target="_blank" style="position: absolute; bottom: 4px; left: 4px; font-size: 11px;">[src]</a> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/trap-and-emulate.webp" width="350"> <br><span style="font-size: 11px; color: #555;">trap-and-emulate on a Type 1 hypervisor</span> <a href="https://dev.to/mdraevich/virtualization-emulation-explained-in-a-top-down-fashion-2of8" target="_blank" style="position: absolute; bottom: 4px; left: 4px; font-size: 12px;">[src]</a> </div> -->
+- <div style="display: inline-block;"> <iframe src="../assets/blog/hypervisor-kvm.html" width="530" height="181" style="border: none; overflow: hidden; display: block;" scrolling="no"></iframe> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Type 1 owns the hardware, type 2 a host OS (left). KVM occupies the former's position with an OS's contents (right).</div> </div>
 
-### **1.2. CPU Virtualisation**
+
+### **1.2. Trap and Emulate**
 
 <p style="margin-bottom: 12px;"> </p>
 
@@ -68,11 +60,11 @@ On x86 the hypervisor claims the highest privilege level, so a guest kernel runs
 
 Two software workarounds emerged. VMware (1999) introduced [binary translation](), scanning the guest instruction stream at runtime and rewriting sensitive instructions into safe sequences that trap or emulate correctly. It stayed tractable since only kernel-mode code required translation while user-mode code ran directly on the CPU, and cached translated blocks amortised the cost. Xen (2003) took the opposite path with [paravirtualisation](), modifying the guest kernel to replace sensitive instructions with [hypercalls]() to the hypervisor, which outruns translation but demands the kernel source, so an unmodified guest such as Windows cannot boot.
 
-Intel [VT-x]() (2005) and [AMD-V]() (2006) eliminated both in hardware. A new non-root execution mode and a [VM control structure]() (VMCS/VMCB) make sensitive instructions [VM exit]() regardless of privilege level, so the P-G inclusion holds again, after which the hypervisor adjusts guest state and *VMRESUME* returns control. The first generation nonetheless lost to binary translation on exit-heavy workloads, as a round trip cost roughly a thousand cycles against a cached block's none, and hardware prevailed only as exit latency fell and the CPU absorbed page-table shadowing too. [KVM]() (2007) exposes it to user space through */dev/kvm*, while [QEMU]() emulates the remaining devices.
+Intel [VT-x]() (2005) and [AMD-V]() (2006) eliminated both in hardware. A new non-root execution mode and a [VM control structure]() (VMCS) make sensitive instructions [VM exit]() regardless of privilege level, so the P-G inclusion holds again, after which the hypervisor adjusts guest state and *VMRESUME* returns control. The first generation nonetheless lost to binary translation on exit-heavy workloads, as a round trip cost roughly a thousand cycles against a cached block's none, and hardware prevailed only as exit latency fell and the CPU absorbed page-table shadowing too. KVM exposes it to user space through */dev/kvm*, while QEMU emulates the remaining devices.
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/paravirt.jpeg" width="325"> <a href="https://dgtlinfra.com/server-virtualization/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Trap-and-emulate on the left, a hypercall from a modified kernel on the right.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/paravirt.jpeg" width="300"> <a href="https://dgtlinfra.com/server-virtualization/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Trap-and-emulate on the left, a hypercall from a modified kernel on the right.</div> </div>
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/hypercall.png" width="500"> <a href="https://idery-123.tistory.com/74" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/hypercall.png" width="500"> <a href="https://idery-123.tistory.com/74" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 ### **1.3. Resource Virtualisation**
 
@@ -80,25 +72,160 @@ Intel [VT-x]() (2005) and [AMD-V]() (2006) eliminated both in hardware. A new no
 
 {% comment %}
 Arc: the same three moves per resource — abstract, isolate, overcommit.
-  p1: CPU — vCPUs, 3:1 overcommit, lock-holder preemption as the cost
-  p2: memory (translation) — two composed mappings, shadow tables vs EPT
-  p3: memory (capacity) — ballooning needs cooperation, KSM buys density
-  p4: disk — thin provisioning and snapshots, both copy-on-write, both deferring a bill
-  p5: network — software path first (vswitch, VirtIO), then the hardware bypass (SR-IOV) at the price of mobility
-  p6: the payoff — a VM is state plus files, hence live migration, hence the cloud
+  p1: CPU — vCPUs, m:n overcommit, lock-holder preemption as the cost
+  p2: memory — two composed mappings (shadow vs EPT), then capacity (ballooning, KSM)
+  p3: disk — one host file; thin provisioning and snapshots defer their bills, yet storage stays cheapest to overcommit
+  p4: network — software path first (vswitch, VirtIO), then the hardware bypass (SR-IOV) at the price of mobility
+  p5: the payoff — a VM is state plus files, hence live migration, hence the cloud (EC2 2006)
 {% endcomment %}
 
-Just as an OS multiplexes processes onto shared hardware, a hypervisor multiplexes VMs one level below, repeating the same three moves per resource, abstraction, isolation, and overcommitment. The hypervisor presents each VM with [virtual CPUs]() (vCPUs) scheduled onto physical cores. [Overcommitment]() allows a host with 64 cores to run 200 vCPUs (~3:1 for general workloads) since VMs rarely demand full CPU at once, but blinds the guest scheduler, which is unaware that its vCPUs are themselves preempted. [Lock-holder preemption]() follows, where a descheduled guest thread still holds a spinlock and its peers spin on a lock whose holder is not running.
+Just as an OS multiplexes processes onto shared hardware, a hypervisor multiplexes VMs one level below. Every resource undergoes the same three moves of abstraction, isolation, and overcommitment. For example, the [virtual CPU]() (vCPU) abstracts the physical CPU, and the hypervisor schedules each vCPU onto the host's cores. Moreover, [overcommitment]() schedules $m$ vCPUs onto $n < m$ physical cores (e.g. $m/n \approx 3$ for general workloads) as VMs rarely demand full CPU at once. The guest scheduler however never sees the hypervisor preempt its vCPUs, and so suffers [lock-holder preemption](), where guest threads spin on a lock whose holder has been descheduled.
 
-Each VM sees its own physical address space, so translation composes two partial functions, the guest's $\pi_g$ (guest-virtual $\rightharpoonup$ guest-physical, §603#3.2) and the hypervisor's $\pi_h$ (guest-physical $\rightharpoonup$ host-physical). [Shadow page tables]() materialised the composition $\pi_h \circ \pi_g$ at the cost of a trap on every guest update. [Extended page tables]() (Intel EPT, AMD NPT) instead evaluate the composition lazily in hardware. Each access of the guest's walk then requires its own EPT walk, so a TLB miss on 4-level paging can cost up to $(4{+}1) \times (4{+}1) - 1 = 24$ memory references, yet cheaper than the shadow tables' traps.
+For memory, each VM sees its own physical address space, so translation composes two partial functions, the guest's $\pi_g$ (guest-virtual $\rightharpoonup$ guest-physical) and the hypervisor's $\pi_h$ (guest-physical $\rightharpoonup$ host-physical). In practice, [shadow page tables]() materialised it but trapped on every guest update, and [extended page tables]() (Intel EPT, AMD NPT) evaluate it lazily in hardware. <!-- Each access of the guest's walk then requires its own EPT walk, so a TLB miss on 4-level paging can cost up to (4+1)x(4+1)-1 = 24 memory references, yet cheaper than the shadow tables' traps. --> Capacity can also be overcommitted. [Memory ballooning]() inflates a driver in the guest until it surrenders frames, whereas a driverless guest leaves the host blind swapping. <!-- which may page out frames the guest already considers free --> [Kernel same-page merging]() (KSM) deduplicates identical pages across VMs via copy-on-write and trades a background scan for density.
 
-Memory is overcommitted as well as translated. [Memory ballooning]() reclaims pages by inflating a balloon driver inside the guest until it surrenders physical frames, so reclamation depends on guest cooperation and a driverless guest leaves the host nothing but blind swapping, which may page out frames the guest already considers free. [Kernel same-page merging]() (KSM) instead deduplicates identical pages across VMs via copy-on-write, trading a background scan for density.
+A [virtual disk]() appears to the guest as a block device yet is one ordinary host file (e.g. QEMU's QCOW2). <!-- also VMDK (VMware), VHD (Hyper-V) --> Under [thin provisioning](), a disk declared as 100 GB is an upper bound whose file grows monotonically from near zero, and the host might hold only the 20 GB written. A [snapshot]() freezes the file read-only and chains a differencing file for later writes. Rollback is hence instant. Copy-on-write operates at cluster granularity, and a long chain pays read amplification on every lookup. Thin provisioning meanwhile lets the promised sizes sum past the host's capacity. Guests filling their disks then exhaust it. Nonetheless, storage stays the cheapest resource to overcommit.
 
-A virtual disk is an ordinary host file (VMDK, QCOW2, VHD), which makes storage the cheapest resource to overcommit. [Thin provisioning]() allocates physical storage only as the guest writes rather than reserving the virtual size upfront, so a 100 GB disk might occupy 20 GB. [Snapshots]() freeze the disk state by redirecting later writes to a new differencing layer, so rollback is instant. Copy-on-write here operates at the cluster (64 KB in QCOW2) rather than the file, so a long snapshot chain pays read amplification, since each lookup walks the backing chain, while thin provisioning leaves the host to exhaust its storage once guests fill the disks they were promised.
+<!-- dropped p4: The guest, for its part, formats the disk with its own filesystem (e.g. ext4, §603#3.3). A guest file is hence bytes within a guest filesystem within a host file within the host filesystem. The two storage stacks compose just as the two page tables do. The host accordingly sees the image as one opaque file and never the files inside it. This opacity is storage's share of the isolation. A shared folder (e.g. virtiofs) breaches it deliberately, serving a host directory to the guest past the virtual disk. -->
 
-The hypervisor connects each VM's virtual NIC to a [virtual switch](), which forwards frames among co-resident VMs at memory speed and routes the rest through the physical NIC. Most cloud VMs use [VirtIO](), a standardised paravirtual interface whose shared-memory rings spare the hypervisor from emulating real hardware. For bare-metal performance, [SR-IOV]() discards the software layer altogether, as a single physical NIC presents lightweight [virtual functions]() assignable directly to VMs, while an [IOMMU]() (Intel [VT-d]()) confines each function's DMA to its VM's memory. A virtual function is PCIe state that cannot be reconstructed elsewhere, so migratable instances stay on VirtIO. <!-- trim: "Networking is where the software layer is most readily discarded altogether", "(e.g. Open vSwitch)", "assigned PCIe state rather than a software device" -->
+The hypervisor connects each VM's virtual NIC to a [virtual switch](), which forwards frames among co-resident VMs at memory speed and sends the rest out the physical NIC. Most cloud VMs use [VirtIO](), a standardised paravirtual interface whose shared-memory rings spare the hypervisor from emulating real hardware. For bare-metal performance, [SR-IOV]() discards the software layer. One physical NIC presents [virtual functions]() assigned directly to VMs, and an [IOMMU]() (Intel [VT-d]()) confines each function's DMA to its VM's memory. A virtual function however is PCIe state that no other host can reconstruct, so migratable instances stay on VirtIO. <!-- trim: "Networking is where the software layer is most readily discarded altogether", "(e.g. Open vSwitch)", "assigned PCIe state rather than a software device" -->
 
-Since a VM is ultimately CPU/memory state plus virtual disk files, [live migration]() moves a running VM between hosts by copying memory pages in rounds while the VM keeps executing, then pausing briefly (typically under 100 ms) to transfer the final dirty pages and switch execution. The iteration converges only while pages move faster than the guest dirties them, so a write-heavy VM on a narrow link forces the hypervisor to stop the guest outright, whereas [post-copy]() migration inverts the order by resuming on the destination first and faulting pages across on demand. Server consolidation and multi-tenancy on this basis gave rise to cloud computing.
+Ultimately, a VM decomposes into runtime state and disk files. [Live migration]() moves this data between hosts, copies memory in rounds as the VM runs, and briefly pauses to transfer the final dirty pages and switch execution. <!-- typically under 100 ms downtime is best case; Clark et al. (2005) measured 60 ms to seconds --> Given that the rounds converge only while the transfer rate exceeds the dirtying rate, if the inequality fails, then throttling the guest restores it. [Post-copy]() inverts the pre-copy rounds, resumes on the destination, and faults pages on demand. A network failure mid-move strands state on both hosts and destroys the VM, so pre-copy stays the default. <!-- Consolidation packed underused servers onto fewer machines while multi-tenancy rented one machine to strangers. --> Hourly rental of such machines became [cloud computing](), e.g. AWS's [elastic compute cloud]() (EC2, 2006).
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/cloud-services.png" width="425"> <a href="https://blog.devgenius.io/understanding-the-parallel-offerings-of-aws-azure-and-gcp-cloud-comparisons-c6a1068c267b" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Parallel service offerings across AWS, Azure, and GCP.</div> </div>
+
+### **1.4. Remote Machine**
+
+<p style="margin-bottom: 12px;"> </p>
+
+{% comment %}
+Arc: the cloud's product is a machine you never touch.
+  p1: the rented instance — image + size + key pair, no console; IaaS
+  p2: SSH — key-based trust replaces the machine-room door; host keys the other half
+  p3: tunnels and bastions — the network folded back to localhost; one-at-a-time limit → §III
+{% endcomment %}
+
+A cloud instance is a VM rented on provider hardware. Launching one reduces to three parameters, an image, a size, and a [key pair](). The provider only returns an IP address. That is, the machine exists only over the network without GUI console, and ownership barely begins by a remote login (e.g. *ssh -i key.pem ubuntu@203.0.113.7*), where later act passes through the same channel (e.g. deploying, debugging, rebooting). The rental of raw machines forms the cloud's lowest rung, known as [infrastructure as a service]() (IaaS), and one can easily find an [amazon machine image]() (AMI), the AWS-specific form of the image for whom to launch a writable virtual disk with a preinstalled OS.
+
+{% comment %}
+ssh client — essentially universal, every mainstream Unix/Linux and macOS ships the OpenSSH client. sshd (server) — not by default:
+
+  System                        sshd default
+  ----------------------------  -----------------------------------------------
+  macOS                         installed, off (Settings -> Remote Login)
+  Ubuntu desktop                not installed
+  Ubuntu server / cloud images  installed + on
+  Debian                        prompts during install
+  Lima VM                       on — that's how limactl shell works
+
+The pattern: servers accept connections by default, workstations don't; fewer open ports, smaller attack surface. OpenSSH itself is not POSIX or "Unix" — it came from OpenBSD (1999) and became a de-facto standard by adoption.
+
+Check yours:
+  sudo systemsetup -getremotelogin   # macOS
+  systemctl status ssh               # in the VM
+{% endcomment %}
+
+[Telnet]() (1969) had sent every login in cleartext for anyone on the path to read. [Secure shell]() (ssh, 1995) replaced it with an encrypted shell, whose server half [ssh daemon]() (*sshd*) ships listening on TCP port 22 in every cloud image. Running *ssh* connects to it, the pair negotiate a session key, and *sshd* starts a shell (§603#2.2) on the remote machine, so the local terminal drives a remote process with every keystroke and reply encrypted in transit. As with pthreads and NPTL (§604#2.2), SSH is the protocol and [OpenSSH]() (OpenBSD, 1999) the implementation that prevailed by adoption. Its *ssh*, *sshd*, and *ssh-keygen* are the programs (§602) one invokes in practice.
+
+The trust model inverts TLS's (§605#3.4) as no certificate authority vouches for both ends. Each side instead generates a key pair and hands over its public half. The client's lands out of band in the instance's *~/.ssh/authorized_keys* before the first login. <!-- i.e. at first boot for the launch key --> The server holds its own pair, the [host key]() generated at first boot, and sends the public half inside the handshake. Its fingerprint<!-- i.e. a SHA-256 hash --> is accepted at the client's first connection, the key then stored in *~/.ssh/known_hosts* to validate the server thereafter. Under this setup, both proves possession by signing a nonce with the private half, which never travels, and a mismatch signals a different machine at the address or interception. <!-- why verify the server at all when it already holds our pubkey: an address is not an identity — DNS gets poisoned, ARP spoofed, routes hijacked, so reaching 10.0.0.5 never proves the answering machine is yours. Client auth answers "is this alice?" and says nothing about "is alice talking to the right machine?" — both questions need answering, hence both keypairs -->
+
+A single connection multiplexes independent channels, and the one of type session executes remote work as exactly one request, i) *shell*: an interactive login, ii) *exec*: a single command (e.g. *ssh host 'docker compose up -d'*) running without a terminal and thereby scriptable, iii) *subsystem*: a named service (e.g. *sftp*). The same connection also carries files using [secure copy]() (*scp*) and [remote sync]() (*rsync*), ports via *-L* and *-R*, and unreachable hosts via *-J* to a [bastion](). <!-- in *ssh -L 8888:localhost:8888* the destination resolves on the far side, binding a remote Jupyter to a client port, while *-R* reverses it and *-D* opens a [SOCKS]() proxy; the *-J* relay runs a second handshake inside the tunnel, so it forwards ciphertext and holds no credentials; a bastion is the single hardened host exposed to the internet, and [agent forwarding]() lends the key onward without copying it --> The unit of deployment however remains the entire machine, as its image ships an OS per application, and packaging the application alone is left as a separate problem. <!-- installed by hand one *apt-get* at a time -->
+
+{% comment %}
+From ssh-keygen to ssh-copy-id, both sides:
+
+        CLIENT (your Mac)                      SERVER (host)
+        -----------------                      -------------
+
+  1. ssh-keygen -t ed25519 -f ~/.ssh/id_x
+        |
+        +-- id_x       (private) -- stays here, NEVER leaves
+        +-- id_x.pub   (public)  -- safe to hand out
+
+                                        0. admin: sudo useradd -m alice
+                                             +-- creates /home/alice
+
+  2. ssh-copy-id -i ~/.ssh/id_x.pub alice@host
+        |
+        |   ...... password, once ......>
+        |                                    appends the pubkey to
+        +----- id_x.pub ---------------->    /home/alice/.ssh/authorized_keys
+                                             chmod 700 .ssh
+                                             chmod 600 authorized_keys
+
+  3. ssh alice@host
+        |
+        |  <----- "prove it: sign this nonce" -----
+        |
+        |  sign with id_x (private)
+        |  ------- signature -------------->  verify against each key in
+        |                                     authorized_keys
+        |  <---------- shell ---------------
+
+  Step 3's key idea: the private key is never transmitted. The server sends a
+  random challenge, the client signs it, the server verifies with the public
+  key it already has — nothing reusable crosses the wire, so a captured
+  session replays to nothing.
+
+  Who holds what:
+    id_x             client only     private key
+    id_x.pub         client+server   public key
+    authorized_keys  server, ~user   public keys allowed to log in as that user
+    known_hosts      client          the server's host key
+
+  Two separate authentications happen in step 3, and this trips people up:
+    server proves itself to you  -> known_hosts
+    you prove yourself to server -> authorized_keys
+
+    CLIENT                                SERVER
+    own private key                       own private key
+    own public key  ──────────────▶       (stored in authorized_keys)
+    (stored in known_hosts) ◀──────────── own public key
+
+  Each side generates its own pair, keeps its private half forever, and gives
+  the other side a copy of its public half. Both directions run the same
+  signing proof, independently:
+    server challenges client -> client signs -> checked against authorized_keys
+    client challenges server -> server signs -> checked against known_hosts
+
+  The proofs are symmetric; the key exchanges are not:
+  ┌─────────────┬───────────────────────────────────────────┬──────────────────────────┐
+  │             │         Client's pubkey → server          │ Server's pubkey → client │
+  ├─────────────┼───────────────────────────────────────────┼──────────────────────────┤
+  │ when        │ before first login                        │ during first connection  │
+  ├─────────────┼───────────────────────────────────────────┼──────────────────────────┤
+  │ how         │ out-of-band (admin, cloud-init, web form) │ sent over the wire       │
+  ├─────────────┼───────────────────────────────────────────┼──────────────────────────┤
+  │ stored as   │ authorized_keys                           │ known_hosts              │
+  ├─────────────┼───────────────────────────────────────────┼──────────────────────────┤
+  │ trust basis │ someone vouched for it                    │ you clicked yes (TOFU)   │
+  └─────────────┴───────────────────────────────────────────┴──────────────────────────┘
+
+  The server's half thus arrives automatically inside the handshake, before
+  any authentication; the client's half cannot — hence cloud-init. The one
+  manual act is typing yes once.
+
+  And step 0 means the admin must make the very first move — ssh cannot
+  bootstrap itself; someone with existing privilege creates the account.
+
+  On a cloud VM that admin is a machine: the provider's agent (cloud-init) 
+  runs useradd and plants your pubkey at first boot, from the key you hardened
+  the console at creation. Privilege has to already exist somewhere — the chain
+  of trust ends at whoever owns the hardware or the hypervisor.
+
+  How the pubkey physically arrives (Lima, same shape as AWS): the host bakes
+  user.pub into a cloud-init seed ISO and attaches it as a virtual CD-ROM;
+  the guest's cloud-init reads it at first boot and writes authorized_keys.
+  So the first mover is the hypervisor — write access to the guest's disk
+  before the guest exists, a channel more privileged than any network login.
+  AWS injects the launch key pair identically.
+
+  Verify:
+    cat ~/.lima/_config/user.pub                 # host: the injected key
+    cat ~/.ssh/authorized_keys                   # guest: should match it
+    sudo grep -i ssh /var/log/cloud-init.log     # guest: the injection logged
+{% endcomment %}
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <div style="background: white; display: inline-block;"> <img src="../assets/blog/ssh.png" width="350" height="400"> </div> <a href="https://devopedia.org/secure-shell" target="_blank" style="position: absolute; bottom: -4px; right: 8px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The transport layer authenticates the host and derives session keys, the next authenticates the user, and the last multiplexes channels.</div> </div>
 
 
 ## II
@@ -108,13 +235,60 @@ Since a VM is ultimately CPU/memory state plus virtual disk files, [live migrati
 
 <p style="margin-bottom: 12px;"> </p>
 
-[OS-level virtualisation](https://en.wikipedia.org/wiki/OS-level_virtualization) (aka. [containerisation]()) shares a single host kernel rather than booting one per instance. It reduces startup to sub-seconds and footprint to megabytes at the cost of weaker isolation, in that a kernel-level escape would compromise the host and every container it runs. Specifically, a [container]() is not a kernel primitive but a user-space abstraction built from two Linux kernel features, namespaces and cgroups, to restrict a process's view of the system and bound the hardware resources available to that process. They were originated in FreeBSD jails (2000) and Solaris Zones (2005), then reached Linux through [LXC](https://linuxcontainers.org/) (2008) and [Docker]() (2013, §603#1.3). 
+[Containerisation]() shares a single host kernel rather than booting one per instance, and thus [OS-level virtualisation]() reduces the unit to its application, startup to sub-seconds, and footprint to $\text{MB}$s at the cost of weaker isolation. In fact, a production-ready container generally runs inside a VM, where the hypervisor and the container separate tenants and services, respectively. <!-- e.g. a Docker Compose stack on an EC2 instance --> The asymmetry reaches access, as the docker group yields host root by mounting the host's root directory into a container, while an SSH key yields one VM's own root. So, the [container]() is not a kernel object, but a runtime-assembled configuration of namespaces and cgroups, an ordinary process to the host. <!-- visible in plain *ps*; entering one is therefore a system call, as *docker exec* drops a fresh host process into the container's namespaces with *setns()*, whereas a VM owning its own kernel offers no such handle and admits only a network login (§1.4) -->
 
-A [namespace]() (_kernel/nsproxy.c_) wraps a global resource so processes inside see their own isolated instance. Linux provides eight types: pid gives each container a PID tree rooted at 1, net gives it a private network stack, mnt with _pivot\_root()_ swaps the visible root fs, and user maps UID 0 inside to an unprivileged host UID for rootless containers, while uts, ipc, cgroup, and time isolate the hostname, IPC objects, cgroup root, and boot clock. From the host, a container's PID 1 is just another process in the default namespace, assembled by _clone()_ with the desired flags. A namespace, however, bounds what a process sees rather than what it consumes.
+{% comment %}
+Two hops, two mechanisms:
 
-A [cgroup]() (_kernel/cgroup/_) organises processes into hierarchical groups and caps their hardware resources. Without cgroups a single container could exhaust host memory or monopolise CPU, so the kernel enforces limits on CPU shares, memory (with an OOM killer scoped to the cgroup), I/O bandwidth, and device access. Driven by Google's experience running [Borg](https://research.google/pubs/large-scale-cluster-management-at-google-with-borg/?hl=it), cgroups were merged in 2008 (Linux 2.6.24). Cgroups v2 unified v1's fragmented hierarchies into one tree and added per-cgroup pressure stall information (PSI) for observability. The first two fail differently, as a container over CPU quota is throttled whereas one over its memory limit is killed. <!-- both features are documented in the Linux [man-pages](https://man7.org/linux/man-pages/) project -->
+        YOUR LAPTOP                              EC2 INSTANCE (a VM)
+        ───────────                              ───────────────────
 
-What a process may ask the kernel to do is, however, bounded by neither feature but by three further mechanisms. i) Linux capabilities: root's authority decomposed into roughly forty independent privileges; ii) [Seccomp](): a [Berkeley packet filter]() (BPF) program screens all system calls; and iii) security modules: mandatory policy on file, socket, and capability access under AppArmor or SELinux. Each lets a container bind a low port without also being able to load kernel modules, cuts the reachable surface to the calls actually needed, and enforces policy its own root cannot alter, respectively.
+  terminal
+     │
+     │   ssh -i key.pem ubuntu@1.2.3.4
+     └──────────────────────────────────────▶  sshd  ──▶  bash  (you are here)
+                                                            │
+                                                            │  docker ps
+                                                            ▼
+                                              ┌─────── Linux kernel ────────┐
+                                              │                             │
+                                              │   dockerd                   │
+                                              │     │                       │
+                                              │     ├── container "api"     │
+                                              │     │     PID 1: uvicorn    │
+                                              │     │                       │
+                                              │     └── container "db"      │
+                                              │           PID 1: postgres   │
+                                              │                             │
+                                              │   (one kernel, shared)      │
+                                              └─────────────────────────────┘
+
+  ssh          crosses a machine boundary    (laptop -> EC2, over the network)
+  docker exec  crosses a namespace boundary  (EC2 -> container, same kernel)
+
+  docker exec -it api bash   container "api" gains PID 7 bash (you); PID 1 uvicorn untouched
+  docker exec api ls /app    PID 8 runs, prints, exits — no shell
+
+Same goal, different hop — the container/VM distinction in one table:
+
+                     limactl shell vm              docker exec -it api bash
+  mechanism          ssh over TCP loopback         unix socket -> dockerd -> setns()
+  auth               keypair + host key            file permissions on docker.sock
+  the shell process  child of the guest's sshd     child of the host's dockerd
+  works remotely     yes, it is just ssh           only through Docker's API
+
+ps on the host shows a container's shell as an ordinary process, but never a process inside
+a Lima guest — there one sees only qemu, a single opaque blob.
+
+docker's -i keeps stdin open and -t allocates the PTY; without a PTY ~/.bashrc largely does
+not run and $PATH differs from an interactive login.
+{% endcomment %}
+
+A [namespace]() (_kernel/nsproxy.c_) wraps a global kernel resource (e.g. the proc table), so processes inside see their own isolated instance, and _clone()_ with the desired flags assembles a container from the eight types Linux provides, i) pid: provides each container a PID tree rooted at 1; ii) net: gives it a private network stack; iii) mnt: swaps the visible root filesystem via _pivot\_root()_; and iv) user: maps the container's UID 0 to an unprivileged host UID, enabling rootless containers. The remaining four, uts, ipc, cgroup, and time, isolate the hostname, IPC objects, cgroup root, and boot clock. <!-- a container's PID 1 still occupies the host's default pid namespace --> A namespace, however, bounds what a process sees rather than what it consumes.
+
+A [cgroup]() (_kernel/cgroup/_) organises processes into hierarchical groups and caps its hardware resources, so precludes a single container from exhausting host memory or monopolising the CPU. The kernel enforces limits on CPU shares, memory, I/O bandwidth, and device access, with the memory limit enforced by an OOM killer scoped to the cgroup. Specifically, it throttles a container that exceeds its CPU quota yet kills one that breaches its memory cap. Born of Google's [Borg](https://research.google/pubs/large-scale-cluster-management-at-google-with-borg/?hl=it) (2003), cgroups entered Linux 2.6.24 (2008), and later cgroups v2 unified v1's fragmented hierarchies into one tree and added per-cgroup pressure stall information (PSI) for observability. <!-- both features are documented in the Linux [man-pages](https://man7.org/linux/man-pages/) project -->
+
+Given that namespaces bound what a process sees and cgroups what it consumes, neither bounds what it may ask the kernel to do. Three further mechanisms supply the missing bound, i) [Linux capabilities](): root's authority split into roughly forty independent privileges, thus a container binds a low port without also being able to load kernel modules; ii) [seccomp](): every system call screened by a [Berkeley packet filter]() (BPF) program, narrowing the reachable kernel surface to the syscalls the application truly requires; and iii) [security modules]() (e.g. AppArmor, SELinux): mandatory policy on file, socket, and capability access, which even the container's root cannot alter.
 
 {% comment %}
 Host kernel (single instance)
@@ -131,9 +305,8 @@ Container 1's nginx thinks it is PID 1, but the host sees it as PID 3847.
 Same process, different namespace views.
 {% endcomment %}
 
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <div style="background: white; display: inline-block;"> <img src="../assets/blog/kernel_features.png" width="350"> </div> <a href="https://bunny.net/academy/computing/what-is-a-linux-namespace-and-container-isolation/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Kernel features underlying containers (5 of 8 namespace types shown).</div> </div>
 
-
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <div style="background: white; display: inline-block;"> <img src="../assets/blog/kernel_features.png" width="350"> </div> <a href="https://bunny.net/academy/computing/what-is-a-linux-namespace-and-container-isolation/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Kernel features underlying containers (5 of 8 namespace types shown).</div> </div>
 
 ### **2.2. Docker**
 
@@ -150,7 +323,9 @@ Arc: one design commitment (immutability), examined at both times.
 Build half and run half mirror each other: mechanism/benefit, then cost, then mitigation.
 {% endcomment %}
 
-Isolation alone did not make a workload shippable while dependency packaging remained manual. Docker answered with a declarative, layered image model, where an [image]() on disk is an immutable filesystem (fs) template, built once to serve many workloads. One uses a [Dockerfile]() to build the image's rootfs through FROM, RUN, and COPY steps, yet identical layers are stored once and skipped on pulls, and each step instead yields a content-addressed read-only layer (i.e. fs diff). The [open container initiative]() (OCI) standardised image and runtime specifications, letting an image run on any compliant engine, while registries such as [Docker hub]() distribute the images.
+Isolation itself was old, running from FreeBSD jails (2000) and Solaris Zones (2005) to Linux's [LXC](https://linuxcontainers.org/) (2008). Yet none made a workload shippable while dependency packaging remained manual. [Docker]() (2013) resolved it with a declarative, layered image model, where an [image]() on disk is an immutable filesystem (fs) template, built once to serve many workloads. A [dockerfile]() prescribes the image's rootfs through FROM, RUN, and COPY steps, each yielding a content-addressed read-only layer (i.e. fs diff), so identical layers are stored once and skipped on pulls. That is, a Dockerfile captures the machine's setup as text, versioned and rebuilt rather than maintained by hand.
+
+Every FROM chain bottoms out at *scratch*, an empty image that a distro's userland enters as a plain tarball of files. What enters above it varies by need, from a full distro userland (*ubuntu*, ~78 MB) through busybox-based [*alpine*]() (~7 MB) down to [distroless image]()s holding libc and the application binary alone. Formally, what an image bundles is a program's transitive dependency closure cut at the system call boundary (i.e. a userland but never a kernel). The [open container initiative]() (OCI) standardises image and runtime specifications to make images portable across compliant engines, and registries such as [docker hub]() and [elastic container registry]() (ECR) distribute them.
 
 {% comment %}
 Image A: FROM ubuntu:22.04, installs flask → 2 layers [ubuntu, flask]
@@ -285,11 +460,34 @@ A bind mount, unlike the compose example's named volume, shadows the
 image's /app entirely — site-packages excepted, which lives outside it.
 {% endcomment %}
 
-Immutability decides not only what is rebuilt but also what the image ships. A layer records the filesystem state a step leaves behind rather than the operations it performs. Deleting a file in a later step therefore merely masks it with a whiteout marker while the bytes remain, which is why cleanup belongs inside the instruction that creates the artefact (e.g. _RUN apt-get update && apt-get install -y ... && rm -rf /var/lib/apt/lists/\*_). Multi-stage builds answer the same problem structurally, where a _FROM ... AS builder_ stage compiles and a later stage copies only the finished artefact via _COPY --from_, thus the toolchain never enters the shipped image.
+Immutability also decides what the image ships. A layer holds the files a step leaves behind rather than the commands it ran. Deleting a file in a later step hence removes nothing, because the new layer only adds a whiteout marker that masks the file, while its bytes remain in the earlier layer. Cleanup therefore belongs inside the instruction that creates the artefact (e.g. _RUN apt-get install ... && rm -rf /var/lib/apt/lists/\*_). Multi-stage builds answer the same problem structurally, where a _FROM ... AS builder_ stage compiles and a later stage copies only the artefact via _COPY --from_ into a minimal base or *scratch*, hence neither toolchain nor OS enters the shipped image.
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/docker-architecture.png" width="375"> <a href="https://itnext.io/getting-started-with-docker-facts-you-should-know-d000e5815598" target="_blank" style="position: absolute; bottom: -10px; right: 2px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The client only talks to the daemon, which pulls from the registry and runs containers.</div> </div>
+{% comment %}
+What a base image ships:
 
-At runtime, Docker turns an image into a container, a running isolated process with one writable layer. The CLI sends build, push, and run requests to the [Docker daemon](https://www.youtube.com/watch?v=1UHaR54i3ak) through its REST API (§605#4.2), usually over a local Unix socket (§603#3.1), but also over TCP. On _docker run_, the daemon delegates [containerd]() to prepare the rootfs, where its snapshotter stacks the writable layer over the image layers with OverlayFS (§603#3.3). It then invokes [runc](), the OCI reference runtime, which creates the namespaces with _clone()_, applies cgroup limits, and starts the image's entrypoint as PID 1. [Docker desktop]() runs hidden Linux VM for non-Linux hosts such as macOS and Windows. <!-- A Makefile is often used to wrap common docker and docker compose commands for convenience. -->
+Ships bash + full userland
+  ubuntu, debian            apt, coreutils, the works
+  postgres, mysql, redis    Debian-based by default
+  python:3.12, node:22      full toolchain
+  nginx                     Debian-based
+
+Ships sh only (busybox — trimmed ls, ps, wget)
+  alpine                                ~7 MB
+  python:3.12-alpine, node:22-alpine    same tag pattern everywhere
+  nginx:alpine, redis:alpine
+  busybox
+
+No shell at all
+  gcr.io/distroless/*    Google's
+  scratch                empty; for static Go/Rust binaries
+  chainguard/*           distroless-style, security-focused
+
+No shell also means no docker exec bash — a distroless container cannot be entered.
+{% endcomment %}
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/docker-architecture.png" width="375"> <a href="https://itnext.io/getting-started-with-docker-facts-you-should-know-d000e5815598" target="_blank" style="position: absolute; bottom: -10px; right: 2px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The client only talks to the daemon, which pulls from the registry and runs containers.</div> </div>
+
+At runtime, Docker turns an image into a container, an isolated process running the image's CMD, such as *["python", "-m", "app.main"]*, atop one writable layer. The CLI sends HTTP requests (e.g. build, run) to the [docker daemon]() via its REST API (§605#4.2) over a Unix socket (§603#3.1) or TCP. On _docker run_, the daemon delegates [containerd](), whose snapshotter stacks the writable layer over the image layers with OverlayFS. [Runc](), the OCI reference runtime, then creates the namespaces with _clone()_, applies cgroup limits, and starts the entrypoint as PID 1. On non-Linux hosts, [Docker desktop]() runs a hidden Linux VM whose OS is [LinuxKit](), a minimal distro assembled for the tasks. <!-- A Makefile is often used to wrap common docker and docker compose commands for convenience. -->
 
 {% comment %}
 LXC (manual assembly via debootstrap, tarballs, or host copy):
@@ -313,9 +511,11 @@ Docker (layered declaration):
               on disk)         on disk)
 {% endcomment %}
 
-The writable layer is what keeps the image immutable, but it fails persistent state in both permanence and performance. For instance, a container lives only while its PID 1 does, _docker rm_ deletes the stopped container with its layer, and thus the next redeploy erases any library installed into the writable layer via _docker exec app apt-get install curl_. Performance instead fails when a container modifies a file held in a read-only layer. That is, the file cannot change in place, OverlayFS performs [copy-up]() (i.e. copies the whole file up into the writable layer and edits it). One INSERT into a multi-gigabyte SQLite file shipped in the image therefore begins by copying gigabytes. <!-- the unit is the entire file however small the write --> <!-- later writes reuse the copy; a redeploy is rm + run, so the fresh container starts from the image again --> <!-- anything written there shares the container's lifetime -->
+The writable layer is what keeps the image immutable, but it still fails persistent state in both permanence and performance. A container lives only while its PID 1 does, _docker rm_ deletes the stopped container with its writable layer, and the next redeploy erases any library installed into the layer (e.g. via _docker exec app apt-get install curl_). This erasure enforces [immutable infrastructure](), the discipline of replacing a running instance rather than patching it, so every environment change (packages, libraries, config) ships in a rebuilt image. <!-- rather than accumulating on the server --> A redeployment is then done by rm-and-run from the rebuilt image. Data however follows from no recipe and must survive elsewhere. <!-- _docker commit_ would instead snapshot the writable layer into a new image layer, and is shunned precisely because the result has no Dockerfile to rebuild it from -->
 
-Mounts escape both problems by placing data outside the writable layer. Docker offers three. i) [volumes](): Docker-managed directories (_/var/lib/docker/volumes/_) for databases and persistent application data, ii) [bind mounts](): a chosen host path mapped into the container for live code reloading in development, and iii) [tmpfs](): files held in memory alone for short-lived secrets (e.g. TLS keys, API tokens). In every case the mount shadows the image content at its destination path, where Docker seeds a new empty volume from that content whereas a bind mount simply hides it. <!-- a distinction that can otherwise make an expected file appear to vanish -->
+In contrast, performance fails when a container modifies a file held in a read-only layer. Specifically, the file cannot change in place, and so OverlayFS performs a [copy-up]() which duplicates it into the writable layer before the edit applies. This copy however spans the entire file even for a one-byte change. For instance, when an application issues INSERTs into a multi-gigabyte SQLite file shipped in the image, the first INSERT copies gigabytes while later ones edit the copy at normal speed. Reads meanwhile are exempt and pass through to the lower layers untouched. Deletion likewise adds a whiteout to the writable layer, the runtime twin of the build-time mask.
+
+Mounts escape both problems by sitting outside the writable layer, while every mount covers the image content at its mount point (e.g. _/var/lib/postgresql/data_), leaving the files beneath unreachable while it holds. Docker offers i) [volumes](): Docker-managed directories (_/var/lib/docker/volumes/_) seeded from that content and outliving the container, for databases and other persistent data; ii) [bind mounts](): a chosen host path that hides the content and lives with the host directory, for live code reloading; and iii) [tmpfs](): an empty in-memory mount that dies with the container, for short-lived secrets (e.g. API tokens). A redeploy reattaches what the previous one wrote. 
 
 {% comment %}
 One app (FastAPI + SQLite), written twice. Each BAD line violates one paragraph above.
@@ -362,7 +562,7 @@ One app (FastAPI + SQLite), written twice. Each BAD line violates one paragraph 
   $ docker compose down                   <- removes containers, dbdata persists
 {% endcomment %}
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/shared-volume.webp" width="300"> <a href="https://peeknpoke.net/docker-volume-management/" target="_blank" style="position: absolute; top: 2px; left: 2px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">One host directory mounted into two containers at once.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/shared-volume.webp" width="300"> <a href="https://peeknpoke.net/docker-volume-management/" target="_blank" style="position: absolute; top: 2px; left: 2px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">One host directory mounted into two containers at once.</div> </div>
 
 {% comment %}
 Docker commands actually typed daily:
@@ -423,6 +623,7 @@ Host filesystem (ext4/xfs)
 └─────────────────────────────────────────────────────────┘
 {% endcomment %}
 
+
 ### **2.3. Docker Networking**
 
 <p style="margin-bottom: 12px;"> </p>
@@ -436,11 +637,11 @@ Arc: connectivity grows outward from an empty namespace, one radius at a time.
 Each radius has its cost attached to the mechanism that buys it.
 {% endcomment %}
 
-A network namespace begins with nothing but a loopback interface, and a container therefore has no path off the host until one is built for it. Docker places one end of a [virtual ethernet]() (veth) pair inside the namespace as _eth0_ and enslaves the other to a software bridge (the default _docker0_). The bridge's address (172.17.0.1, private per RFC 1918, §605#2.1) then serves every container as its default gateway. The host thereby acts as an L2 switch among its containers (one broadcast domain, §605#1.3) and as an L3 router beyond them. <!-- a veth pair is a kernel device with two ends, one in each namespace --> Since no host elsewhere routes 172.17.0.0/16, an outbound packet from, for example, 172.17.0.2 leaves masqueraded behind the host's address.
+A network namespace begins with nothing but a loopback interface, and a container therefore has no path off the host until one is built for it. Docker places one end of a [virtual ethernet]() (veth) pair inside the namespace as _eth0_ and enslaves the other to a software bridge (i.e. the [_docker0_]()). The bridge's address (172.17.0.1, private per RFC 1918, §605#2.1) then serves every container as its default gateway. The host thereby acts as an L2 switch among its containers (one broadcast domain, §605#1.3) and as an L3 router beyond them. <!-- a veth pair is a kernel device with two ends, one in each namespace --> Since no host elsewhere routes 172.17.0.0/16, an outbound packet from a container (e.g. 172.17.0.2) leaves masqueraded behind the host's address.
 
-Inbound traffic must instead be published since an external client cannot name a private IP address. For instance, _-p 8080:80_ publishes via a [DNAT]() rule rewriting the destination (host:8080 to 172.17.0.2:80), while _EXPOSE_ merely records intent. <!-- trim: EXPOSE records intent as image metadata --> <!-- the DNAT rewrite happens ahead of the routing decision (PREROUTING); rules enter iptables at container start --> Docker also writes rules of its own via [iptables]() into the host's [firewall](), the rule list against which the kernel admits or drops every packet by its tuple $($address, port, protocol$)$. The kernel consults Docker's entries before those a tool such as UFW administers, thus a published port remains open to the LAN even after a deny, and the deny holds only from the DOCKER-USER chain, which Docker consults first. <!-- trim: a userland docker-proxy covers the cases DNAT (PREROUTING) misses, loopback and hairpin traffic; it re-originates connections, so access logs attribute every request to the gateway 172.17.0.1 -->
+Inbound traffic must instead be published since an external client cannot name a private IP address. For instance, _-p 8080:80_ publishes via a [DNAT]() rule rewriting the destination (host:8080 to 172.17.0.2:80), while _EXPOSE_ merely records intent. <!-- trim: EXPOSE records intent as image metadata --> <!-- the DNAT rewrite happens ahead of the routing decision (PREROUTING); rules enter iptables at container start --> Docker also writes rules of its own via [iptables]() into the host's [firewall](), the rule list against which the kernel admits or drops every packet by its tuple $($address, port, protocol$)$. The kernel consults Docker's entries before those a tool such as UFW administers, thus a published port stays open to the LAN even after a deny, which holds only when placed in the DOCKER-USER chain that Docker checks first. <!-- trim: a userland docker-proxy covers the cases DNAT (PREROUTING) misses, loopback and hairpin traffic; it re-originates connections, so access logs attribute every request to the gateway 172.17.0.1 -->
 
-Reaching other containers is a separate matter. The default _docker0_ affords L2 forwarding but no name resolution. That is, a container reaches another by IP address, while restarts may reassign the address. <!-- a legacy of the deprecated --link flag that wrote peer entries into each container's /etc/hosts --> Docker instead provides [user-defined bridge networks](), carrying their own subnet (172.18.0.0/16, §605#2.1) with an embedded DNS server (127.0.0.11), which resolves container and alias names to current addresses. In practice, [Docker compose]() automatically creates one such network per project from a [YAML ain't markup language]() (YAML) file and starts containers in dependency order. <!-- trim: which is why its services address one another by name --> Containers on separate bridges remain isolated, as no rule forwards between them.
+Reaching other containers is a separate matter. The default _docker0_ affords L2 forwarding but no name resolution, so a container reaches another only by IP address, which restarts may reassign. <!-- a legacy of the deprecated --link flag that wrote peer entries into each container's /etc/hosts --> Docker instead provides [user-defined bridge networks](), carrying their own subnet (172.18.0.0/16, §605#2.1) with an embedded DNS server (127.0.0.11), which resolves container and alias names to current addresses. In practice, [Docker compose]() automatically creates one such network per project from a [YAML ain't markup language]() (YAML) file and starts containers in dependency order. <!-- trim: which is why its services address one another by name --> Containers on separate bridges remain isolated, as no rule forwards between them.
 
 {% comment %}
 One stack (api + postgres), wired twice. Port 8080 published, LAN untrusted.
@@ -484,9 +685,9 @@ Where the two wirings land:
 <!-- trim (was p4, network drivers): the bridge buys isolation at a cost (veth traversal, NAT), and the remaining drivers decline to pay. --network host creates no namespace, so NAT and veth vanish, a bind to port 80 inside occupies the host's port 80, and -p loses its meaning. --network container:<id> joins the named container's namespace instead of creating one, so the two share one stack and reach each other over 127.0.0.1, the mechanism behind the Kubernetes pod. -->
 {% endcomment %}
 
-The isolation hardens across machines. An L2 bridge is confined to its host, thus the _docker0_ on two hosts each issue 172.17.0.0/16, and neither has a path to the other. An [overlay network]() supplies one by wrapping container frames in UDP packets between hosts ([VXLAN](), §605#1.2). <!-- containers on separate machines then communicate as if co-located --> Wrapping costs 50 header bytes, hence the MTU of 1450. Paths that filter ICMP break path MTU discovery (§605#1.3) and full-size packets vanish, thus overlay faults surface as hangs on large responses rather than refused connections. Reachability is nonetheless the smaller half. The larger half, scheduling and repairing workloads across machines, falls to orchestration.
+The isolation hardens across machines. An L2 bridge is confined to its host, thus the _docker0_ bridges on two hosts each issue 172.17.0.0/16, and neither has a path to the other. An [overlay network]() supplies one by wrapping container frames in UDP packets between hosts ([VXLAN](), §605#1.2). <!-- containers on separate machines then communicate as if co-located --> Wrapping costs 50 header bytes, hence the MTU of 1450. Paths that filter ICMP break path MTU discovery (§605#1.3) and full-size packets vanish, thus overlay faults surface as hangs on large responses rather than refused connections. Reachability is nonetheless the smaller half. The larger half, scheduling and repairing workloads across machines, falls to orchestration.
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/docker-networking.webp" width="500"> <a href="https://dev.to/nobleman97/docker-networking-101-a-blueprint-for-seamless-container-connectivity-3i5b" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Default docker0 and a user-defined bridge, each an isolated subnet behind the host NIC.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/docker-networking.webp" width="500"> <a href="https://dev.to/nobleman97/docker-networking-101-a-blueprint-for-seamless-container-connectivity-3i5b" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Default docker0 and a user-defined bridge, each an isolated subnet behind the host NIC.</div> </div>
 
 ## III
 ---
@@ -554,7 +755,7 @@ EC2 Instance
   └──────────────┘
 {% endcomment %}
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/k8s.svg" width="600"> <a href="https://kubernetes.io/docs/concepts/architecture/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Every arrow ends at the API server.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/k8s.svg" width="600"> <a href="https://kubernetes.io/docs/concepts/architecture/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Every arrow ends at the API server.</div> </div>
 
 ### **3.2. K8s Workloads**
 
@@ -610,7 +811,7 @@ kubectl:
 5. kubectl delete pod <pod>         — delete a pod
 {% endcomment %}
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/k8s-deployment.webp" width="300" height="300"> <a href="https://dev.to/docker/from-zero-to-kubernetes-a-beginners-guide-to-orchestrating-docker-containers-leg" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Deployment drives replica scaling (3 to 5) and rolling updates.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/k8s-deployment.webp" width="300" height="300"> <a href="https://dev.to/docker/from-zero-to-kubernetes-a-beginners-guide-to-orchestrating-docker-containers-leg" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Deployment drives replica scaling (3 to 5) and rolling updates.</div> </div>
 
 ### **3.3. K8s Networking**
 
