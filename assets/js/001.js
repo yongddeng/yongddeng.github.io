@@ -3,12 +3,6 @@
 
 (function () {
 	var zTop = 10;
-
-	// Checked at event time, not at load: a rotate changes the answer
-	function phone () {
-		return window.matchMedia("(max-width: 700px)").matches;
-	}
-
 	var openSeq = 0;
 
 	function getWidth () {

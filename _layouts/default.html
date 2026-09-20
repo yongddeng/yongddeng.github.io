@@ -32,6 +32,7 @@
 			r.style.setProperty('--font', fonts[g('font', 'georgia')] || fonts.georgia);
 		})();
 	</script>
+	<script src="/assets/js/phone.js"></script>
 	<script src="/assets/js/highlight.pack.js"></script>
 	<script src="/assets/js/x86asm.min.js"></script>
 	<script>hljs.initHighlightingOnLoad();</script>
@@ -127,7 +128,9 @@
 				if (g.height) win.style.height = g.height + 'px';
 			};
 			window.deskSess = sess;
-			if (sess && sess.explorer) {
+			// The restore this pre-paints is skipped on phones (session.js),
+			// so the pre-paint is skipped with it
+			if (!phone() && sess && sess.explorer) {
 				if (sess.explorer.hidden) document.querySelector('.wrapper').style.display = 'none';
 				else preGeom(document.querySelector('.wrapper'), sess.explorer.geom);
 			} else if (!tagged && window.matchMedia('(min-width: 910px)').matches) {
@@ -151,6 +154,7 @@
 			// Runs while this window's div is still open, ahead of first
 			// paint of its contents; session.js re-applies the same geom.
 			(function (win) {
+				if (phone()) return;
 				(window.deskSess && window.deskSess.windows || []).forEach(function (w) {
 					if (w.kind === 'post' && w.id === win.dataset.url) preGeom(win, w.geom);
 				});
