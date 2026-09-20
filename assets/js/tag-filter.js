@@ -3,6 +3,12 @@
 	if (!tagList) return;
 
 	var posts = window.searchIndex || [];
+
+	// Phones navigate instead of opening windows: stacking three posts in
+	// one scroll and refusing the fourth is desktop behaviour
+	function phone() {
+		return window.matchMedia('(max-width: 700px)').matches;
+	}
 	var originalTitle = document.querySelector('.default_title h1').textContent;
 
 	var DET_HEAD = '<div class="det-head"><span class="dh-name">Name</span>'
@@ -363,11 +369,13 @@
 		if (!link) return;
 		var href = link.getAttribute('href');
 		if (!href || href.startsWith('http')) return;
+		if (phone()) return;
 		e.preventDefault();
 		loadPost(href);
 	});
 
 	window.addEventListener('popstate', function() {
+		if (phone()) return;
 		loadPost(location.pathname + location.search);
 	});
 

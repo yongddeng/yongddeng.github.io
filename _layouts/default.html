@@ -38,7 +38,7 @@
 	{% include mathjax.html %}
 	{% include analytics.html %}
 </head>
-<body data-site="{{ site.name }}">
+<body data-site="{{ site.name }}"{% if page.title %} class="has-post"{% endif %}>
 	<div class="desktop-icons">
 		<a href="/"><img src="/assets/img/mycomputerv2.png" alt="" /><span>My Computer</span></a>
 		<a href="/?tag=cs600"><img src="/assets/img/folder.png" alt="" /><span>cs600</span></a>

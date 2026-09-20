@@ -3,6 +3,12 @@
 
 (function () {
 	var zTop = 10;
+
+	// Checked at event time, not at load: a rotate changes the answer
+	function phone () {
+		return window.matchMedia("(max-width: 700px)").matches;
+	}
+
 	var openSeq = 0;
 
 	function getWidth () {
@@ -57,6 +63,9 @@
 		tbar.style.cursor = "move";
 		tbar.addEventListener("mousedown", function (e) {
 			if (e.target.closest(".btn") || e.target.closest("a")) return;
+			// A tap synthesises mousedown; without this the app bar would
+			// pin the window to absolute coordinates on every touch
+			if (phone()) return;
 			var r = el.getBoundingClientRect();
 			var ox = r.left + window.scrollX, oy = r.top + window.scrollY;
 			el.style.position = "absolute";
@@ -92,11 +101,13 @@
 			if (onReset) onReset();
 		});
 		grip.addEventListener("dblclick", function () {
+			if (phone()) return;
 			el.style.width = "";
 			el.style.height = "";
 			if (onReset) onReset();
 		});
 		grip.addEventListener("mousedown", function (e) {
+			if (phone()) return;
 			var sw = el.offsetWidth, sh = el.offsetHeight;
 			var sx = e.clientX, sy = e.clientY;
 			function move (ev) {
@@ -144,6 +155,10 @@
 		// X closes just this window; when the last one goes, restore the
 		// desktop title and (only off "/") a clean URL
 		if (close) close.addEventListener("click", function (e) {
+			// On a phone the explorer behind this window is hidden, so
+			// removing the window would leave a blank page: let the link
+			// navigate home instead
+			if (phone()) return;
 			e.preventDefault();
 			content.remove();
 			if (!document.querySelector(".content")) {
