@@ -1,0 +1,229 @@
+// Phones: window dragging, resizing, the taskbar and hover cards have no
+// touch equivalent, so below this width the windows stop being windows and
+// become the page. Layout only — the three scripts that would fight it
+// (001.js, tag-filter.js, xref.js) test the same breakpoint at event time.
+@media only screen and (max-width: 700px) {
+	body {
+		padding-bottom: 0;
+		background: #ffffff;
+		-webkit-text-size-adjust: 100%;
+	}
+
+	// Chrome with no touch equivalent, plus the drive tree and its
+	// permanently disabled search box
+	.desktop-icons,
+	.taskbar,
+	.win-grip,
+	.post_total,
+	ul.topbar,
+	.tag_list,
+	.post_list .det-head,
+	.default_title .btn,
+	.xref-tip {
+		display: none;
+	}
+
+	// A post page renders the explorer as well (default.html); on a phone
+	// only one of the two can be the page
+	body.has-post .wrapper {
+		display: none;
+	}
+
+	// Windows become the page. The variant selectors are listed because
+	// .content.deck-win and .content.dos-win outrank a bare .content.
+	.wrapper,
+	.content,
+	.content.deck-win,
+	.content.dos-win {
+		display: block;
+		position: static;
+		width: auto;
+		min-width: 0;
+		height: auto;
+		min-height: 0;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		overflow: visible;
+		background: #ffffff;
+	}
+
+	// Title bars become sticky app bars. Focus means nothing with one
+	// window, so both states paint navy.
+	.default_title,
+	.post_title,
+	.active-win .default_title,
+	.active-win .post_title {
+		position: sticky;
+		top: 0;
+		z-index: 30;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		height: 48px;
+		padding: 0 12px;
+		background: linear-gradient(to right, #00007f, #1084d0);
+
+		img {
+			float: none;
+			width: 18px;
+			height: 18px;
+			margin: 0;
+		}
+
+		h1 {
+			flex: 1;
+			display: block;
+			color: #ffffff;
+			font-size: 17px;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+	}
+
+	// The close box is the way back out of a post, so give it a fingertip
+	.post_title a {
+		flex: none;
+	}
+	.post_title .btn {
+		float: none;
+
+		// Nested, not listed above: a sibling .post_title .btn rule would
+		// otherwise re-show these at equal specificity, later in the block
+		&.btn_max,
+		&.btn_min {
+			display: none;
+		}
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 26px;
+
+		span {
+			position: static;
+			left: auto;
+			top: auto;
+			font-size: 14px;
+		}
+	}
+
+	// File rows become full-width list items with touch-sized targets
+	.post_list {
+		overflow: visible;
+		background: #ffffff;
+		border: 0;
+
+		ul {
+			margin: 0;
+			padding: 0;
+		}
+
+		li {
+			margin: 0;
+			padding: 0;
+		}
+
+		li a {
+			gap: 10px;
+			min-height: 56px;
+			padding: 10px 12px;
+			border-bottom: 1px solid #d8d4cc;
+			font-size: 15px;
+			white-space: normal;
+
+			img {
+				width: 20px;
+				height: 20px;
+				margin: 0;
+			}
+
+			.nm {
+				flex: 1;
+				padding: 0;
+				overflow: visible;
+				border: 0;
+				text-overflow: clip;
+			}
+
+			.sz,
+			.ty {
+				display: none;
+			}
+
+			.dt {
+				flex: none;
+				width: auto;
+				color: #777777;
+				font-size: 12px;
+			}
+		}
+
+		li a:active {
+			background: #e9edf7;
+		}
+	}
+
+	// The content pane scrolls with the page instead of inside itself
+	.content .post_content {
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: 16px 14px 40px;
+		overflow: visible;
+		background: #ffffff;
+		border: 0;
+		font-size: calc(var(--text, 13px) + 3px);
+		line-height: 1.65;
+
+		img,
+		video,
+		svg {
+			max-width: 100%;
+			height: auto;
+		}
+
+		// Every figure is a single list item, so one rule gives each wide
+		// figure its own sideways scroll and leaves prose items alone
+		li {
+			overflow-x: auto;
+		}
+
+		table {
+			display: block;
+			width: fit-content;
+			max-width: 100%;
+			overflow-x: auto;
+		}
+
+		pre {
+			overflow-x: auto;
+		}
+
+		h1 {
+			margin-top: 36px;
+		}
+	}
+
+	// The videos deck sizes its playlist to a fixed 150px window. Three
+	// classes deep because the post's own <style> block comes later in the
+	// document than this stylesheet.
+	.content.deck-win .vp-list {
+		height: auto;
+		max-height: none;
+	}
+
+	// me.txt keeps its terminal colours, loses its fixed height
+	.content.dos-win .post_content {
+		height: auto;
+		background: #000000;
+	}
+
+	// Section references are links on touch, since there is no hover card
+	a.xref {
+		color: #0000ff;
+		border-bottom: 0;
+	}
+}

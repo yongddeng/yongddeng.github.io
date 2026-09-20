@@ -12,6 +12,12 @@
 
   var cache = {};
 
+  // Phones get links: a 350px hover card has nowhere to sit and nothing
+  // to trigger it
+  function phone() {
+    return window.matchMedia('(max-width: 700px)').matches;
+  }
+
   // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
   // post content, so this must be callable again, not run-once. Walks
   // every open post window; each is set up exactly once.
@@ -35,7 +41,8 @@
       parts.forEach(function (part) {
         var m = part.match(/^§(\d{3})(?:#([\d.]+))?$/);
         if (m && refs[m[1]]) {
-          var span = document.createElement('span');
+          var span = document.createElement(phone() ? 'a' : 'span');
+          if (phone()) span.href = refs[m[1]].url;
           span.className = 'xref';
           span.textContent = '§' + m[1];
           span.setAttribute('data-ref', m[1]);
@@ -139,6 +146,8 @@
       if (tip) { tip.remove(); tip = null; }
     }, 200);
   }
+
+  if (phone()) return;
 
   content.addEventListener('mouseover', function (e) {
     if (e.target.classList.contains('xref')) {
