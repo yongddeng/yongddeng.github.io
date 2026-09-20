@@ -12,12 +12,6 @@
 
   var cache = {};
 
-  // Phones get links: a 350px hover card has nowhere to sit and nothing
-  // to trigger it
-  function phone() {
-    return window.matchMedia('(max-width: 700px)').matches;
-  }
-
   // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
   // post content, so this must be callable again, not run-once. Walks
   // every open post window; each is set up exactly once.
@@ -28,6 +22,10 @@
   }
 
   function setupContent(content) {
+
+    // Phones get links: a 350px hover card has nowhere to sit and nothing
+    // to trigger it
+    var isPhone = phone();
 
     // Wrap §4XX and §4XX#section occurrences in <span> elements
     var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
@@ -41,13 +39,13 @@
       parts.forEach(function (part) {
         var m = part.match(/^§(\d{3})(?:#([\d.]+))?$/);
         if (m && refs[m[1]]) {
-          var span = document.createElement(phone() ? 'a' : 'span');
-          if (phone()) span.href = refs[m[1]].url;
-          span.className = 'xref';
-          span.textContent = '§' + m[1];
-          span.setAttribute('data-ref', m[1]);
-          if (m[2]) span.setAttribute('data-section', m[2]);
-          frag.appendChild(span);
+          var ref = document.createElement(isPhone ? 'a' : 'span');
+          if (isPhone) ref.href = refs[m[1]].url;
+          ref.className = 'xref';
+          ref.textContent = '§' + m[1];
+          ref.setAttribute('data-ref', m[1]);
+          if (m[2]) ref.setAttribute('data-section', m[2]);
+          frag.appendChild(ref);
         } else {
           frag.appendChild(document.createTextNode(part));
         }
@@ -147,18 +145,18 @@
     }, 200);
   }
 
-  if (phone()) return;
+  if (!isPhone) {
+    content.addEventListener('mouseover', function (e) {
+      if (e.target.classList.contains('xref')) {
+        clearTimeout(hideTimer);
+        showTip(e.target);
+      }
+    });
 
-  content.addEventListener('mouseover', function (e) {
-    if (e.target.classList.contains('xref')) {
-      clearTimeout(hideTimer);
-      showTip(e.target);
-    }
-  });
-
-  content.addEventListener('mouseout', function (e) {
-    if (e.target.classList.contains('xref')) hideTip();
-  });
+    content.addEventListener('mouseout', function (e) {
+      if (e.target.classList.contains('xref')) hideTip();
+    });
+  }
   }
 
   initXrefs();

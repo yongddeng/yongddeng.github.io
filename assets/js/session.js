@@ -177,8 +177,11 @@
 		if (!restoring) write(snapshot());
 	});
 
+	// Restore is desktop furniture: on a phone it would stack absolutely
+	// positioned windows over the unwrapped page. Saving still runs, so a
+	// return to desktop width picks the session back up.
 	var saved = read();
-	if (saved && ((saved.windows && saved.windows.length) || (saved.explorer && !saved.explorer.hidden))) {
+	if (!phone() && saved && ((saved.windows && saved.windows.length) || (saved.explorer && !saved.explorer.hidden))) {
 		restore(saved);
 	}
 })();
