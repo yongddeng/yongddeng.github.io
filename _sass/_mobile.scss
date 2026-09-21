@@ -281,6 +281,29 @@
 		}
 	}
 
+	// The F1 status bar's reading-progress blocks, relocated under the
+	// app bar at one-sixth the height; progress.js fills them
+	.read-prog {
+		position: sticky;
+		top: 48px;
+		z-index: 29;
+		display: flex;
+		gap: 1px;
+		height: 7px;
+		padding: 1px;
+		background: silver;
+		border-bottom: 1px solid #7f787f;
+
+		i {
+			flex: 1;
+			background: #dadada;
+		}
+
+		i.on {
+			background: #00007f;
+		}
+	}
+
 	// The posts are a numbered series, and the series says what follows
 	.pn-nav {
 		display: flex;

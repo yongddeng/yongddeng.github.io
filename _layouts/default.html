@@ -173,6 +173,7 @@
 				<div class="btn btn_max"><span class="fa fa-window-maximize"></span></div>
 				<div class="btn btn_min"><span class="fa fa-window-minimize"></span></div>
 			</div>
+			{% unless page.winclass %}<div class="read-prog">{% for i in (1..18) %}<i></i>{% endfor %}</div>{% endunless %}
 			<ul class="topbar">
 				<li class="tb-menu"><span class="tb-label">File</span>
 					<div class="tb-drop">

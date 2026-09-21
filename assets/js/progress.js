@@ -10,17 +10,29 @@
 		bar.dataset.progress = '1';
 		var label = bar.querySelector('.left');
 		var blocks = bar.querySelectorAll('.right i');
+		var strip = win.querySelectorAll('.read-prog i');
 
 		function update() {
-			var max = cont.scrollHeight - cont.clientHeight;
-			var r = max > 0 ? Math.min(1, cont.scrollTop / max) : 1;
+			// On a phone the page is the scroller, not the pane
+			var max, r;
+			if (phone()) {
+				max = document.documentElement.scrollHeight - window.innerHeight;
+				r = max > 0 ? Math.min(1, window.scrollY / max) : 1;
+			} else {
+				max = cont.scrollHeight - cont.clientHeight;
+				r = max > 0 ? Math.min(1, cont.scrollTop / max) : 1;
+			}
 			blocks.forEach(function (b, i) {
 				b.className = r > 0 && i / blocks.length <= r ? 'on' : '';
+			});
+			strip.forEach(function (b, i) {
+				b.className = r > 0 && i / strip.length <= r ? 'on' : '';
 			});
 			label.textContent = r >= 1 ? 'Done' : 'Ready';
 		}
 
 		cont.addEventListener('scroll', update);
+		window.addEventListener('scroll', update, { passive: true });
 		// Re-sync when the pane is resized without scrolling (grip, maximise)
 		if (window.ResizeObserver) new ResizeObserver(update).observe(cont);
 		update();
