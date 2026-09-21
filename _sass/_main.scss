@@ -1380,3 +1380,10 @@ pre code.numbered {
 ::-webkit-scrollbar-corner {
 	background-color: #cacaca;
 } /* if both the vertical and the horizontal bars appear, then perhaps the right bottom corner also needs to be styled */
+
+// Phone-only navigation (_mobile.scss shows both): the chip rail stands in
+// for the drive tree, prev/next for the window stack
+.drive-chips,
+.pn-nav {
+	display: none;
+}

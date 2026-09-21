@@ -215,6 +215,16 @@
 	// Apply the ?tag= filter (default.html hides the list pre-render)
 	var postListDiv = document.querySelector('.post_list');
 	var activeTag = new URLSearchParams(window.location.search).get('tag');
+
+	// Drive chips (phones): press the chip whose tag the URL carries.
+	// Chips are plain links, so filtering arrives by navigation, same as
+	// the post rows.
+	document.querySelectorAll('.drive-chips a').forEach(function (chip) {
+		var q = (chip.getAttribute('href') || '').split('?')[1] || '';
+		var t = new URLSearchParams(q).get('tag');
+		chip.classList.toggle('on', t === activeTag);
+	});
+
 	if (activeTag) {
 		filterByTag(activeTag);
 		postListDiv.style.visibility = 'visible';
