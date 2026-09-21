@@ -144,6 +144,60 @@
 		win.dispatchEvent(new MouseEvent('mousedown'));
 	}
 
+	// The Settings pane recut as a bottom sheet: the taskbar that reaches
+	// System Properties is hidden on phones, so the app bar's Aa opens the
+	// same three reading controls over the same storage
+	function openViewSheet() {
+		if (document.querySelector('.view-sheet')) return;
+		var wrap = document.createElement('div');
+		wrap.className = 'view-sheet';
+		wrap.innerHTML =
+			'<div class="vs-dim"></div>'
+			+ '<div class="vs-box">'
+			+ '<div class="vs-title"><span>Display Properties</span>'
+			+ '<span class="vs-x">&#10005;</span></div>'
+			+ '<fieldset><legend>Paper</legend><div data-key="paper">'
+			+ radio('vs-paper', '#fbfafb', 'White', get('paper'))
+			+ radio('vs-paper', '#fff8ff', 'Pink (classic)', get('paper'))
+			+ '</div></fieldset>'
+			+ '<fieldset><legend>Text size</legend><div data-key="text">'
+			+ radio('vs-text', '12px', 'Small', get('text'))
+			+ radio('vs-text', '13px', 'Medium', get('text'))
+			+ radio('vs-text', '15px', 'Large', get('text'))
+			+ '</div></fieldset>'
+			+ '<fieldset><legend>Font</legend><div data-key="font">'
+			+ radio('vs-font', 'arial', 'Arial', get('font'))
+			+ radio('vs-font', 'georgia', 'Georgia', get('font'))
+			+ radio('vs-font', 'courier', 'Courier', get('font'))
+			+ '</div></fieldset>'
+			+ '<div class="vs-ok"><button>OK</button></div>'
+			+ '</div>';
+		document.body.appendChild(wrap);
+
+		wrap.querySelectorAll('[data-key]').forEach(function (group) {
+			group.addEventListener('change', function (e) {
+				set(group.dataset.key, e.target.value);
+			});
+		});
+		// The sheet's chrome lives inside the phone media query, so a
+		// rotate past the breakpoint closes it rather than leaving bare divs
+		var mq = window.matchMedia('(max-width: 700px)');
+		function close() {
+			wrap.remove();
+			mq.removeEventListener('change', onFlip);
+		}
+		function onFlip() { if (!mq.matches) close(); }
+		mq.addEventListener('change', onFlip);
+		wrap.querySelector('.vs-dim').addEventListener('click', close);
+		wrap.querySelector('.vs-x').addEventListener('click', close);
+		wrap.querySelector('.vs-ok button').addEventListener('click', close);
+	}
+
+	// Delegated: an SPA-loaded post carries a fresh .btn_view this ran before
+	document.addEventListener('click', function (e) {
+		if (e.target.closest('.btn_view') && phone()) openViewSheet();
+	});
+
 	var menuItem = document.getElementById('menu-settings');
 	if (menuItem) {
 		menuItem.addEventListener('click', function (e) {
