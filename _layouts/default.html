@@ -20,6 +20,7 @@
 	<link rel="stylesheet" href="/assets/css/font-awesome.min.css">
 	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
+	<script src="/assets/js/phone.js"></script>
 	<script>
 		// Apply saved Settings before first paint (no colour flash)
 		(function () {
@@ -27,12 +28,12 @@
 			function g(k, d) { try { return localStorage.getItem('set-' + k) || d; } catch (e) { return d; } }
 			r.style.setProperty('--desk', g('desk', '#008082'));
 			r.style.setProperty('--paper', g('paper', '#fbfafb'));
-			r.style.setProperty('--text', g('text', '12px'));
+			// Phones start one notch up: Medium, against the desktop's Small
+			r.style.setProperty('--text', g('text', phone() ? '13px' : '12px'));
 			var fonts = { arial: '"Helvetica Neue", Arial, sans-serif', georgia: 'Georgia, "Times New Roman", serif', courier: '"Courier New", monospace' };
 			r.style.setProperty('--font', fonts[g('font', 'georgia')] || fonts.georgia);
 		})();
 	</script>
-	<script src="/assets/js/phone.js"></script>
 	<script src="/assets/js/highlight.pack.js"></script>
 	<script src="/assets/js/x86asm.min.js"></script>
 	<script>hljs.initHighlightingOnLoad();</script>
