@@ -170,8 +170,24 @@
 			}
 		}
 
+		// Selection paints the whole row, not the desktop's name-span
+		// box with its dotted keyboard-focus border
+		li a:hover,
 		li a:active {
-			background: #e9edf7;
+			background: #00007f;
+			color: #ffffff;
+		}
+
+		ul li a:hover .nm,
+		ul li a:active .nm {
+			background: none;
+			color: inherit;
+			border-color: transparent;
+		}
+
+		li a:hover .dt,
+		li a:active .dt {
+			color: #c8c8e0;
 		}
 	}
 
