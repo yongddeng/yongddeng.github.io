@@ -341,6 +341,33 @@
 		}
 	}
 
+	// The scrollbar's down arrow, escaped to a corner: jump.js shows it
+	// one screen in, a tap lands on the prev/next foot, a second returns
+	.jump-end {
+		position: fixed;
+		right: 12px;
+		bottom: 14px;
+		z-index: 35;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+		background: silver;
+		border: 2px solid;
+		border-color: #ffffff #000000 #000000 #ffffff;
+		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+		font-size: 14px;
+
+		&:active {
+			border-color: #000000 #ffffff #ffffff #000000;
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
 	// Reading settings, docked to the bottom edge in Win95 dialog chrome.
 	// The desktop reaches the same controls through Start > System
 	// Properties; the taskbar is hidden here, so the app bar's Aa opens

@@ -199,6 +199,7 @@
 					{% include comment.html %}
 				{% endif %}
 			</div>
+			{% unless page.winclass %}<div class="jump-end" hidden><span>&#9660;</span></div>{% endunless %}
 			{% if page.previous or page.next %}
 			<div class="pn-nav">
 				{% if page.previous %}<a class="pn-prev" href="{{ page.previous.url }}"><b>&#8249; Previous</b>{{ page.previous.title }}</a>{% endif %}
@@ -238,6 +239,7 @@
 	<script src="/assets/js/find.js"></script>
 	<script src="/assets/js/menubar.js"></script>
 	<script src="/assets/js/progress.js"></script>
+	<script src="/assets/js/jump.js"></script>
 	<div class="taskbar">
 		<div class="task-start-wrap">
 			<button class="task-start" id="task-start">Start</button>
