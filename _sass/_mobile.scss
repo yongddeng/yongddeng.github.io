@@ -178,6 +178,8 @@
 			color: #ffffff;
 		}
 
+		// The ul is load-bearing: it matches the desktop .nm rule's
+		// (0,3,3) specificity so this wins on order, not by accident
 		ul li a:hover .nm,
 		ul li a:active .nm {
 			background: none;
