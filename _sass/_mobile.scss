@@ -252,6 +252,70 @@
 		border-bottom: 0;
 	}
 
+	// The drive tree recut as a chip rail: raised is idle, sunken is the
+	// active drive, the taskbar-button grammar the desktop already speaks
+	.drive-chips {
+		display: flex;
+		gap: 6px;
+		padding: 8px 10px;
+		background: silver;
+		border-bottom: 2px solid #7f787f;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+
+		a {
+			flex: none;
+			padding: 6px 14px;
+			font-size: 13px;
+			color: #000000;
+			text-decoration: none;
+			background: silver;
+			border: 2px solid;
+			border-color: #ffffff #000000 #000000 #ffffff;
+
+			&.on {
+				background: #dadada;
+				border-color: #000000 #ffffff #ffffff #000000;
+				font-weight: bold;
+			}
+		}
+	}
+
+	// The posts are a numbered series, and the series says what follows
+	.pn-nav {
+		display: flex;
+		gap: 8px;
+		padding: 4px 14px 28px;
+		background: var(--paper, #fbfafb);
+
+		a {
+			flex: 1;
+			padding: 10px 12px;
+			font-size: 13px;
+			color: #000000;
+			text-decoration: none;
+			background: silver;
+			border: 2px solid;
+			border-color: #ffffff #000000 #000000 #ffffff;
+
+			b {
+				display: block;
+				margin-bottom: 2px;
+				font-size: 11px;
+				font-weight: normal;
+				color: #55505a;
+			}
+
+			&:active {
+				border-color: #000000 #ffffff #ffffff #000000;
+			}
+		}
+
+		.pn-next {
+			text-align: right;
+		}
+	}
+
 	// Reading settings, docked to the bottom edge in Win95 dialog chrome.
 	// The desktop reaches the same controls through Start > System
 	// Properties; the taskbar is hidden here, so the app bar's Aa opens

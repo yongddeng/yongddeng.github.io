@@ -56,6 +56,11 @@
 				<h1>My Computer</h1>
 			{% endif %}
 		</div>
+		<div class="drive-chips">
+			<a href="/">All</a>
+			{% assign sorted_tags = site.tags | sort %}
+			{% for tag in sorted_tags %}<a href="/?tag={{ tag[0] }}">{{ tag[0] }}</a>{% endfor %}
+		</div>
 		<div class="tag_list">
 			{% include search.html %}
 			<ul id="tag-list">
@@ -192,6 +197,12 @@
 					{% include comment.html %}
 				{% endif %}
 			</div>
+			{% if page.previous or page.next %}
+			<div class="pn-nav">
+				{% if page.previous %}<a class="pn-prev" href="{{ page.previous.url }}"><b>&#8249; Previous</b>{{ page.previous.title }}</a>{% endif %}
+				{% if page.next %}<a class="pn-next" href="{{ page.next.url }}"><b>Next &#8250;</b>{{ page.next.title }}</a>{% endif %}
+			</div>
+			{% endif %}
 			<div class="post_total">
 				<div class="left">Ready</div>
 				<div class="right"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
