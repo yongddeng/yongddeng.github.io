@@ -32,7 +32,12 @@
 		}
 
 		cont.addEventListener('scroll', update);
-		window.addEventListener('scroll', update, { passive: true });
+		// Self-removing: the desktop SPA replaces windows, and a listener
+		// on window would otherwise keep each dead one reachable
+		window.addEventListener('scroll', function onPage() {
+			if (!cont.isConnected) { window.removeEventListener('scroll', onPage); return; }
+			update();
+		}, { passive: true });
 		// Re-sync when the pane is resized without scrolling (grip, maximise)
 		if (window.ResizeObserver) new ResizeObserver(update).observe(cont);
 		update();

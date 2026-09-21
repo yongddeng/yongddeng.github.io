@@ -181,13 +181,12 @@
 		});
 		// The sheet's chrome lives inside the phone media query, so a
 		// rotate past the breakpoint closes it rather than leaving bare divs
-		var mq = window.matchMedia('(max-width: 700px)');
 		function close() {
 			wrap.remove();
-			mq.removeEventListener('change', onFlip);
+			phoneQuery.removeEventListener('change', onFlip);
 		}
-		function onFlip() { if (!mq.matches) close(); }
-		mq.addEventListener('change', onFlip);
+		function onFlip() { if (!phone()) close(); }
+		phoneQuery.addEventListener('change', onFlip);
 		wrap.querySelector('.vs-dim').addEventListener('click', close);
 		wrap.querySelector('.vs-x').addEventListener('click', close);
 		wrap.querySelector('.vs-ok button').addEventListener('click', close);
