@@ -251,4 +251,91 @@
 		color: #0000ff;
 		border-bottom: 0;
 	}
+
+	// Reading settings, docked to the bottom edge in Win95 dialog chrome.
+	// The desktop reaches the same controls through Start > System
+	// Properties; the taskbar is hidden here, so the app bar's Aa opens
+	// this instead (settings.js builds it).
+	.view-sheet .vs-dim {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		background: rgba(0, 0, 0, 0.35);
+	}
+
+	.view-sheet .vs-box {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 41;
+		background: silver;
+		border: 2px solid;
+		border-color: #ffffff #000000 #000000 #ffffff;
+		padding: 2px 2px 6px;
+	}
+
+	.view-sheet .vs-title {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 4px 4px 4px 8px;
+		background: linear-gradient(to right, #00007f, #1084d0);
+		color: #ffffff;
+		font-size: 13px;
+		font-weight: bold;
+
+		.vs-x {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 36px;
+			height: 26px;
+			background: #cccccc;
+			color: #000000;
+			font-weight: normal;
+			border: 2px solid;
+			border-color: #ffffff #000000 #000000 #ffffff;
+		}
+	}
+
+	.view-sheet fieldset {
+		margin: 10px 8px 0;
+		padding: 6px 10px 10px;
+		border: 1px solid;
+		border-color: #7f787f #ffffff #ffffff #7f787f;
+		outline: 1px solid #ffffff;
+	}
+
+	.view-sheet legend {
+		padding: 0 4px;
+		font-size: 12px;
+	}
+
+	.view-sheet label {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 36px;
+		margin-right: 16px;
+		font-size: 14px;
+	}
+
+	.view-sheet .vs-ok {
+		text-align: right;
+		padding: 10px 10px 4px;
+
+		button {
+			padding: 6px 28px;
+			font-size: 13px;
+			font-family: inherit;
+			background: silver;
+			border: 2px solid;
+			border-color: #ffffff #000000 #000000 #ffffff;
+
+			&:active {
+				border-color: #000000 #ffffff #ffffff #000000;
+			}
+		}
+	}
 }

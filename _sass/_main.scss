@@ -355,6 +355,11 @@ body {
 		margin: 0 3px 0 0;
 	}
 
+	// Phone-only reading settings trigger (_mobile.scss shows it)
+	.btn_view {
+		display: none;
+	}
+
 	.btn:active {
 		width: 12px;
 		height: 10px;
