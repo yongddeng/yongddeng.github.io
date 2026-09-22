@@ -24,7 +24,9 @@
 	btn.addEventListener('click', function () {
 		if (mark === null) {
 			mark = window.scrollY;
-			window.scrollTo(0, bottom());
+			// Overshoot and let the browser clamp: computing the target from
+			// innerHeight undershoots on iOS while the toolbar is collapsing
+			window.scrollTo(0, document.documentElement.scrollHeight);
 		} else {
 			window.scrollTo(0, mark);
 			mark = null;

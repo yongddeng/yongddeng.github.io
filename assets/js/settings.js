@@ -3,7 +3,7 @@
 (function () {
 	// Text default is one notch up on phones (default.html pre-paints the
 	// same choice); decided at load, like the pre-paint
-	var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: phone() ? '13px' : '12px', clock: '12', font: 'georgia' };
+	var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '12px', clock: '12', font: 'georgia' };
 	var FONTS = {
 		arial: '"Helvetica Neue", Arial, sans-serif',
 		georgia: 'Georgia, "Times New Roman", serif',

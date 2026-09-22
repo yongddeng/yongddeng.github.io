@@ -29,7 +29,7 @@
 			r.style.setProperty('--desk', g('desk', '#008082'));
 			r.style.setProperty('--paper', g('paper', '#fbfafb'));
 			// Phones start one notch up: Medium, against the desktop's Small
-			r.style.setProperty('--text', g('text', phone() ? '13px' : '12px'));
+			r.style.setProperty('--text', g('text', '12px'));
 			var fonts = { arial: '"Helvetica Neue", Arial, sans-serif', georgia: 'Georgia, "Times New Roman", serif', courier: '"Courier New", monospace' };
 			r.style.setProperty('--font', fonts[g('font', 'georgia')] || fonts.georgia);
 		})();
