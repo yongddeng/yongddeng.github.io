@@ -310,7 +310,8 @@
 	.pn-nav {
 		display: flex;
 		gap: 8px;
-		padding: 4px 14px 28px;
+		// foot clearance: the jump arrow and the iOS toolbar sit below the nav
+		padding: 4px 14px calc(72px + env(safe-area-inset-bottom));
 		background: var(--paper, #fbfafb);
 
 		a {
@@ -346,7 +347,7 @@
 	.jump-end {
 		position: fixed;
 		right: 12px;
-		bottom: 14px;
+		bottom: calc(14px + env(safe-area-inset-bottom));
 		z-index: 35;
 		display: flex;
 		align-items: center;
