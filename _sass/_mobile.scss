@@ -242,74 +242,74 @@
 	// the document than this stylesheet.
 	.content.deck-win {
 		background: #16161c;
-	}
 
-	.content.deck-win .post_content {
-		padding: 0 0 32px;
-		background: #16161c;
-	}
+		.post_content {
+			padding: 0 0 32px;
+			background: #16161c;
+		}
 
-	.content.deck-win .vp {
-		padding: 0;
-	}
+		.vp {
+			padding: 0;
+		}
 
-	.content.deck-win .vp-main {
-		position: sticky;
-		top: 48px;
-		z-index: 25;
-		padding: 0 0 6px;
-		border: 0;
-	}
+		.vp-main {
+			position: sticky;
+			top: 48px;
+			z-index: 25;
+			padding: 0 0 6px;
+			border: 0;
+		}
 
-	.content.deck-win .vp-screen {
-		border-right: 0;
-		border-left: 0;
-	}
+		.vp-screen {
+			border-right: 0;
+			border-left: 0;
+		}
 
-	// The generic post-image height: auto above outranks the deck's own
-	// inset rule and lets the 4:3 thumb overflow its 16:9 frame
-	.content.deck-win .vp-screen iframe,
-	.content.deck-win .vp-screen .vp-thumb {
-		height: 100%;
-	}
+		// The generic post-image height: auto above outranks the deck's
+		// own inset rule and lets the 4:3 thumb overflow its 16:9 frame
+		.vp-screen iframe,
+		.vp-screen .vp-thumb {
+			height: 100%;
+		}
 
-	.content.deck-win .vp-now,
-	.content.deck-win .vp-controls {
-		padding-right: 12px;
-		padding-left: 12px;
-	}
+		.vp-now,
+		.vp-controls {
+			padding-right: 12px;
+			padding-left: 12px;
+		}
 
-	.content.deck-win .vp-controls button {
-		width: 42px;
-		height: 32px;
-		font-size: 13px;
-	}
+		.vp-controls button {
+			width: 42px;
+			height: 32px;
+			font-size: 13px;
+		}
 
-	.content.deck-win .vp-list {
-		height: auto;
-		max-height: none;
-		margin-top: 0;
-		font-size: 12px;
-		border: 0;
-	}
+		.vp-list {
+			height: auto;
+			max-height: none;
+			margin-top: 0;
+			font-size: 12px;
+			border: 0;
+		}
 
-	.content.deck-win .vp-grp {
-		padding: 8px 12px;
-	}
+		.vp-grp {
+			padding: 8px 12px;
+		}
 
-	.content.deck-win .vp-item {
-		gap: 10px;
-		padding: 10px 12px 10px 18px;
-	}
+		.vp-item {
+			gap: 10px;
+			padding: 10px 12px 10px 18px;
+		}
 
-	// Titles wrap instead of dying in a mono ellipsis
-	.content.deck-win .vp-item-t {
-		white-space: normal;
-	}
+		// Titles wrap instead of dying in a mono ellipsis
+		.vp-item-t {
+			white-space: normal;
+		}
 
-	// Find has no prose to search on the deck
-	.deck-win .post_title .btn_find {
-		display: none;
+		// Find has no prose to search on the deck
+		.post_title .btn_find {
+			display: none;
+		}
 	}
 
 	// me.txt keeps its terminal colours, loses its fixed height
@@ -550,6 +550,9 @@
 
 	.xref-peek .xp-bar {
 		flex: none;
+		// the drag listeners are passive; this is what stops the page
+		// behind from panning along
+		touch-action: none;
 		display: flex;
 		align-items: center;
 		gap: 8px;
