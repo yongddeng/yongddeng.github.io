@@ -171,35 +171,45 @@
     root.hidden = true;
     root.innerHTML = '<div class="xp-dim"></div>'
       + '<div class="xp-box">'
-      + '<div class="xp-grip"></div>'
       + '<div class="xp-bar"><span class="xp-title"></span><span class="xp-x">&times;</span></div>'
-      + '<div class="xp-body"></div>'
-      + '<a class="xp-open">Open the full post &#8250;</a>'
+      + '<div class="xp-body post_content" data-xref="1"></div>'
       + '</div>';
     document.body.appendChild(root);
 
     peek = {
       root: root,
       title: root.querySelector('.xp-title'),
-      body: root.querySelector('.xp-body'),
-      open: root.querySelector('.xp-open')
+      body: root.querySelector('.xp-body')
     };
 
     function close() { root.hidden = true; }
     root.querySelector('.xp-dim').addEventListener('click', close);
     root.querySelector('.xp-x').addEventListener('click', close);
 
-    // A downward drag on the grip or the bar drops the sheet
+    // The grip is honest: the sheet follows the finger, closes when
+    // dragged past a third of its height, springs back otherwise
+    var box = root.querySelector('.xp-box');
     var startY = null;
+    function settle(dy) {
+      startY = null;
+      box.classList.remove('dragging');
+      if (dy > box.offsetHeight / 3) close();
+      box.style.transform = '';
+    }
     root.addEventListener('touchstart', function (e) {
-      startY = e.target.closest('.xp-bar, .xp-grip') ? e.touches[0].clientY : null;
+      startY = e.target.closest('.xp-bar') ? e.touches[0].clientY : null;
+      if (startY !== null) box.classList.add('dragging');
     }, { passive: true });
     root.addEventListener('touchmove', function (e) {
-      if (startY !== null && e.touches[0].clientY - startY > 60) {
-        startY = null;
-        close();
-      }
+      if (startY === null) return;
+      box.style.transform = 'translateY(' + Math.max(0, e.touches[0].clientY - startY) + 'px)';
     }, { passive: true });
+    root.addEventListener('touchend', function (e) {
+      if (startY !== null) settle(e.changedTouches[0].clientY - startY);
+    });
+    root.addEventListener('touchcancel', function () {
+      if (startY !== null) settle(0);
+    });
   }
 
   function openPeek(ref) {
@@ -208,13 +218,13 @@
     if (!id || !refs[id]) return;
     if (!peek) buildPeek();
     peek.title.textContent = '§ ' + refs[id].title + (section ? ' — ' + section : '');
-    peek.open.href = refs[id].url;
+    peek.root.dataset.url = refs[id].url;
     peek.body.textContent = 'Loading...';
     peek.body.scrollTop = 0;
     peek.root.hidden = false;
     fetchPost(id, function (html) {
       // Ignore a fetch that resolves after the sheet moved on or closed
-      if (peek.root.hidden || peek.open.getAttribute('href') !== refs[id].url) return;
+      if (peek.root.hidden || peek.root.dataset.url !== refs[id].url) return;
       fillPreview(peek.body, html, section);
     });
   }
