@@ -346,14 +346,16 @@
 	// one screen in, a tap lands on the prev/next foot, a second returns
 	.jump-end {
 		position: fixed;
+		// right matches the app bar's side padding, so the arrow shares
+		// the close button's axis; size matches its 36px buttons
 		right: 12px;
 		bottom: calc(14px + env(safe-area-inset-bottom));
 		z-index: 35;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
+		width: 36px;
+		height: 36px;
 		background: silver;
 		border: 2px solid;
 		border-color: #ffffff #000000 #000000 #ffffff;
@@ -373,6 +375,69 @@
 	// The desktop reaches the same controls through Start > System
 	// Properties; the taskbar is hidden here, so the app bar's Aa opens
 	// this instead (settings.js builds it).
+	// Find docked under the app bar as a single slim row (find.js):
+	// the dialog's title strip goes, its ✕ joins the input row.
+	// 16px input: anything smaller makes iOS zoom the page on focus
+	.find-dlg {
+		position: fixed;
+		top: 48px;
+		left: 0;
+		right: 0;
+		z-index: 31;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 10px;
+		border-top: 0;
+		box-shadow: none;
+
+		// the two wrappers dissolve; their children become the row's
+		// own flex items, reordered so the ✕ sits last
+		.find-dlg-tbar,
+		.find-dlg-body {
+			display: contents;
+		}
+
+		.find-dlg-t {
+			display: none;
+		}
+
+		input {
+			flex: 1;
+			order: 1;
+			width: auto;
+			min-width: 0;
+			height: 34px;
+			font-size: 16px;
+		}
+
+		.find-count {
+			flex: none;
+			order: 2;
+			font-size: 13px;
+		}
+
+		button {
+			flex: none;
+			width: 36px;
+			height: 36px;
+			font-size: 10px;
+		}
+
+		.find-prev {
+			order: 3;
+		}
+
+		.find-next {
+			order: 4;
+		}
+
+		// no ✕ on the row: the magnifier that opened it closes it
+		.find-dlg-x {
+			display: none;
+		}
+	}
+
 	.view-sheet .vs-dim {
 		position: fixed;
 		inset: 0;
