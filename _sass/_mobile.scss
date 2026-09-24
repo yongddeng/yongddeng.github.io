@@ -77,6 +77,8 @@
 			display: block;
 			color: #ffffff;
 			font-size: 17px;
+			// taller than the glyphs: at 1.0 the ellipsis clip cuts descenders
+			line-height: 1.35;
 			overflow: hidden;
 			white-space: nowrap;
 			text-overflow: ellipsis;
