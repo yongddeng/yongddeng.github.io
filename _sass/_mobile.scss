@@ -100,15 +100,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
+		width: 36px;
+		height: 36px;
 
 		// Desktop presses a button by shrinking it to 12x10. Under a
 		// finger that moves the tap point off the button mid-press and
 		// the click never reaches the anchor, so hold the size.
 		&:active {
-			width: 44px;
-			height: 44px;
+			width: 36px;
+			height: 36px;
 		}
 
 		span {
