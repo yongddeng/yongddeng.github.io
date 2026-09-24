@@ -372,8 +372,9 @@ body {
 		margin: 0 3px 0 0;
 	}
 
-	// Phone-only reading settings trigger (_mobile.scss shows it)
-	.btn_view {
+	// Phone-only triggers: reading settings and find (_mobile.scss shows them)
+	.btn_view,
+	.btn_find {
 		display: none;
 	}
 

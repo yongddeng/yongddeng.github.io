@@ -72,11 +72,19 @@
 		state.cur = (i + state.hits.length) % state.hits.length;
 		var el = state.hits[state.cur];
 		el.classList.add('current');
-		// Scroll the post pane itself, not the page
-		var cr = state.cont.getBoundingClientRect();
 		var r = el.getBoundingClientRect();
-		if (r.top < cr.top || r.bottom > cr.bottom) {
-			state.cont.scrollTop += r.top - cr.top - state.cont.clientHeight / 3;
+		if (phone()) {
+			// The page is the pane; 100 clears the app bar and the
+			// docked dialog above the match
+			if (r.top < 100 || r.bottom > window.innerHeight) {
+				window.scrollBy(0, r.top - window.innerHeight / 3);
+			}
+		} else {
+			// Scroll the post pane itself, not the page
+			var cr = state.cont.getBoundingClientRect();
+			if (r.top < cr.top || r.bottom > cr.bottom) {
+				state.cont.scrollTop += r.top - cr.top - state.cont.clientHeight / 3;
+			}
 		}
 		updateCount(state);
 	}
@@ -93,7 +101,7 @@
 
 		var dlg = document.createElement('div');
 		dlg.className = 'find-dlg';
-		dlg.innerHTML = '<div class="find-dlg-tbar">Find<span class="find-dlg-x">&times;</span></div>'
+		dlg.innerHTML = '<div class="find-dlg-tbar"><span class="find-dlg-t">Find</span><span class="find-dlg-x">&times;</span></div>'
 			+ '<div class="find-dlg-body">'
 			+ '<input type="text" aria-label="find in post" />'
 			+ '<button type="button" class="find-prev" aria-label="previous match">&#9650;</button>'
@@ -141,6 +149,21 @@
 	document.addEventListener('keydown', function (e) {
 		if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
 			if (openFind(document.querySelector('.content.active-win'))) e.preventDefault();
+		}
+	});
+
+	// Phone entry: the app-bar magnifier toggles — the row has no ✕,
+	// the button that opened it closes it. Delegated, like the Aa
+	// opener — an SPA-loaded post carries a fresh .btn_find
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest('.btn_find');
+		if (!btn || !phone()) return;
+		var win = btn.closest('.content');
+		var state = win.findState;
+		if (state && state.dlg.style.display !== 'none') {
+			closeDialog(state);
+		} else {
+			openFind(win);
 		}
 	});
 })();
