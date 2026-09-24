@@ -158,8 +158,25 @@ body {
 		display: flex;
 	}
 
-	.task-clock {
+	// Cascade / Tile buttons by the clock: one press arranges, the
+	// same press restores (assets/js/arrange.js)
+	.task-arr {
+		width: 26px;
+		justify-content: center;
+		padding: 0;
+		font-size: 14px;
+	}
+
+	#task-cascade {
 		margin-left: auto;
+	}
+
+	.task-arr.active {
+		border-color: #000000 #ffffff #ffffff #000000;
+		background: #dadada;
+	}
+
+	.task-clock {
 		padding: 3px 10px;
 		font-size: 12px;
 		@include bevel(false);
