@@ -438,6 +438,106 @@
 		}
 	}
 
+	// §-reference peek: the referenced post as a 70% sheet (xref.js).
+	// _main.scss hides it wholesale on desktop; re-shown here
+	.xref-peek {
+		display: block;
+	}
+
+	.xref-peek[hidden] {
+		display: none;
+	}
+
+	.xref-peek .xp-dim {
+		position: fixed;
+		inset: 0;
+		z-index: 44;
+		background: rgba(0, 0, 0, 0.4);
+		touch-action: none;
+	}
+
+	.xref-peek .xp-box {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 45;
+		display: flex;
+		flex-direction: column;
+		height: 70%;
+		background: silver;
+		border: 2px solid;
+		border-color: #ffffff #000000 #000000 #ffffff;
+		border-bottom: 0;
+		padding: 2px 2px 0;
+	}
+
+	.xref-peek .xp-grip {
+		flex: none;
+		width: 44px;
+		height: 5px;
+		margin: 5px auto;
+		background: #a8a4a8;
+		border: 1px solid;
+		border-color: #7f787f #ffffff #ffffff #7f787f;
+	}
+
+	.xref-peek .xp-bar {
+		flex: none;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 10px;
+		font-size: 14px;
+		font-weight: bold;
+		color: #ffffff;
+		background: linear-gradient(to right, #00007f, #1084d0);
+	}
+
+	.xref-peek .xp-x {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex: none;
+		width: 36px;
+		height: 30px;
+		margin-left: auto;
+		font-size: 16px;
+		color: #000000;
+		background: #cccccc;
+		border: 2px solid;
+		border-color: #ffffff #000000 #000000 #ffffff;
+	}
+
+	.xref-peek .xp-body {
+		position: relative;
+		flex: 1;
+		overflow-y: auto;
+		// the sheet's scroll must not chain into the post beneath
+		overscroll-behavior: contain;
+		margin-top: 2px;
+		padding: 4px 16px 16px;
+		font-size: calc(var(--text, 13px) + 3px);
+		font-family: var(--font, inherit);
+		line-height: 1.65;
+		background: var(--paper, #fbfafb);
+		border: 2px solid;
+		border-color: #7f787f #ffffff #ffffff #7f787f;
+
+		img,
+		iframe {
+			max-width: 100%;
+			height: auto;
+		}
+	}
+
+	.xref-peek .xp-open {
+		flex: none;
+		padding: 12px 0 14px;
+		font-size: 14px;
+		text-align: center;
+	}
+
 	.view-sheet .vs-dim {
 		position: fixed;
 		inset: 0;

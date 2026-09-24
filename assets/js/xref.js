@@ -12,6 +12,47 @@
 
   var cache = {};
 
+  // Fetch and cache a post's content, shared by the desktop tooltip
+  // and the phone peek sheet
+  function fetchPost(id, cb) {
+    if (cache[id]) return cb(cache[id]);
+    fetch(refs[id].url)
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var pc = doc.querySelector('.post_content');
+        cache[id] = pc ? pc.innerHTML : '';
+        cb(cache[id]);
+      });
+  }
+
+  // Fill a container with a fetched post, links disabled the way a
+  // preview wants, scrolled to the referenced section once MathJax
+  // has settled the heights
+  function fillPreview(body, html, section) {
+    body.innerHTML = html;
+    var links = body.querySelectorAll('a');
+    for (var i = 0; i < links.length; i++) {
+      links[i].removeAttribute('href');
+      links[i].style.cursor = 'default';
+    }
+    function scrollToSection() {
+      if (!section) return;
+      var headings = body.querySelectorAll('h1, h2, h3, h4');
+      for (var j = 0; j < headings.length; j++) {
+        if (headings[j].textContent.indexOf(section + '.') !== -1) {
+          body.scrollTop = headings[j].offsetTop - 20;
+          break;
+        }
+      }
+    }
+    if (window.MathJax && MathJax.Hub) {
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, body], scrollToSection);
+    } else {
+      scrollToSection();
+    }
+  }
+
   // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
   // post content, so this must be callable again, not run-once. Walks
   // every open post window; each is set up exactly once.
@@ -54,20 +95,7 @@
     }
     });
 
-    // Fetch and cache post content
-    function fetchPost(id, cb) {
-    if (cache[id]) return cb(cache[id]);
-    fetch(refs[id].url)
-      .then(function (r) { return r.text(); })
-      .then(function (html) {
-        var doc = new DOMParser().parseFromString(html, 'text/html');
-        var pc = doc.querySelector('.post_content');
-        cache[id] = pc ? pc.innerHTML : '';
-        cb(cache[id]);
-      });
-  }
-
-  // Tooltip
+    // Tooltip
   var tip = null;
   var hideTimer = null;
 
@@ -102,34 +130,7 @@
     });
 
     fetchPost(id, function (html) {
-      body.innerHTML = html;
-
-      // Disable links but keep blue styling
-      var links = body.querySelectorAll('a');
-      for (var i = 0; i < links.length; i++) {
-        links[i].removeAttribute('href');
-        links[i].style.cursor = 'default';
-      }
-
-      // Scroll to section if specified
-      function scrollToSection() {
-        if (!section) return;
-        var headings = body.querySelectorAll('h1, h2, h3, h4');
-        for (var j = 0; j < headings.length; j++) {
-          if (headings[j].textContent.indexOf(section + '.') !== -1) {
-            body.scrollTop = headings[j].offsetTop - 20;
-            break;
-          }
-        }
-      }
-
-      // Fetched HTML is pre-MathJax; typeset the $...$ runs, then scroll
-      // once heights have settled
-      if (window.MathJax && MathJax.Hub) {
-        MathJax.Hub.Queue(['Typeset', MathJax.Hub, body], scrollToSection);
-      } else {
-        scrollToSection();
-      }
+      fillPreview(body, html, section);
     });
   }
 
@@ -158,6 +159,72 @@
     });
   }
   }
+
+  // Phone peek: tapping a §-ref raises the referenced post as a 70%
+  // sheet over the live post instead of navigating away. The <a> href
+  // stays as the no-JS fallback.
+  var peek = null;
+
+  function buildPeek() {
+    var root = document.createElement('div');
+    root.className = 'xref-peek';
+    root.hidden = true;
+    root.innerHTML = '<div class="xp-dim"></div>'
+      + '<div class="xp-box">'
+      + '<div class="xp-grip"></div>'
+      + '<div class="xp-bar"><span class="xp-title"></span><span class="xp-x">&times;</span></div>'
+      + '<div class="xp-body"></div>'
+      + '<a class="xp-open">Open the full post &#8250;</a>'
+      + '</div>';
+    document.body.appendChild(root);
+
+    peek = {
+      root: root,
+      title: root.querySelector('.xp-title'),
+      body: root.querySelector('.xp-body'),
+      open: root.querySelector('.xp-open')
+    };
+
+    function close() { root.hidden = true; }
+    root.querySelector('.xp-dim').addEventListener('click', close);
+    root.querySelector('.xp-x').addEventListener('click', close);
+
+    // A downward drag on the grip or the bar drops the sheet
+    var startY = null;
+    root.addEventListener('touchstart', function (e) {
+      startY = e.target.closest('.xp-bar, .xp-grip') ? e.touches[0].clientY : null;
+    }, { passive: true });
+    root.addEventListener('touchmove', function (e) {
+      if (startY !== null && e.touches[0].clientY - startY > 60) {
+        startY = null;
+        close();
+      }
+    }, { passive: true });
+  }
+
+  function openPeek(ref) {
+    var id = ref.getAttribute('data-ref');
+    var section = ref.getAttribute('data-section');
+    if (!id || !refs[id]) return;
+    if (!peek) buildPeek();
+    peek.title.textContent = '§ ' + refs[id].title + (section ? ' — ' + section : '');
+    peek.open.href = refs[id].url;
+    peek.body.textContent = 'Loading...';
+    peek.body.scrollTop = 0;
+    peek.root.hidden = false;
+    fetchPost(id, function (html) {
+      // Ignore a fetch that resolves after the sheet moved on or closed
+      if (peek.root.hidden || peek.open.getAttribute('href') !== refs[id].url) return;
+      fillPreview(peek.body, html, section);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var ref = e.target.closest('a.xref');
+    if (!ref || !phone()) return;
+    e.preventDefault();
+    openPeek(ref);
+  });
 
   initXrefs();
   document.addEventListener('content:swapped', initXrefs);
