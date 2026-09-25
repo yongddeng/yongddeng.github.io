@@ -85,6 +85,18 @@
 		}
 	}
 
+	// the title opens the contents sheet (toc.js); the ▾ makes the offer,
+	// withdrawn on the windows with no headings to list
+	.post_title h1::after {
+		content: ' \25BE';
+		font-size: 12px;
+	}
+
+	.deck-win .post_title h1::after,
+	.dos-win .post_title h1::after {
+		content: none;
+	}
+
 	// The close box is the way back out of a post, so give it a fingertip
 	.post_title a {
 		flex: none;
@@ -510,15 +522,15 @@
 
 	// §-reference peek: the referenced post as a 70% sheet (xref.js).
 	// _main.scss hides it wholesale on desktop; re-shown here
-	.xref-peek {
+	.xp-sheet {
 		display: block;
 	}
 
-	.xref-peek[hidden] {
+	.xp-sheet[hidden] {
 		display: none;
 	}
 
-	.xref-peek .xp-dim {
+	.xp-sheet .xp-dim {
 		position: fixed;
 		inset: 0;
 		z-index: 44;
@@ -526,7 +538,7 @@
 		touch-action: none;
 	}
 
-	.xref-peek .xp-box {
+	.xp-sheet .xp-box {
 		position: fixed;
 		left: 0;
 		right: 0;
@@ -548,7 +560,7 @@
 		}
 	}
 
-	.xref-peek .xp-bar {
+	.xp-sheet .xp-bar {
 		flex: none;
 		// the drag listeners are passive; this is what stops the page
 		// behind from panning along
@@ -563,7 +575,7 @@
 		background: linear-gradient(to right, #00007f, #1084d0);
 	}
 
-	.xref-peek .xp-x {
+	.xp-sheet .xp-x {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -578,13 +590,9 @@
 		border-color: #ffffff #000000 #000000 #ffffff;
 	}
 
-	// carries .post_content for the post typography; these override
-	// that class's pane sizing
-	.xref-peek .xp-body {
+	.xp-sheet .xp-body {
 		position: relative;
 		flex: 1;
-		width: auto;
-		height: auto;
 		overflow-y: auto;
 		// the sheet's scroll must not chain into the post beneath
 		overscroll-behavior: contain;
@@ -596,6 +604,13 @@
 		background: var(--paper, #fbfafb);
 		border: 2px solid;
 		border-color: #7f787f #ffffff #ffffff #7f787f;
+	}
+
+	// the peek's body carries .post_content for the post typography;
+	// these override that class's pane sizing
+	.xref-peek .xp-body {
+		width: auto;
+		height: auto;
 
 		img,
 		iframe {
@@ -606,6 +621,30 @@
 		// disabled for the preview, but they should still read as links
 		a {
 			text-decoration: underline;
+		}
+	}
+
+	// Contents sheet (toc.js): heading rows fill the pane edge to edge
+	.toc-sheet .xp-body {
+		padding: 0;
+	}
+
+	.toc-sheet .toc-row {
+		display: block;
+		width: 100%;
+		padding: 12px 16px;
+		font: inherit;
+		font-weight: bold;
+		text-align: left;
+		color: #000000;
+		background: none;
+		border: 0;
+		border-bottom: 1px solid #e2ded8;
+
+		&.sub {
+			font-weight: normal;
+			padding-left: 34px;
+			color: #444444;
 		}
 	}
 
