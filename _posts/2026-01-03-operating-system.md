@@ -29,15 +29,39 @@ use_math: true
 
 <p style="margin-bottom: 12px;"> </p>
 
-The earliest generation of electronic computers (1940s-50s), such as the ENIAC, were programmed manually in pure machine code by rewiring circuits or feeding in [punched cards](https://www.youtube.com/watch?v=kKJxzay85Vk). Programs ran in isolation, required laborious setup, and left machines idle between jobs. The concept of an OS emerged in the 1950s with <!-- the introduction of --> [batch processing systems]() which grouped similar jobs for sequential execution without manual intervention. <!-- (i.e. favoured homogeneity within a batch) --> A key example is GM-NAA I/O, developed <!-- developed by General Motors (GM) --> for the IBM 704, which used control cards to interpret jobs and automate execution, and whose successors (SOS, IBSYS) later scheduled Fortran jobs.
+The earliest generation of electronic computers (1940s-50s), such as the ENIAC, were programmed manually in pure machine code by rewiring circuits or feeding in [punched cards](https://www.youtube.com/watch?v=kKJxzay85Vk). Programs ran in isolation, required laborious setup, and left machines idle between jobs. The concept of an OS emerged in the 1950s with <!-- the introduction of --> [batch processing systems](), where a human operator stacked homogeneous decks and mounted the tapes and translators <!-- period term for any program turning source into machine code (assemblers, compilers); on the IBM 704, the SAP assembler or the Fortran compiler --> only once per batch. <!-- rather than once per job --> In particular, GM-NAA I/O on the IBM 704 <!-- developed by General Motors (GM) --> carried the software ancestor of the kernel, a resident monitor that took over the sequencing between jobs, reading each deck, running it, and loading the next unattended.
 
-The 1960s marked a shift toward [time-sharing systems]() (TSS) and [multiprogramming](), which admitted [concurrent execution]() of multiple programs residing in memory by rapidly switching the CPU among them. This trajectory produced [Multics](), a pioneering TSS jointly built by AT&T Bell Labs, GE, and MIT to support a robust, multi-user computing environment. However, discontent with its complexity prompted researchers at Bell Labs to develop [Unix]() in 1969. This newer and simpler OS incorporated a modular kernel, hardware abstraction, and multi-user support, and these principles remain central to modern operating system design.
+[Control cards]() interleaved in the deck told the monitor which translator to invoke, where the program ended and its data began, what to load next when a run finished or crashed, and so on. Each deck owned the whole machine until completion and nothing yet abstracted the program into a process. The control card grew under successors such as the SHARE Operating System (SOS) and IBSYS into IBM's [Job Control Language]() (JCL, formalised with OS/360 in 1964) and finally into the Unix shell script. These are the [command languages]() that name which programs run and in what order and become the command line once typed at a terminal. <!-- vs PL: a PL composes expressions inside a program, a command language composes whole programs -->
 
-The 1980s ushered in the era of personal computing, shifting OS development from [command-line interfaces]() (CLI) to [graphical user interfaces]() (GUI) to improve accessibility for non-technical users. Microsoft introduced [MS-DOS]() in 1981, a single-tasking CLI-based OS, followed by successive versions of [Windows]() that adopted cooperative and later preemptive multitasking. Around the same time, Apple’s [Macintosh]() system software (later Mac OS, now macOS) brought the GUI into mainstream. In the 1990s, [Linux]() emerged as a free and open-source Unix-like alternative, that became a foundation for innovation across servers, mobiles, and embedded systems.
+The process abstraction began in the 1960s with [multiprogramming](), where several programs resided in memory and turned a program's I/O wait into another's CPU time, and the switching obliges the OS to save and restore each program's execution state. The [time-sharing systems]() (TSS) extended it to interactive users at terminals. For instance, [Multics](), a joint project of AT&T Bell Labs, GE, and MIT, folded memory and files into one paged virtual address space with its single-level store. <!-- a pioneering TSS; to support a robust, multi-user computing environment --> That ambition bred complexity, and researchers at Bell Labs distilled the ideas into [Unix]() in 1969, keeping a per-process address space and a single file interface for all I/O. <!-- This newer and simpler OS incorporated a modular kernel, hardware abstraction, and multi-user support, and these principles remain central to modern operating system design. -->
 
-What emerged from this history is a common set of abstractions that shield programs from hardware: i) A process refers to the running program with its isolated execution environment; ii) virtual memory lets each process have the illusion of a large contiguous address space independent of physical RAM; iii) file descriptors present all I/O endpoints <!-- e.g. regular files, devices, sockets, pipes --> via a uniform read/write interface. These abstractions decouple programs from specific hardware, so the same source code compiles and runs on any machine the OS supports ([portability]()). §I traces the Unix and Linux lineage that shaped them, §II examines the kernel internals, and §III examines each abstraction in turn.
+Personal computing in the 1980s retraced the climb from resident monitor to multiprogramming. [MS-DOS]() (1981) began at the bottom as a single-tasking monitor on the MMU-less Intel 8088. [Windows]() then re-ascended through cooperative (1985) and later preemptive (1993) multitasking once the 386’s protected mode restored memory protection. The control interface took its next step in the same era, from [command-line interfaces]() (CLI) to [graphical user interfaces]() (GUI), <!-- to open computing to non-technical users --> and Apple’s System Software (1984, since renamed [macOS]()) on the Macintosh popularised the GUI. A GUI program idles in a message loop until the window system dispatches a keystroke or click.
 
-<!--
+{% comment %}
+Four "multi-" terms, two layers. The first pair is what the OS does with a
+scarce CPU, the second what an application does with plentiful cores.
+
+                    cores  unit          the distinguishing move        where
+  multiprogramming    1    2 processes   switches when one BLOCKS       here
+                                         on I/O (keep the CPU busy)
+  multitasking        1    2 processes   switches when the task YIELDS  here
+                                         (cooperative) or on a timer
+                                         quantum (preemptive)
+  multithreading      2    1 process,    threads SHARE one address      §604#2.2
+                           2 threads     space, run on both cores
+  multiprocessing     2    2 processes   ISOLATED address spaces,       §604#2.1
+                           (1 thread ea.) run on both cores
+
+Top pair: same picture (one core, two processes), different trigger — a blocking call vs the task's own yield or the timer interrupt.
+Bottom pair: same picture (two cores, work in parallel), different sharing — one address space vs two.
+
+Two cores is how the bottom pair is drawn, not a precondition: multithreading
+on one core still overlaps I/O, it just gains no parallelism.
+{% endcomment %}
+
+[Linux]() (1991) later arrived as a free Unix-like alternative and spread across servers, mobiles, and embedded systems. In fact, decades of research settled on the three abstractions shielding programs from hardware, i) process: a running program with an isolated execution environment; ii) virtual memory: an illusion of contiguous address space decoupled from physical memory; and also iii) file descriptor: a uniform read/write interface over every I/O endpoint<!-- e.g. regular files, devices, sockets, pipes -->. <!-- Because they decouple programs from specific hardware, the same source code compiles and runs on any machine the OS supports (portability). --> Each of the three virtualises one scarce resource, as the process multiplexes CPU time via the timer interrupt, virtual memory multiplexes RAM via the MMU, and the file descriptor multiplexes devices via their drivers.
+
+{%comment%}
 Programs need hardware resources but cannot touch hardware directly.
 The OS provides three abstractions as safe, uniform request interfaces:
 
@@ -55,18 +79,20 @@ The OS provides three abstractions as safe, uniform request interfaces:
   - Pipes: byte streams between processes (ls | grep foo)
   - Pseudo-files: /proc/cpuinfo, /sys/ (live kernel state, not on disk)
 All accessed through the same open()/read()/write()/close() interface.
--->
+{%endcomment%}
 
-- ...
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/os-evolution.jpg" width="400"> <a href="https://osm.hpi.de/origins/2017/" target="_blank" style="position: absolute; top: 2px; right: 2px; font-size: 11px;">[src]</a> </div>
 <!-- - <iframe width="500" height="300" src="https://www.youtube.com/embed/tc4ROCJYbm0?si=lv-t2ZqX56CZWqMJ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
 
 ### **1.2. Unix**
 
 <p style="margin-bottom: 12px;"> </p>
 
-Unix emerged in 1969 at Bell Labs, when Ken Thompson and Dennis Ritchie (Turing Award, 1983) repurposed a spare [PDP-7]() minicomputer to build a lightweight alternative to Multics. Where Multics pursued complexity, Unix pursued simplicity: a small kernel, a [hierarchical file system]() (HFS), and a minimal API with a clean separation between kernel mechanisms and user-space utilities. In the early 1970s, Unix was rewritten from assembly into C, also created by Ritchie, making it the first widely portable operating system. The design decisions that followed shaped the three abstractions examined in §III (process, virtual memory, file).
+Ken Thompson and Dennis Ritchie (Turing Award, 1983) began Unix on a spare [PDP-7]() minicomputer. Against Multics's generality they chose smallness. A compact kernel sat beneath a [hierarchical file system]() (HFS) and a minimal API separated kernel mechanisms from user-space utilities. <!-- Unix emerged in 1969 at Bell Labs as a lightweight alternative to Multics --> The decisive move came in 1973, when the kernel was rewritten from assembly into [C](), a language Ritchie created for the purpose. An OS had always been the property of one machine because it was written in that machine's assembly, whereas a kernel in a high-level language could be recompiled for any machine with a C compiler (§602#2.1), and Unix thus became the first widely portable OS. <!-- The design decisions that followed shaped the three abstractions (process, virtual memory, file). -->
 
-Before Unix, each class of device (disk, tape, terminal, printer) required its own set of I/O instructions and access methods<!-- e.g. IBM OS/360 had QSAM for sequential, BSAM for block-level, ISAM for indexed — all with different assembly macros and JCL parameters; C did not exist yet -->, coupling programs to specific hardware. Unix’s central design decision was the "everything is a file" abstraction, which collapsed all I/O behind a single [open]()/[read]()/[write]()/[close]() interface so that a program reading bytes need not know whether they come from a disk, a keyboard, or a network. On top of this uniform interface, Unix introduced the [fork-exec-wait]() process model, pipes (added in 1973 at Doug McIlroy’s insistence, wiring one program’s output to another’s input), and signals for asynchronous notification. Combined with plain-text configuration, these primitives made the environment composable and scriptable.
+Every program before Unix was coupled to specific hardware since each class of device (e.g. card reader, line printer) demanded its own I/O instructions and access methods<!-- e.g. IBM OS/360 had QSAM for sequential, BSAM for block-level, ISAM for indexed — all with different assembly macros and JCL parameters; C did not exist yet -->. Unix said "[everything is a file]()" after it unified all I/O interface with *open()*/*read()*/*write()*/*close()* A file is simply a stream of bytes, so a program could now identify it only by a file descriptor and never by its device, and the kernel returns the descriptor as a mere integer on the *open()* system call that it dispatches each read and write on it to the underlying device's driver. The shell in turn starts every child process with fd 0, 1, and 2 bound to stdin, stdout, and stderr and rebinds them for redirection.
+
+On top of this uniform interface, Unix added i) the [fork-exec-wait]() process model; ii) [pipes]() (1973, at Doug McIlroy’s insistence) that wire one process’s output into another’s input; and iii) [signals]() that notify processes asynchronously. Combined with plain-text configuration, these primitives made the environment composable and scriptable, as small tools chain into pipelines that solve problems none solves alone. McIlroy distilled the ethos into the Unix philosophy such that a program should do one thing well and work with others. The shell made such composition the daily practice, and a tool written in 1975 still runs in a modern pipeline because the contract never changed.
 
 <!--
 "Everything is a file" — why it matters
@@ -84,8 +110,8 @@ Thompson & Ritchie’s insight: make every I/O source a stream of bytes behind o
 The file descriptor (fd) is just a number the kernel returns when you open something:
 
   int fd1 = open("/home/ken/notes.txt", O_RDONLY);  // regular file → fd 3
-  int fd2 = open("/dev/tty", O_RDWR);               // terminal    → fd 4
-  int fd3 = open("/dev/lp0", O_WRONLY);              // printer     → fd 5
+  int fd2 = open("/dev/tty", O_RDWR);               // terminal     → fd 4
+  int fd3 = open("/dev/lp0", O_WRONLY);             // printer      → fd 5
 
   read(fd1, buf, 100);   // read from file
   read(fd2, buf, 100);   // read from keyboard — same function
@@ -142,36 +168,58 @@ Why the abstraction endures:
 A tool written in 1975 still works in a 2026 pipeline because the interface never changed.
 -->
 
-As AT&T was restricted by a 1956 antitrust consent decree from commercialising Unix, it spread freely through academia. The [Berkeley software distribution]() (BSD), launched in the late 1970s by Bill Joy at UC Berkeley, evolved from a set of enhancements into a full OS that contributed the first complete TCP/IP stack and became a reference platform for early Internet development. BSD’s code lives on in FreeBSD, Apple’s [Darwin]() (the Unix core of macOS/iOS), and even Windows networking. Meanwhile, Bell Labs continued with [Plan 9]() (1980s), which pushed the "everything is a file" abstraction to network and system resources, influencing Linux’s */proc* and */sys*. As Unix variants proliferated and diverged, the IEEE introduced the [Portable Operating System Interface]() (POSIX) standard in the late 1980s, codifying a portable API around processes, file descriptors, and signals that unified the fragmented landscape.
+A 1956 antitrust consent decree had confined AT&T to telephony, so Unix could not be sold and was instead licensed to universities with source code for a nominal fee. The [Berkeley software distribution]() (BSD, late 1970s) grew from the source into a full OS that contributed the first complete TCP/IP stack <!-- became a reference platform for early Internet development --> and lives on in FreeBSD and Apple’s Darwin (i.e. the Unix core of macOS). Bell Labs also continued with Plan 9 (1980s), which pushed "everything is a file" to network and system resources and inspired Linux’s */proc* and */sys*. <!-- Linux-only: macOS/Darwin never adopted procfs and exposes the same info via sysctl and the libproc API (what ps uses) --> These variants nonetheless diverged until the IEEE's [Portable Operating System Interface]() (POSIX, 1988) froze the Unix API as a portable contract. <!-- code against the spec runs on any compliant kernel (Linux, macOS, the BSDs), vendors competing on implementation beneath the contract -->
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix_block.gif" width="450"> <a href="http://unixbyrahul.50webs.com/unix2.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix_block.gif" width="450"> <a href="http://unixbyrahul.50webs.com/unix2.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix-like.png" width="450"> <a href="https://en.wikipedia.org/wiki/Unix-like" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix-like.png" width="400"> <a href="https://en.wikipedia.org/wiki/Unix-like" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div>
 
 
 ### **1.3. Linux**
 
 <p style="margin-bottom: 12px;"> </p>
 
-[Linux](https://www.youtube.com/watch?v=E0Q9KnYSVLc&source_ve_path=MjM4NTE&embeds_referring_euri=http%3A%2F%2F127.0.0.1%3A4000%2F) began in 1991 as a personal project by Linus Torvalds to build a free, Unix-like kernel for the Intel 80386 architecture. Inspired by [MINIX]() (a teaching OS by Andrew Tanenbaum) and licensed under the [GPL](), it attracted contributions from developers worldwide and was paired with the [GNU Project]()’s user-space tools (e.g. gcc, glibc, coreutils) to form a complete open-source operating system. Unlike proprietary Unix systems tied to specific vendors, Linux grew through a decentralised, community-driven model, a development approach that would later be mirrored by the open-source AI community (e.g. Hugging Face, PyTorch, llama.cpp).
+Andrew Tanenbaum wrote [MINIX]() (1987) as a miniature Unix under a licence that only permitted academic uses. Linus Torvalds started Linux as a free Unix-like kernel for the Intel 80386, the first PC chip with the paged memory protection Unix presumes, and became his master's thesis [Linux: A Portable Operating System (1997)](). The GPL-licensed kernel joined the GNU Project's user space (e.g. gcc, glibc, coreutils) to complete an open-source OS (1992). A single vendor wrote each proprietary Unix, whereas a decentralised community of volunteers wrote Linux. Torvalds wrote [git]() (2005) for the community which now carries open source at large. <!-- later mirrored in open-source AI (e.g. Hugging Face, PyTorch, llama.cpp) -->
 
-Architecturally, Linux uses a [monolithic kernel](), integrating core services such as process scheduling, virtual memory, networking, and file systems into a single privileged binary. To balance this with modularity, it supports [loadable kernel modules]() (LKMs) that allow dynamic insertion of drivers and extensions at runtime without rebooting. Written in portable C, Linux was quickly ported beyond x86 to architectures including ARM, PowerPC, and SPARC, and later incorporated features such as [control groups]() (cgroups), [namespaces](), and pluggable schedulers, features that now underpin containerised workloads (§607).
+Linux is however an independent reimplementation of Unix while POSIX had already standardised its interface. Unix software targeted the contract rather than any vendor's code, so a kernel rebuilt from the specification slotted in where licensed code once sat. Meanwhile, the USL v. BSDi lawsuit (1992) clouded BSD precisely when commodity x86 servers wanted a free Unix, and by the early 2000s Linux had displaced vendor Unix across servers. Three decades on, it runs Android phones, many cloud servers, <!-- an EC2 instance defaults to a Linux image atop a KVM-derived hypervisor --> and large-scale ML models. For instance, many ML stacks often presume Linux containers (e.g. SageMaker, vLLM), because both CUDA and K8s prioritise Linux.
 
-Though not derived from any Unix source tree, Linux closely follows POSIX standards and Unix design principles. By the early 2000s, it had displaced proprietary Unix as the dominant OS for servers and infrastructure. Today, it runs on everything from Android smartphones to all [Top500]() supercomputers, and serves as the default runtime for virtually all large-scale ML workloads. Cloud ML platforms (e.g. AWS SageMaker) run Linux-based containers, as do distributed training frameworks (e.g. DeepSpeed, Megatron-LM) and inference servers (e.g. vLLM, TGI), because its open-source nature and fine-grained hardware control make it the natural fit.
+Three choices mark Linux's architectural design. Namely, i) a [monolithic kernel](): core services live in one privileged binary, and [loadable kernel modules]() (LKMs) add drivers at runtime, hence one kernel image serves any hardware; ii) asymmetric stability: the maxim "never break userspace" keeps decades-old binaries running, whereas in-kernel interfaces promise nothing and drivers must live in the [kernel's source tree](https://github.com/torvalds/linux) and move with it; and iii) portable C: the tree runs beyond x86 on ARM and RISC-V. Tanenbaum publicly judged the first choice obsolete in 1992, arguing microkernels had already won, yet the monolithic tree outlived every microkernel rival on the server.<!-- trim: Subsequently, control groups (cgroups) and namespaces deepened process isolation, which yield one kernel host many tenants that neither see nor starve each other, and a single module, KVM, even makes the same kernel a Type 1 hypervisor (§607#1.1), scheduling whole guest OSes beside ordinary processes. -->
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux_kernel.webp" width="375" height="275"> <a href="https://examradar.com/linux-architecture-linux-kernel-structure/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux_kernel.webp" width="325" height="235"> <a href="https://examradar.com/linux-architecture-linux-kernel-structure/" target="_blank" style="position: absolute; top: 4px; left: 12px; font-size: 11px;">[src]</a> </div>
 
-<!-- ### **Linux Distribution**
-<p style="margin-bottom: 12px;"> </p>
+A [Linux distribution]() (Linux distro) bundles the kernel with a curated user space, including the utilities <!-- POSIX's own term: ls, cp, grep from coreutils; mount from util-linux --> and shell, libraries, configuration defaults, and package manager <!-- others: pacman (Arch), apk (Alpine — the one you meet in slim Docker images); Homebrew is macOS's de facto one, user-space and third-party since no distro defines it --> that turn a bare kernel into a bootable, usable system. The kernel alone starts PID 1 and stops concerning itself with what runs above. Everything a user touches, from the shell to the [init system]() running as that PID 1, is hence the distribution's choice rather than Linux's. Most install [systemd]() whereas slim distros such as Alpine choose lighter inits. Early distros such as Slackware (1993), [Debian]() (1993), and Red Hat Linux (1995) laid the groundwork, and every major distro today descends from one of these lines. <!-- trim: "provide usable environments tailored to various audiences, from desktop users and system administrators to developers, embedded engineers, and cloud providers" -->
 
-A Linux distribution (or "distro") bundles the Linux kernel with a curated set of user-space utilities, libraries, configuration defaults, and package management tools to form a complete operating system. As the Linux kernel alone is insufficient for end users, distributions emerged to provide usable environments tailored to various audiences—ranging from desktop users and system administrators to developers, embedded engineers, and cloud providers. Early distributions such as Slackware (1993), Debian (1993), and Red Hat Linux (1995) laid the groundwork for today’s ecosystem.
+The differences among distributions nonetheless run shallow, as every distro shares the kernel's syscall ABI (§602#3.1) and honours POSIX and the FHS. <!-- the Linux Standard Base (LSB) too, though moribund since ~2015 --> What fragments is user space, which glibc and which library versions, so a binary built on one distro may not find its lib. on another. Meta-tools (e.g. snap, flatpak) thus bundle an application's dependencies and lean on the kernel alone. <!-- trim: "the choice of distribution often reflects the target use case, administrative preferences, or hardware constraints, rather than incompatibilities in the underlying Linux system" --> What distinguishes distributions in practice is the [package manager]() and the release policy. For example, Debian ships .deb packages via [apt](), and releases roughly every two years only when its testing pool is judged stable. <!-- a conservatism that made it the base others build on --> 
 
-Each distribution makes distinct choices in areas such as init systems (e.g. systemd, OpenRC), packaging formats (e.g. .deb, .rpm, source-based), file system layout, release cadence, and included software stacks. For example, Debian emphasizes stability and is widely used as a base for derivatives like Ubuntu, which targets usability and long-term support for both desktops and servers. Red Hat Enterprise Linux (RHEL), and its derivatives like CentOS and AlmaLinux, prioritize commercial support and certification for enterprise workloads, while Arch Linux focuses on minimalism, rolling releases, and user control.
+[Ubuntu]() (2004, Canonical) rebuilds from Debian on a fixed cadence, where a release arrives every six months and a [long-term support]() (LTS) release every two years (22.04 is April 2022, an LTS). Its LTS wins where certification matters. For instance, vendor stacks (e.g. nvidia/cuda with the pytorch images atop it), CI runners (e.g. GitHub Actions' ubuntu-latest), and cloud images (e.g. EC2's Amazon Machine Images) all ride it, while Debian still bases the official language and database images (e.g. python, postgres). Either way a distro arrives as a Docker base image and runs on any host, and Docker Desktop supplies a hidden Linux VM on macOS and Windows (§607#2.2). <!-- The Red Hat line (RHEL, CentOS, AlmaLinux) makes the same trade with .rpm and dnf for certified enterprise support, while Arch abandons versioned releases for a rolling model. -->
 
-Distributions also diverge in tooling and update strategies. Package managers like apt, dnf, and pacman streamline software installation and system updates, while meta-tools like snap or flatpak aim to standardize application delivery across distros. Despite differences, most distributions remain interoperable through shared adherence to standards like POSIX, FHS, and the Linux Standard Base (LSB). As such, the choice of distribution often reflects the target use case, administrative preferences, or hardware constraints, rather than incompatibilities in the underlying Linux system.
- -->
+{% comment %}
+FROM chains of two familiar images — every base bottoms out at a userland tarball, never a kernel.
 
-<!-- - <iframe width="475" height="290" src="https://www.youtube.com/embed/E0Q9KnYSVLc?si=3xrEkT-sMcskztqz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
+python:3.12 (official, simplified):
+  FROM buildpack-deps:bookworm        # Debian + gcc, make, headers — enough to compile CPython
+  RUN wget .../Python-3.12.x.tar.xz && ./configure && make && make install
+  CMD ["python3"]
+
+  chain beneath:
+  buildpack-deps:bookworm → bookworm-scm (+git) → bookworm-curl (+curl, certs)
+  → debian:bookworm                   # the distro userland
+  → FROM scratch                      # empty — the chain's floor
+    ADD rootfs.tar.xz /               # Debian's userland as plain files, no kernel
+
+pytorch/pytorch (runtime, simplified):
+  FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04   # vendor-certified base
+  RUN apt-get install -y python3 ... && pip install torch torchvision
+
+  chain beneath:
+  nvidia/cuda:...-ubuntu22.04 → ubuntu:22.04 → scratch + ADD ubuntu-jammy-...-root.tar.gz /
+
+Note what is absent: no kernel, no GPU driver — the driver stays on the host; the image carries
+only CUDA user-space libraries. The userland-only rule holds even for GPUs.
+{% endcomment %}
+
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux-distro.png" width="350"> <a href="https://cognitivewaves.wordpress.com/linux-distributions/" target="_blank" style="position: absolute; bottom: 50px; left: 4px; font-size: 11px;">[src]</a> </div>
+
 
 ## II
 
@@ -227,9 +275,10 @@ Application developer + libc (user space)
 │    → kernel copies to user buf, wakes process
 {% endcomment %}
 
-### **2.1. Kernel (+ Shell)**
+### **2.1. Kernel**
 
 <p style="margin-bottom: 12px;"> </p>
+
 
 {% comment %}
 linux/
@@ -288,7 +337,11 @@ At runtime, the kernel only runs when entered via:
   hardware interrupt    → arch/x86/kernel/irq → dispatches to drivers/
 {% endcomment %}
 
-A [kernel](https://www.josehu.com/technical/2021/05/24/os-kernel-models.html) is a compiled binary (i.e. C, with Rust accepted into Linux since 6.1) built for a specific CPU architecture which remains resident for the lifetime of the machine, managing hardware on behalf of user programs: process scheduling, memory management, file systems, networking, and device control. It maintains all system state in C structs: what programs run (i.e. processes), where they live in memory (i.e. pages), and what they read/write (i.e. file descriptors). While it manages hardware through interrupt handling, device registers, and DMA, its codebase has architecture-specific code (e.g. *arch/x86/*, *arch/arm64/*) alongside portable C code (e.g. *kernel/*, *mm/*, *fs/*). <!-- At power-on, firmware (BIOS/UEFI) performs the power-on self-test (POST) and the bootloader loads the kernel into RAM, where it launches the first user-space process (i.e. PID 1). -->
+A [kernel](https://www.josehu.com/technical/2021/05/24/os-kernel-models.html) is a compiled binary (i.e. C, with Rust accepted into Linux since 6.1) built for a specific CPU architecture which remains resident for the lifetime of the machine, managing hardware on behalf of user programs: process scheduling, memory management, file systems, networking, and device control. It maintains all system state in C structs: what programs run (i.e. processes), where they live in memory (i.e. pages), and what they read/write (i.e. file descriptors). While it manages hardware through interrupt handling, device registers, and DMA, its codebase has architecture-specific code (e.g. *arch/x86/*, *arch/arm64/*) alongside portable C code (e.g. *kernel/*, *mm/*, *fs/*).
+
+At power-on, firmware ([BIOS]()/[UEFI]()) performs the power-on self-test (POST) and hands over to a [bootloader]() (e.g. GRUB), which loads the kernel image into RAM. The kernel's *start_kernel()* then runs once, installing the trap table and syscall entry point, starting the scheduler and page allocator, probing devices, and mounting the root file system (first an [initramfs](), a temporary in-RAM filesystem carrying the drivers and tools needed to reach the real disk), before executing */sbin/init* as [PID 1](). From that moment the kernel never launches a program of its own accord, as every later process descends from PID 1 by fork.
+
+Despite its permanence, the kernel is not a process. It holds no PID and no run-queue entry, existing instead as a library of handlers mapped into the upper half of every process's address space, so entering it is a [mode switch]() within the current process rather than a context switch to another. It executes only when entered via a syscall, a fault, or an interrupt, and otherwise costs no CPU. The exceptions are kernel threads such as *kswapd*, which the kernel spawns for background housekeeping and *ps* shows in square brackets.
 
 {% comment %} 
 - https://www.youtube.com/watch?v=ZmPIxfCggFw 
@@ -298,17 +351,23 @@ the kernel launches PID 1 and does not concern itself with what init does afterw
 
 Its architecture varies in how much code runs privileged. [Monolithic kernels]() (e.g. Linux) place all services in a single binary for fast in-kernel function calls, and so a single bug can crash the entire system. [Microkernels]() (e.g. seL4) preserve scheduling, IPC, and memory management privileged, running other kernel components as user-space servers at the cost of IPC overhead. [Hybrid kernels]() (e.g. XNU on macOS) keep performance-critical services (e.g. file system, networking, graphics) in kernel space.<!-- Note: macOS is the full OS (kernel + frameworks + GUI); XNU is its kernel (Mach microkernel + BSD monolithic layer). Similarly, "Linux" is strictly the kernel, while Ubuntu/Fedora/etc. are the full OS distributions built around it. Windows NT is the kernel; "Windows" is the OS. --> The distinction matters most for [device drivers](), code that translates generic I/O requests into hardware-specific operations, as they are highly crash-prone components.
 
-Regardless of architecture, user code executes in user mode and enters the kernel through a privilege transition. There are three causes: i) [system call]() (syscall): an intentional request by a program (e.g. *write()*, *fork()*), implemented via a [trap]() instruction (e.g. *syscall* on x86-64) that saves state and jumps to a kernel entry point<!-- not every trap is a syscall (faults and breakpoints are also traps), but every syscall uses a trap -->. ii) [Fault](): a synchronous exception raised by the CPU during instruction execution (e.g. page fault, division by zero), often restartable after the kernel resolves the cause, though some (e.g. invalid opcode) are fatal. iii) [Interrupt](): an asynchronous signal from hardware (e.g. disk I/O completion, timer tick), handled independently of any running process. Syscalls and faults are synchronous and handled in the context of the current process; interrupts can arrive at any time. The timer interrupt (every 1-10 ms) is what allows the kernel to preempt running programs. On x86-64, syscalls enter via MSR_LSTAR, while faults and interrupts dispatch through the [interrupt descriptor table]() (IDT).
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/monolithic_kernel.png" width="400" height="320"> <a href="http://www.haifux.org/lectures/86-sil/kernel-modules-drivers/kernel-modules-drivers.html" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div>
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/monolithic_kernel.png" width="400" height="320"> <a href="http://www.haifux.org/lectures/86-sil/kernel-modules-drivers/kernel-modules-drivers.html" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+<!-- - <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://leimao.github.io/images/blog/2021-06-18-Microkernel-VS-Monolithic-Kernel-OS/OS-structure.svg" width="500" height="250"> <a href="https://leimao.github.io/blog/Microkernel-VS-Monolithic-Kernel-OS/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 11px;">[src]</a> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white;"> <img src="https://leimao.github.io/images/blog/2021-06-18-Microkernel-VS-Monolithic-Kernel-OS/OS-structure.svg" width="500" height="250"> <a href="https://leimao.github.io/blog/Microkernel-VS-Monolithic-Kernel-OS/" target="_blank" style="position: absolute; top: 0px; left: 4px; font-size: 12px;">[src]</a> </div> -->
+### **2.2. Shell**
 
-Of the three, syscalls are the primary interface for user programs, typically issued through a [shell](), a command interpreter that parses input and dispatches the corresponding syscalls. The shell is a user-space process which repeatedly reads a command, forks a child, execs the binary, and waits for completion. CLI shells (e.g. Bash, [Zsh](https://github.com/ohmyzsh/ohmyzsh/wiki/Cheatsheet)) build on this loop with scripting, I/O redirection, job control, and process substitution. A pipeline such as *ls \| grep foo* compiles into the target syscalls: *fork()*, *pipe()*, *dup2()*, and *exec()*, orchestrated by the shell before any program executes. Graphical desktop environments (e.g. Aqua, GNOME) expose the same interface visually<!-- terminal emulators (e.g. Ghostty, iTerm2) merely host shell processes -->.
+<p style="margin-bottom: 12px;"> </p>
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/os_shell.gif" width="400" height="180"> <a href="https://docstore.mik.ua/orelly/unix/upt/ch01_02.htm" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+User programs reach kernel services only through system calls, which every process issues via library wrappers, and the user's own point of entry is the [shell](), a command interpreter that parses input and dispatches the corresponding syscalls. The shell is a user-space process which repeatedly reads a command, forks a child, execs the binary, and waits for completion. CLI shells (e.g. Bash, [Zsh](https://github.com/ohmyzsh/ohmyzsh/wiki/Cheatsheet)) build on this loop with scripting, I/O redirection, job control, and process substitution. A pipeline such as *ls \| grep foo* compiles into the target syscalls: *fork()*, *pipe()*, *dup2()*, and *exec()*, orchestrated by the shell before any program executes. Graphical desktop environments (e.g. Aqua, GNOME) expose the same interface visually.
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux-kernel.gif" width="400"> <a href="https://litux.nl/mirror/kerneldevelopment/0672327201/ch01lev1sec2.html" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+Before any fork, the shell rewrites the command line through a fixed sequence of expansions. [Parameter expansion]() replaces *$HOME* with the variable's value, [command substitution]() replaces *$(git branch)* with that command's output, and [pathname expansion]() (globbing) replaces *\*.py* with matching file names, so the program receives finished argument strings and never sees the notation. Variables are local to the shell process until [export]() marks them as [environment variables](), a key=value block that *execve()* hands to every child, which is how *PATH* reaches each program the shell launches. The inheritance runs one way only, as a child may alter its own copy but never the parent's.
+
+A user today opens not the shell but a [terminal emulator]() (e.g. Ghostty, iTerm2), a GUI application that emulates the hardware terminals of the 1970s (e.g. the VT100, whose escape codes survive). Its role is presentation, as it draws glyphs, translates keystrokes into bytes, and interprets [escape sequences]() for colour and cursor movement, whereas the shell runs inside as a child process wired to it through a [pseudo-terminal]() (pty). The kernel's pty device relays bytes both ways, so the emulator never parses a command and the shell never draws a pixel.
+
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/os_shell.gif" width="400" height="180"> <a href="https://docstore.mik.ua/orelly/unix/upt/ch01_02.htm" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div>
+
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/linux-kernel.gif" width="400"> <a href="https://litux.nl/mirror/kerneldevelopment/0672327201/ch01lev1sec2.html" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 
 <!-- My setup looks as below. -->
@@ -323,18 +382,21 @@ Of the three, syscalls are the primary interface for user programs, typically is
 <!-- 🔧          [lsd, bat, fzf, fd, ripgrep, ...] -->
 <!-- ``` -->
 
-
-### **2.2. System Call**
+### **2.3. System Call**
 
 <p style="margin-bottom: 12px;"> </p>
 
+User code executes in user mode and enters the kernel through a privilege transition. There are three causes: i) [system call]() (syscall): an intentional request by a program (e.g. *write()*, *fork()*), implemented via a [trap]() instruction (e.g. *syscall* on x86-64)<!-- that saves state and jumps to a kernel entry point; not every trap is a syscall (faults and breakpoints are also traps), but every syscall uses a trap -->; ii) [fault](): a synchronous exception raised by the CPU during instruction execution (e.g. page fault, division by zero), usually restartable once the kernel resolves the cause<!-- though some (e.g. invalid opcode) are fatal -->; iii) [interrupt](): an asynchronous signal from hardware (e.g. disk I/O completion, timer tick), whose handlers acknowledge the device and defer the rest (a softirq in Linux), and whose timer tick (every 1-10 ms) is what lets the kernel preempt running programs. <!-- Syscalls and faults are synchronous and handled in the context of the current process, whereas interrupts arrive at any time. On x86-64, syscalls enter via MSR_LSTAR, while faults and interrupts dispatch through the interrupt descriptor table (IDT). -->
+
 The [syscall lifecycle](https://www.youtube.com/watch?v=H4SDPLiUnv4) on Linux x86-64 proceeds as follows. The program calls a libc wrapper (e.g. *write()*), which places the syscall number in [rax](https://www.cs.uaf.edu/2017/fall/cs301/lecture/09_11_registers.html) (1 for write) and arguments in [rdi](), [rsi](), [rdx](), then executes the *syscall* instruction. The CPU saves the instruction pointer (RIP → RCX) and flags (RFLAGS → R11), switches to kernel mode, and jumps to the entry point registered in MSR_LSTAR. The kernel indexes into a [syscall table]() by the number in rax, dispatches the handler (e.g. *sys_write*), places the return value in rax, and executes *sysret* to restore user mode. The program resumes unaware of the privilege transition.
 
-[Standard libraries]() (e.g. libc) wrap these register conventions and trap instructions into portable function signatures (*open()*, *read()*, *write()*, *close()*), so programmers never issue syscalls directly. In Python, *os.write(1, b"Hello")* chains through CPython’s C runtime into libc’s *write()*, which issues the *syscall* instruction. Windows exposes the same functionality through *WriteFile()* with a distinct [ABI]() and trap mechanism (*syscall* on x64, *int 0x2e* on early NT, *sysenter* from XP onward). Cross-platform portability is achieved via standardised APIs (e.g. [POSIX]()) or runtime layers (e.g. JVM, Python interpreter).
+[Standard libraries]() (e.g. libc) wrap these register conventions and trap instructions into portable function signatures, so programmers never issue syscalls directly. For example, C's *printf()*, for instance, formats and buffers in user space, then hands the bytes to *write()*. Python's *print()* sits a layer above, chaining through CPython's C runtime into the same libc. Windows exposes the same functionality through *WriteFile()* with a distinct ABI and trap mechanism (*syscall* on x64, *int 0x2e* on early NT, *sysenter* from XP onward). Cross-platform portability is achieved via standardised APIs (e.g. [POSIX]()) or runtime layers (e.g. JVM, Python interpreter).
 
-Linux x86-64 defines ~450 system calls, each identified by a number in a syscall table spanning process control (*fork()*, *execve()*), file operations (*open()*, *read()*), memory management (*mmap()*, *brk()*, used by *malloc* underneath), and networking (*socket()*, *connect()*). Fast syscalls like *getpid()* return immediately. [Blocking]() syscalls like *read()* or *accept()* may suspend the calling process, as the kernel marks it as waiting and schedules another until hardware signals completion via an interrupt. Each mode switch costs roughly 100-1000 ns, which is why performance-sensitive code minimises crossings through buffered I/O, vectored operations (*readv()*/*writev()*), or batching interfaces like *io_uring*.
+Linux x86-64 defines ~450 system calls, each identified by a number in a syscall table spanning process control (*fork()*, *execve()*), file operations (*open()*, *read()*), memory management (*mmap()*, *brk()*<!-- used by malloc underneath -->), and networking (*socket()*, *connect()*). Fast syscalls like *getpid()* return immediately. [Blocking]() syscalls like *read()* or *accept()* may suspend the calling process, as the kernel marks it as waiting and schedules another until hardware signals completion via an interrupt. Each mode switch costs roughly 100-1000 ns, which is why performance-sensitive code minimises crossings through buffered I/O, vectored operations (*readv()*/*writev()*), or batching interfaces like *io_uring*.
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-syscalls.jpg" width="375"> <a href="https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/2_Structures.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+The boundary is crossed in the other direction by [signals](), the kernel's only upcall to a process. When a fault, a timer, or another process warrants notification, the kernel marks the signal pending and, on the target's next return to user mode, diverts execution into the registered handler before resuming where it left off. Ctrl-C is the everyday instance, as the pty driver turns the keystroke into SIGINT for the foreground process group. <!-- which terminates unless a handler catches it; a process may catch, ignore, or block most signals, whereas SIGKILL and SIGSTOP are unconditional --> Every keystroke thus completes one circuit, from emulator to shell to kernel and back to the prompt, and each layer speaks only to its neighbours, so any one of them, emulator, shell, or kernel, may be swapped without the rest noticing.
+
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/2024-01-02-syscalls.jpg" width="375"> <a href="https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/2_Structures.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div>
 
 {% comment %}
 Example: malloc uses syscalls internally
@@ -485,7 +547,7 @@ Kernel architecture determines how sys_write is handled internally:
   P9 — COMPOSITION: fork inherits fd table, pipe + dup2 + exec → shell pipelines (ls | grep)
 -->
 
-A [process]() (i.e. resource-owning unit) is the kernel's abstraction of a running program that provides an isolated address space and its own kernel resources. A [thread]() (i.e. scheduling unit) shares the process's address space and fd, but maintains its own stack, PC, SP, registers, and flags, to enable concurrent execution without duplicating the address space. In Linux, both are represented by a single *task_struct* (i.e. [process control block]()), where thread(s) in the same process simply point to the same *mm_struct* and *files_struct*. The distinction between the two is therefore structural rather than fundamental, while all processes always begin with a single [main thread]().
+A program (§602#2.1) is a static entity, machine code and initial data laid out in an executable file that computes nothing until granted a processor and memory, and granting them is the OS's work. A [process]() (i.e. resource-owning unit) is the kernel's abstraction of one execution of a program, providing an isolated address space and its own kernel resources, so a single program may run as several processes at once, each with its own state. A [thread]() (i.e. scheduling unit, the smallest unit of execution the kernel dispatches) shares the process's address space and fd, but maintains its own stack, PC, SP, registers, and flags, to enable concurrent execution without duplicating the address space. In Linux, both are represented by a single *task_struct* (i.e. [process control block]()), where thread(s) in the same process simply point to the same *mm_struct* and *files_struct*. The distinction between the two is therefore structural rather than fundamental, while all processes always begin with a single [main thread]().
 
 {% comment %}
 ```c
@@ -512,7 +574,7 @@ void context_switch(task_struct *old, task_struct *new) {
 ```
 {% endcomment %}
 
-Creating a process from scratch would require allocating a fresh address space, page tables, and fd table. Unix avoids this with a two-step mechanism. i) [fork()]() (*kernel/fork.c*) duplicates the calling process via [copy-on-write]() (CoW), producing a child with a new PID that shares the parent's pages until either side writes; ii) The child calls [exec()]() to load a new program, and the parent calls [wait()]() to block until the child terminates; For example, when a user types *ls*, the shell forks → child execs */bin/ls* (i.e. replaces the shell code with the *ls* binary) → parent waits → next prompt. <!-- Commands like cd and export are built-in and run inside the shell process itself, since they must modify the shell's own state. --> A terminated child whose parent has not yet called *wait()* is also known as a [zombie process]().
+Creating a process from scratch would require allocating a fresh address space, page tables, and fd table. Unix avoids this with a two-step mechanism. i) [fork()]() (*kernel/fork.c*) duplicates the calling process via [copy-on-write]() (CoW), producing a child with a new PID that shares the parent's pages until either side writes, where both fork and *pthread_create()* reach the kernel as [clone()](), whose flags select what parent and child share, a copied address space making a process and a shared one a thread; ii) The child calls [exec()]() to load a new program, and the parent calls [wait()]() to block until the child terminates; For example, when a user types *ls*, the shell forks → child execs */bin/ls* (i.e. replaces the shell code with the *ls* binary) → parent waits → next prompt. <!-- Commands like cd and export are built-in and run inside the shell process itself, since they must modify the shell's own state. --> A terminated child whose parent has not yet called *wait()* is also known as a [zombie process]().
 
 <!-- e.g. 1: GUI application launch on macOS
   1. Finder forks
@@ -533,7 +595,7 @@ e.g. 2: python script.py
 
 Specifically, *exec()* reads the executable header (e.g. ELF, §602) and maps its segments into the process's (virtual-) address space. i) [text](): machine code, read-only and shareable via CoW; ii) [data/BSS](): initialised and zero-initialised global and static variables; iii) [heap](): growing upward via *brk()* / *mmap()*; iv) [stack](): growing downward for local variables and [function frames](); Notice that dynamically linked shared libraries are mapped between heap and stack by the runtime linker (_ld.so_), allowing multiple processes to share a single copy in physical memory (§602). Execution then begins at the entry point _\_start_, which initialises the C runtime and calls _main_.
 
-- <div style="position: relative; background-color: white; display: inline-block;"> <img src="../assets/blog/2024-01-memory.png" width="475"> <a href="https://www.linkedin.com/pulse/c-memory-layout-naveen-suppala/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; background-color: white; display: inline-block;"> <img src="../assets/blog/2024-01-memory.png" width="475"> <a href="https://www.linkedin.com/pulse/c-memory-layout-naveen-suppala/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div>
 
 Once created, each thread advances through a [life cycle]() of mutually exclusive states: new, ready (queued for CPU), running (actively scheduled), waiting (blocked on I/O or synchronisation), and terminated. Each transition corresponds to a field update in the thread's *task_struct*. For example, *read()* on a slow device moves the thread from running to waiting; the device interrupt moves it back to ready. The kernel organises threads by state into [queues](), maintaining a [ready queue]() for threads awaiting CPU time and [wait queues]() for those blocked on events. On multicore systems, the scheduler keeps per-core ready queues and periodically rebalances load.
 
@@ -552,7 +614,7 @@ and go back to waiting.
 The "d" suffix in Unix (sshd, httpd, systemd) stands for "daemon."
 {% endcomment %}
 
-The [CPU scheduler]() determines which ready thread to dispatch on each core. [Cooperative scheduling]() relies on threads voluntarily relinquishing the CPU (via *yield()*, I/O, or sleep), so a thread that never yields starves all others. [Preemptive scheduling](), adopted by all modern OSes, removes this dependency via the hardware timer interrupt<!-- every 1-10 ms -->. Each decision triggers a [context switch]() that saves the current thread's CPU state<!-- PC, SP, registers --> into its *task_struct* and restores the next thread's. Intra-process switches are inexpensive<!-- register swap, same address space -->, but inter-process switches require a page table swap and TLB flush<!-- reaching roughly 1-10 μs with cache pollution -->. Selecting which thread to run next is therefore a policy decision<!-- minimising the number of switches is another; see thread pools, event loops, coroutines (§604) -->.
+The [CPU scheduler]() determines which ready thread to dispatch on each core. [Cooperative scheduling]() relies on threads voluntarily relinquishing the CPU (via *yield()*, I/O, or sleep), so a thread that never yields starves all others. [Preemptive scheduling](), adopted by all modern OSes, removes this dependency via the hardware timer interrupt<!-- every 1-10 ms -->. Each decision triggers a [context switch]() that saves the current thread's CPU state<!-- PC, SP, registers --> into its *task_struct* and restores the next thread's. Intra-process switches are inexpensive<!-- register swap, same address space -->, but inter-process switches require a page table swap and TLB flush, reaching roughly 1-10 μs with the [cache pollution]() they leave behind<!-- the indirect cost, which dominates the direct register-save (Li, Ding, and Shen, 2007) -->. How long a thread runs before preemption is bounded by the same numbers, as the slice must dwarf the ~1-10 μs switch for overhead to stay negligible yet remain short enough that most CPU bursts end within one of their own accord (~80%, Silberschatz's rule of thumb), which is why time slices sit at 1-100 ms. Selecting which thread to run next is therefore a policy decision<!-- minimising the number of switches is another; see thread pools, event loops, coroutines (§604) -->.
 
 The classical scheduling algorithms formalise its choice, each a selection rule optimising a different objective over the ready set. [Round robin]() (RR) cycles through the ready queue with a fixed time quantum, i.e. selecting the least recently dispatched thread. [Shortest Job First]() (SJF) selects the smallest expected [CPU burst](), minimising average wait at the risk of starving long jobs. [Highest Response Ratio Next]() (HRN) mitigates this via $(w + s) / s$ ($w$ = waited, $s$ = est. service time), so longer-waiting threads eventually win. [Priority scheduling]() dispatches the highest-priority thread, risking [starvation]() unless [aging]() boosts lower priorities. [Multi-level feedback queues]() (MLFQ) unify these with multiple queues that dynamically adjust priority based on observed behaviour (I/O-bound promoted).
 
@@ -586,7 +648,7 @@ IPC methods summary:
 
 - ...
 
-Once scheduled and running, processes may need to exchange data across their isolated address spaces. The kernel facilitates this through [inter-process communication](https://www.youtube.com/watch?v=Y2mDwW2pMv4&list=PL9vTTBa7QaQPdvEuMTqS9McY-ieaweU8M&index=4) (IPC). [Message passing]() delegates transfer to the kernel via pipes, [Unix domain sockets]() (UDS), or message queues. Unlike TCP over loopback, UDS bypasses the network stack, addressed by a file path (e.g. _/var/run/docker.sock_)<!-- rather than an (IP, port) pair -->. [Shared memory]() maps the same physical pages into multiple address spaces, avoiding the copy<!-- Chrome passes rendered bitmaps from renderer to browser process this way -->. Message passing is simpler (the kernel handles synchronisation), but shared memory offers higher throughput since data never crosses the kernel boundary. All IPC mechanisms are accessed through file descriptors (§3.3).
+Once scheduled and running, processes may need to exchange data across their isolated address spaces. The kernel facilitates this through [inter-process communication](https://www.youtube.com/watch?v=Y2mDwW2pMv4&list=PL9vTTBa7QaQPdvEuMTqS9McY-ieaweU8M&index=4) (IPC). [Message passing]() delegates transfer to the kernel via pipes, [Unix domain sockets]() (UDS), or message queues. Unlike TCP over loopback, UDS bypasses the network stack, addressed by a file path (e.g. _/var/run/docker.sock_)<!-- rather than an (IP, port) pair -->. [Shared memory]() maps the same physical pages into multiple address spaces, avoiding the copy<!-- Chrome passes rendered bitmaps from renderer to browser process this way -->. Message passing is simpler (the kernel handles synchronisation), but shared memory offers higher throughput since data never crosses the kernel boundary. Message passing reaches these through file descriptors, whereas shared memory takes one only to establish the mapping, after which access is ordinary loads and stores.<!-- the older System V interfaces (shmget, msgget) instead use keys and IDs and stand outside the fd model -->
 
 <!-- TCP loopback vs UDS:
   TCP over loopback (127.0.0.1):
@@ -599,12 +661,12 @@ Once scheduled and running, processes may need to exchange data across their iso
                           ^^^^^^^^^^^^^^
                           direct copy, no protocol overhead -->
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ipc.webp" width="250"> <a href="https://www.w3schools.in/operating-system/interprocess-communication-ipc" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ipc.webp" width="250"> <a href="https://www.w3schools.in/operating-system/interprocess-communication-ipc" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div>
 
 *fork()* duplicates the parent process's fd table, and *exec()* preserves it<!-- except fds marked FD_CLOEXEC, which are closed on exec -->, so a child process inherits all open file descriptors. This inheritance is the mechanism behind shell [I/O redirection]() and [pipes](), where *pipe()* creates a pair of fds connected by a kernel buffer and *dup2(oldfd, newfd)* copies one fd onto another slot, replacing what was there. To build *ls | grep foo*, the shell creates a pipe, forks twice, uses *dup2()* to replace each child's stdout or stdin with the appropriate pipe end, then calls *exec()* in each child. Neither *ls* nor *grep* contains any redirection logic; both simply read from fd 0 and write to fd 1 as usual.
 <!-- mmap() offers a different composition: instead of copying bytes via read(), it maps file-backed page-cache pages directly into the process's address space, letting page faults serve as implicit I/O (e.g. np.memmap). -->
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix_pipe.png" width="350"> <a href="https://programmer-eun.tistory.com/72" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix_pipe.png" width="350"> <a href="https://programmer-eun.tistory.com/72" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div>
 
 ### **3.2. Virtual Memory**
 
@@ -626,7 +688,7 @@ Once scheduled and running, processes may need to exchange data across their iso
   P5 — BRIDGE: page cache, mmap (np.memmap), swap → §3.3
 -->
 
-Given that physical memory is a flat, byte-addressable array (§601), [virtual memory](https://www.cs.rpi.edu/academics/courses/fall04/os/c12/) interposes a hardware translation layer (e.g. MMU + TLB), in which each process sees a large, contiguous address space rather than physical memory. Modern general-purpose OSes leverage the abstraction, where the kernel maintains the mapping for the hardware to enforce it on every memory access, as it allows i) isolation: one process cannot access another's memory; ii) sharing: common pages mapped without duplication, with CoW deferring copies until a write occurs; and iii) overcommitment: total virtual allocation may exceed physical capacity, backed by disk.
+A linker bakes absolute addresses into the binary (§602#2.1), and a program consumes them densely, as code falls through to the next instruction and arrays are indexed off a base. Run directly on physical memory (a flat, byte-addressable array, §601), a process is therefore one immovable contiguous block, and memory fragments into holes too small to reuse as such blocks come and go. [Virtual memory](https://www.cs.rpi.edu/academics/courses/fall04/os/c12/) dissolves both constraints with one indirection, a hardware translation layer (e.g. MMU + TLB) through which each process sees a large, contiguous address space of its own rather than physical memory. Modern general-purpose OSes leverage the abstraction, where the kernel maintains the mapping for the hardware to enforce it on every memory access, as it allows i) isolation: one process cannot access another's memory; ii) sharing: common pages mapped without duplication, with CoW deferring copies until a write occurs; and iii) overcommitment: total virtual allocation may exceed physical capacity, backed by disk.
 
 {% comment %}
 Core idea: The CPU sees virtual addresses, DRAM uses physical addresses,
@@ -704,16 +766,16 @@ Concrete address translation example (4 KB pages, 32-bit for simplicity):
 
 Fixed-size paging naturally eliminates [external fragmentation]() at the cost of [internal fragmentation]()<!-- since a page is the minimum allocation unit; e.g. a 5 KB allocation wastes 3 KB of its second 4 KB page -->. However, the tables also reside in physical memory, and a naive flat table becomes impractical as the address space widens. For instance, let $N$, $P$, and $E$ denote the virtual address width<!-- not always the CPU word size; x86-64 uses 48 bits, not 64 -->, page size exponent, and PTE size exponent, respectively. A flat table with one entry per page costs $2^{N - P + E}$ B per process. On x86-64<!-- the upper 16 bits must be sign-extended (canonical form) --> (i.e. $N = 48$, $P = 12$, $E = 3$), this yields $2^{39}$ B = 512 GB of pre-allocated memory per process, regardless of actual usage, which makes a flat table prohibitive.
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://pages.cs.wisc.edu/~bart/537/lecturenotes/figures/s18.tlb.gif" width="400"> <a href="https://pages.cs.wisc.edu/~bart/537/lecturenotes/s17.html" target="_blank" style="position: absolute; top: 2px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://pages.cs.wisc.edu/~bart/537/lecturenotes/figures/s18.tlb.gif" width="400"> <a href="https://pages.cs.wisc.edu/~bart/537/lecturenotes/s17.html" target="_blank" style="position: absolute; top: 2px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-- <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/virtual_memory_stallings.png" width="475"> <a href="https://stevengong.co/notes/Page-Table" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/virtual_memory_stallings.png" width="475"> <a href="https://stevengong.co/notes/Page-Table" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div>
   <p style="color: grey; font-size: 11px; margin-top: 0;">Stallings, <i>Operating Systems: Internals and Design Principles</i>, Fig. 8.2</p>
 
 <!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/virtual_memory_tlb.png" width="355"> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/page_table.svg" width="315"> <a href="https://en.wikipedia.org/wiki/Page_table" target="_blank" style="position: absolute; bottom: -10px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/page_table.svg" width="315"> <a href="https://en.wikipedia.org/wiki/Page_table" target="_blank" style="position: absolute; bottom: -10px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/virtual_memory.png" width="450"> <a href="https://wiki.osdev.org/X86_Paging" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/virtual_memory.png" width="450"> <a href="https://wiki.osdev.org/X86_Paging" target="_blank" style="position: absolute; bottom: -8px; left: 4px; font-size: 11px;">[src]</a> </div> -->
 
 [Multi-level page tables]() solve the flat table problem by partitioning the virtual address into multiple index fields, each selecting an entry in a successively deeper table. Only subtrees covering populated regions are allocated, making each process's page table cost proportional to actual usage. x86 (32-bit) uses a 2-level hierarchy<!-- page directory + page table -->, requiring two memory reads per translation; x86-64 extends this to 4 levels<!-- PGD → PUD → PMD → PTE --> for wider address spaces. However, multiple memory reads per translation is still expensive, so the TLB (§601#1.3) caches recent translations. It is effective because programs exhibit strong locality: a single 4 KB page holds many instructions, so consecutive accesses frequently result in a [TLB hit](). A [TLB miss]() triggers the full page table walk, and a [TLB flush]()<!-- e.g. on context switch --> invalidates all cached entries.
 <!-- Context switch → kernel writes new CR3 → TLB flush (all entries invalidated)
@@ -724,17 +786,17 @@ Fixed-size paging naturally eliminates [external fragmentation]() at the cost of
 
 Physical frames are not allocated until first accessed, a strategy called [demand paging](). When a process touches an unmapped page, i.e. evaluates $\pi_i$ where it is not yet materialised, the CPU raises a [page fault]() (*mm/memory.c*) and the kernel extends the map by allocating a frame, either zero-initialising it or loading content from disk. If physical memory is exhausted, a [page replacement]() policy (e.g. FIFO, LRU, Clock) evicts a victim frame. While this permits overcommitment, sustained faulting leads to [thrashing]().
 
-In practice, virtual memory and file I/O are tightly coupled. The [page cache]() (*mm/filemap.c*) buffers disk blocks in RAM, so repeated reads of the same file resolve from memory rather than disk. [mmap()]() (*mm/mmap.c*) turns page faults into file reads, allowing *np.memmap* to access a large on-disk array as if it resided in memory, with the kernel paging in only the blocks actually touched. [Swap]() inverts this relationship, using disk as a backing store for memory pages with no file origin. In all three cases, the kernel moves data between RAM and disk in page-sized units, making the boundary between abstractions ii) and iii) thinner than it appears.
+In practice, virtual memory and file I/O are tightly coupled. The [page cache]() (*mm/filemap.c*) buffers disk blocks in RAM, so repeated reads of the same file resolve from memory rather than disk. [mmap()]() (*mm/mmap.c*) turns page faults into file reads, allowing *np.memmap* to access a large on-disk array as if it resided in memory, with the kernel paging in only the blocks actually touched. [Swap]() inverts this relationship, using disk as a backing store for memory pages with no file origin. In all three cases, the kernel moves data between RAM and disk in page-sized units, making the boundary between virtual memory and the file interface thinner than it appears.
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/multi-lv-2.svg" width="350"> <a href="https://notes.eddyerburgh.me/computer-architecture/memory" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/multi-lv-2.svg" width="350"> <a href="https://notes.eddyerburgh.me/computer-architecture/memory" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-- <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/multi_lv_pt.png" width="450"> <a href="https://stevengong.co/notes/Page-Table" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/multi_lv_pt.png" width="450"> <a href="https://stevengong.co/notes/Page-Table" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div>
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://userpages.umbc.edu/~squire/images/tlb1.jpg" width="450"> <a href="https://userpages.umbc.edu/~squire/cs411_l23.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://userpages.umbc.edu/~squire/images/tlb1.jpg" width="450"> <a href="https://userpages.umbc.edu/~squire/cs411_l23.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://sam4k.com/content/images/2025/05/image-1.png" width="500" height="220"> <a href="https://sam4k.com/page-table-kernel-exploitation/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="https://sam4k.com/content/images/2025/05/image-1.png" width="500" height="220"> <a href="https://sam4k.com/page-table-kernel-exploitation/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/2024-01-02-pte.png" width="500" height="385"> <a href="https://sam4k.com/page-table-kernel-exploitation/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block; background-color: white"> <img src="../assets/blog/2024-01-02-pte.png" width="500" height="385"> <a href="https://sam4k.com/page-table-kernel-exploitation/" target="_blank" style="position: absolute;  bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 
 ### **3.3. File System**
@@ -780,6 +842,50 @@ hardware directly — the kernel routes each fd to the right driver.
 <!-- Programs need data to persist beyond process lifetime. -->In Unix, a [file]() is an unstructured sequence of bytes with no format imposed by the kernel<!-- pre-Unix systems like IBM OS/360 required programs to declare record formats (fixed-length, variable-length) and block sizes; Unix pushed all structure to user space -->, and a [file system]() is the software layer which organises files into a hierarchy of named paths, each associated with metadata (e.g. size, ownership, permission). The indirection (i.e. abstraction) between names and raw bytes is what maps files onto the raw blocks of a disk (§601#1.4), though the same interface extends to memory-backed (tmpfs), network-backed (NFS), and kernel-generated (/proc) file systems. Therefore, the kernel is format-agnostic, file extensions (e.g. *.txt*, *.py*) are merely a user-space convention, and *file(1)* inspects [magic bytes]() in the content to determine its type.
 
 {% comment %}
+The hierarchy in practice (FHS): an Ubuntu VM (Lima) as seen from ~, with a macOS folder mounted in.
+
+/                                 ← root of everything
+├── bin -> usr/bin                ← symlinks, legacy compatibility
+├── boot                          ← kernel + bootloader
+├── dev                           ← devices: /dev/sda, /dev/null, /dev/tty
+├── etc                           ← config files (text)
+│   ├── passwd                       users
+│   ├── fstab                        what mounts where
+│   └── apt/                         package sources
+├── home
+│   └── lima                      ← ~   YOU ARE HERE
+│       ├── .bashrc                  your shell config
+│       └── .ssh/
+├── lib -> usr/lib
+├── mnt
+│   └── files  ══════════════╗    ← MOUNTED FROM YOUR MAC
+│       └── environment/     ║        = ~/Desktop/code/gatech/6200
+├── opt                      ║
+├── proc                     ║    ← virtual: kernel state, size 0
+│   ├── cpuinfo              ║
+│   └── 1234/                ║        one dir per running process
+├── root                     ║    ← root user's home
+├── sys                      ║    ← virtual: devices, kernel knobs
+├── tmp                      ║    ← scratch, wiped on reboot
+├── usr                      ║    ← installed software
+│   ├── bin/                 ║        gcc, git, valgrind
+│   ├── lib/                 ║
+│   └── share/               ║
+└── var                      ║    ← changing data
+    └── log/                 ║        cloud-init-output.log
+                             ║
+        ═════════════════════╝
+                 │
+   ┌─────────────┴──────────────┐
+   │  macOS (your Mac)          │
+   │  /Users/yongseongkim/      │
+   │    Desktop/code/gatech/    │
+   │      6200/                 │
+   │        └── environment/    │
+   └────────────────────────────┘
+{% endcomment %}
+
+{% comment %}
 File system implementations are hardware-specific:
 
   Hardware              File systems                  Storage
@@ -800,7 +906,7 @@ Even on the same back-end, different filesystems make different tradeoffs:
   Maturity          Best      Growing    Good
 {% endcomment %}
 
-Programs do not access files directly; they ask the kernel for a [file descriptor]() (fd) via the *open()* syscall, which resolves the path and allocates entries in internal bookkeeping tables before returning a small non-negative integer. The fd is the mechanism that makes this uniform interface possible. The kernel tracks it through three layers of data structures: per-process [fd table]() $\to$ system-wide [open-file table]() $\to$ in-kernel file object, and it returns the lowest available integer, so the first three fds on a fresh process are 0 ([standard input]()), 1 ([standard output]()), 2 ([standard error]()) by convention (POSIX).
+Programs do not access a file directly but through a [file descriptor]() (fd), which *open()* issues for a path, *socket()* for a connection (4.2BSD, 1983), and *pipe()* for a pipe's two ends. Creation varies by endpoint, taking a path, an address, or nothing at all, whereas use is invariant, as *read()*, *write()*, and *close()* treat every fd alike. The kernel tracks it through three layers of data structures: per-process [fd table]() $\to$ system-wide [open-file table]() $\to$ in-kernel file object, and it returns the lowest available integer, so the first three fds on a fresh process are 0 ([standard input]()), 1 ([standard output]()), 2 ([standard error]()) by convention (POSIX).
 
 <!--
 USER SPACE
@@ -881,7 +987,7 @@ fclose(f);                             // closes underlying fd
 // fileno(f) retrieves the underlying fd from a FILE*
 ``` -->
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix_file_system.png" width="400"> <a href="https://stackoverflow.com/questions/5256599/what-are-file-descriptors-explained-in-simple-terms" target="_blank" style="position: absolute; top: 4px; right: 6px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/unix_file_system.png" width="400"> <a href="https://stackoverflow.com/questions/5256599/what-are-file-descriptors-explained-in-simple-terms" target="_blank" style="position: absolute; top: 4px; right: 6px; font-size: 11px;">[src]</a> </div>
 
 <!--
 "File" in Unix means any I/O endpoint exposed through a file descriptor:
@@ -939,7 +1045,7 @@ Given the uniform interface applicable to all I/O endpoints, each back-end<!-- b
 A 1-byte file still occupies one full 4 KB block (internal fragmentation).
 An 8 KB file occupies two blocks:
 
-  inode #42
+  inode \#42
   └── block pointers: [1047, 1048]
 
   block 1047 (4 KB):  |n|a|m|e|,|a|g|e|\n|a|l|i|c|e|,|3|0|...| (4096 bytes; inode size field marks valid extent)
@@ -970,7 +1076,7 @@ ls -l file type characters:
      root (root user) — the superuser with uid 0, unrestricted access
      Completely different concepts, same word. -->
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/fhs.webp" width="550"> <a href="https://www.reddit.com/r/linux/comments/8kt99k/the_file_system_hierarchy_standard_visualized_or/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/fhs.webp" width="550"> <a href="https://www.reddit.com/r/linux/comments/8kt99k/the_file_system_hierarchy_standard_visualized_or/" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div>
 
 The preceding paragraphs describe one file system on one disk, but a single machine may mount ext4 on its local disk, NFS for a remote share, and tmpfs for scratch space simultaneously. Even on the same back-end, different file systems embody different design tradeoffs (e.g. ext4 vs btrfs vs XFS). Without a common dispatch layer, every syscall would need to know which file system it is talking to. A [virtual file system]() (VFS) solves this by providing a single abstraction layer through which all file system operations pass. The in-kernel file object in the three-layer model is a VFS object, populated from the on-disk inode for disk-backed files or synthesised by the kernel for pipes, sockets, and pseudo-filesystems. Each filesystem registers a [file_operations]() struct whose function pointers implement *open*, *read*, *write* for that format; VFS dispatches every syscall through these pointers. [Mounting]() a FAT32 USB drive alongside APFS (Apple's default disk file system) requires no change to user-space code.
 
@@ -1024,9 +1130,9 @@ fd progression:
 
 The fd abstraction grew from files (disk I/O) $\to$ pipes (inter-process byte streams) $\to$ sockets (network endpoints, §605#2.2) $\to$ devices, each extending the same read/write interface to a new domain. In Unix, a file is therefore any I/O endpoint the kernel exposes through a file descriptor. [Device drivers]() bridge this abstraction to real hardware by implementing two contracts: upward, they conform to the kernel's file interface so that user-space sees a file descriptor; downward, they speak the device's register protocol, handle its interrupts, and manage its DMA buffers. When installed, a driver registers with the kernel's bus subsystem (e.g. PCI), probes the device, and exposes it as a file in */dev* (e.g. */dev/sda* for a disk, */dev/nvidia0* for a GPU). Pseudo-filesystems like */proc* (originating in 8th Edition Unix, 1984) and */sys* expose live kernel and hardware state through the same interface. These files have no backing data on disk; the kernel generates their contents dynamically on each *read()*, making system introspection as simple as reading a file.
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/vfs.png" width="400"> <a href="https://opensource.com/article/19/3/virtual-filesystems-linux" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/vfs.png" width="400"> <a href="https://opensource.com/article/19/3/virtual-filesystems-linux" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div>
 
-<!-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/fd_general.png" width="450"> <a href="https://eng.libretexts.org/Under_Construction/Purgatory/Computer_Science_from_the_Bottom_Up_%28Wienand%29/0.02%3A_File_Descriptors" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 12px;">[src]</a> </div> -->
+<!-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/fd_general.png" width="450"> <a href="https://eng.libretexts.org/Under_Construction/Purgatory/Computer_Science_from_the_Bottom_Up_%28Wienand%29/0.02%3A_File_Descriptors" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 <!-- tmpfs (/tmp) lives entirely in memory, not on disk.
      Temporary files disappear at reboot, avoiding device wear from frequent writes. -->

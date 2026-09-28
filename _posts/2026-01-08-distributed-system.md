@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "608. distributed system"
+title: "608. distributed computing"
 tags: cs600
 use_math: true
 ---
@@ -121,7 +121,7 @@ Parallel patterns (fork-join, work-stealing, pipeline; ML data/model/tensor para
   locality. [Pipeline parallelism]() distributes sequential stages across processors, with bounded
   buffers regulating flow, where throughput is limited by the slowest stage.
 
-  In ML, these patterns map onto two axes. [Data parallelism]() replicates the model across devices and
+  In ML, these patterns map onto two axes. Data parallelism (§604#2.1) replicates the model across devices and
   partitions the input (e.g. DDP), while [model parallelism]() partitions the model itself. Pipeline
   parallelism (e.g. GPipe, PipeDream) is a form of model parallelism that distributes layers across
   GPUs, allowing different micro-batches to occupy different stages simultaneously. [Tensor
