@@ -65,6 +65,8 @@
 			item.textContent = h.textContent;
 			item.addEventListener('click', function () {
 				closeAll();
+				// a heading inside a folded section (fold.js) must be seen
+				if (window.unfoldTo) unfoldTo(h);
 				cont.scrollTop += h.getBoundingClientRect().top - cont.getBoundingClientRect().top - 6;
 			});
 			drop.appendChild(item);
@@ -89,6 +91,7 @@
 				k.textContent = a.textContent;
 				k.addEventListener('click', function () {
 					closeAll();
+					if (window.unfoldTo) unfoldTo(a);
 					cont.scrollTop += a.getBoundingClientRect().top - cont.getBoundingClientRect().top - 60;
 					a.classList.add('kw-flash');
 					setTimeout(function () { a.classList.remove('kw-flash'); }, 1600);

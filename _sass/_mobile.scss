@@ -20,7 +20,9 @@
 	.tag_list,
 	.post_list .det-head,
 	.default_title .btn,
-	.xref-tip {
+	.xref-tip,
+	// matches the desktop rule's .post_content .fold-box specificity
+	.post_content .fold-box {
 		display: none;
 	}
 

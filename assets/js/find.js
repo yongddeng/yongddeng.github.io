@@ -72,6 +72,8 @@
 		state.cur = (i + state.hits.length) % state.hits.length;
 		var el = state.hits[state.cur];
 		el.classList.add('current');
+		// a match inside a folded section (fold.js) must be seen
+		if (window.unfoldTo) unfoldTo(el);
 		var r = el.getBoundingClientRect();
 		if (phone()) {
 			// The page is the pane; 100 clears the app bar and the
