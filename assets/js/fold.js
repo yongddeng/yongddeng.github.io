@@ -31,9 +31,12 @@
 	// section's h2 can be hiding it
 	window.unfoldTo = function (el) {
 		var cont = el.closest('.post_content');
+		if (!cont) return;
+		// a jump to a heading opens the heading's own body too
+		if (el.classList.contains('folded')) setFolded(el, false);
 		var top = el;
 		while (top.parentElement && top.parentElement !== cont) top = top.parentElement;
-		if (!cont || !top.hidden) return;
+		if (!top.hidden) return;
 		var n = top;
 		var pastH3 = top.tagName === 'H3';
 		while ((n = n.previousElementSibling)) {
