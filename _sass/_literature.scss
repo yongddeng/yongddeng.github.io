@@ -9,13 +9,17 @@ $lit-link: #008000;
 
 .help-win {
 	// two panes side by side want more than the 750px of a reading window
-	width: 825px;
+	width: 960px;
 
+	// the pane is window chrome here; the Contents and page panes inside carry the paper
 	.post_content {
 		display: flex;
 		flex-direction: column;
-		height: 450px;
+		height: 456px;
 		overflow: hidden;
+		background: #bfb8bf;
+		border: 0;
+		padding: 0 2px 2px;
 	}
 
 	// View menu lists the views, with a bullet on the current one
@@ -105,6 +109,10 @@ $lit-link: #008000;
 		cursor: default;
 	}
 }
+.lit-arr {
+	padding: 0 7px;
+	font-size: 11px;
+}
 .lit-sep {
 	width: 0;
 	height: 20px;
@@ -124,6 +132,10 @@ $lit-link: #008000;
 	b {
 		color: #000000;
 		font-weight: normal;
+	}
+	.lit-link:hover {
+		background: none;
+		color: #000000;
 	}
 }
 .lit-views {
@@ -168,7 +180,7 @@ $lit-link: #008000;
 
 // Contents (also cloned into the phone sheet)
 .lit-tree {
-	width: 215px;
+	width: 235px;
 	flex: none;
 	padding: 4px 2px;
 }

@@ -61,7 +61,7 @@
 	const actions = {
 		back() { if (!state.back.length) return; state.fwd.push([state.book, state.paper]); const h = state.back.pop(); go(h[0], h[1], false); },
 		fwd() { if (!state.fwd.length) return; state.back.push([state.book, state.paper]); const h = state.fwd.pop(); go(h[0], h[1], false); },
-		up() { if (state.paper) go(state.book, null); else if (state.book) go(books[state.book].parent || null, null); },
+		root() { go(null, null); },
 		prev() { step(-1); },
 		next() { step(1); }
 	};
@@ -80,18 +80,18 @@
 		const b = state.book, p = state.paper, parent = b && books[b].parent;
 		$('[data-act=back]').disabled = !state.back.length;
 		$('[data-act=fwd]').disabled = !state.fwd.length;
-		$('[data-act=up]').disabled = !b && !p;
 		// Contents: highlight the selection and open its books
 		$$('.lit-row').forEach(r => r.classList.toggle('on', p ? r.dataset.paper === p : (!!b && r.dataset.group === b)));
 		if (parent) setBook($('li[data-book="' + parent + '"]'), true);
 		if (b) setBook($('li[data-book="' + b + '"]'), true);
 		const on = $('.lit-tree .lit-row.on');
 		if (on) on.scrollIntoView({ block: 'nearest' });
-		const path = ['ml literature'];
-		if (parent) path.push(books[parent].label);
-		if (b) path.push(books[b].label);
-		if (p) path.push(papers[p].name);
-		$('.lit-crumb').innerHTML = path.map((t, i) => i === path.length - 1 ? '<b>' + esc(t) + '</b>' : esc(t)).join(' › ');
+		// breadcrumb: every segment but the last is a link, so it does Up's job
+		const path = [['ml literature', 'data-act="root"']];
+		if (parent) path.push([books[parent].label, 'data-group="' + esc(parent) + '"']);
+		if (b) path.push([books[b].label, 'data-group="' + esc(b) + '"']);
+		if (p) path.push([papers[p].name, '']);
+		$('.lit-crumb').innerHTML = path.map((seg, i) => i === path.length - 1 ? '<b>' + esc(seg[0]) + '</b>' : '<span class="lit-link" ' + seg[1] + '>' + esc(seg[0]) + '</span>').join(' › ');
 		if (state.view === 'page') renderPage();
 		if (timeline) timeline.scope();
 		if (state.view === 'g') graph.show();
@@ -102,7 +102,7 @@
 		li.querySelector('use').setAttribute('href', open ? '#lit-bookopen' : '#lit-book');
 	}
 
-	// one handler for Contents rows, page links and figure boxes
+	// one handler for Contents rows, page links, breadcrumb and figure boxes
 	function onPick(e) {
 		const el = e.target.closest('[data-paper], [data-group]');
 		if (!el) return;
@@ -116,8 +116,8 @@
 	}
 	root.addEventListener('click', onPick);
 	root.addEventListener('click', e => {
-		const b = e.target.closest('.lit-btn[data-act]');
-		if (b) actions[b.dataset.act]();
+		const b = e.target.closest('[data-act]');
+		if (b && !b.disabled) actions[b.dataset.act]();
 	});
 
 	// ---- pages -------------------------------------------------------------------
