@@ -339,6 +339,7 @@
 				// DOMParser scripts are inert; recreate them so they run
 				newContent.querySelectorAll('script').forEach(function(old) {
 					var s = document.createElement('script');
+					if (old.type) s.type = old.type;
 					if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
 					old.replaceWith(s);
 				});

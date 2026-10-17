@@ -1,0 +1,349 @@
+// 301. ml literature: a WinHelp-style reader inside the post window.
+// Contents lists venues as books and papers as pages; the right pane shows
+// the overview, one venue, or one paper. View ▸ Timeline and View ▸ Lineage
+// redraw the current selection laid out by subject shelf; Lineage fetches d3
+// on first use. The desktop re-creates a post's scripts when it swaps the
+// window in, so this runs once per window and claims it with data-ready.
+(function () {
+	const root = document.querySelector('.lit:not([data-ready])');
+	if (!root) return;
+	root.dataset.ready = '1';
+	const win = root.closest('.content') || root;
+	const $ = (sel, from) => (from || root).querySelector(sel);
+	const $$ = (sel, from) => Array.from((from || root).querySelectorAll(sel));
+	const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+	const ico = id => '<svg class="lit-ico" aria-hidden="true"><use href="#' + id + '"/></svg>';
+
+	// ---- data ---------------------------------------------------------------
+	// found by type, the one attribute the desktop keeps when it re-creates a swapped window's scripts
+	const data = JSON.parse($('script[type="application/json"]', win).textContent);
+	const shelves = {}, venues = {}, papers = {};
+	data.shelves.forEach(s => { s.subLabel = {}; s.subs.forEach(x => { s.subLabel[x.id] = x.label; }); shelves[s.id] = s; });
+	data.venues.forEach(v => { venues[v.id] = v; });
+	data.papers.forEach(p => { p.by = []; papers[p.id] = p; });
+	data.papers.forEach(p => p.builds_on.forEach(o => papers[o].by.push(p.id)));
+	const byYear = (a, b) => a.year - b.year || a.name.localeCompare(b.name);
+	const inVenue = v => v ? data.papers.filter(p => p.venue === v) : data.papers.slice();
+	// browse order (<< >>) is Contents order: venues as listed, papers by year
+	const order = [];
+	data.venues.forEach(v => inVenue(v.id).sort(byYear).forEach(p => order.push(p.id)));
+	const index = {};
+	order.forEach((id, i) => { index[id] = i; });
+	// transitive closure along builds_on (ancestors) or by (descendants)
+	function closure(id, key, set) {
+		set = set || new Set();
+		papers[id][key].forEach(o => { if (!set.has(o)) { set.add(o); closure(o, key, set); } });
+		return set;
+	}
+
+	// ---- state and navigation -------------------------------------------------
+	const state = { venue: null, paper: null, view: 'page', back: [], fwd: [] };
+	let timeline = null;
+
+	function go(venue, paper, remember) {
+		if (remember !== false && (venue !== state.venue || paper !== state.paper)) {
+			state.back.push([state.venue, state.paper]);
+			state.fwd = [];
+		}
+		state.venue = venue;
+		state.paper = paper;
+		render();
+	}
+	const openPaper = id => go(papers[id].venue, id);
+	const actions = {
+		back() { if (!state.back.length) return; state.fwd.push([state.venue, state.paper]); const h = state.back.pop(); go(h[0], h[1], false); },
+		fwd() { if (!state.fwd.length) return; state.back.push([state.venue, state.paper]); const h = state.fwd.pop(); go(h[0], h[1], false); },
+		up() { if (state.paper) go(state.venue, null); else if (state.venue) go(null, null); },
+		prev() { step(-1); },
+		next() { step(1); }
+	};
+	function step(delta) {
+		let i;
+		if (state.paper) {
+			i = index[state.paper] + delta;
+		} else {
+			const ids = inVenue(state.venue).map(p => index[p.id]).sort((a, b) => a - b);
+			i = delta > 0 ? ids[0] : ids[ids.length - 1];
+		}
+		openPaper(order[(i + order.length) % order.length]);
+	}
+
+	function render() {
+		const v = state.venue, p = state.paper;
+		$('[data-act=back]').disabled = !state.back.length;
+		$('[data-act=fwd]').disabled = !state.fwd.length;
+		$('[data-act=up]').disabled = !v && !p;
+		// Contents: highlight the selection and open its book
+		$$('.lit-row').forEach(r => r.classList.toggle('on', p ? r.dataset.paper === p : (!!v && r.dataset.venue === v)));
+		if (v) setBook($('li[data-book="' + v + '"]'), true);
+		const on = $('.lit-tree .lit-row.on');
+		if (on) on.scrollIntoView({ block: 'nearest' });
+		const path = ['ml literature'];
+		if (v) path.push(v);
+		if (p) path.push(papers[p].name);
+		$('.lit-crumb').innerHTML = path.map((t, i) => i === path.length - 1 ? '<b>' + esc(t) + '</b>' : esc(t)).join(' › ');
+		if (state.view === 'page') renderPage();
+		if (timeline) timeline.scope();
+		if (state.view === 'g') graph.show();
+	}
+	function setBook(li, open) {
+		if (!li) return;
+		li.classList.toggle('closed', !open);
+		li.querySelector('use').setAttribute('href', open ? '#lit-bookopen' : '#lit-book');
+	}
+
+	// one handler for Contents rows, page links and figure boxes
+	function onPick(e) {
+		const el = e.target.closest('[data-paper], [data-venue]');
+		if (!el) return;
+		if (el.dataset.paper) { openPaper(el.dataset.paper); return; }
+		const li = el.closest('.lit-tree li[data-book]');
+		if (li && state.venue === el.dataset.venue && !state.paper) {
+			setBook(li, li.classList.contains('closed')); // second click folds or unfolds the open book
+			return;
+		}
+		go(el.dataset.venue, null);
+	}
+	root.addEventListener('click', onPick);
+	root.addEventListener('click', e => {
+		const b = e.target.closest('.lit-btn[data-act]');
+		if (b) actions[b.dataset.act]();
+	});
+
+	// ---- pages -------------------------------------------------------------------
+	const overview = $('.lit-page').innerHTML;
+	const link = id => '<span class="lit-link" data-paper="' + id + '">' + esc(papers[id].name) + '</span> <span class="lit-yv">(' + papers[id].year + ')</span>';
+	const links = ids => ids.length ? ids.map(link).join('; ') : '<span class="lit-yv">none in this list</span>';
+	const swatch = s => '<i class="lit-sw" style="background:' + s.color + '"></i>';
+
+	function renderPage() {
+		const pane = $('.lit-page');
+		pane.innerHTML = state.paper ? topicPage(papers[state.paper]) : state.venue ? bookPage(venues[state.venue]) : overview;
+		$('.lit-text', pane).scrollTop = 0;
+	}
+	function bookPage(v) {
+		const ps = inVenue(v.id).sort(byYear);
+		const items = ps.map(p => '<li>' + ico('lit-page') + '<span class="lit-link" data-paper="' + p.id + '">' + esc(p.name)
+			+ '</span> <span class="lit-yv">' + p.year + ' · ' + swatch(shelves[p.shelf]) + esc(shelves[p.shelf].short) + '</span>'
+			+ '<span class="lit-note">' + esc(p.note) + '</span></li>').join('');
+		return '<div class="lit-nsr"><p class="lit-h2">' + esc(v.name) + '</p><p class="lit-meta">' + esc(v.id) + ' · ' + ps.length + ' paper' + (ps.length > 1 ? 's' : '')
+			+ ', ' + ps[0].year + (ps.length > 1 ? ' – ' + ps[ps.length - 1].year : '') + '</p></div>'
+			+ '<div class="lit-text"><ul class="lit-list">' + items + '</ul></div>';
+	}
+	function topicPage(p) {
+		const s = shelves[p.shelf];
+		const shelfmates = data.papers.filter(q => q.shelf === p.shelf && q.sub === p.sub && q.id !== p.id).sort(byYear).map(q => q.id);
+		return '<div class="lit-nsr"><p class="lit-h2">' + esc(p.title) + '</p><p class="lit-meta"><span class="lit-link" data-venue="' + esc(p.venue) + '">' + esc(p.venue) + '</span>, ' + p.year
+			+ ' &nbsp;·&nbsp; ' + swatch(s) + esc(s.label) + ' › ' + esc(s.subLabel[p.sub]) + ' &nbsp;·&nbsp; topic ' + (index[p.id] + 1) + ' of ' + order.length + '</p></div>'
+			+ '<div class="lit-text"><p>' + esc(p.note) + '</p>' + figure(p)
+			+ '<p class="lit-h3">Builds on</p><p>' + links(p.builds_on) + '</p>'
+			+ '<p class="lit-h3">Followed by</p><p>' + links(p.by) + '</p>'
+			+ '<p class="lit-h3">Same shelf</p><p>' + links(shelfmates) + '</p></div>';
+	}
+	// ancestors on the left, the paper in the middle, descendants on the right
+	function figure(p) {
+		const L = p.builds_on, R = p.by;
+		if (!L.length && !R.length) return '';
+		const BW = 150, BH = 22, GY = 8, COL = 200, rows = Math.max(L.length, R.length, 1), H = rows * (BH + GY) + 10, W = 3 * COL - 50;
+		const yAt = (i, n) => (H - (n * (BH + GY) - GY)) / 2 + i * (BH + GY);
+		const mid = yAt(0, 1) + BH / 2;
+		const box = (id, x, y, me) => '<g' + (me ? '' : ' data-paper="' + id + '"') + '><rect class="box' + (me ? ' me' : '') + '" x="' + x + '" y="' + y + '" width="' + BW + '" height="' + BH
+			+ '" stroke="' + shelves[papers[id].shelf].color + '"/><text x="' + (x + 8) + '" y="' + (y + 15) + '">' + esc(papers[id].name.length > 22 ? papers[id].name.slice(0, 21) + '…' : papers[id].name)
+			+ ' <tspan fill="#55505a">’' + String(papers[id].year).slice(2) + '</tspan></text></g>';
+		const arrow = (x1, y1, x2, y2) => '<path class="arr" d="M' + x1 + ',' + y1 + 'C' + (x1 + 25) + ',' + y1 + ' ' + (x2 - 25) + ',' + y2 + ' ' + x2 + ',' + y2 + '" marker-end="url(#lit-arr)"/>';
+		let s = '';
+		L.forEach((id, i) => { const y = yAt(i, L.length); s += box(id, 0, y, false) + arrow(BW, y + BH / 2, COL - 2, mid); });
+		s += box(p.id, COL, yAt(0, 1), true);
+		R.forEach((id, i) => { const y = yAt(i, R.length); s += arrow(COL + BW, mid, 2 * COL - 2, y + BH / 2) + box(id, 2 * COL, y, false); });
+		return '<figure class="lit-fig"><svg role="img" aria-label="What this paper builds on, left, and what followed it, right" viewBox="-1 -1 ' + (W + 2) + ' ' + (H + 2) + '" width="' + W + '" height="' + H + '">' + s
+			+ '</svg><figcaption>Builds on (left) · this paper · followed by (right). Click a box to jump.</figcaption></figure>';
+	}
+
+	// ---- views -------------------------------------------------------------------------
+	const VIEWS = { page: 'Page', tl: 'Timeline', g: 'Lineage' };
+	function setView(id) {
+		state.view = id;
+		$$('.lit-view').forEach(x => x.classList.toggle('on', x.classList.contains('lit-' + id)));
+		$$('[data-view]', win).forEach(b => b.classList.toggle(b.classList.contains('tb-item') ? 'cur' : 'on', b.dataset.view === id));
+		if (id === 'page') renderPage();
+		if (id === 'tl') { timeline = timeline || makeTimeline(); timeline.scope(); }
+		if (id === 'g') graph.show();
+	}
+	// The window's View menu normally lists headings (menubar.js); filled here, it lists views instead
+	const drop = $('.tb-outline', win);
+	if (drop) drop.innerHTML = Object.keys(VIEWS).map(id => '<button type="button" class="tb-item' + (id === 'page' ? ' cur' : '') + '" data-view="' + id + '">' + VIEWS[id] + '</button>').join('');
+	win.addEventListener('click', e => {
+		const b = e.target.closest('[data-view]');
+		if (!b) return;
+		setView(b.dataset.view);
+		const menu = b.closest('.tb-menu');
+		if (menu) menu.classList.remove('open');
+	});
+
+	// ---- Timeline: one lane per shelf, one column per year ------------------------------
+	function makeTimeline() {
+		const Y0 = 2008, Y1 = 2025, CW = 100, CHW = 92, CHH = 14, GAP = 3, PAD = 6;
+		const NS = 'http://www.w3.org/2000/svg';
+		const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k])); parent.appendChild(n); return n; };
+		const view = $('.lit-tl'), svg = $('svg', view);
+		const pos = {}, laneTop = {};
+		let y = 0, lanes = '<div class="lit-lane lit-ruler">year ►</div>';
+		data.shelves.forEach(s => {
+			const cells = {};
+			data.papers.filter(p => p.shelf === s.id).sort(byYear).forEach(p => { (cells[p.year] = cells[p.year] || []).push(p); });
+			const rows = Math.max(1, ...Object.values(cells).map(c => c.length));
+			const h = PAD * 2 + rows * (CHH + GAP) - GAP;
+			Object.values(cells).forEach(c => c.forEach((p, i) => { pos[p.id] = { x: (p.year - Y0) * CW + (CW - CHW) / 2, y: y + PAD + i * (CHH + GAP) }; }));
+			lanes += '<div class="lit-lane" style="height:' + h + 'px"><i class="lit-sw" style="background:' + s.color + '"></i>' + esc(s.short) + '</div>';
+			laneTop[s.id] = y;
+			y += h;
+		});
+		$('.lit-lanes', view).innerHTML = lanes;
+		const W = (Y1 - Y0 + 1) * CW, H = y;
+		let rul = '';
+		for (let yr = Y0; yr <= Y1; yr++) rul += '<span style="left:' + (yr - Y0) * CW + 'px;width:' + CW + 'px">' + yr + '</span>';
+		const rulEl = $('.lit-rul', view);
+		rulEl.innerHTML = rul;
+		rulEl.style.width = W + 'px';
+		svg.setAttribute('width', W);
+		svg.setAttribute('height', H);
+		for (let yr = Y0; yr <= Y1 + 1; yr++) el('line', { class: 'ycol', x1: (yr - Y0) * CW, x2: (yr - Y0) * CW, y1: 0, y2: H }, svg);
+		Object.values(laneTop).slice(1).forEach(t => el('line', { class: 'ycol', x1: 0, x2: W, y1: t - 0.5, y2: t - 0.5 }, svg));
+		const edges = [];
+		data.papers.forEach(p => p.builds_on.forEach(o => {
+			const a = pos[o], b = pos[p.id], x1 = a.x + CHW, y1 = a.y + CHH / 2, x2 = b.x, y2 = b.y + CHH / 2;
+			const d = x2 > x1 + 4
+				? 'M' + x1 + ',' + y1 + 'C' + (x1 + x2) / 2 + ',' + y1 + ' ' + (x1 + x2) / 2 + ',' + y2 + ' ' + x2 + ',' + y2
+				: 'M' + x1 + ',' + y1 + 'C' + (x1 + 26) + ',' + y1 + ' ' + (x1 + 26) + ',' + y2 + ' ' + (x1 + 1) + ',' + y2; // same year: loop out the right
+			edges.push({ s: o, t: p.id, el: el('path', { class: 'lk', d: d, stroke: shelves[papers[o].shelf].color, 'marker-end': 'url(#lit-arr-grey)' }, svg) });
+		}));
+		const chips = {};
+		data.papers.forEach(p => {
+			const g = el('g', { class: 'chip', 'data-paper': p.id, transform: 'translate(' + pos[p.id].x + ',' + pos[p.id].y + ')' }, svg);
+			el('rect', { width: CHW, height: CHH, stroke: shelves[p.shelf].color }, g);
+			el('rect', { class: 'bar', width: 3, height: CHH, fill: shelves[p.shelf].color }, g);
+			el('text', { x: 7, y: 10.5 }, g).textContent = p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name;
+			el('title', {}, g).textContent = p.title + ' (' + p.venue + ' ' + p.year + ')';
+			chips[p.id] = g;
+		});
+		// hovering a paper lights its whole ancestry and descent
+		svg.addEventListener('mouseover', e => {
+			const c = e.target.closest('.chip');
+			if (!c) return;
+			const set = closure(c.dataset.paper, 'builds_on');
+			closure(c.dataset.paper, 'by', set);
+			set.add(c.dataset.paper);
+			view.classList.add('hl');
+			Object.keys(chips).forEach(id => chips[id].classList.toggle('near', set.has(id)));
+			edges.forEach(x => x.el.classList.toggle('near', set.has(x.s) && set.has(x.t)));
+		});
+		svg.addEventListener('mouseout', e => {
+			if (e.target.closest('.chip') && !(e.relatedTarget && e.relatedTarget.closest('.chip'))) view.classList.remove('hl');
+		});
+		svg.addEventListener('dblclick', e => { if (e.target.closest('.chip')) setView('page'); });
+		view.scrollLeft = (2015 - Y0) * CW;
+		return {
+			scope() {
+				const set = new Set(inVenue(state.venue).map(p => p.id));
+				view.classList.toggle('scoped', !!state.venue);
+				Object.keys(chips).forEach(id => { chips[id].classList.toggle('out', !set.has(id)); chips[id].classList.toggle('me', id === state.paper); });
+				edges.forEach(x => x.el.classList.toggle('out', !set.has(x.s) && !set.has(x.t)));
+				if (state.paper) view.scrollTop = Math.max(0, pos[state.paper].y - view.clientHeight / 2);
+			}
+		};
+	}
+
+	// ---- Lineage: force graph of the selection, clustered by shelf ----------------------
+	const graph = (() => {
+		const view = $('.lit-g');
+		let drawn = null, sim = null, nodeSel = null, pending = null;
+		function loadD3(cb) {
+			if (window.d3) { cb(); return; }
+			if (pending) { pending.push(cb); return; }
+			pending = [cb];
+			const s = document.createElement('script');
+			s.src = 'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js';
+			s.onload = () => { const cbs = pending; pending = null; cbs.forEach(f => f()); };
+			s.onerror = () => { pending = null; $('.lit-hint', view).textContent = 'Lineage needs d3, which did not load.'; };
+			document.head.appendChild(s);
+		}
+		function show() {
+			if (!view.classList.contains('on')) return;
+			loadD3(() => {
+				if (drawn !== (state.venue || '*')) draw();
+				else if (nodeSel) nodeSel.classed('sel', d => d.id === state.paper);
+			});
+		}
+		function draw() {
+			drawn = state.venue || '*';
+			const W = view.clientWidth || 600, H = view.clientHeight || 440;
+			const scope = new Set(inVenue(state.venue).map(p => p.id)), ctx = new Set();
+			scope.forEach(id => papers[id].builds_on.concat(papers[id].by).forEach(o => { if (!scope.has(o)) ctx.add(o); }));
+			const ids = new Set([...scope, ...ctx]);
+			const nodes = [...ids].map(id => ({ id, p: papers[id], ctx: !scope.has(id), r: (scope.has(id) ? 4 : 3) + 1.6 * Math.sqrt(papers[id].by.filter(b => ids.has(b)).length) }));
+			const links = [];
+			data.papers.forEach(p => p.builds_on.forEach(o => { if (ids.has(o) && ids.has(p.id)) links.push({ source: o, target: p.id }); }));
+			if (sim) sim.stop();
+			const svg = d3.select(view).select('svg');
+			svg.selectAll('*').remove();
+			svg.attr('viewBox', [0, 0, W, H]);
+			svg.append('defs').html('<marker id="lit-garr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#777"/></marker>');
+			const g = svg.append('g');
+			const zoom = d3.zoom().scaleExtent([0.4, 3]).on('zoom', e => g.attr('transform', e.transform));
+			svg.call(zoom);
+			// each shelf gets a bearing on a ring, so clusters land in the same place every time
+			const ring = {};
+			data.shelves.forEach((s, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / data.shelves.length; ring[s.id] = { x: W / 2 + Math.cos(a) * W * 0.34, y: H / 2 + Math.sin(a) * H * 0.34 }; });
+			const small = scope.size < 30;
+			sim = d3.forceSimulation(nodes).randomSource(d3.randomLcg(11))
+				.force('link', d3.forceLink(links).id(d => d.id).distance(small ? 48 : 36).strength(0.5))
+				.force('charge', d3.forceManyBody().strength(small ? -140 : -95))
+				.force('x', d3.forceX(d => ring[d.p.shelf].x).strength(0.1))
+				.force('y', d3.forceY(d => ring[d.p.shelf].y).strength(0.1))
+				.force('collide', d3.forceCollide(d => d.r + 10));
+			const link = g.append('g').selectAll('path').data(links).join('path').attr('class', 'edge').attr('marker-end', 'url(#lit-garr)');
+			nodeSel = g.append('g').selectAll('g').data(nodes).join('g')
+				.attr('class', d => 'node' + (d.ctx ? ' ctx' : '') + (d.id === state.paper ? ' sel' : ''))
+				.attr('data-paper', d => d.id)
+				.call(d3.drag()
+					.on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+					.on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+					.on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+			nodeSel.append('circle').attr('r', d => d.r).attr('fill', d => shelves[d.p.shelf].color).attr('stroke', d => d.ctx ? shelves[d.p.shelf].color : '#fff');
+			nodeSel.append('text').attr('x', d => d.r + 3).attr('y', 3.5).text(d => d.p.name);
+			function tick() {
+				link.attr('d', d => {
+					const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y, L = Math.hypot(dx, dy) || 1;
+					return 'M' + (d.source.x + dx / L * d.source.r) + ',' + (d.source.y + dy / L * d.source.r) + 'L' + (d.target.x - dx / L * (d.target.r + 3)) + ',' + (d.target.y - dy / L * (d.target.r + 3));
+				});
+				nodeSel.attr('transform', d => 'translate(' + d.x + ',' + d.y + ')');
+			}
+			sim.on('tick', tick);
+			// settle first, then fit everything (labels included) into the pane
+			sim.stop();
+			for (let i = 0; i < 220; i++) sim.tick();
+			tick();
+			const xs = nodes.map(d => d.x), ys = nodes.map(d => d.y);
+			const x0 = Math.min(...xs) - 30, x1 = Math.max(...xs) + 90, y0 = Math.min(...ys) - 16, y1 = Math.max(...ys) + 16;
+			const HB = H - 28; // keep the hint line clear
+			const k = Math.min(W / (x1 - x0), HB / (y1 - y0), 1.4);
+			svg.call(zoom.transform, d3.zoomIdentity.translate((W - k * (x0 + x1)) / 2, (HB - k * (y0 + y1)) / 2).scale(k));
+			sim.alpha(0.06).restart();
+			nodeSel.on('mouseenter', (e, d) => {
+				const near = new Set([d.id, ...d.p.builds_on, ...d.p.by]);
+				view.classList.add('hl');
+				nodeSel.classed('near', x => near.has(x.id));
+				link.classed('near', l => l.source.id === d.id || l.target.id === d.id);
+			}).on('mouseleave', () => {
+				view.classList.remove('hl');
+				nodeSel.classed('near', false);
+				link.classed('near', false);
+			}).on('dblclick', e => { e.stopPropagation(); setView('page'); });
+			$('.lit-hint', view).textContent = (state.venue ? 'Hollow nodes are papers from other venues that these link to. ' : 'Drag to pan, wheel to zoom. ')
+				+ 'Click a paper to select it, double-click to read it.';
+		}
+		return { show };
+	})();
+
+	render();
+})();
