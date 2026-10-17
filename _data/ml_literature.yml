@@ -1,6 +1,6 @@
 # 301. ml literature — papers, shelves and builds-on links.
 # shelves group papers by subject (used by the Timeline and Lineage views);
-# venues are the Contents books; each paper lists the ids it builds on (builds_on).
+# venues, grouped by type, are the Contents books; each paper lists the ids it builds on (builds_on).
 
 shelves:
   - id: arch
@@ -96,32 +96,38 @@ shelves:
       - { id: batch, label: "Batch size & minima" }
       - { id: reg, label: "Regularisation" }
 
+venue_types:
+  - { id: conference, label: "Conferences" }
+  - { id: journal, label: "Journals" }
+  - { id: workshop, label: "Workshops" }
+  - { id: preprint, label: "Preprints & reports" }
+
 venues:
-  - { id: "AAAI", name: "AAAI Conference on Artificial Intelligence" }
-  - { id: "ACL", name: "Annual Meeting of the Association for Computational Linguistics" }
-  - { id: "ACM CSUR", name: "ACM Computing Surveys" }
-  - { id: "BlackboxNLP", name: "BlackboxNLP Workshop on Analyzing and Interpreting Neural Networks for NLP" }
-  - { id: "CHI", name: "ACM Conference on Human Factors in Computing Systems" }
-  - { id: "CVPR", name: "IEEE/CVF Conference on Computer Vision and Pattern Recognition" }
-  - { id: "DLRS", name: "Workshop on Deep Learning for Recommender Systems" }
-  - { id: "EMNLP", name: "Conference on Empirical Methods in Natural Language Processing" }
-  - { id: "ICCV", name: "IEEE/CVF International Conference on Computer Vision" }
-  - { id: "ICDM", name: "IEEE International Conference on Data Mining" }
-  - { id: "ICLR", name: "International Conference on Learning Representations" }
-  - { id: "ICML", name: "International Conference on Machine Learning" }
-  - { id: "IEEE Computer", name: "IEEE Computer" }
-  - { id: "IEEE TBD", name: "IEEE Transactions on Big Data" }
-  - { id: "IEEE TPAMI", name: "IEEE Transactions on Pattern Analysis and Machine Intelligence" }
-  - { id: "IJCAI", name: "International Joint Conference on Artificial Intelligence" }
-  - { id: "JMLR", name: "Journal of Machine Learning Research" }
-  - { id: "NAACL", name: "Conference of the North American Chapter of the Association for Computational Linguistics" }
-  - { id: "NeurIPS", name: "Conference on Neural Information Processing Systems" }
-  - { id: "NeurIPS workshop", name: "NeurIPS Workshops" }
-  - { id: "RecSys", name: "ACM Conference on Recommender Systems" }
-  - { id: "SOSP", name: "ACM Symposium on Operating Systems Principles" }
-  - { id: "UAI", name: "Conference on Uncertainty in Artificial Intelligence" }
-  - { id: "arXiv", name: "arXiv preprints" }
-  - { id: "OpenAI report", name: "OpenAI technical reports" }
+  - { id: "AAAI", type: conference, name: "AAAI Conference on Artificial Intelligence" }
+  - { id: "ACL", type: conference, name: "Annual Meeting of the Association for Computational Linguistics" }
+  - { id: "ACM CSUR", type: journal, name: "ACM Computing Surveys" }
+  - { id: "BlackboxNLP", type: workshop, name: "BlackboxNLP Workshop on Analyzing and Interpreting Neural Networks for NLP" }
+  - { id: "CHI", type: conference, name: "ACM Conference on Human Factors in Computing Systems" }
+  - { id: "CVPR", type: conference, name: "IEEE/CVF Conference on Computer Vision and Pattern Recognition" }
+  - { id: "DLRS", type: workshop, name: "Workshop on Deep Learning for Recommender Systems" }
+  - { id: "EMNLP", type: conference, name: "Conference on Empirical Methods in Natural Language Processing" }
+  - { id: "ICCV", type: conference, name: "IEEE/CVF International Conference on Computer Vision" }
+  - { id: "ICDM", type: conference, name: "IEEE International Conference on Data Mining" }
+  - { id: "ICLR", type: conference, name: "International Conference on Learning Representations" }
+  - { id: "ICML", type: conference, name: "International Conference on Machine Learning" }
+  - { id: "IEEE Computer", type: journal, name: "IEEE Computer" }
+  - { id: "IEEE TBD", type: journal, name: "IEEE Transactions on Big Data" }
+  - { id: "IEEE TPAMI", type: journal, name: "IEEE Transactions on Pattern Analysis and Machine Intelligence" }
+  - { id: "IJCAI", type: conference, name: "International Joint Conference on Artificial Intelligence" }
+  - { id: "JMLR", type: journal, name: "Journal of Machine Learning Research" }
+  - { id: "NAACL", type: conference, name: "Conference of the North American Chapter of the Association for Computational Linguistics" }
+  - { id: "NeurIPS", type: conference, name: "Conference on Neural Information Processing Systems" }
+  - { id: "NeurIPS workshop", type: workshop, name: "NeurIPS Workshops" }
+  - { id: "RecSys", type: conference, name: "ACM Conference on Recommender Systems" }
+  - { id: "SOSP", type: conference, name: "ACM Symposium on Operating Systems Principles" }
+  - { id: "UAI", type: conference, name: "Conference on Uncertainty in Artificial Intelligence" }
+  - { id: "arXiv", type: preprint, name: "arXiv preprints" }
+  - { id: "OpenAI report", type: preprint, name: "OpenAI technical reports" }
 
 papers:
   - { id: bahdanau, name: "Bahdanau attention", year: 2015, venue: "ICLR", shelf: arch, sub: attn, builds_on: [],

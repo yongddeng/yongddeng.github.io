@@ -1,6 +1,6 @@
 // 301. ml literature: a WinHelp-style reader inside the post window.
-// Contents lists venues as books and papers as pages; the right pane shows
-// the overview, one venue, or one paper. View ▸ Timeline and View ▸ Lineage
+// Contents lists venue types and venues as books and papers as pages; the
+// right pane shows the overview, one book, or one paper. View ▸ Timeline and View ▸ Lineage
 // redraw the current selection laid out by subject shelf; Lineage fetches d3
 // on first use. The desktop re-creates a post's scripts when it swaps the
 // window in, so this runs once per window and claims it with data-ready.
@@ -17,16 +17,24 @@
 	// ---- data ---------------------------------------------------------------
 	// found by type, the one attribute the desktop keeps when it re-creates a swapped window's scripts
 	const data = JSON.parse($('script[type="application/json"]', win).textContent);
-	const shelves = {}, venues = {}, papers = {};
+	const shelves = {}, papers = {};
 	data.shelves.forEach(s => { s.subLabel = {}; s.subs.forEach(x => { s.subLabel[x.id] = x.label; }); shelves[s.id] = s; });
-	data.venues.forEach(v => { venues[v.id] = v; });
 	data.papers.forEach(p => { p.by = []; papers[p.id] = p; });
 	data.papers.forEach(p => p.builds_on.forEach(o => papers[o].by.push(p.id)));
 	const byYear = (a, b) => a.year - b.year || a.name.localeCompare(b.name);
-	const inVenue = v => v ? data.papers.filter(p => p.venue === v) : data.papers.slice();
-	// browse order (<< >>) is Contents order: venues as listed, papers by year
+	// Contents books: a venue type holds venues, a venue holds papers (ids by year)
+	const books = {};
+	data.venue_types.forEach(t => { books[t.id] = { label: t.label, kids: [], ids: [] }; });
+	data.venues.forEach(v => {
+		const ids = data.papers.filter(p => p.venue === v.id).sort(byYear).map(p => p.id);
+		books[v.id] = { label: v.id, meta: v.name, parent: v.type, kids: [], ids };
+		books[v.type].kids.push(v.id);
+		books[v.type].ids.push(...ids);
+	});
+	const papersIn = key => (key ? books[key].ids : data.papers.map(p => p.id)).map(id => papers[id]);
+	// browse order (<< >>) is Contents order
 	const order = [];
-	data.venues.forEach(v => inVenue(v.id).sort(byYear).forEach(p => order.push(p.id)));
+	data.venue_types.forEach(t => books[t.id].kids.forEach(v => order.push(...books[v].ids)));
 	const index = {};
 	order.forEach((id, i) => { index[id] = i; });
 	// transitive closure along builds_on (ancestors) or by (descendants)
@@ -37,23 +45,23 @@
 	}
 
 	// ---- state and navigation -------------------------------------------------
-	const state = { venue: null, paper: null, view: 'page', back: [], fwd: [] };
+	const state = { book: null, paper: null, view: 'page', back: [], fwd: [] };
 	let timeline = null;
 
-	function go(venue, paper, remember) {
-		if (remember !== false && (venue !== state.venue || paper !== state.paper)) {
-			state.back.push([state.venue, state.paper]);
+	function go(book, paper, remember) {
+		if (remember !== false && (book !== state.book || paper !== state.paper)) {
+			state.back.push([state.book, state.paper]);
 			state.fwd = [];
 		}
-		state.venue = venue;
+		state.book = book;
 		state.paper = paper;
 		render();
 	}
 	const openPaper = id => go(papers[id].venue, id);
 	const actions = {
-		back() { if (!state.back.length) return; state.fwd.push([state.venue, state.paper]); const h = state.back.pop(); go(h[0], h[1], false); },
-		fwd() { if (!state.fwd.length) return; state.back.push([state.venue, state.paper]); const h = state.fwd.pop(); go(h[0], h[1], false); },
-		up() { if (state.paper) go(state.venue, null); else if (state.venue) go(null, null); },
+		back() { if (!state.back.length) return; state.fwd.push([state.book, state.paper]); const h = state.back.pop(); go(h[0], h[1], false); },
+		fwd() { if (!state.fwd.length) return; state.back.push([state.book, state.paper]); const h = state.fwd.pop(); go(h[0], h[1], false); },
+		up() { if (state.paper) go(state.book, null); else if (state.book) go(books[state.book].parent || null, null); },
 		prev() { step(-1); },
 		next() { step(1); }
 	};
@@ -62,24 +70,26 @@
 		if (state.paper) {
 			i = index[state.paper] + delta;
 		} else {
-			const ids = inVenue(state.venue).map(p => index[p.id]).sort((a, b) => a - b);
+			const ids = papersIn(state.book).map(p => index[p.id]).sort((a, b) => a - b);
 			i = delta > 0 ? ids[0] : ids[ids.length - 1];
 		}
 		openPaper(order[(i + order.length) % order.length]);
 	}
 
 	function render() {
-		const v = state.venue, p = state.paper;
+		const b = state.book, p = state.paper, parent = b && books[b].parent;
 		$('[data-act=back]').disabled = !state.back.length;
 		$('[data-act=fwd]').disabled = !state.fwd.length;
-		$('[data-act=up]').disabled = !v && !p;
-		// Contents: highlight the selection and open its book
-		$$('.lit-row').forEach(r => r.classList.toggle('on', p ? r.dataset.paper === p : (!!v && r.dataset.venue === v)));
-		if (v) setBook($('li[data-book="' + v + '"]'), true);
+		$('[data-act=up]').disabled = !b && !p;
+		// Contents: highlight the selection and open its books
+		$$('.lit-row').forEach(r => r.classList.toggle('on', p ? r.dataset.paper === p : (!!b && r.dataset.group === b)));
+		if (parent) setBook($('li[data-book="' + parent + '"]'), true);
+		if (b) setBook($('li[data-book="' + b + '"]'), true);
 		const on = $('.lit-tree .lit-row.on');
 		if (on) on.scrollIntoView({ block: 'nearest' });
 		const path = ['ml literature'];
-		if (v) path.push(v);
+		if (parent) path.push(books[parent].label);
+		if (b) path.push(books[b].label);
 		if (p) path.push(papers[p].name);
 		$('.lit-crumb').innerHTML = path.map((t, i) => i === path.length - 1 ? '<b>' + esc(t) + '</b>' : esc(t)).join(' › ');
 		if (state.view === 'page') renderPage();
@@ -94,15 +104,15 @@
 
 	// one handler for Contents rows, page links and figure boxes
 	function onPick(e) {
-		const el = e.target.closest('[data-paper], [data-venue]');
+		const el = e.target.closest('[data-paper], [data-group]');
 		if (!el) return;
 		if (el.dataset.paper) { openPaper(el.dataset.paper); return; }
 		const li = el.closest('.lit-tree li[data-book]');
-		if (li && state.venue === el.dataset.venue && !state.paper) {
+		if (li && state.book === el.dataset.group && !state.paper) {
 			setBook(li, li.classList.contains('closed')); // second click folds or unfolds the open book
 			return;
 		}
-		go(el.dataset.venue, null);
+		go(el.dataset.group, null);
 	}
 	root.addEventListener('click', onPick);
 	root.addEventListener('click', e => {
@@ -115,25 +125,32 @@
 	const link = id => '<span class="lit-link" data-paper="' + id + '">' + esc(papers[id].name) + '</span> <span class="lit-yv">(' + papers[id].year + ')</span>';
 	const links = ids => ids.length ? ids.map(link).join('; ') : '<span class="lit-yv">none in this list</span>';
 	const swatch = s => '<i class="lit-sw" style="background:' + s.color + '"></i>';
+	const span = ps => ps[0].year + (ps.length > 1 ? ' – ' + ps[ps.length - 1].year : '');
 
 	function renderPage() {
 		const pane = $('.lit-page');
-		pane.innerHTML = state.paper ? topicPage(papers[state.paper]) : state.venue ? bookPage(venues[state.venue]) : overview;
+		pane.innerHTML = state.paper ? topicPage(papers[state.paper]) : state.book ? bookPage(state.book) : overview;
 		$('.lit-text', pane).scrollTop = 0;
 	}
-	function bookPage(v) {
-		const ps = inVenue(v.id).sort(byYear);
-		const items = ps.map(p => '<li>' + ico('lit-page') + '<span class="lit-link" data-paper="' + p.id + '">' + esc(p.name)
+	const paperList = ids => '<ul class="lit-list">' + ids.map(id => {
+		const p = papers[id];
+		return '<li>' + ico('lit-page') + '<span class="lit-link" data-paper="' + p.id + '">' + esc(p.name)
 			+ '</span> <span class="lit-yv">' + p.year + ' · ' + swatch(shelves[p.shelf]) + esc(shelves[p.shelf].short) + '</span>'
-			+ '<span class="lit-note">' + esc(p.note) + '</span></li>').join('');
-		return '<div class="lit-nsr"><p class="lit-h2">' + esc(v.name) + '</p><p class="lit-meta">' + esc(v.id) + ' · ' + ps.length + ' paper' + (ps.length > 1 ? 's' : '')
-			+ ', ' + ps[0].year + (ps.length > 1 ? ' – ' + ps[ps.length - 1].year : '') + '</p></div>'
-			+ '<div class="lit-text"><ul class="lit-list">' + items + '</ul></div>';
+			+ '<span class="lit-note">' + esc(p.note) + '</span></li>';
+	}).join('') + '</ul>';
+	function bookPage(key) {
+		const b = books[key], ps = papersIn(key);
+		const head = b.meta ? b.meta : b.label;
+		const meta = (b.parent ? esc(books[b.parent].label) + ' · ' + esc(b.label) : b.kids.length + ' venues') + ' · ' + ps.length + ' paper' + (ps.length > 1 ? 's' : '') + ', ' + span(ps);
+		const body = b.kids.length
+			? b.kids.map(v => '<p class="lit-h3"><span class="lit-link" data-group="' + esc(v) + '">' + esc(v) + '</span> <span class="lit-yv">' + esc(books[v].meta) + ' (' + books[v].ids.length + ')</span></p>' + paperList(books[v].ids)).join('')
+			: paperList(b.ids);
+		return '<div class="lit-nsr"><p class="lit-h2">' + esc(head) + '</p><p class="lit-meta">' + meta + '</p></div><div class="lit-text">' + body + '</div>';
 	}
 	function topicPage(p) {
 		const s = shelves[p.shelf];
 		const shelfmates = data.papers.filter(q => q.shelf === p.shelf && q.sub === p.sub && q.id !== p.id).sort(byYear).map(q => q.id);
-		return '<div class="lit-nsr"><p class="lit-h2">' + esc(p.title) + '</p><p class="lit-meta"><span class="lit-link" data-venue="' + esc(p.venue) + '">' + esc(p.venue) + '</span>, ' + p.year
+		return '<div class="lit-nsr"><p class="lit-h2">' + esc(p.title) + '</p><p class="lit-meta"><span class="lit-link" data-group="' + esc(p.venue) + '">' + esc(p.venue) + '</span>, ' + p.year
 			+ ' &nbsp;·&nbsp; ' + swatch(s) + esc(s.label) + ' › ' + esc(s.subLabel[p.sub]) + ' &nbsp;·&nbsp; topic ' + (index[p.id] + 1) + ' of ' + order.length + '</p></div>'
 			+ '<div class="lit-text"><p>' + esc(p.note) + '</p>' + figure(p)
 			+ '<p class="lit-h3">Builds on</p><p>' + links(p.builds_on) + '</p>'
@@ -244,8 +261,8 @@
 		view.scrollLeft = (2015 - Y0) * CW;
 		return {
 			scope() {
-				const set = new Set(inVenue(state.venue).map(p => p.id));
-				view.classList.toggle('scoped', !!state.venue);
+				const set = new Set(papersIn(state.book).map(p => p.id));
+				view.classList.toggle('scoped', !!state.book);
 				Object.keys(chips).forEach(id => { chips[id].classList.toggle('out', !set.has(id)); chips[id].classList.toggle('me', id === state.paper); });
 				edges.forEach(x => x.el.classList.toggle('out', !set.has(x.s) && !set.has(x.t)));
 				if (state.paper) view.scrollTop = Math.max(0, pos[state.paper].y - view.clientHeight / 2);
@@ -270,14 +287,14 @@
 		function show() {
 			if (!view.classList.contains('on')) return;
 			loadD3(() => {
-				if (drawn !== (state.venue || '*')) draw();
+				if (drawn !== (state.book || '*')) draw();
 				else if (nodeSel) nodeSel.classed('sel', d => d.id === state.paper);
 			});
 		}
 		function draw() {
-			drawn = state.venue || '*';
+			drawn = state.book || '*';
 			const W = view.clientWidth || 600, H = view.clientHeight || 440;
-			const scope = new Set(inVenue(state.venue).map(p => p.id)), ctx = new Set();
+			const scope = new Set(papersIn(state.book).map(p => p.id)), ctx = new Set();
 			scope.forEach(id => papers[id].builds_on.concat(papers[id].by).forEach(o => { if (!scope.has(o)) ctx.add(o); }));
 			const ids = new Set([...scope, ...ctx]);
 			const nodes = [...ids].map(id => ({ id, p: papers[id], ctx: !scope.has(id), r: (scope.has(id) ? 4 : 3) + 1.6 * Math.sqrt(papers[id].by.filter(b => ids.has(b)).length) }));
@@ -339,7 +356,7 @@
 				nodeSel.classed('near', false);
 				link.classed('near', false);
 			}).on('dblclick', e => { e.stopPropagation(); setView('page'); });
-			$('.lit-hint', view).textContent = (state.venue ? 'Hollow nodes are papers from other venues that these link to. ' : 'Drag to pan, wheel to zoom. ')
+			$('.lit-hint', view).textContent = (state.book ? 'Hollow nodes are papers outside this book that these link to. ' : 'Drag to pan, wheel to zoom. ')
 				+ 'Click a paper to select it, double-click to read it.';
 		}
 		return { show };
