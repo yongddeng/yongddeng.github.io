@@ -1,6 +1,8 @@
 // 301. ml literature: a WinHelp-style reader in the post window
 // (assets/js/literature.js). Contents on the left, a page on the right;
 // the Timeline and Lineage views replace the page.
+@use "main";
+
 $lit-ui: "Helvetica Neue", Arial, sans-serif;
 $lit-shade: #7f787f;
 $lit-mute: #55505a;
@@ -9,7 +11,7 @@ $lit-link: #008000;
 
 .help-win {
 	// two panes side by side want more than the 750px of a reading window
-	width: 960px;
+	width: 940px;
 
 	// the pane is window chrome here; the Contents and page panes inside carry the paper
 	.post_content {
@@ -19,7 +21,7 @@ $lit-link: #008000;
 		overflow: hidden;
 		background: #bfb8bf;
 		border: 0;
-		padding: 0 2px 2px;
+		padding: 0 4px 2px;
 	}
 
 	// View menu lists the views, with a bullet on the current one
@@ -152,12 +154,12 @@ $lit-link: #008000;
 	flex: 1;
 	min-height: 0;
 	display: flex;
-	gap: 3px;
+	gap: 4px;
 }
 .lit-pane {
 	background: var(--paper, #fbfafb);
-	border: 2px solid;
-	border-color: $lit-shade #ffffff #ffffff $lit-shade;
+	// same sunken frame as the explorer's tree and file panes
+	@include main.bevel(false, ridge groove groove ridge);
 	box-sizing: border-box;
 	min-width: 0;
 	overflow: auto;
@@ -176,6 +178,20 @@ $lit-link: #008000;
 }
 .lit-view.on {
 	display: flex;
+}
+// view controls, floating in the pane's top-right corner
+.lit-ctl {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	z-index: 3;
+	display: flex;
+	gap: 2px;
+
+	.lit-btn {
+		min-width: 24px;
+		padding: 0 6px;
+	}
 }
 
 // Contents (also cloned into the phone sheet)
@@ -335,9 +351,19 @@ $lit-link: #008000;
 	}
 }
 
-// Timeline
+// Timeline: the pane holds still so the controls stay put; the lanes and
+// the chart scroll inside it
 .lit-tl {
+	position: relative;
+	overflow: hidden;
+}
+.lit-tlscroll {
+	flex: 1;
+	min-width: 0;
+	height: 100%;
+	display: flex;
 	align-items: flex-start;
+	overflow: auto;
 }
 .lit-lanes {
 	position: sticky;

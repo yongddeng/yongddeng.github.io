@@ -9,21 +9,50 @@
 		return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName("body")[0].clientWidth;
 	}
 
+	// Maximize: fill the desktop above the taskbar. Sizes are content-box,
+	// so the window's own frame (bevel + padding) is subtracted, and the
+	// width comes from clientWidth, which excludes the page scrollbar, so
+	// the page never scrolls sideways. The pre-maximize spot is kept for
+	// Restore.
 	function maximize (content) {
 		var cont = content.querySelector(".post_content");
-		var wid = getWidth();
-		if (wid > 900) {
-			content.style.width = (wid * 0.9) + "px";
-			cont.style.width = wid < 1400 ? "99%" : "99.4%";
+		if (getWidth() <= 900) return;
+		if (!content.dataset.premax) {
+			var st = content.style;
+			content.dataset.premax = JSON.stringify({ position: st.position, margin: st.margin, left: st.left, top: st.top });
 		}
+		var cs = getComputedStyle(content);
+		var frameW = content.offsetWidth - parseFloat(cs.width);
+		var frameH = content.offsetHeight - parseFloat(cs.height);
+		var bar = document.querySelector(".taskbar");
+		var barH = bar ? bar.offsetHeight : 0;
+		window.scrollTo(0, 0);
+		content.style.position = "absolute";
+		content.style.margin = "0";
+		content.style.left = "0";
+		content.style.top = "0";
+		content.style.width = (document.documentElement.clientWidth - frameW) + "px";
+		content.style.height = (window.innerHeight - barH - frameH) + "px";
+		cont.style.width = "99.4%";
 	}
 
+	// Restore: back to the stylesheet size, which differs per window
+	// class (750px reader, 940px help, ...), so clear rather than pin;
+	// a maximized window also goes back to where it was
 	function minimize (content) {
 		var cont = content.querySelector(".post_content");
-		if (getWidth() > 900) {
-			content.style.width = "750px";
-			cont.style.width = "98.5%";
+		if (getWidth() <= 900) return;
+		if (content.dataset.premax) {
+			var pre = JSON.parse(content.dataset.premax);
+			content.style.position = pre.position;
+			content.style.margin = pre.margin;
+			content.style.left = pre.left;
+			content.style.top = pre.top;
+			delete content.dataset.premax;
 		}
+		content.style.width = "";
+		content.style.height = "";
+		cont.style.width = "";
 	}
 
 	// Click anywhere brings the window to the front; only the front

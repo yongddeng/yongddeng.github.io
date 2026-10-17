@@ -63,7 +63,13 @@
 		fwd() { if (!state.fwd.length) return; state.back.push([state.book, state.paper]); const h = state.fwd.pop(); go(h[0], h[1], false); },
 		root() { go(null, null); },
 		prev() { step(-1); },
-		next() { step(1); }
+		next() { step(1); },
+		// view controls
+		oldest() { timeline.scrollTo(0); },
+		newest() { timeline.scrollTo(1); },
+		zoomin() { graph.zoomBy(1.3); },
+		zoomout() { graph.zoomBy(1 / 1.3); },
+		reset() { go(state.book, null); graph.fit(); }
 	};
 	function step(delta) {
 		let i;
@@ -77,19 +83,22 @@
 	}
 
 	function render() {
-		const b = state.book, p = state.paper, parent = b && books[b].parent;
+		const b = state.book, p = state.paper;
+		// the Contents and breadcrumb lead to the paper's own venue, which may sit
+		// inside a wider book (a paper picked in a type's Lineage keeps that scope)
+		const lead = p ? papers[p].venue : b, parent = lead && books[lead].parent;
 		$('[data-act=back]').disabled = !state.back.length;
 		$('[data-act=fwd]').disabled = !state.fwd.length;
 		// Contents: highlight the selection and open its books
 		$$('.lit-row').forEach(r => r.classList.toggle('on', p ? r.dataset.paper === p : (!!b && r.dataset.group === b)));
 		if (parent) setBook($('li[data-book="' + parent + '"]'), true);
-		if (b) setBook($('li[data-book="' + b + '"]'), true);
+		if (lead) setBook($('li[data-book="' + lead + '"]'), true);
 		const on = $('.lit-tree .lit-row.on');
 		if (on) on.scrollIntoView({ block: 'nearest' });
 		// breadcrumb: every segment but the last is a link, so it does Up's job
 		const path = [['ml literature', 'data-act="root"']];
 		if (parent) path.push([books[parent].label, 'data-group="' + esc(parent) + '"']);
-		if (b) path.push([books[b].label, 'data-group="' + esc(b) + '"']);
+		if (lead) path.push([books[lead].label, 'data-group="' + esc(lead) + '"']);
 		if (p) path.push([papers[p].name, '']);
 		$('.lit-crumb').innerHTML = path.map((seg, i) => i === path.length - 1 ? '<b>' + esc(seg[0]) + '</b>' : '<span class="lit-link" ' + seg[1] + '>' + esc(seg[0]) + '</span>').join(' › ');
 		if (state.view === 'page') renderPage();
@@ -202,7 +211,7 @@
 		const Y0 = 2008, Y1 = 2025, CW = 100, CHW = 92, CHH = 14, GAP = 3, PAD = 6;
 		const NS = 'http://www.w3.org/2000/svg';
 		const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k])); parent.appendChild(n); return n; };
-		const view = $('.lit-tl'), svg = $('svg', view);
+		const view = $('.lit-tl'), box = $('.lit-tlscroll', view), svg = $('svg', view);
 		const pos = {}, laneTop = {};
 		let y = 0, lanes = '<div class="lit-lane lit-ruler">year ►</div>';
 		data.shelves.forEach(s => {
@@ -258,14 +267,16 @@
 			if (e.target.closest('.chip') && !(e.relatedTarget && e.relatedTarget.closest('.chip'))) view.classList.remove('hl');
 		});
 		svg.addEventListener('dblclick', e => { if (e.target.closest('.chip')) setView('page'); });
-		view.scrollLeft = (2015 - Y0) * CW;
+		// open on the newest year; the older ones are a scroll to the left
+		box.scrollLeft = box.scrollWidth;
 		return {
+			scrollTo(end) { box.scrollLeft = end ? box.scrollWidth : 0; },
 			scope() {
 				const set = new Set(papersIn(state.book).map(p => p.id));
 				view.classList.toggle('scoped', !!state.book);
 				Object.keys(chips).forEach(id => { chips[id].classList.toggle('out', !set.has(id)); chips[id].classList.toggle('me', id === state.paper); });
 				edges.forEach(x => x.el.classList.toggle('out', !set.has(x.s) && !set.has(x.t)));
-				if (state.paper) view.scrollTop = Math.max(0, pos[state.paper].y - view.clientHeight / 2);
+				if (state.paper) box.scrollTop = Math.max(0, pos[state.paper].y - box.clientHeight / 2);
 			}
 		};
 	}
@@ -273,7 +284,7 @@
 	// ---- Lineage: force graph of the selection, clustered by shelf ----------------------
 	const graph = (() => {
 		const view = $('.lit-g');
-		let drawn = null, sim = null, nodeSel = null, pending = null;
+		let drawn = null, sim = null, nodeSel = null, pending = null, svgSel = null, zoomB = null, fitT = null;
 		function loadD3(cb) {
 			if (window.d3) { cb(); return; }
 			if (pending) { pending.push(cb); return; }
@@ -284,29 +295,38 @@
 			s.onerror = () => { pending = null; $('.lit-hint', view).textContent = 'Lineage needs d3, which did not load.'; };
 			document.head.appendChild(s);
 		}
+		// A selected paper is drawn with its whole lineage, ancestors and descendants;
+		// with none selected the current book is drawn
+		const scopeKey = () => (state.paper ? 'p:' + state.paper : state.book || '*');
+		function scopeIds() {
+			if (!state.paper) return new Set(papersIn(state.book).map(p => p.id));
+			const set = closure(state.paper, 'builds_on');
+			closure(state.paper, 'by', set);
+			return set.add(state.paper);
+		}
 		function show() {
 			if (!view.classList.contains('on')) return;
-			loadD3(() => {
-				if (drawn !== (state.book || '*')) draw();
-				else if (nodeSel) nodeSel.classed('sel', d => d.id === state.paper);
-			});
+			loadD3(() => { if (drawn !== scopeKey()) draw(); });
 		}
 		function draw() {
-			drawn = state.book || '*';
+			drawn = scopeKey();
 			const W = view.clientWidth || 600, H = view.clientHeight || 440;
-			const scope = new Set(papersIn(state.book).map(p => p.id)), ctx = new Set();
-			scope.forEach(id => papers[id].builds_on.concat(papers[id].by).forEach(o => { if (!scope.has(o)) ctx.add(o); }));
+			const scope = scopeIds(), ctx = new Set();
+			// a book shows where its papers link out; a lineage is already complete, so no context
+			if (!state.paper) scope.forEach(id => papers[id].builds_on.concat(papers[id].by).forEach(o => { if (!scope.has(o)) ctx.add(o); }));
 			const ids = new Set([...scope, ...ctx]);
 			const nodes = [...ids].map(id => ({ id, p: papers[id], ctx: !scope.has(id), r: (scope.has(id) ? 4 : 3) + 1.6 * Math.sqrt(papers[id].by.filter(b => ids.has(b)).length) }));
 			const links = [];
 			data.papers.forEach(p => p.builds_on.forEach(o => { if (ids.has(o) && ids.has(p.id)) links.push({ source: o, target: p.id }); }));
 			if (sim) sim.stop();
-			const svg = d3.select(view).select('svg');
+			// the hovered node goes with the old drawing, so its mouseleave never fires
+			view.classList.remove('hl');
+			const svg = svgSel = d3.select(view).select('svg');
 			svg.selectAll('*').remove();
 			svg.attr('viewBox', [0, 0, W, H]);
 			svg.append('defs').html('<marker id="lit-garr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#777"/></marker>');
 			const g = svg.append('g');
-			const zoom = d3.zoom().scaleExtent([0.4, 3]).on('zoom', e => g.attr('transform', e.transform));
+			const zoom = zoomB = d3.zoom().scaleExtent([0.4, 3]).on('zoom', e => g.attr('transform', e.transform));
 			svg.call(zoom);
 			// each shelf gets a bearing on a ring, so clusters land in the same place every time
 			const ring = {};
@@ -344,7 +364,8 @@
 			const x0 = Math.min(...xs) - 30, x1 = Math.max(...xs) + 90, y0 = Math.min(...ys) - 16, y1 = Math.max(...ys) + 16;
 			const HB = H - 28; // keep the hint line clear
 			const k = Math.min(W / (x1 - x0), HB / (y1 - y0), 1.4);
-			svg.call(zoom.transform, d3.zoomIdentity.translate((W - k * (x0 + x1)) / 2, (HB - k * (y0 + y1)) / 2).scale(k));
+			fitT = d3.zoomIdentity.translate((W - k * (x0 + x1)) / 2, (HB - k * (y0 + y1)) / 2).scale(k);
+			svg.call(zoom.transform, fitT);
 			sim.alpha(0.06).restart();
 			nodeSel.on('mouseenter', (e, d) => {
 				const near = new Set([d.id, ...d.p.builds_on, ...d.p.by]);
@@ -355,11 +376,17 @@
 				view.classList.remove('hl');
 				nodeSel.classed('near', false);
 				link.classed('near', false);
-			}).on('dblclick', e => { e.stopPropagation(); setView('page'); });
-			$('.lit-hint', view).textContent = (state.book ? 'Hollow nodes are papers outside this book that these link to. ' : 'Drag to pan, wheel to zoom. ')
+			}).on('click', (e, d) => { e.stopPropagation(); go(state.book, d.id); })
+			.on('dblclick', e => { e.stopPropagation(); setView('page'); });
+			$('.lit-hint', view).textContent = (state.paper ? 'The lineage of ' + papers[state.paper].name + ': what it builds on and what built on it. '
+				: state.book ? 'Hollow nodes are papers outside this book that these link to. ' : 'Drag to pan, wheel to zoom. ')
 				+ 'Click a paper to select it, double-click to read it.';
 		}
-		return { show };
+		return {
+			show,
+			fit() { if (svgSel) svgSel.transition().duration(200).call(zoomB.transform, fitT); },
+			zoomBy(k) { if (svgSel) svgSel.transition().duration(150).call(zoomB.scaleBy, k); }
+		};
 	})();
 
 	render();
