@@ -43,6 +43,9 @@
 		papers[id][key].forEach(o => { if (!set.has(o)) { set.add(o); closure(o, key, set); } });
 		return set;
 	}
+	const lineage = id => closure(id, 'by', closure(id, 'builds_on')).add(id);
+	// what the Timeline and Lineage views show: a selected paper's lineage, else the current book
+	const scopeIds = () => (state.paper ? lineage(state.paper) : new Set(papersIn(state.book).map(p => p.id)));
 
 	// ---- state and navigation -------------------------------------------------
 	const state = { book: null, paper: null, view: 'page', back: [], fwd: [] };
@@ -67,6 +70,7 @@
 		// view controls
 		oldest() { timeline.scrollTo(0); },
 		newest() { timeline.scrollTo(1); },
+		links() { timeline.links(); },
 		zoomin() { graph.zoomBy(1.3); },
 		zoomout() { graph.zoomBy(1 / 1.3); },
 		reset() { go(state.book, null); graph.fit(); }
@@ -217,7 +221,7 @@
 		const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k])); parent.appendChild(n); return n; };
 		const view = $('.lit-tl'), box = $('.lit-tlscroll', view), svg = $('svg', view);
 		const pos = {}, laneTop = {};
-		let y = 0, lanes = '<div class="lit-lane lit-ruler">year ►</div>';
+		let y = 0, lanes = '<div class="lit-lane lit-ruler"><button type="button" class="lit-btn" data-act="oldest" title="First year">&#9666;&#9666;</button><button type="button" class="lit-btn" data-act="newest" title="Last year">&#9656;&#9656;</button><button type="button" class="lit-btn on" data-act="links" title="Show or hide the builds-on links">links</button></div>'; // the corner cell holds the scroll and link buttons
 		data.shelves.forEach(s => {
 			const cells = {};
 			data.papers.filter(p => p.shelf === s.id).sort(byYear).forEach(p => { (cells[p.year] = cells[p.year] || []).push(p); });
@@ -259,9 +263,7 @@
 		svg.addEventListener('mouseover', e => {
 			const c = e.target.closest('.chip');
 			if (!c) return;
-			const set = closure(c.dataset.paper, 'builds_on');
-			closure(c.dataset.paper, 'by', set);
-			set.add(c.dataset.paper);
+			const set = lineage(c.dataset.paper);
 			view.classList.add('hl');
 			Object.keys(chips).forEach(id => chips[id].classList.toggle('near', set.has(id)));
 			edges.forEach(x => x.el.classList.toggle('near', set.has(x.s) && set.has(x.t)));
@@ -270,16 +272,24 @@
 			if (e.target.closest('.chip') && !(e.relatedTarget && e.relatedTarget.closest('.chip'))) view.classList.remove('hl');
 		});
 		svg.addEventListener('dblclick', e => { if (e.target.closest('.chip')) setView('page'); });
+		svg.addEventListener('click', e => {
+			const c = e.target.closest('.chip');
+			if (c && c.dataset.paper === state.paper) { e.stopPropagation(); go(null, null); } // back to the whole chart
+		});
 		// open on the newest year; the older ones are a scroll to the left
 		box.scrollLeft = box.scrollWidth;
 		return {
 			scrollTo(end) { box.scrollLeft = end ? box.scrollWidth : 0; },
+			links() { const off = view.classList.toggle('nolinks'); $('[data-act=links]', view).classList.toggle('on', !off); },
+			// a selected paper keeps its lineage lit, as the hover previews it; a book dims to its papers
 			scope() {
-				const set = new Set(papersIn(state.book).map(p => p.id));
-				view.classList.toggle('scoped', !!state.book);
-				Object.keys(chips).forEach(id => { chips[id].classList.toggle('out', !set.has(id)); chips[id].classList.toggle('me', id === state.paper); });
-				edges.forEach(x => x.el.classList.toggle('out', !set.has(x.s) && !set.has(x.t)));
-				if (state.paper) box.scrollTop = Math.max(0, pos[state.paper].y - box.clientHeight / 2);
+				const p = state.paper, set = scopeIds();
+				// a lineage keeps only its own links; a book keeps every link touching it
+				const kept = p ? x => set.has(x.s) && set.has(x.t) : x => set.has(x.s) || set.has(x.t);
+				view.classList.toggle('scoped', !!(p || state.book));
+				Object.keys(chips).forEach(id => { chips[id].classList.toggle('out', !set.has(id)); chips[id].classList.toggle('me', id === p); });
+				edges.forEach(x => x.el.classList.toggle('out', !kept(x)));
+				if (p) box.scrollTop = Math.max(0, pos[p].y - box.clientHeight / 2);
 			}
 		};
 	}
@@ -301,12 +311,6 @@
 		// A selected paper is drawn with its whole lineage, ancestors and descendants;
 		// with none selected the current book is drawn
 		const scopeKey = () => (state.paper ? 'p:' + state.paper : state.book || '*');
-		function scopeIds() {
-			if (!state.paper) return new Set(papersIn(state.book).map(p => p.id));
-			const set = closure(state.paper, 'builds_on');
-			closure(state.paper, 'by', set);
-			return set.add(state.paper);
-		}
 		function show() {
 			if (!view.classList.contains('on')) return;
 			loadD3(() => { if (drawn !== scopeKey()) draw(); });

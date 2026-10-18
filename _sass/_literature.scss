@@ -397,6 +397,13 @@ $lit-link: #008000;
 	border-bottom: 1px solid $lit-shade;
 	font-weight: normal;
 	color: $lit-mute;
+
+	.lit-btn {
+		height: 18px;
+		padding: 0 5px;
+		font-size: 10px;
+		margin-right: 4px;
+	}
 }
 .lit-tlmain {
 	flex: none;
@@ -450,6 +457,9 @@ $lit-link: #008000;
 	.chip.me rect {
 		stroke-width: 2.5;
 	}
+}
+.lit-tl.nolinks .lk {
+	display: none;
 }
 .lit-tl.scoped {
 	.chip.out { opacity: 0.2; }
