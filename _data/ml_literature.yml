@@ -1,82 +1,94 @@
-# 301. ml literature — papers, shelves and builds-on links.
+# 301. papers — papers, shelves and builds-on links.
 # shelves group papers by subject (used by the Timeline and Lineage views);
 # venues, grouped by type, are the Contents books; each paper lists the ids it builds on (builds_on).
 
 shelves:
   - id: arch
-    label: "Attention & Architecture"
+    label: "Architecture"
     short: "Architecture"
     color: "#000080"
-    blurb: "How attention replaced recurrence, and what has since been done about its cost, its positions and its heads."
+    blurb: "Recurrence and seq2seq, the Transformer and the pieces of its block, how positions are encoded, and the cheaper attentions and alternatives since."
     subs:
-      - { id: attn, label: "Attention" }
+      - { id: seq, label: "Recurrence & seq2seq" }
+      - { id: block, label: "The Transformer block" }
       - { id: pos, label: "Position & length" }
-      - { id: lin, label: "Linear attention" }
-      - { id: interp, label: "Interpretability" }
-      - { id: alt, label: "Beyond attention" }
-  - id: lm
-    label: "Pretrained Language Models"
-    short: "Language models"
-    color: "#800000"
-    blurb: "Tokenisers, encoders, decoders and encoder-decoders pretrained on text, from ULMFiT to LLaMA."
+      - { id: attn, label: "Attention variants & alternatives" }
+      - { id: interp, label: "Analysis" }
+  - id: pre
+    label: "Pre-training"
+    short: "Pre-training"
+    color: "#606060"
+    blurb: "What goes into training from scratch: tokenisers, optimisers, batch size and schedules, regularisation, and the laws that say how big to go."
     subs:
       - { id: tok, label: "Tokenisation" }
-      - { id: enc, label: "Encoders & transfer" }
-      - { id: dec, label: "Decoders" }
-      - { id: s2s, label: "Encoder-decoders" }
-  - id: scale
-    label: "Scaling & Post-training"
-    short: "Scaling"
-    color: "#b05a00"
-    blurb: "Scaling laws, instruction tuning and RLHF, and the newer move to spend compute at inference time."
-    subs:
+      - { id: opt, label: "Optimisers" }
+      - { id: lr, label: "Batch size, LR & minima" }
+      - { id: reg, label: "Regularisation & normalisation" }
       - { id: laws, label: "Scaling laws" }
-      - { id: align, label: "Instruction & RL" }
-      - { id: tts, label: "Test-time scaling" }
-  - id: eff
-    label: "Efficient Training & Inference"
-    short: "Efficiency"
-    color: "#008080"
-    blurb: "Making training and serving cheap: IO-aware kernels, KV-cache paging, speculation, quantisation, adapters, sparsity."
+  - id: lm
+    label: "Language Models"
+    short: "LMs"
+    color: "#800000"
+    blurb: "The pretrained models themselves, from ULMFiT and BERT through the GPT series to the open models of 2023–25."
     subs:
-      - { id: kern, label: "Kernels & KV cache" }
-      - { id: serve, label: "Serving" }
-      - { id: quant, label: "Quantisation & PEFT" }
-      - { id: moe, label: "Sparsity" }
-  - id: reason
-    label: "Reasoning & Agents"
-    short: "Reasoning"
+      - { id: enc, label: "Encoders & transfer" }
+      - { id: s2s, label: "Encoder-decoders" }
+      - { id: gpt, label: "GPT series" }
+      - { id: open, label: "Open models 2023–25" }
+  - id: sys
+    label: "Systems & Efficiency"
+    short: "Systems"
+    color: "#008080"
+    blurb: "Making training and serving cheap: IO-aware kernels, continuous batching and KV paging, speculation, low precision, quantisation, distillation, experts."
+    subs:
+      - { id: serve, label: "Kernels & serving" }
+      - { id: quant, label: "Precision, quantisation & distillation" }
+      - { id: moe, label: "Mixture of experts" }
+  - id: post
+    label: "Post-training"
+    short: "Post-training"
     color: "#800080"
-    blurb: "Prompting that elicits reasoning, how faithful it is, and agents that act with tools."
+    blurb: "Turning a pretrained model into an assistant: instruction tuning, RLHF and RL for reasoning, and adapters that do it with few parameters."
+    subs:
+      - { id: sft, label: "Instruction tuning & RLHF" }
+      - { id: peft, label: "Parameter-efficient fine-tuning" }
+  - id: tt
+    label: "Test-time"
+    short: "Test-time"
+    color: "#b05a00"
+    blurb: "Spending compute on a frozen model: chain-of-thought prompting and its faithfulness, sampling and search at test time, and agents acting with tools."
     subs:
       - { id: cot, label: "Chain of thought" }
+      - { id: tts, label: "Test-time scaling" }
       - { id: agent, label: "Agents" }
   - id: embed
-    label: "Representation Learning & Embeddings"
+    label: "Representation Learning"
     short: "Embeddings"
     color: "#007000"
-    blurb: "Contrastive objectives, sentence vectors, their geometry, and what can be read back out of them."
+    blurb: "Word vectors, contrastive objectives, sentence vectors, their geometry, and what can be read back out of them."
     subs:
+      - { id: wv, label: "Word vectors" }
       - { id: contrast, label: "Contrastive losses" }
-      - { id: sent, label: "Sentence embeddings" }
-      - { id: aug, label: "Data augmentation" }
+      - { id: sent, label: "Sentence embeddings & augmentation" }
       - { id: geo, label: "Geometry & inversion" }
   - id: vision
     label: "Vision & Multimodal"
     short: "Vision"
     color: "#707000"
-    blurb: "Transformers on image patches, and image–text models trained on captions."
+    blurb: "Conv nets, transformers on image patches, GANs and VAEs, and image–text models trained on captions."
     subs:
+      - { id: cnn, label: "Conv nets" }
       - { id: vit, label: "Image transformers" }
+      - { id: gen, label: "Generative models" }
       - { id: mm, label: "Vision–language" }
   - id: retr
-    label: "Retrieval & Nearest Neighbour"
+    label: "Retrieval"
     short: "Retrieval"
     color: "#0062b8"
-    blurb: "Quantised and graph indexes for nearest neighbours, and dense retrievers feeding generators."
+    blurb: "Quantised and graph indexes for nearest neighbours, and sparse and dense retrievers feeding generators."
     subs:
       - { id: ann, label: "Approximate NN" }
-      - { id: dense, label: "Dense retrieval" }
+      - { id: rag, label: "Retrieval & RAG" }
   - id: rec
     label: "Recommender Systems"
     short: "RecSys"
@@ -85,16 +97,7 @@ shelves:
     subs:
       - { id: cf, label: "Collab. filtering" }
       - { id: ctr, label: "CTR prediction" }
-      - { id: indus, label: "Industrial systems" }
-      - { id: user, label: "Student modelling" }
-  - id: optim
-    label: "Optimisation & Generalisation"
-    short: "Optimisation"
-    color: "#606060"
-    blurb: "Why batch size, normalisation, weight decay and label smoothing change what a network generalises to."
-    subs:
-      - { id: batch, label: "Batch size & minima" }
-      - { id: reg, label: "Regularisation" }
+      - { id: indus, label: "Industrial systems & users" }
 
 venue_types:
   - { id: conference, label: "Conferences" }
@@ -105,12 +108,12 @@ venue_types:
 venues:
   - { id: "AAAI", type: conference, name: "AAAI Conference on Artificial Intelligence" }
   - { id: "ACL", type: conference, name: "Annual Meeting of the Association for Computational Linguistics" }
-  - { id: "ACM CSUR", type: journal, name: "ACM Computing Surveys" }
   - { id: "BlackboxNLP", type: workshop, name: "BlackboxNLP Workshop on Analyzing and Interpreting Neural Networks for NLP" }
   - { id: "CHI", type: conference, name: "ACM Conference on Human Factors in Computing Systems" }
   - { id: "CVPR", type: conference, name: "IEEE/CVF Conference on Computer Vision and Pattern Recognition" }
   - { id: "DLRS", type: workshop, name: "Workshop on Deep Learning for Recommender Systems" }
   - { id: "EMNLP", type: conference, name: "Conference on Empirical Methods in Natural Language Processing" }
+  - { id: "Found. Trends IR", type: journal, name: "Foundations and Trends in Information Retrieval" }
   - { id: "ICCV", type: conference, name: "IEEE/CVF International Conference on Computer Vision" }
   - { id: "ICDM", type: conference, name: "IEEE International Conference on Data Mining" }
   - { id: "ICLR", type: conference, name: "International Conference on Learning Representations" }
@@ -120,28 +123,92 @@ venues:
   - { id: "IEEE TPAMI", type: journal, name: "IEEE Transactions on Pattern Analysis and Machine Intelligence" }
   - { id: "IJCAI", type: conference, name: "International Joint Conference on Artificial Intelligence" }
   - { id: "JMLR", type: journal, name: "Journal of Machine Learning Research" }
+  - { id: "MLSys", type: conference, name: "Conference on Machine Learning and Systems" }
   - { id: "NAACL", type: conference, name: "Conference of the North American Chapter of the Association for Computational Linguistics" }
   - { id: "NeurIPS", type: conference, name: "Conference on Neural Information Processing Systems" }
   - { id: "NeurIPS workshop", type: workshop, name: "NeurIPS Workshops" }
+  - { id: "Neural Computation", type: journal, name: "Neural Computation" }
+  - { id: "OSDI", type: conference, name: "USENIX Symposium on Operating Systems Design and Implementation" }
   - { id: "RecSys", type: conference, name: "ACM Conference on Recommender Systems" }
   - { id: "SOSP", type: conference, name: "ACM Symposium on Operating Systems Principles" }
+  - { id: "TACL", type: journal, name: "Transactions of the Association for Computational Linguistics" }
   - { id: "UAI", type: conference, name: "Conference on Uncertainty in Artificial Intelligence" }
   - { id: "arXiv", type: preprint, name: "arXiv preprints" }
   - { id: "OpenAI report", type: preprint, name: "OpenAI technical reports" }
 
 papers:
-  - { id: bahdanau, name: "Bahdanau attention", year: 2015, venue: "ICLR", shelf: arch, sub: attn, builds_on: [],
+  - { id: lstm, name: "LSTM", year: 1997, venue: "Neural Computation", shelf: arch, sub: seq, builds_on: [],
+      title: "Long Short-Term Memory",
+      note: "Gated memory cells that let gradients survive long sequences. The recurrent workhorse until attention." }
+  - { id: alexnet, name: "AlexNet", year: 2012, venue: "NeurIPS", shelf: vision, sub: cnn, builds_on: [],
+      title: "ImageNet Classification with Deep Convolutional Neural Networks",
+      note: "A GPU-trained deep conv net wins ImageNet by a wide margin. ReLU, dropout and data augmentation become standard." }
+  - { id: word2vec, name: "word2vec", year: 2013, venue: "NeurIPS", shelf: embed, sub: wv, builds_on: [],
+      title: "Distributed Representations of Words and Phrases and their Compositionality",
+      note: "Skip-gram with negative sampling. Dense word vectors whose arithmetic captures analogies." }
+  - { id: glove, name: "GloVe", year: 2014, venue: "EMNLP", shelf: embed, sub: wv, builds_on: [word2vec],
+      title: "GloVe: Global Vectors for Word Representation",
+      note: "Word vectors fitted to the log of global co-occurrence counts; a bridge between count-based and predictive methods." }
+  - { id: seq2seq, name: "seq2seq", year: 2014, venue: "NeurIPS", shelf: arch, sub: seq, builds_on: [lstm],
+      title: "Sequence to Sequence Learning with Neural Networks",
+      note: "An LSTM encoder compresses the source into one vector that an LSTM decoder unrolls. The bottleneck attention was invented to fix." }
+  - { id: dropout, name: "Dropout", year: 2014, venue: "JMLR", shelf: pre, sub: reg, builds_on: [],
+      title: "Dropout: A Simple Way to Prevent Neural Networks from Overfitting",
+      note: "Randomly zero units during training; an implicit ensemble of thinned networks." }
+  - { id: gan, name: "GAN", year: 2014, venue: "NeurIPS", shelf: vision, sub: gen, builds_on: [],
+      title: "Generative Adversarial Nets",
+      note: "A generator and a discriminator trained as a minimax game. Sharp samples, unstable training." }
+  - { id: vae, name: "VAE", year: 2014, venue: "ICLR", shelf: vision, sub: gen, builds_on: [],
+      title: "Auto-Encoding Variational Bayes",
+      note: "The reparameterisation trick makes a latent-variable model trainable by backprop through the ELBO." }
+  - { id: vgg, name: "VGG", year: 2015, venue: "ICLR", shelf: vision, sub: cnn, builds_on: [alexnet],
+      title: "Very Deep Convolutional Networks for Large-Scale Image Recognition",
+      note: "Stacks of 3×3 convolutions, 16 to 19 layers deep. Depth matters, and the plain design made it the default backbone." }
+  - { id: batchnorm, name: "BatchNorm", year: 2015, venue: "ICML", shelf: pre, sub: reg, builds_on: [],
+      title: "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+      note: "Normalise each activation over the mini-batch. Faster training and higher learning rates; the stated reason was later disputed." }
+  - { id: adam, name: "Adam", year: 2015, venue: "ICLR", shelf: pre, sub: opt, builds_on: [],
+      title: "Adam: A Method for Stochastic Optimization",
+      note: "Per-parameter step sizes from bias-corrected first and second moment estimates. The default optimiser since." }
+  - { id: distill, name: "Distillation", year: 2015, venue: "arXiv", shelf: sys, sub: quant, builds_on: [],
+      title: "Distilling the Knowledge in a Neural Network",
+      note: "Train a small model on a big model's softened outputs. The teacher–student recipe behind every distilled LLM." }
+  - { id: resnet, name: "ResNet", year: 2016, venue: "CVPR", shelf: vision, sub: cnn, builds_on: [vgg, batchnorm],
+      title: "Deep Residual Learning for Image Recognition",
+      note: "Skip connections let networks of 100+ layers train. The residual stream every Transformer block inherits." }
+  - { id: bahdanau, name: "Bahdanau attention", year: 2015, venue: "ICLR", shelf: arch, sub: seq, builds_on: [seq2seq],
       title: "Neural Machine Translation by Jointly Learning to Align and Translate",
       note: "Soft alignment over encoder states while decoding. The attention mechanism before the Transformer." }
-  - { id: luong, name: "Luong attention", year: 2015, venue: "EMNLP", shelf: arch, sub: attn, builds_on: [bahdanau],
+  - { id: luong, name: "Luong attention", year: 2015, venue: "EMNLP", shelf: arch, sub: seq, builds_on: [bahdanau],
       title: "Effective Approaches to Attention-based Neural Machine Translation",
       note: "Global vs local attention, and the dot-product score the Transformer later adopts." }
-  - { id: transformer, name: "Transformer", year: 2017, venue: "NeurIPS", shelf: arch, sub: attn, builds_on: [luong],
+  - { id: transformer, name: "Transformer", year: 2017, venue: "NeurIPS", shelf: arch, sub: block, builds_on: [luong],
       title: "Attention Is All You Need",
       note: "Drops recurrence for multi-head self-attention. The base class of nearly everything after it." }
-  - { id: layernorm, name: "Pre-LN", year: 2020, venue: "ICML", shelf: arch, sub: attn, builds_on: [transformer],
+  - { id: layernorm, name: "Pre-LN", year: 2020, venue: "ICML", shelf: arch, sub: block, builds_on: [transformer, ln],
       title: "On Layer Normalization in the Transformer Architecture",
       note: "Putting LayerNorm before the residual branch tames gradients at init and removes the warm-up requirement." }
+  - { id: ln, name: "LayerNorm", year: 2016, venue: "arXiv", shelf: arch, sub: block, builds_on: [batchnorm],
+      title: "Layer Normalization",
+      note: "Normalise over the features of one example rather than over the batch, so it works for sequences and at batch size one." }
+  - { id: gelu, name: "GELU", year: 2016, venue: "arXiv", shelf: arch, sub: block, builds_on: [],
+      title: "Gaussian Error Linear Units (GELUs)",
+      note: "x·Φ(x): a smooth gate that weights inputs by their value rather than their sign. The activation of BERT and GPT." }
+  - { id: rmsnorm, name: "RMSNorm", year: 2019, venue: "NeurIPS", shelf: arch, sub: block, builds_on: [ln],
+      title: "Root Mean Square Layer Normalization",
+      note: "Drops the mean-centring from LayerNorm and rescales by the RMS alone; cheaper and just as good. The norm in LLaMA and its descendants." }
+  - { id: swiglu, name: "SwiGLU", year: 2020, venue: "arXiv", shelf: arch, sub: block, builds_on: [transformer, gelu],
+      title: "GLU Variants Improve Transformer",
+      note: "A gated feed-forward layer, Swish(xW)⊙xV, beats ReLU and GELU at equal compute. The FFN in PaLM, LLaMA and most models since." }
+  - { id: qknorm, name: "QK-norm", year: 2020, venue: "EMNLP", shelf: arch, sub: block, builds_on: [ln, transformer],
+      title: "Query-Key Normalization for Transformers",
+      note: "L2-normalise queries and keys before the dot product so attention logits cannot blow up. Revived in Gemma 3 and OLMo 2 for training stability." }
+  - { id: mqa, name: "Multi-query attention", year: 2019, venue: "arXiv", shelf: arch, sub: attn, builds_on: [transformer],
+      title: "Fast Transformer Decoding: One Write-Head is All You Need",
+      note: "All heads share one key and one value projection, shrinking the KV cache by the head count. GQA later interpolates between this and full MHA." }
+  - { id: linattn, name: "Linear attention", year: 2020, venue: "ICML", shelf: arch, sub: attn, builds_on: [transformer],
+      title: "Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention",
+      note: "Replace softmax with a feature-map kernel so attention becomes a running sum: linear in length and expressible as an RNN." }
   - { id: relpos, name: "Relative position", year: 2018, venue: "NAACL", shelf: arch, sub: pos, builds_on: [transformer],
       title: "Self-Attention with Relative Position Representations",
       note: "Encodes pairwise offsets inside the attention score instead of adding absolute positions." }
@@ -151,13 +218,16 @@ papers:
   - { id: poslen, name: "PE & length generalisation", year: 2023, venue: "NeurIPS", shelf: arch, sub: pos, builds_on: [relpos],
       title: "The Impact of Positional Encoding on Length Generalization in Transformers",
       note: "In decoder-only models, no positional encoding generalises to longer inputs better than most explicit schemes." }
-  - { id: rffu, name: "RFF analysis", year: 2019, venue: "ICML", shelf: arch, sub: lin, builds_on: [],
+  - { id: rope, name: "RoPE", year: 2021, venue: "arXiv", shelf: arch, sub: pos, builds_on: [transformer, relpos],
+      title: "RoFormer: Enhanced Transformer with Rotary Position Embedding",
+      note: "Rotate query and key by an angle proportional to position, so the dot product depends only on the relative offset. The default in decoder LMs." }
+  - { id: alibi, name: "ALiBi", year: 2022, venue: "ICLR", shelf: arch, sub: pos, builds_on: [transformer, relpos],
+      title: "Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation",
+      note: "No position embedding at all; subtract a distance-proportional penalty from the attention scores. Extrapolates past the training length." }
+  - { id: rffu, name: "RFF analysis", year: 2019, venue: "ICML", shelf: arch, sub: attn, builds_on: [],
       title: "Towards a Unified Analysis of Random Fourier Features",
       note: "Sample complexity of random Fourier features for kernel ridge regression and SVMs." }
-  - { id: rffs, name: "RFF survey", year: 2021, venue: "IEEE TPAMI", shelf: arch, sub: lin, builds_on: [rffu],
-      title: "Random Features for Kernel Approximation: A Survey on Algorithms, Theory, and Beyond",
-      note: "Random features as kernel approximation: algorithms, guarantees, and open problems." }
-  - { id: performer, name: "Performer", year: 2021, venue: "ICLR", shelf: arch, sub: lin, builds_on: [transformer, rffu],
+  - { id: performer, name: "Performer", year: 2021, venue: "ICLR", shelf: arch, sub: attn, builds_on: [transformer, rffu, linattn],
       title: "Rethinking Attention with Performers",
       note: "Linear-time attention by approximating the softmax kernel with positive random features (FAVOR+)." }
   - { id: heads, name: "Pruning heads", year: 2019, venue: "ACL", shelf: arch, sub: interp, builds_on: [transformer],
@@ -166,22 +236,22 @@ papers:
   - { id: bertlook, name: "What BERT looks at", year: 2019, venue: "BlackboxNLP", shelf: arch, sub: interp, builds_on: [bert],
       title: "What Does BERT Look At? An Analysis of BERT’s Attention",
       note: "Attention heads track syntax and coreference; attention as a window into what was learned." }
-  - { id: mamba, name: "Mamba", year: 2023, venue: "arXiv", shelf: arch, sub: alt, builds_on: [transformer],
+  - { id: mamba, name: "Mamba", year: 2023, venue: "arXiv", shelf: arch, sub: attn, builds_on: [transformer],
       title: "Mamba: Linear-Time Sequence Modeling with Selective State Spaces",
       note: "Input-dependent state-space recurrence as a sub-quadratic alternative to attention." }
-  - { id: bpe, name: "BPE", year: 2016, venue: "ACL", shelf: lm, sub: tok, builds_on: [],
+  - { id: bpe, name: "BPE", year: 2016, venue: "ACL", shelf: pre, sub: tok, builds_on: [],
       title: "Neural Machine Translation of Rare Words with Subword Units",
       note: "Byte-pair merges give an open vocabulary of subwords. Still the default tokeniser." }
-  - { id: subreg, name: "Subword regularisation", year: 2018, venue: "ACL", shelf: lm, sub: tok, builds_on: [bpe],
+  - { id: subreg, name: "Subword regularisation", year: 2018, venue: "ACL", shelf: pre, sub: tok, builds_on: [bpe],
       title: "Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates",
       note: "Sample segmentations from a unigram LM at training time, as regularisation." }
-  - { id: spm, name: "SentencePiece", year: 2018, venue: "EMNLP", shelf: lm, sub: tok, builds_on: [bpe, subreg],
+  - { id: spm, name: "SentencePiece", year: 2018, venue: "EMNLP", shelf: pre, sub: tok, builds_on: [bpe, subreg],
       title: "SentencePiece: A Simple and Language Independent Subword Tokenizer and Detokenizer for Neural Text Processing",
       note: "Language-agnostic tokeniser trained from raw text; BPE and unigram in one tool." }
-  - { id: ulmfit, name: "ULMFiT", year: 2018, venue: "ACL", shelf: lm, sub: enc, builds_on: [],
+  - { id: ulmfit, name: "ULMFiT", year: 2018, venue: "ACL", shelf: lm, sub: enc, builds_on: [lstm],
       title: "Universal Language Model Fine-tuning for Text Classification",
       note: "Pretrain an LSTM language model, then fine-tune discriminatively. Transfer learning for NLP before BERT." }
-  - { id: bert, name: "BERT", year: 2019, venue: "NAACL", shelf: lm, sub: enc, builds_on: [transformer, ulmfit],
+  - { id: bert, name: "BERT", year: 2019, venue: "NAACL", shelf: lm, sub: enc, builds_on: [transformer, ulmfit, gpt1],
       title: "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
       note: "Masked LM plus next-sentence prediction; a bidirectional encoder you fine-tune per task." }
   - { id: roberta, name: "RoBERTa", year: 2019, venue: "arXiv", shelf: lm, sub: enc, builds_on: [bert],
@@ -190,93 +260,162 @@ papers:
   - { id: xlnet, name: "XLNet", year: 2019, venue: "NeurIPS", shelf: lm, sub: enc, builds_on: [bert, txl],
       title: "XLNet: Generalized Autoregressive Pretraining for Language Understanding",
       note: "Permutation language modelling over Transformer-XL; no [MASK] train/test mismatch." }
-  - { id: gpt2, name: "GPT-2", year: 2019, venue: "OpenAI report", shelf: lm, sub: dec, builds_on: [transformer, bpe],
+  - { id: gpt1, name: "GPT-1", year: 2018, venue: "OpenAI report", shelf: lm, sub: gpt, builds_on: [transformer],
+      title: "Improving Language Understanding by Generative Pre-Training",
+      note: "Pretrain a decoder on text, then fine-tune per task. The first of the GPT series and BERT's foil." }
+  - { id: gpt2, name: "GPT-2", year: 2019, venue: "OpenAI report", shelf: lm, sub: gpt, builds_on: [transformer, bpe, gpt1],
       title: "Language Models are Unsupervised Multitask Learners",
       note: "Decoder-only LM at 1.5B parameters; zero-shot task transfer appears with scale." }
-  - { id: gpt3, name: "GPT-3", year: 2020, venue: "NeurIPS", shelf: lm, sub: dec, builds_on: [gpt2],
+  - { id: gpt3, name: "GPT-3", year: 2020, venue: "NeurIPS", shelf: lm, sub: gpt, builds_on: [gpt2],
       title: "Language Models are Few-Shot Learners",
       note: "175B parameters; in-context few-shot learning with no gradient updates." }
-  - { id: llama, name: "LLaMA", year: 2023, venue: "arXiv", shelf: lm, sub: dec, builds_on: [chinchilla, gpt3],
+  - { id: llama, name: "LLaMA", year: 2023, venue: "arXiv", shelf: lm, sub: open, builds_on: [chinchilla, gpt3, rmsnorm, swiglu, rope],
       title: "LLaMA: Open and Efficient Foundation Language Models",
       note: "7B to 65B open weights trained on public data well past the Chinchilla-optimal token count." }
-  - { id: llmsurvey, name: "LLM survey", year: 2023, venue: "arXiv", shelf: lm, sub: dec, builds_on: [gpt3],
-      title: "A Survey of Large Language Models",
-      note: "Map of pretraining, adaptation, utilisation and evaluation of LLMs." }
+  - { id: mistral, name: "Mistral 7B", year: 2023, venue: "arXiv", shelf: lm, sub: open, builds_on: [llama, gqa],
+      title: "Mistral 7B",
+      note: "Sliding-window attention with a rolling KV buffer plus GQA; a 7B model that beats Llama 2 13B. Mixtral is this with experts." }
+  - { id: llama3, name: "Llama 3", year: 2024, venue: "arXiv", shelf: lm, sub: open, builds_on: [llama],
+      title: "The Llama 3 Herd of Models",
+      note: "Dense 8B to 405B models on 15T tokens, with a full account of data, scaling and post-training. The open reference point of 2024." }
+  - { id: dsv2, name: "DeepSeek-V2", year: 2024, venue: "arXiv", shelf: lm, sub: open, builds_on: [llama, mixtral, dsmoe],
+      title: "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model",
+      note: "Multi-head latent attention compresses the KV cache; fine-grained MoE with shared experts. The architecture V3 and R1 run on." }
+  - { id: dsv3, name: "DeepSeek-V3", year: 2024, venue: "arXiv", shelf: lm, sub: open, builds_on: [dsv2],
+      title: "DeepSeek-V3 Technical Report",
+      note: "671B-parameter MoE (37B active) trained in FP8 for a reported 2.8M GPU-hours, with auxiliary-loss-free load balancing and multi-token prediction." }
+  - { id: qwen25, name: "Qwen2.5", year: 2024, venue: "arXiv", shelf: lm, sub: open, builds_on: [llama],
+      title: "Qwen2.5 Technical Report",
+      note: "0.5B to 72B dense models on 18T tokens, plus the widely used open coder and math variants." }
+  - { id: qwen3, name: "Qwen3", year: 2025, venue: "arXiv", shelf: lm, sub: open, builds_on: [qwen25, r1, distill],
+      title: "Qwen3 Technical Report",
+      note: "Dense and MoE models with a switchable thinking mode, so one checkpoint serves both quick answers and long reasoning." }
   - { id: t5, name: "T5", year: 2020, venue: "JMLR", shelf: lm, sub: s2s, builds_on: [bert],
       title: "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer",
       note: "Every task as text-to-text; a systematic study of pretraining choices at scale." }
   - { id: bart, name: "BART", year: 2020, venue: "ACL", shelf: lm, sub: s2s, builds_on: [bert, gpt2],
       title: "BART: Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension",
       note: "Corrupt text, reconstruct it with an encoder-decoder. Strong for generation and summarisation." }
-  - { id: chinchilla, name: "Chinchilla", year: 2022, venue: "NeurIPS", shelf: scale, sub: laws, builds_on: [gpt3],
+  - { id: chinchilla, name: "Chinchilla", year: 2022, venue: "NeurIPS", shelf: pre, sub: laws, builds_on: [gpt3, kaplan],
       title: "Training Compute-Optimal Large Language Models",
       note: "Scale tokens with parameters, about 20 tokens per parameter. Gopher and GPT-3 were undertrained." }
-  - { id: flan, name: "FLAN", year: 2022, venue: "ICLR", shelf: scale, sub: align, builds_on: [gpt3, t5],
+  - { id: kaplan, name: "Scaling laws", year: 2020, venue: "arXiv", shelf: pre, sub: laws, builds_on: [gpt2],
+      title: "Scaling Laws for Neural Language Models",
+      note: "Loss falls as a power law in parameters, data and compute, and larger models are more sample-efficient. Chinchilla later corrects the data exponent." }
+  - { id: flan, name: "FLAN", year: 2022, venue: "ICLR", shelf: post, sub: sft, builds_on: [gpt3, t5],
       title: "Finetuned Language Models Are Zero-Shot Learners",
       note: "Instruction tuning on many tasks improves zero-shot performance on unseen ones." }
-  - { id: instructgpt, name: "InstructGPT", year: 2022, venue: "NeurIPS", shelf: scale, sub: align, builds_on: [gpt3],
+  - { id: instructgpt, name: "InstructGPT", year: 2022, venue: "NeurIPS", shelf: post, sub: sft, builds_on: [gpt3],
       title: "Training Language Models to Follow Instructions with Human Feedback",
       note: "SFT, then a reward model, then PPO (RLHF). A 1.3B model preferred over 175B GPT-3." }
-  - { id: r1, name: "DeepSeek-R1", year: 2025, venue: "arXiv", shelf: scale, sub: align, builds_on: [instructgpt, cot],
+  - { id: r1, name: "DeepSeek-R1", year: 2025, venue: "arXiv", shelf: post, sub: sft, builds_on: [instructgpt, cot, dsv3, distill],
       title: "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
       note: "RL with verifiable rewards (GRPO) elicits long chain-of-thought without SFT; then distilled into small models." }
-  - { id: ttc, name: "Test-time compute", year: 2024, venue: "arXiv", shelf: scale, sub: tts, builds_on: [cot, chinchilla],
+  - { id: selfcons, name: "Self-consistency", year: 2023, venue: "ICLR", shelf: tt, sub: tts, builds_on: [cot],
+      title: "Self-Consistency Improves Chain of Thought Reasoning in Language Models",
+      note: "Sample several chains and take the majority answer. The first test-time compute knob, years before o1." }
+  - { id: ttc, name: "Test-time compute", year: 2024, venue: "arXiv", shelf: tt, sub: tts, builds_on: [cot, chinchilla, selfcons],
       title: "Scaling LLM Test-Time Compute Optimally Can Be More Effective than Scaling Model Parameters",
       note: "Allocate inference compute (verifier search, revisions) per prompt difficulty; beats a 14× larger model on easy and medium prompts." }
-  - { id: smallttc, name: "1B vs 405B", year: 2025, venue: "arXiv", shelf: scale, sub: tts, builds_on: [ttc],
-      title: "Can 1B LLM Surpass 405B LLM? Rethinking Compute-Optimal Test-Time Scaling",
-      note: "With PRM-guided search a 1B model can beat 405B on MATH-500. The right strategy depends on policy, PRM and difficulty." }
-  - { id: flash, name: "FlashAttention", year: 2022, venue: "NeurIPS", shelf: eff, sub: kern, builds_on: [transformer],
+  - { id: flash, name: "FlashAttention", year: 2022, venue: "NeurIPS", shelf: sys, sub: serve, builds_on: [transformer],
       title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
       note: "Tile attention to fit SRAM and recompute in the backward pass. Exact attention without the O(n²) memory." }
-  - { id: gqa, name: "GQA", year: 2023, venue: "EMNLP", shelf: eff, sub: kern, builds_on: [transformer],
+  - { id: gqa, name: "GQA", year: 2023, venue: "EMNLP", shelf: arch, sub: attn, builds_on: [mqa],
       title: "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints",
       note: "Share KV heads across groups of query heads; shrinks the KV cache with little quality loss." }
-  - { id: paged, name: "PagedAttention", year: 2023, venue: "SOSP", shelf: eff, sub: serve, builds_on: [],
+  - { id: flash2, name: "FlashAttention-2", year: 2024, venue: "ICLR", shelf: sys, sub: serve, builds_on: [flash],
+      title: "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning",
+      note: "Fewer non-matmul FLOPs and a better split of work across warps and the sequence; about twice the speed of the original kernel." }
+  - { id: nsa, name: "Native Sparse Attention", year: 2025, venue: "ACL", shelf: arch, sub: attn, builds_on: [flash, dsv3],
+      title: "Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention",
+      note: "Compressed, selected and sliding-window attention branches trained end to end, with kernels that make the sparsity pay off." }
+  - { id: orca, name: "Orca", year: 2022, venue: "OSDI", shelf: sys, sub: serve, builds_on: [],
+      title: "Orca: A Distributed Serving System for Transformer-Based Generative Models",
+      note: "Schedule at the iteration, not the request, so finished sequences leave and new ones join the batch: continuous batching." }
+  - { id: paged, name: "PagedAttention", year: 2023, venue: "SOSP", shelf: sys, sub: serve, builds_on: [orca],
       title: "Efficient Memory Management for Large Language Model Serving with PagedAttention",
       note: "Virtual-memory-style paging for the KV cache (vLLM). Near-zero waste, 2 to 4× throughput." }
-  - { id: sarathi, name: "SARATHI", year: 2023, venue: "arXiv", shelf: eff, sub: serve, builds_on: [paged],
+  - { id: sarathi, name: "SARATHI", year: 2023, venue: "arXiv", shelf: sys, sub: serve, builds_on: [paged],
       title: "SARATHI: Efficient LLM Inference by Piggybacking Decodes with Chunked Prefills",
       note: "Chunk prefills and batch them with decodes so the GPU stays busy in both phases." }
-  - { id: specdec, name: "Speculative decoding", year: 2023, venue: "ICML", shelf: eff, sub: serve, builds_on: [transformer],
+  - { id: sglang, name: "SGLang", year: 2024, venue: "NeurIPS", shelf: sys, sub: serve, builds_on: [paged],
+      title: "SGLang: Efficient Execution of Structured Language Model Programs",
+      note: "RadixAttention keeps KV prefixes in a radix tree for automatic reuse; a frontend compiles structured generation." }
+  - { id: specdec, name: "Speculative decoding", year: 2023, venue: "ICML", shelf: sys, sub: serve, builds_on: [transformer],
       title: "Fast Inference from Transformers via Speculative Decoding",
       note: "Draft with a small model, verify in parallel with the large one. Exact sampling, 2 to 3× faster." }
-  - { id: int8, name: "LLM.int8()", year: 2022, venue: "NeurIPS", shelf: eff, sub: quant, builds_on: [transformer],
+  - { id: adapters, name: "Adapters", year: 2019, venue: "ICML", shelf: post, sub: peft, builds_on: [bert],
+      title: "Parameter-Efficient Transfer Learning for NLP",
+      note: "Small bottleneck layers inserted into a frozen BERT; near full fine-tuning at 3% of the parameters." }
+  - { id: prompttune, name: "Prompt tuning", year: 2021, venue: "EMNLP", shelf: post, sub: peft, builds_on: [t5],
+      title: "The Power of Scale for Parameter-Efficient Prompt Tuning",
+      note: "Learn a handful of soft input tokens with the model frozen; the gap to fine-tuning closes as the model grows." }
+  - { id: int8, name: "LLM.int8()", year: 2022, venue: "NeurIPS", shelf: sys, sub: quant, builds_on: [transformer],
       title: "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale",
       note: "Vector-wise int8 with outlier features kept in fp16; no degradation up to 175B." }
-  - { id: lora, name: "LoRA", year: 2022, venue: "ICLR", shelf: eff, sub: quant, builds_on: [gpt3],
+  - { id: lora, name: "LoRA", year: 2022, venue: "ICLR", shelf: post, sub: peft, builds_on: [gpt3, adapters, prompttune],
       title: "LoRA: Low-Rank Adaptation of Large Language Models",
       note: "Freeze the weights and train a low-rank ΔW. Ten-thousand-fold fewer trainable parameters." }
-  - { id: qlora, name: "QLoRA", year: 2023, venue: "NeurIPS", shelf: eff, sub: quant, builds_on: [lora, int8, llama],
+  - { id: qlora, name: "QLoRA", year: 2023, venue: "NeurIPS", shelf: post, sub: peft, builds_on: [lora, int8, llama],
       title: "QLoRA: Efficient Finetuning of Quantized LLMs",
       note: "4-bit NormalFloat base weights plus LoRA adapters; fine-tune 65B on one 48GB GPU." }
-  - { id: mixtral, name: "Mixtral", year: 2024, venue: "arXiv", shelf: eff, sub: moe, builds_on: [llama],
+  - { id: gptq, name: "GPTQ", year: 2023, venue: "ICLR", shelf: sys, sub: quant, builds_on: [int8],
+      title: "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers",
+      note: "One-shot 3–4-bit weight quantisation using second-order error compensation. Made 175B fit on a single GPU." }
+  - { id: awq, name: "AWQ", year: 2024, venue: "MLSys", shelf: sys, sub: quant, builds_on: [gptq],
+      title: "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration",
+      note: "Protect the 1% of weights with large activations by scaling them before 4-bit rounding. No backprop, no calibration overfit." }
+  - { id: moe, name: "Sparsely-gated MoE", year: 2017, venue: "ICLR", shelf: sys, sub: moe, builds_on: [lstm],
+      title: "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer",
+      note: "A gating network routes each token to a few of thousands of experts, so parameters grow without compute. First shown inside LSTM language models." }
+  - { id: switch, name: "Switch Transformer", year: 2022, venue: "JMLR", shelf: sys, sub: moe, builds_on: [moe, t5],
+      title: "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity",
+      note: "Route each token to a single expert in the FFN, with a load-balancing loss. The MoE recipe Mixtral and DeepSeek refine." }
+  - { id: dsmoe, name: "DeepSeekMoE", year: 2024, venue: "ACL", shelf: sys, sub: moe, builds_on: [switch],
+      title: "DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models",
+      note: "Many fine-grained experts plus a few always-on shared ones. The MoE layout DeepSeek-V2 and V3 scale up." }
+  - { id: mixtral, name: "Mixtral", year: 2024, venue: "arXiv", shelf: lm, sub: open, builds_on: [llama, switch, mistral],
       title: "Mixtral of Experts",
       note: "Sparse mixture of experts: 8 experts, 2 routed per token, 13B active of 47B." }
-  - { id: cot, name: "Chain-of-Thought", year: 2022, venue: "NeurIPS", shelf: reason, sub: cot, builds_on: [gpt3],
+  - { id: mixedprec, name: "Mixed precision", year: 2018, venue: "ICLR", shelf: sys, sub: quant, builds_on: [],
+      title: "Mixed Precision Training",
+      note: "FP16 weights and activations with an FP32 master copy and loss scaling. Halves memory with no loss in accuracy; the start of low-precision training." }
+  - { id: cot, name: "Chain-of-Thought", year: 2022, venue: "NeurIPS", shelf: tt, sub: cot, builds_on: [gpt3],
       title: "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models",
       note: "Few-shot exemplars with intermediate steps. Reasoning gains appear around 100B parameters." }
-  - { id: cotwhy, name: "What matters in CoT", year: 2023, venue: "ACL", shelf: reason, sub: cot, builds_on: [cot],
+  - { id: zscot, name: "Zero-shot CoT", year: 2022, venue: "NeurIPS", shelf: tt, sub: cot, builds_on: [cot],
+      title: "Large Language Models are Zero-Shot Reasoners",
+      note: "Append “Let's think step by step” and reasoning appears without exemplars. The prompt that made CoT the default." }
+  - { id: cotwhy, name: "What matters in CoT", year: 2023, venue: "ACL", shelf: tt, sub: cot, builds_on: [cot],
       title: "Towards Understanding Chain-of-Thought Prompting: An Empirical Study of What Matters",
       note: "Invalid rationales barely hurt; relevance to the query and correct ordering of steps matter." }
-  - { id: cotunf, name: "Unfaithful CoT", year: 2023, venue: "NeurIPS", shelf: reason, sub: cot, builds_on: [cot],
+  - { id: cotunf, name: "Unfaithful CoT", year: 2023, venue: "NeurIPS", shelf: tt, sub: cot, builds_on: [cot],
       title: "Language Models Don’t Always Say What They Think: Unfaithful Explanations in Chain-of-Thought Prompting",
       note: "CoT explanations can be driven by biasing features the model never mentions." }
-  - { id: tot, name: "Tree of Thoughts", year: 2023, venue: "NeurIPS", shelf: reason, sub: cot, builds_on: [cot],
+  - { id: tot, name: "Tree of Thoughts", year: 2023, venue: "NeurIPS", shelf: tt, sub: cot, builds_on: [cot],
       title: "Tree of Thoughts: Deliberate Problem Solving with Large Language Models",
       note: "Search over branching thoughts with self-evaluation. Game of 24: 4% to 74%." }
-  - { id: react, name: "ReAct", year: 2023, venue: "ICLR", shelf: reason, sub: agent, builds_on: [cot],
+  - { id: react, name: "ReAct", year: 2023, venue: "ICLR", shelf: tt, sub: agent, builds_on: [cot],
       title: "ReAct: Synergizing Reasoning and Acting in Language Models",
       note: "Interleave reasoning traces with tool actions and observations. The agent loop." }
-  - { id: tau, name: "τ-bench", year: 2024, venue: "arXiv", shelf: reason, sub: agent, builds_on: [react],
+  - { id: reflexion, name: "Reflexion", year: 2023, venue: "NeurIPS", shelf: tt, sub: agent, builds_on: [react],
+      title: "Reflexion: Language Agents with Verbal Reinforcement Learning",
+      note: "After a failed episode the agent writes a critique into memory and retries. Learning across trials without gradient updates." }
+  - { id: sweagent, name: "SWE-agent", year: 2024, venue: "NeurIPS", shelf: tt, sub: agent, builds_on: [react],
+      title: "SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering",
+      note: "Designs the interface the agent sees (file viewer, search, edit) and shows it matters as much as the model. Companion to SWE-bench." }
+  - { id: tau, name: "τ-bench", year: 2024, venue: "arXiv", shelf: tt, sub: agent, builds_on: [react],
       title: "τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains",
       note: "Agents with tools and simulated users under domain policies; pass^k shows reliability is low." }
-  - { id: aaj, name: "Agent-as-a-Judge", year: 2024, venue: "arXiv", shelf: reason, sub: agent, builds_on: [react],
+  - { id: aaj, name: "Agent-as-a-Judge", year: 2024, venue: "arXiv", shelf: tt, sub: agent, builds_on: [react],
       title: "Agent-as-a-Judge: Evaluate Agents with Agents",
       note: "Agentic evaluators judge agentic systems step by step; the DevAI benchmark." }
-  - { id: pte, name: "Plan-Then-Execute", year: 2025, venue: "CHI", shelf: reason, sub: agent, builds_on: [react],
+  - { id: pte, name: "Plan-Then-Execute", year: 2025, venue: "CHI", shelf: tt, sub: agent, builds_on: [react],
       title: "Plan-Then-Execute: An Empirical Study of User Trust and Team Performance When Using LLM Agents",
       note: "How user involvement at planning time changes trust and team performance with agents." }
+  - { id: toolformer, name: "Toolformer", year: 2023, venue: "NeurIPS", shelf: tt, sub: agent, builds_on: [gpt3],
+      title: "Toolformer: Language Models Can Teach Themselves to Use Tools",
+      note: "The model annotates its own training text with API calls, keeps the ones that lower the loss, and learns when to call a calculator, search or calendar." }
   - { id: facenet, name: "FaceNet", year: 2015, venue: "CVPR", shelf: embed, sub: contrast, builds_on: [],
       title: "FaceNet: A Unified Embedding for Face Recognition and Clustering",
       note: "Triplet loss into a 128-d embedding. Metric learning for recognition by nearest neighbour." }
@@ -301,10 +440,10 @@ papers:
   - { id: simcse, name: "SimCSE", year: 2021, venue: "EMNLP", shelf: embed, sub: sent, builds_on: [alun, sbert, bertflow],
       title: "SimCSE: Simple Contrastive Learning of Sentence Embeddings",
       note: "Dropout noise as the augmentation; unsupervised contrastive sentence embeddings." }
-  - { id: eda, name: "EDA", year: 2019, venue: "EMNLP", shelf: embed, sub: aug, builds_on: [],
+  - { id: eda, name: "EDA", year: 2019, venue: "EMNLP", shelf: embed, sub: sent, builds_on: [],
       title: "EDA: Easy Data Augmentation Techniques for Boosting Performance on Text Classification Tasks",
       note: "Synonym replacement, random insert, swap and delete. Cheap gains in low-data regimes." }
-  - { id: augsbert, name: "Augmented SBERT", year: 2021, venue: "NAACL", shelf: embed, sub: aug, builds_on: [sbert, eda],
+  - { id: augsbert, name: "Augmented SBERT", year: 2021, venue: "NAACL", shelf: embed, sub: sent, builds_on: [sbert, eda],
       title: "Augmented SBERT: Data Augmentation Method for Improving Bi-Encoders for Pairwise Sentence Scoring Tasks",
       note: "A cross-encoder labels silver pairs to train the bi-encoder." }
   - { id: vec2text, name: "Vec2Text", year: 2023, venue: "EMNLP", shelf: embed, sub: geo, builds_on: [t5],
@@ -334,7 +473,7 @@ papers:
   - { id: lit, name: "LiT", year: 2022, venue: "CVPR", shelf: vision, sub: mm, builds_on: [clip],
       title: "LiT: Zero-Shot Transfer with Locked-image text Tuning",
       note: "Freeze a pretrained image tower and train only the text tower." }
-  - { id: dalle, name: "DALL·E", year: 2021, venue: "ICML", shelf: vision, sub: mm, builds_on: [gpt3],
+  - { id: dalle, name: "DALL·E", year: 2021, venue: "ICML", shelf: vision, sub: mm, builds_on: [gpt3, vae],
       title: "Zero-Shot Text-to-Image Generation",
       note: "A 12B autoregressive transformer over text and dVAE image tokens; CLIP reranks the samples." }
   - { id: pq, name: "PQ", year: 2011, venue: "IEEE TPAMI", shelf: retr, sub: ann, builds_on: [],
@@ -349,12 +488,18 @@ papers:
   - { id: faiss, name: "Faiss", year: 2019, venue: "IEEE TBD", shelf: retr, sub: ann, builds_on: [pq, opq, hnsw],
       title: "Billion-Scale Similarity Search with GPUs",
       note: "GPU k-selection and IVF-PQ indexes at billion scale." }
-  - { id: dpr, name: "DPR", year: 2020, venue: "EMNLP", shelf: retr, sub: dense, builds_on: [bert, faiss],
+  - { id: bm25, name: "BM25", year: 2009, venue: "Found. Trends IR", shelf: retr, sub: rag, builds_on: [],
+      title: "The Probabilistic Relevance Framework: BM25 and Beyond",
+      note: "Term-frequency saturation and length normalisation from the probabilistic model. The baseline dense retrieval still has to beat." }
+  - { id: dpr, name: "DPR", year: 2020, venue: "EMNLP", shelf: retr, sub: rag, builds_on: [bert, faiss, bm25],
       title: "Dense Passage Retrieval for Open-Domain Question Answering",
       note: "Dual BERT encoders with in-batch negatives; dense beats BM25 for open-domain QA." }
-  - { id: rag, name: "RAG", year: 2020, venue: "NeurIPS", shelf: retr, sub: dense, builds_on: [dpr, bart],
+  - { id: rag, name: "RAG", year: 2020, venue: "NeurIPS", shelf: retr, sub: rag, builds_on: [dpr, bart],
       title: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
       note: "A DPR retriever and a BART generator trained end to end." }
+  - { id: litm, name: "Lost in the middle", year: 2024, venue: "TACL", shelf: retr, sub: rag, builds_on: [rag],
+      title: "Lost in the Middle: How Language Models Use Long Contexts",
+      note: "Accuracy is highest when the relevant passage comes first or last and dips in the middle. Passage order matters even with a long context." }
   - { id: implicitcf, name: "Implicit-feedback CF", year: 2008, venue: "ICDM", shelf: rec, sub: cf, builds_on: [],
       title: "Collaborative Filtering for Implicit Feedback Datasets",
       note: "Confidence-weighted ALS over implicit signals such as views and purchases." }
@@ -382,30 +527,27 @@ papers:
   - { id: ytdnn, name: "YouTube DNN", year: 2016, venue: "RecSys", shelf: rec, sub: indus, builds_on: [yt2010, mf],
       title: "Deep Neural Networks for YouTube Recommendations",
       note: "Two stages, candidate generation then ranking, both DNNs. The example-age feature." }
-  - { id: recsurvey, name: "DL RecSys survey", year: 2019, venue: "ACM CSUR", shelf: rec, sub: indus, builds_on: [ytdnn, deepfm],
-      title: "Deep Learning Based Recommender System: A Survey and New Perspectives",
-      note: "A taxonomy of deep recommender models." }
-  - { id: kt, name: "Knowledge tracing", year: 2022, venue: "AAAI", shelf: rec, sub: user, builds_on: [],
+  - { id: kt, name: "Knowledge tracing", year: 2022, venue: "AAAI", shelf: rec, sub: indus, builds_on: [],
       title: "Multi-Task Learning of Knowledge Tracing and Option Tracing for Better Student Assessment",
       note: "Jointly predict correctness and the chosen option. Sequential student modelling." }
-  - { id: sharp, name: "Sharp minima", year: 2017, venue: "ICLR", shelf: optim, sub: batch, builds_on: [],
+  - { id: sharp, name: "Sharp minima", year: 2017, venue: "ICLR", shelf: pre, sub: lr, builds_on: [],
       title: "On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima",
       note: "Large batches converge to sharp minima that generalise worse." }
-  - { id: trainlonger, name: "Train longer", year: 2017, venue: "NeurIPS", shelf: optim, sub: batch, builds_on: [sharp],
+  - { id: trainlonger, name: "Train longer", year: 2017, venue: "NeurIPS", shelf: pre, sub: lr, builds_on: [sharp],
       title: "Train Longer, Generalize Better: Closing the Generalization Gap in Large Batch Training of Neural Networks",
       note: "The gap comes from fewer updates; adapt the schedule and use ghost batch norm." }
-  - { id: dontdecay, name: "Don’t decay the LR", year: 2018, venue: "ICLR", shelf: optim, sub: batch, builds_on: [sharp, trainlonger],
+  - { id: dontdecay, name: "Don’t decay the LR", year: 2018, venue: "ICLR", shelf: pre, sub: lr, builds_on: [sharp, trainlonger],
       title: "Don’t Decay the Learning Rate, Increase the Batch Size",
       note: "Increasing the batch size mirrors learning-rate decay through the gradient noise scale." }
-  - { id: landscape, name: "Loss landscape", year: 2018, venue: "NeurIPS", shelf: optim, sub: batch, builds_on: [sharp],
+  - { id: landscape, name: "Loss landscape", year: 2018, venue: "NeurIPS", shelf: pre, sub: lr, builds_on: [sharp],
       title: "Visualizing the Loss Landscape of Neural Nets",
       note: "Filter-normalised 2-D slices; skip connections flatten the landscape." }
-  - { id: adamw, name: "AdamW", year: 2019, venue: "ICLR", shelf: optim, sub: reg, builds_on: [],
+  - { id: adamw, name: "AdamW", year: 2019, venue: "ICLR", shelf: pre, sub: opt, builds_on: [adam],
       title: "Decoupled Weight Decay Regularization",
       note: "Weight decay is not L2 under Adam; decouple it from the gradient step." }
-  - { id: bn, name: "BatchNorm & optimisation", year: 2018, venue: "NeurIPS", shelf: optim, sub: reg, builds_on: [],
+  - { id: bn, name: "BatchNorm & optimisation", year: 2018, venue: "NeurIPS", shelf: pre, sub: reg, builds_on: [batchnorm],
       title: "How Does Batch Normalization Help Optimization?",
       note: "Not internal covariate shift. BatchNorm smooths the loss landscape." }
-  - { id: ls, name: "Label smoothing", year: 2019, venue: "NeurIPS", shelf: optim, sub: reg, builds_on: [],
+  - { id: ls, name: "Label smoothing", year: 2019, venue: "NeurIPS", shelf: pre, sub: reg, builds_on: [],
       title: "When Does Label Smoothing Help?",
       note: "Tightens class clusters in the penultimate layer; hurts knowledge distillation." }

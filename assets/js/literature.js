@@ -1,4 +1,4 @@
-// 301. ml literature: a WinHelp-style reader inside the post window.
+// 301. papers: a WinHelp-style reader inside the post window.
 // Contents lists venue types and venues as books and papers as pages; the
 // right pane shows the overview, one book, or one paper. View ▸ Timeline and View ▸ Lineage
 // redraw the current selection laid out by subject shelf; Lineage fetches d3
@@ -96,7 +96,7 @@
 		const on = $('.lit-tree .lit-row.on');
 		if (on) on.scrollIntoView({ block: 'nearest' });
 		// breadcrumb: every segment but the last is a link, so it does Up's job
-		const path = [['ml literature', 'data-act="root"']];
+		const path = [['papers', 'data-act="root"']];
 		if (parent) path.push([books[parent].label, 'data-group="' + esc(parent) + '"']);
 		if (lead) path.push([books[lead].label, 'data-group="' + esc(lead) + '"']);
 		if (p) path.push([papers[p].name, '']);
@@ -208,7 +208,14 @@
 
 	// ---- Timeline: one lane per shelf, one column per year ------------------------------
 	function makeTimeline() {
-		const Y0 = 2008, Y1 = 2025, CW = 100, CHW = 92, CHH = 14, GAP = 3, PAD = 6;
+		const CW = 100, GW = 36, CHW = 92, CHH = 14, GAP = 3, PAD = 6;
+		// one column per year that has a paper; a run of empty years collapses to one narrow gap column
+		const years = [...new Set(data.papers.map(p => p.year))].sort((a, b) => a - b), cols = [], colX = {};
+		let W = 0;
+		years.forEach((yr, i) => {
+			if (i && yr - years[i - 1] > 1) { cols.push({ label: '…', x: W, w: GW }); W += GW; }
+			cols.push({ label: yr, x: W, w: CW }); colX[yr] = W; W += CW;
+		});
 		const NS = 'http://www.w3.org/2000/svg';
 		const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k])); parent.appendChild(n); return n; };
 		const view = $('.lit-tl'), box = $('.lit-tlscroll', view), svg = $('svg', view);
@@ -219,21 +226,20 @@
 			data.papers.filter(p => p.shelf === s.id).sort(byYear).forEach(p => { (cells[p.year] = cells[p.year] || []).push(p); });
 			const rows = Math.max(1, ...Object.values(cells).map(c => c.length));
 			const h = PAD * 2 + rows * (CHH + GAP) - GAP;
-			Object.values(cells).forEach(c => c.forEach((p, i) => { pos[p.id] = { x: (p.year - Y0) * CW + (CW - CHW) / 2, y: y + PAD + i * (CHH + GAP) }; }));
+			Object.values(cells).forEach(c => c.forEach((p, i) => { pos[p.id] = { x: colX[p.year] + (CW - CHW) / 2, y: y + PAD + i * (CHH + GAP) }; }));
 			lanes += '<div class="lit-lane" style="height:' + h + 'px"><i class="lit-sw" style="background:' + s.color + '"></i>' + esc(s.short) + '</div>';
 			laneTop[s.id] = y;
 			y += h;
 		});
 		$('.lit-lanes', view).innerHTML = lanes;
-		const W = (Y1 - Y0 + 1) * CW, H = y;
-		let rul = '';
-		for (let yr = Y0; yr <= Y1; yr++) rul += '<span style="left:' + (yr - Y0) * CW + 'px;width:' + CW + 'px">' + yr + '</span>';
+		const H = y;
+		const rul = cols.map(c => '<span style="left:' + c.x + 'px;width:' + c.w + 'px">' + c.label + '</span>').join('');
 		const rulEl = $('.lit-rul', view);
 		rulEl.innerHTML = rul;
 		rulEl.style.width = W + 'px';
 		svg.setAttribute('width', W);
 		svg.setAttribute('height', H);
-		for (let yr = Y0; yr <= Y1 + 1; yr++) el('line', { class: 'ycol', x1: (yr - Y0) * CW, x2: (yr - Y0) * CW, y1: 0, y2: H }, svg);
+		cols.concat([{ x: W }]).forEach(c => el('line', { class: 'ycol', x1: c.x, x2: c.x, y1: 0, y2: H }, svg));
 		Object.values(laneTop).slice(1).forEach(t => el('line', { class: 'ycol', x1: 0, x2: W, y1: t - 0.5, y2: t - 0.5 }, svg));
 		const edges = [];
 		data.papers.forEach(p => p.builds_on.forEach(o => {

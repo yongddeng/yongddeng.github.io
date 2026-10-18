@@ -232,6 +232,13 @@ body {
 			height: 34px;
 		}
 
+		// The tree fills its 32px bitmap edge to edge; take it down a notch and keep the baseline
+		img[src$="tree.png"] {
+			width: 30px;
+			height: 30px;
+			margin-top: 2px;
+		}
+
 		// Wide emoji: keep its natural aspect at icon height
 		img[src$="aubergine.png"] {
 			width: auto;
