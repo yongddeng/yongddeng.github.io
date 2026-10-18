@@ -111,8 +111,10 @@
 		li.querySelector('use').setAttribute('href', open ? '#lit-bookopen' : '#lit-book');
 	}
 
-	// one handler for Contents rows, page links, breadcrumb and figure boxes
-	function onPick(e) {
+	// one handler for the toolbar buttons, Contents rows, page links, breadcrumb and figure boxes
+	root.addEventListener('click', e => {
+		const b = e.target.closest('[data-act]');
+		if (b) { if (!b.disabled) actions[b.dataset.act](); return; }
 		const el = e.target.closest('[data-paper], [data-group]');
 		if (!el) return;
 		if (el.dataset.paper) { openPaper(el.dataset.paper); return; }
@@ -122,11 +124,6 @@
 			return;
 		}
 		go(el.dataset.group, null);
-	}
-	root.addEventListener('click', onPick);
-	root.addEventListener('click', e => {
-		const b = e.target.closest('[data-act]');
-		if (b && !b.disabled) actions[b.dataset.act]();
 	});
 
 	// ---- pages -------------------------------------------------------------------
@@ -144,7 +141,7 @@
 	const paperList = ids => '<ul class="lit-list">' + ids.map(id => {
 		const p = papers[id];
 		return '<li>' + ico('lit-page') + '<span class="lit-link" data-paper="' + p.id + '">' + esc(p.name)
-			+ '</span> <span class="lit-yv">' + p.year + ' · ' + swatch(shelves[p.shelf]) + esc(shelves[p.shelf].short) + '</span>'
+			+ '</span> <span class="lit-yv">' + p.year + ' · ' + swatch(shelves[p.shelf]) + esc(shelves[p.shelf].short || shelves[p.shelf].label) + '</span>'
 			+ '<span class="lit-note">' + esc(p.note) + '</span></li>';
 	}).join('') + '</ul>';
 	function bookPage(key) {
@@ -227,7 +224,7 @@
 			const rows = Math.max(1, ...Object.values(cells).map(c => c.length));
 			const h = PAD * 2 + rows * (CHH + GAP) - GAP;
 			Object.values(cells).forEach(c => c.forEach((p, i) => { pos[p.id] = { x: colX[p.year] + (CW - CHW) / 2, y: y + PAD + i * (CHH + GAP) }; }));
-			lanes += '<div class="lit-lane" style="height:' + h + 'px"><i class="lit-sw" style="background:' + s.color + '"></i>' + esc(s.short) + '</div>';
+			lanes += '<div class="lit-lane" style="height:' + h + 'px"><i class="lit-sw" style="background:' + s.color + '"></i>' + esc(s.short || s.label) + '</div>';
 			laneTop[s.id] = y;
 			y += h;
 		});

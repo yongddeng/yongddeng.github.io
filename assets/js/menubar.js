@@ -38,7 +38,9 @@
 		openFlyItem = item;
 	}
 
-	// The outline is built lazily on first open, one entry per h2/h3
+	// The outline is built lazily on first open, one entry per h2/h3.
+	// A post may fill it first with entries of its own (literature.js
+	// lists its views); a non-empty dropdown is left alone.
 	function buildOutline(win) {
 		var drop = win.querySelector('.tb-outline');
 		if (!drop || drop.childNodes.length) return;

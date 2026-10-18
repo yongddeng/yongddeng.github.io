@@ -1,13 +1,11 @@
 # 301. papers — papers, shelves and builds-on links.
-# shelves group papers by subject (used by the Timeline and Lineage views);
+# shelves group papers by subject (used by the Timeline and Lineage views); short, when given, is the narrow lane label;
 # venues, grouped by type, are the Contents books; each paper lists the ids it builds on (builds_on).
 
 shelves:
   - id: arch
     label: "Architecture"
-    short: "Architecture"
     color: "#000080"
-    blurb: "Recurrence and seq2seq, the Transformer and the pieces of its block, how positions are encoded, and the cheaper attentions and alternatives since."
     subs:
       - { id: seq, label: "Recurrence & seq2seq" }
       - { id: block, label: "The Transformer block" }
@@ -16,9 +14,7 @@ shelves:
       - { id: interp, label: "Analysis" }
   - id: pre
     label: "Pre-training"
-    short: "Pre-training"
     color: "#606060"
-    blurb: "What goes into training from scratch: tokenisers, optimisers, batch size and schedules, regularisation, and the laws that say how big to go."
     subs:
       - { id: tok, label: "Tokenisation" }
       - { id: opt, label: "Optimisers" }
@@ -29,7 +25,6 @@ shelves:
     label: "Language Models"
     short: "LMs"
     color: "#800000"
-    blurb: "The pretrained models themselves, from ULMFiT and BERT through the GPT series to the open models of 2023–25."
     subs:
       - { id: enc, label: "Encoders & transfer" }
       - { id: s2s, label: "Encoder-decoders" }
@@ -39,24 +34,19 @@ shelves:
     label: "Systems & Efficiency"
     short: "Systems"
     color: "#008080"
-    blurb: "Making training and serving cheap: IO-aware kernels, continuous batching and KV paging, speculation, low precision, quantisation, distillation, experts."
     subs:
       - { id: serve, label: "Kernels & serving" }
       - { id: quant, label: "Precision, quantisation & distillation" }
       - { id: moe, label: "Mixture of experts" }
   - id: post
     label: "Post-training"
-    short: "Post-training"
     color: "#800080"
-    blurb: "Turning a pretrained model into an assistant: instruction tuning, RLHF and RL for reasoning, and adapters that do it with few parameters."
     subs:
       - { id: sft, label: "Instruction tuning & RLHF" }
       - { id: peft, label: "Parameter-efficient fine-tuning" }
   - id: tt
     label: "Test-time"
-    short: "Test-time"
     color: "#b05a00"
-    blurb: "Spending compute on a frozen model: chain-of-thought prompting and its faithfulness, sampling and search at test time, and agents acting with tools."
     subs:
       - { id: cot, label: "Chain of thought" }
       - { id: tts, label: "Test-time scaling" }
@@ -65,7 +55,6 @@ shelves:
     label: "Representation Learning"
     short: "Embeddings"
     color: "#007000"
-    blurb: "Word vectors, contrastive objectives, sentence vectors, their geometry, and what can be read back out of them."
     subs:
       - { id: wv, label: "Word vectors" }
       - { id: contrast, label: "Contrastive losses" }
@@ -75,7 +64,6 @@ shelves:
     label: "Vision & Multimodal"
     short: "Vision"
     color: "#707000"
-    blurb: "Conv nets, transformers on image patches, GANs and VAEs, and image–text models trained on captions."
     subs:
       - { id: cnn, label: "Conv nets" }
       - { id: vit, label: "Image transformers" }
@@ -83,9 +71,7 @@ shelves:
       - { id: mm, label: "Vision–language" }
   - id: retr
     label: "Retrieval"
-    short: "Retrieval"
     color: "#0062b8"
-    blurb: "Quantised and graph indexes for nearest neighbours, and sparse and dense retrievers feeding generators."
     subs:
       - { id: ann, label: "Approximate NN" }
       - { id: rag, label: "Retrieval & RAG" }
@@ -93,7 +79,6 @@ shelves:
     label: "Recommender Systems"
     short: "RecSys"
     color: "#b0186a"
-    blurb: "From matrix factorisation and pairwise ranking to deep CTR models and industrial two-stage systems."
     subs:
       - { id: cf, label: "Collab. filtering" }
       - { id: ctr, label: "CTR prediction" }
