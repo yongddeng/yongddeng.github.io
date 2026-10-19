@@ -220,8 +220,9 @@
 		const NS = 'http://www.w3.org/2000/svg';
 		const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k])); parent.appendChild(n); return n; };
 		const view = $('.lit-tl'), box = $('.lit-tlscroll', view), svg = $('svg', view);
+		view.classList.add('nolinks'); // links are off until asked for: chips by year first
 		const pos = {}, laneTop = {};
-		let y = 0, lanes = '<div class="lit-lane lit-ruler"><button type="button" class="lit-btn" data-act="oldest" title="First year">&#9666;&#9666;</button><button type="button" class="lit-btn" data-act="newest" title="Last year">&#9656;&#9656;</button><button type="button" class="lit-btn on" data-act="links" title="Show or hide the builds-on links">links</button></div>'; // the corner cell holds the scroll and link buttons
+		let y = 0, lanes = '<div class="lit-lane lit-ruler"><button type="button" class="lit-btn" data-act="oldest" title="First year">&#9666;&#9666;</button><button type="button" class="lit-btn" data-act="newest" title="Last year">&#9656;&#9656;</button><button type="button" class="lit-btn" data-act="links" title="Show or hide the builds-on links">links</button></div>'; // the corner cell holds the scroll and link buttons
 		data.shelves.forEach(s => {
 			const cells = {};
 			data.papers.filter(p => p.shelf === s.id).sort(byYear).forEach(p => { (cells[p.year] = cells[p.year] || []).push(p); });
