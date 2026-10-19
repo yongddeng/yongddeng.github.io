@@ -17,6 +17,11 @@
 		var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
 			acceptNode: function (node) {
 				var el = node.parentElement;
+				// An HTML span cannot sit inside SVG text, so wrapping a chart label erases it
+				if (el instanceof SVGElement) return NodeFilter.FILTER_REJECT;
+				// Skip what is not on screen (a closed list, a hidden pane); a folded
+				// section is [hidden] too, and the jump opens it, so it stays
+				if (!el.getClientRects().length && !el.closest('[hidden]')) return NodeFilter.FILTER_REJECT;
 				while (el && el !== root) {
 					// Leave rendered maths alone; wrapping its text breaks layout
 					if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.tagName.indexOf('MJX-') === 0) {
