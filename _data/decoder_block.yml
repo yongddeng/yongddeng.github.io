@@ -1,0 +1,417 @@
+# 302. decoder block — sixteen models, each with its parent in the family tree, and the versions of each part.
+# Numbers come from each paper's configuration table; the KV cache per token is computed from them in the browser.
+# attn: mha | mqa | gqa | window | mla | hybrid.  pos: sin | learned | rope | rope-dec | rope-partial | none.  norm: LN | RMS | RMS0.
+
+models:
+  - id: tf
+    name: Transformer
+    date: Jun 2017
+    org: Google
+    paper: Attention Is All You Need
+    parent:
+    layers: 6
+    width: 512
+    heads: 8
+    kv_heads: 8
+    head_dim: 64
+    attn: mha
+    pos: sin
+    norm: LN
+    pre: false
+    xattn: true
+    ffn: { kind: dense, act: ReLU, dff: 2048, ratio: "4" }
+    vocab: { n: 37000, tok: BPE, shared }
+    ctx: 512
+    params: 0.065
+    why: An encoder-decoder for translation. Its decoder half, masked self-attention then an MLP with a residual path around each, is the block every model here keeps.
+  - id: gpt1
+    name: GPT-1
+    date: Jun 2018
+    org: OpenAI
+    paper: Improving Language Understanding by Generative Pre-Training
+    parent: tf
+    layers: 12
+    width: 768
+    heads: 12
+    kv_heads: 12
+    head_dim: 64
+    attn: mha
+    pos: learned
+    norm: LN
+    pre: false
+    ffn: { kind: dense, act: GELU, dff: 3072, ratio: "4" }
+    vocab: { n: 40478, tok: BPE }
+    ctx: 512
+    params: 0.117
+    why: Keep the decoder, drop the encoder and the cross-attention that read it. Pre-train on next-token prediction over 7,000 books, then fine-tune once per task.
+  - id: gpt2
+    name: GPT-2
+    date: Feb 2019
+    org: OpenAI
+    paper: Language Models are Unsupervised Multitask Learners
+    parent: gpt1
+    layers: 48
+    width: 1600
+    heads: 25
+    kv_heads: 25
+    head_dim: 64
+    attn: mha
+    pos: learned
+    norm: LN
+    pre: true
+    ffn: { kind: dense, act: GELU, dff: 6400, ratio: "4" }
+    vocab: { n: 50257, tok: byte-level BPE }
+    ctx: 1024
+    params: 1.5
+    why: LayerNorm moves to the input of each sub-block, with one more after the last layer, so the residual path itself is never normalised. Deep stacks train stably; every later model keeps this.
+  - id: palm
+    name: PaLM
+    date: Apr 2022
+    org: Google
+    paper: "PaLM: Scaling Language Modeling with Pathways"
+    parent: gpt2
+    layers: 118
+    width: 18432
+    heads: 48
+    kv_heads: 1
+    head_dim: 256
+    attn: mqa
+    pos: rope
+    norm: LN
+    pre: true
+    par: true
+    ffn: { kind: dense, act: SwiGLU, dff: 73728, ratio: "4" }
+    vocab: { n: 256000, tok: SentencePiece }
+    ctx: 2048
+    params: 540
+    why: SwiGLU, rotary positions, no bias terms, and one KV head shared by all 48 query heads. Attention and the MLP read the same normalised input side by side, which is 15% faster at 540B.
+  - id: llama
+    name: LLaMA
+    date: Feb 2023
+    org: Meta
+    paper: "LLaMA: Open and Efficient Foundation Language Models"
+    parent: gpt2
+    layers: 80
+    width: 8192
+    heads: 64
+    kv_heads: 64
+    head_dim: 128
+    attn: mha
+    pos: rope
+    norm: RMS
+    pre: true
+    ffn: { kind: dense, act: SwiGLU, dff: 22016, ratio: "2.7" }
+    vocab: { n: 32000, tok: SentencePiece BPE }
+    ctx: 2048
+    params: 65
+    why: "Three swaps that stuck: RMSNorm, SwiGLU and RoPE, with the biases removed. Trained on 1.4T public tokens, and every open family since starts from this block."
+  - id: llama2
+    name: Llama 2
+    date: Jul 2023
+    org: Meta
+    paper: "Llama 2: Open Foundation and Fine-Tuned Chat Models"
+    parent: llama
+    layers: 80
+    width: 8192
+    heads: 64
+    kv_heads: 8
+    head_dim: 128
+    attn: gqa
+    pos: rope
+    norm: RMS
+    pre: true
+    ffn: { kind: dense, act: SwiGLU, dff: 28672, ratio: "3.5" }
+    vocab: { n: 32000, tok: SentencePiece BPE }
+    ctx: 4096
+    params: 70
+    why: Groups of eight query heads share one KV head at 70B, so the cache shrinks eightfold and decoding reads far less memory. Context doubles to 4k.
+  - id: mistral
+    name: Mistral 7B
+    date: Sep 2023
+    org: Mistral AI
+    paper: Mistral 7B
+    parent: llama
+    layers: 32
+    width: 4096
+    heads: 32
+    kv_heads: 8
+    head_dim: 128
+    attn: window
+    win: 4096
+    pos: rope
+    norm: RMS
+    pre: true
+    ffn: { kind: dense, act: SwiGLU, dff: 14336, ratio: "3.5" }
+    vocab: { n: 32000, tok: SentencePiece BPE }
+    ctx: 8192
+    params: 7.3
+    why: Each layer attends to the last 4,096 tokens only, and stacked layers still reach further back. The KV cache becomes a fixed rolling buffer.
+  - id: mixtral
+    name: Mixtral
+    date: Jan 2024
+    org: Mistral AI
+    paper: Mixtral of Experts
+    parent: mistral
+    layers: 32
+    width: 4096
+    heads: 32
+    kv_heads: 8
+    head_dim: 128
+    attn: gqa
+    pos: rope
+    norm: RMS
+    pre: true
+    ffn: { kind: moe, act: SwiGLU, n: 8, k: 2, sh: 0, ed: 14336 }
+    vocab: { n: 32000, tok: SentencePiece BPE }
+    ctx: 32768
+    params: 46.7
+    active: 12.9
+    why: Each MLP becomes eight experts and a router sends every token to two of them. Total parameters grow sixfold while each token pays for two experts.
+  - id: jamba
+    name: Jamba
+    date: Mar 2024
+    org: AI21 Labs
+    paper: "Jamba: A Hybrid Transformer-Mamba Language Model"
+    parent: mixtral
+    layers: 32
+    full_layers: 4
+    moe_every: 2
+    width: 4096
+    heads: 32
+    kv_heads: 8
+    head_dim: 128
+    attn: hybrid
+    state: Mamba
+    pos: none
+    norm: RMS
+    pre: true
+    ffn: { kind: moe, act: SwiGLU, n: 16, k: 2, sh: 0, ed: 14336 }
+    vocab: { n: 65536, tok: SentencePiece BPE }
+    ctx: 262144
+    params: 52
+    active: 12
+    why: The first hybrid. One attention layer for every seven Mamba layers, and experts in every other layer, so a 256K context fits a single 80 GB GPU. No position encoding at all; the Mamba layers carry order.
+  - id: dsv2
+    name: DeepSeek-V2
+    date: May 2024
+    org: DeepSeek
+    paper: "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model"
+    parent: llama
+    layers: 60
+    dense_first: 1
+    width: 5120
+    heads: 128
+    kv_heads: 128
+    head_dim: 128
+    attn: mla
+    mla: { dc: 512, dr: 64 }
+    pos: rope-dec
+    norm: RMS
+    pre: true
+    ffn: { kind: moe, act: SwiGLU, n: 160, k: 6, sh: 2, ed: 1536 }
+    vocab: { n: 100000, tok: byte-level BPE }
+    ctx: 131072
+    params: 236
+    active: 21
+    why: Keys and values are rebuilt from one 512-wide latent per token, cutting the cache by 93% with no loss in quality. Many small experts, two of them shared by every token.
+  - id: gemma2
+    name: Gemma 2
+    date: Jun 2024
+    org: Google DeepMind
+    paper: "Gemma 2: Improving Open Language Models at a Practical Size"
+    parent: llama2
+    layers: 46
+    full_layers: 23
+    width: 4608
+    heads: 32
+    kv_heads: 16
+    head_dim: 128
+    attn: window
+    win: 4096
+    pos: rope
+    norm: RMS
+    pre: true
+    norm_after: true
+    ffn: { kind: dense, act: GeGLU, dff: 36864, ratio: "8" }
+    vocab: { n: 256128, tok: SentencePiece }
+    ctx: 8192
+    params: 27.2
+    why: Every other layer sees only a 4,096-token window, so half the cache stays small. A norm before and after each sub-block, a GELU-gated FFN eight times the width, and logits soft-capped at 30. The smaller sizes are distilled from a larger teacher.
+  - id: llama3
+    name: Llama 3
+    date: Jul 2024
+    org: Meta
+    paper: The Llama 3 Herd of Models
+    parent: llama2
+    layers: 126
+    width: 16384
+    heads: 128
+    kv_heads: 8
+    head_dim: 128
+    attn: gqa
+    pos: rope
+    norm: RMS
+    pre: true
+    ffn: { kind: dense, act: SwiGLU, dff: 53248, ratio: "3.25" }
+    vocab: { n: 128256, tok: tiktoken BPE }
+    ctx: 131072
+    params: 405
+    why: Still dense, by choice, for training stability at 405B. Four times the vocabulary and GQA at every size; the gains came from 15T tokens, not from the block.
+  - id: olmo2
+    name: OLMo 2
+    date: Nov 2024
+    org: Ai2
+    paper: 2 OLMo 2 Furious
+    parent: llama
+    layers: 32
+    width: 4096
+    heads: 32
+    kv_heads: 32
+    head_dim: 128
+    attn: mha
+    pos: rope
+    norm: RMS
+    pre: false
+    norm_after: true
+    qk: true
+    ffn: { kind: dense, act: SwiGLU, dff: 11008, ratio: "2.7" }
+    vocab: { n: 100278, tok: byte-level BPE }
+    ctx: 4096
+    params: 7.3
+    why: Post-norm brought back, but inside the residual branch, so the stream itself stays unnormalised. With QK-norm this trained without the loss spikes that pre-norm was adopted to avoid. Fully open, down to the data and the training code.
+  - id: dsv3
+    name: DeepSeek-V3
+    date: Dec 2024
+    org: DeepSeek
+    paper: DeepSeek-V3 Technical Report
+    parent: dsv2
+    layers: 61
+    dense_first: 3
+    width: 7168
+    heads: 128
+    kv_heads: 128
+    head_dim: 128
+    attn: mla
+    mla: { dc: 512, dr: 64 }
+    pos: rope-dec
+    norm: RMS
+    pre: true
+    ffn: { kind: moe, act: SwiGLU, n: 256, k: 8, sh: 1, ed: 2048, router: sigmoid }
+    vocab: { n: 129280, tok: byte-level BPE }
+    ctx: 131072
+    params: 671
+    active: 37
+    why: Experts are balanced by a bias on the router instead of an auxiliary loss. Training predicts one extra token ahead and runs in FP8, for 2.8M GPU-hours in all.
+  - id: gptoss
+    name: gpt-oss
+    date: Aug 2025
+    org: OpenAI
+    paper: gpt-oss-120b & gpt-oss-20b Model Card
+    parent: mixtral
+    layers: 36
+    full_layers: 18
+    width: 2880
+    heads: 64
+    kv_heads: 8
+    head_dim: 64
+    attn: window
+    win: 128
+    sinks: true
+    pos: rope
+    norm: RMS
+    pre: true
+    ffn: { kind: moe, act: SwiGLU, n: 128, k: 4, sh: 0, ed: 2880 }
+    vocab: { n: 201088, tok: byte-level BPE }
+    ctx: 131072
+    params: 116.8
+    active: 5.1
+    why: Layers alternate between a 128-token band and full attention. Each head has a learned sink score, so a query can attend to nothing in particular. 128 experts, four per token, stored in 4-bit, so 117B parameters fit one 80 GB GPU.
+  - id: qnext
+    name: Qwen3-Next
+    date: Sep 2025
+    org: Alibaba
+    paper: Qwen3-Next model card; no paper
+    parent: dsv3
+    layers: 48
+    full_layers: 12
+    width: 2048
+    heads: 16
+    kv_heads: 2
+    head_dim: 256
+    attn: hybrid
+    state: Gated DeltaNet
+    gate: true
+    pos: rope-partial
+    norm: RMS0
+    pre: true
+    qk: true
+    ffn: { kind: moe, act: SwiGLU, n: 512, k: 10, sh: 1, ed: 512 }
+    vocab: { n: 151669, tok: byte-level BPE }
+    ctx: 262144
+    params: 80
+    active: 3
+    why: Three Gated DeltaNet layers for every full-attention layer, so the KV cache grows in only a quarter of the stack. 512 small experts; 3B of the 80B parameters work on each token.
+
+# the techniques of each part; each lists every model here that uses it, the one that introduced it first.
+# A model can use several techniques of one part. Sizes and settings belong to the model, not here.
+parts:
+  - id: tok
+    name: Tokeniser
+    techniques:
+      - { id: wbpe, what: "BPE over words", how: "merges learned on whitespace-split text; unseen characters become unknown", models: [tf, gpt1] }
+      - { id: bbpe, what: "Byte-level BPE", how: "merges over UTF-8 bytes; any string tokenises, nothing is unknown", models: [gpt2, dsv2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: spm, what: "SentencePiece with byte fallback", how: "raw text in, spaces kept as a symbol; rare characters drop to bytes", models: [palm, llama, llama2, mistral, mixtral, jamba, gemma2] }
+  - id: pos
+    name: PE
+    techniques:
+      - { id: sin, what: "Sinusoidal", how: "fixed sine waves added to the embedding", models: [tf] }
+      - { id: learned, what: "Learned absolute", how: "one trained vector per slot, added to the embedding", models: [gpt1, gpt2] }
+      - { id: rope, what: "RoPE", how: "rotate queries and keys by position; nothing is added", models: [palm, llama, llama2, mistral, mixtral, dsv2, gemma2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: nope, what: "No position encoding", how: "nothing added or rotated; the state layers carry order", models: [jamba] }
+      - { id: rope_dec, what: "Decoupled RoPE", how: "rotation on a few extra dims, so the KV latent stays compressible", models: [dsv2, dsv3] }
+      - { id: rope_part, what: "Partial RoPE", how: "rotation on part of each head; the rest carries no position", models: [qnext] }
+  - id: norm
+    name: Norm
+    techniques:
+      - { id: post, what: "Post-norm", how: "on the trunk, after each residual add", models: [tf, gpt1] }
+      - { id: pre, what: "Pre-norm", how: "on the branch, before each sub-block, plus one at the end", models: [gpt2, palm, llama, llama2, mistral, mixtral, jamba, dsv2, gemma2, llama3, dsv3, gptoss, qnext] }
+      - { id: rms, what: "RMSNorm", how: "divide by the root mean square; no mean, no bias", models: [llama, llama2, mistral, mixtral, jamba, dsv2, gemma2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: sandwich, what: "Norm before and after", how: "a norm on the branch input and another on its output", models: [gemma2] }
+      - { id: inside, what: "Post-norm inside the residual", how: "the norm sits on the branch output, before the add; the trunk stays raw", models: [olmo2] }
+      - { id: qk, what: "QK-norm", how: "normalise queries and keys before the dot product", models: [olmo2, qnext] }
+      - { id: zero, what: "Zero-centred RMSNorm", how: "the scale is learned around zero, so weight decay keeps it small", models: [qnext] }
+  - id: attn
+    name: Attention
+    techniques:
+      - { id: mha, what: "Multi-head", how: "every query head has its own keys and values", models: [tf, gpt1, gpt2, llama, olmo2] }
+      - { id: mqa, what: "Multi-query", how: "all query heads share one key and value head", models: [palm] }
+      - { id: gqa, what: "Grouped-query", how: "groups of query heads share a key and value head", models: [llama2, mistral, mixtral, jamba, gemma2, llama3, gptoss, qnext] }
+      - { id: window, what: "Sliding window", how: "a layer sees a fixed number of recent tokens", models: [mistral, gemma2, gptoss] }
+      - { id: linear, what: "State-space hybrid", how: "most layers keep a fixed-size state instead of a cache", models: [jamba, qnext] }
+      - { id: mla, what: "Multi-head latent", how: "keys and values rebuilt from one small latent per token", models: [dsv2, dsv3] }
+      - { id: sinks, what: "Attention sinks", how: "a learned score per head that a query can attend to instead of any token", models: [gptoss] }
+      - { id: gated, what: "Gated output", how: "a sigmoid of the block input scales what attention writes back", models: [qnext] }
+  - id: ctx
+    name: Context
+    techniques:
+      - { id: full, what: "Train at full length", how: "the whole context is seen in pre-training", models: [tf, gpt1, gpt2, palm, llama, llama2, mixtral, jamba, gemma2, olmo2] }
+      - { id: window, what: "Sliding window", how: "a fixed cache, with reach growing through the layers", models: [mistral] }
+      - { id: linear, what: "State-space hybrid", how: "a fixed-size state carries most of the history", models: [jamba, qnext] }
+      - { id: yarn, what: "YaRN", how: "rescale the RoPE frequencies unevenly, then a short fine-tune", models: [dsv2, dsv3, gptoss] }
+      - { id: interleave, what: "Local-global interleave", how: "windowed layers alternate with full ones; half the cache stays small", models: [gemma2, gptoss] }
+      - { id: base, what: "Raise the RoPE base", how: "a slower rotation, then continued training on long documents", models: [llama3] }
+  - id: ffn
+    name: FFN
+    techniques:
+      - { id: dense, what: "Dense MLP", how: "every token goes through the same expand-and-project block", models: [tf, gpt1, gpt2, palm, llama, llama2, mistral, gemma2, llama3, olmo2] }
+      - { id: moe, what: "Mixture of experts", how: "a router sends each token to a few of many MLPs", models: [mixtral, jamba, dsv2, dsv3, gptoss, qnext] }
+      - { id: shared, what: "Fine-grained and shared experts", how: "many small experts, plus a few that every token uses", models: [dsv2, dsv3, qnext] }
+      - { id: auxfree, what: "Aux-loss-free balancing", how: "a bias on the router balances load, with no extra loss", models: [dsv3] }
+      - { id: sigmoid, what: "Sigmoid router", how: "expert scores from a sigmoid, not a softmax, so they need not compete", models: [dsv3] }
+  - id: act
+    name: Activation
+    techniques:
+      - { id: relu, what: "ReLU", how: "keep the positive part, zero the rest", models: [tf] }
+      - { id: gelu, what: "GELU", how: "a smooth ReLU, weighted by how likely the input is positive", models: [gpt1, gpt2] }
+      - { id: swiglu, what: "SwiGLU", how: "a gated unit: a SiLU gate times an up projection, then down", models: [palm, llama, llama2, mistral, mixtral, jamba, dsv2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: geglu, what: "GeGLU", how: "the same gated unit with a GELU gate", models: [gemma2] }

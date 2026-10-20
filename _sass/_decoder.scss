@@ -1,0 +1,387 @@
+// 302. decoder block: a workbench in the post window (assets/js/decoder.js).
+// The model tree and the parts sheet stack on the left; the block is drawn on
+// the right. Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
+@use "main";
+
+$wb-ui: "Helvetica Neue", Arial, sans-serif;
+$wb-mute: #55505a;
+$wb-new: #ffff80;
+$wb-newline: #c8a000;
+$wb-newtext: #8a6d00;
+
+.wb-win {
+	width: 980px;
+
+	.post_content {
+		display: flex;
+		flex-direction: column;
+		height: 620px;
+		overflow: hidden;
+		background: #bfb8bf;
+		border: 0;
+		padding: 0 4px 2px;
+	}
+}
+
+.wb {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	font: 12px/1.35 $wb-ui;
+
+	ul, ul li, ul li ul, ul li ul li {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	p {
+		margin: 0;
+		line-height: inherit;
+	}
+}
+.wb-body {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+	gap: 4px;
+}
+.wb-left {
+	display: grid;
+	grid-template-rows: 236px minmax(0, 1fr);
+	gap: 4px;
+	min-height: 0;
+}
+
+// the model pane: a rail, one row per model in date order (assets/js/decoder.js railHtml)
+.wb-tree {
+	padding: 4px 2px;
+	overflow: auto;
+	min-height: 0;
+
+	svg {
+		display: block;
+		width: 100%;
+		height: auto;
+		font-family: $wb-ui;
+	}
+	.rail { stroke: #000000; stroke-width: 1.2; fill: none; }
+	.dot { fill: #000080; stroke: #ffffff; stroke-width: 1; }
+	.bg { fill: transparent; }
+	.yr, .lb { font-size: 9.5px; fill: $wb-mute; }
+	.nm { font-size: 11.5px; fill: #000000; }
+	.rl { cursor: default; outline: none; }
+	.rl:hover .bg { fill: #eef1f8; }
+	.rl:focus-visible .bg { stroke: #000000; stroke-dasharray: 1 1; }
+	.rl.on .bg { fill: #000080; }
+	.rl.on .nm { fill: #ffffff; font-weight: bold; }
+	.rl.on .yr, .rl.on .lb { fill: #ddddee; }
+	.rl.on .dot { fill: #ffffff; stroke: #000080; }
+}
+
+// the two references, at the right end of the toolbar
+.wb-see {
+	margin-left: auto;
+	padding-right: 6px;
+	font-size: 11px;
+	color: $wb-mute;
+	white-space: nowrap;
+
+	a {
+		color: $wb-mute;
+		text-decoration: underline;
+	}
+}
+
+// the parts sheet: a property sheet with one tab per part
+.wb-sheet {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.wb-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 1px;
+	padding: 4px 4px 0;
+}
+.wb-tab {
+	font: 11px $wb-ui;
+	color: #000000;
+	padding: 3px 7px 2px;
+	background: #c0c0c0;
+	border: 1px solid;
+	border-color: #ffffff #000000 transparent #ffffff;
+	margin-bottom: -1px;
+	cursor: pointer;
+
+	&.on {
+		font-weight: bold;
+		padding-bottom: 4px;
+		background: var(--paper, #fbfafb);
+		position: relative;
+		z-index: 1;
+	}
+}
+.wb-tabbody {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	margin: 0 4px 4px;
+	background: var(--paper, #fbfafb);
+	border: 1px solid;
+	border-color: #ffffff #000000 #000000 #ffffff;
+}
+// each technique is one row: its name, then when and which models in italic, then what it does,
+// and the glyph on the right across all three lines
+.wb .wb-vers li {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 64px;
+	gap: 1px 10px;
+	align-items: start;
+	padding: 6px 8px;
+	border-bottom: 1px dotted #d0d0d0;
+	font-size: 11.5px;
+	cursor: pointer;
+
+	&:hover {
+		background: #eef1f8;
+	}
+	.what, .meta, .how {
+		grid-column: 1;
+	}
+	.what {
+		font-weight: bold;
+	}
+	.meta {
+		color: $wb-mute;
+		font-size: 11px;
+		font-style: italic;
+		font-variant-numeric: tabular-nums;
+	}
+	svg {
+		grid-column: 2;
+		grid-row: 1 / 4;
+		align-self: center;
+		display: block;
+		width: 64px;
+		height: 22px;
+	}
+	svg text {
+		fill: currentColor;
+	}
+	&.on {
+		background: #000080;
+		color: #ffffff;
+
+		.meta {
+			color: #ddddee;
+		}
+		.g-ln, .g-wave {
+			stroke: #ffffff;
+		}
+		.g-norm {
+			stroke: #ffffff;
+		}
+		.g-rt {
+			fill: #000080;
+			stroke: #ffffff;
+		}
+		.g-cur {
+			fill: #ffffff;
+		}
+		.g-tint {
+			fill: #4040a0;
+		}
+		.g-bx, .g-norm {
+			stroke: #ffffff;
+		}
+		.g-ghost {
+			stroke: #8080c0;
+		}
+	}
+}
+// glyphs in the version rows
+.g-q { fill: #5b7fd1; }
+.g-k { fill: #d18a3c; }
+.g-off { fill: #d9e2d2; }
+.g-on { fill: #2e7d32; }
+.g-sh { fill: #b05a00; }
+.g-ln { stroke: #000000; fill: none; }
+.g-norm { fill: #e7e7f3; stroke: #000000; }
+.g-wave { stroke: #000000; fill: none; stroke-width: 1.2; }
+.g-hint { stroke: #9a9a9a; fill: none; stroke-width: 0.8; }
+.g-rt { fill: #ffffff; stroke: #000000; }
+.g-see { fill: #9fb4e8; }
+.g-cur { fill: #000080; }
+.g-lat { fill: none; stroke: #d18a3c; stroke-width: 1; }
+.g-dim { fill: #e6e6e6; }
+.g-tint { fill: #e7e7f3; }
+.g-bx { fill: none; stroke: #000000; stroke-width: 0.7; }
+.g-bad { fill: #c62828; }
+.g-ax { stroke: #9a9a9a; fill: none; stroke-width: 0.6; }
+.g-ghost { fill: none; stroke: #bbbbbb; stroke-width: 0.7; stroke-dasharray: 1.5 1; }
+.g-dd { fill: #ffffff; stroke: #2e7d32; stroke-width: 0.8; }
+.g-dw { fill: #c8e6b8; stroke: #2e7d32; stroke-width: 0.8; }
+
+// the block pane
+.wb-right {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.wb-head {
+	flex: none;
+	display: flex;
+	gap: 10px;
+	align-items: baseline;
+	flex-wrap: wrap;
+	padding: 6px 10px 2px;
+	font-size: 11.5px;
+	color: $wb-mute;
+
+	b {
+		color: #000000;
+		font-size: 13px;
+	}
+}
+.wb-sch {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	justify-content: center;
+	padding: 6px;
+
+	svg {
+		display: block;
+		width: auto;
+		height: 100%;
+		max-width: 100%;
+	}
+}
+.wb-foot {
+	flex: none;
+	padding: 4px 10px 6px;
+	border-top: 1px solid #dddddd;
+	font: 13px/1.45 var(--font, Georgia, "Times New Roman", serif);
+
+	.wb-src {
+		color: $wb-mute;
+		font: 11px $wb-ui;
+	}
+}
+.wb-legend {
+	flex: none;
+	padding: 2px 10px 0;
+	font-size: 10.5px;
+	color: $wb-mute;
+
+	i {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		margin-right: 4px;
+		vertical-align: -1px;
+		background: $wb-new;
+		border: 1px solid $wb-newline;
+	}
+}
+
+// the drawing
+.wb-sch {
+	text { font-family: $wb-ui; }
+	.trunk { stroke: #000000; stroke-width: 1.5; fill: none; }
+	.ln { stroke: #000000; stroke-width: 1; fill: none; }
+	.wf { stroke: #b8b8b8; stroke-width: 0.8; fill: none; }
+	.hw { stroke: #000000; stroke-width: 0.7; fill: none; }
+	.bx { fill: #ffffff; stroke: #000000; stroke-width: 1; }
+	.emb, .pos, .head { fill: #f1f1f1; }
+	.norm { fill: #e7e7f3; }
+	.attn { fill: #dde8ff; }
+	.ffn { fill: #e3f2da; }
+	.xattn { fill: #ece4f8; }
+	.chg { fill: $wb-new; stroke: $wb-newline; stroke-width: 1.5; animation: wb-flash 0.7s ease-out; }
+	.ghost { fill: #fafafa; stroke: #999999; stroke-dasharray: 3 2; }
+	.ghost.chg { fill: $wb-new; stroke: $wb-newline; }
+	.frame { fill: none; stroke: #7f787f; stroke-dasharray: 4 3; }
+	.fl { font-size: 11px; font-weight: bold; fill: $wb-mute; }
+	.fl.chgt { fill: $wb-newtext; }
+	.bt { font-size: 11px; font-weight: bold; fill: #000000; }
+	.bs { font-size: 9.5px; fill: #333333; }
+	.bs2 { font-weight: normal; font-size: 10px; fill: #444444; }
+	.lab { font-size: 9px; font-weight: bold; fill: $wb-mute; }
+	.tag { font-size: 9px; font-weight: bold; fill: $wb-newtext; }
+	.plus { fill: #ffffff; stroke: #000000; }
+	.arr { fill: #b00000; }
+	.plust { font-size: 12px; font-weight: bold; fill: #000000; }
+	.q { fill: #5b7fd1; }
+	.k { fill: #d18a3c; }
+	.lat { fill: url(#wb-hatch); stroke: #d18a3c; }
+	.st { fill: #d18a3c; }
+	.c-on { fill: #9fb4e8; }
+	.c-dim { fill: #dfe6f7; }
+	.c-off { fill: #e6e6e6; }
+	.c-cur { fill: #000080; }
+	.mt { fill: #dddddd; }
+	.mf { fill: #000080; }
+	.dd { fill: #ffffff; stroke: #2e7d32; }
+	.dw { fill: #c8e6b8; stroke: #2e7d32; }
+	.rt { fill: #ffffff; stroke: #000000; }
+	.e-on { fill: #2e7d32; }
+	.e-off { fill: #d9e2d2; }
+	.e-sh { fill: #b05a00; }
+	.gs { font-size: 9.5px; fill: #777777; }
+	.io { font-size: 10px; fill: $wb-mute; }
+	.axis { font-size: 9px; font-style: italic; fill: $wb-mute; }
+	// the attention box opens into the second level
+	.openable { cursor: pointer; outline: none; }
+	.openable:hover > rect.attn, .openable:focus-visible > rect.attn, .openable:hover > rect.ffn, .openable:focus-visible > rect.ffn { stroke-width: 2; }
+	.opn { font-size: 9px; font-weight: bold; fill: $wb-mute; }
+	.openable:hover .opn { fill: #000000; }
+	.attn-open { fill: #f4f7ff; stroke: #000000; }
+	.ffn-open { fill: #f5faf1; stroke: #000000; }
+	.wave { stroke: #000000; fill: none; stroke-width: 1.6; }
+	.btn { fill: #c0c0c0; stroke: #000000; }
+	.btnt { font-size: 10px; fill: #000000; }
+	.openable:hover > rect.btn { fill: #d8d8d8; }
+	.ttl { font-size: 13px; font-weight: bold; fill: #000000; }
+	.zq { fill: #dde8ff; }
+	.zk, .zv { fill: #fbe9d6; }
+	.zop { fill: #e7e7f3; }
+	.zw { fill: #f1f1f1; }
+	.frame.chgf { stroke: $wb-newline; stroke-width: 1.5; }
+	// boxes slide from where they were when the model changes
+	[data-k] { transform-box: fill-box; transform-origin: 0 0; }
+	svg { transition: opacity 0.35s; }
+	svg.dim { opacity: 0.45; }
+}
+@keyframes wb-flash {
+	from { fill: #ffd84d; }
+	to { fill: $wb-new; }
+}
+
+// On a phone the workbench is hidden behind a one-line notice (.wb-phone);
+// the window chrome goes back to the ordinary page
+.wb-phone {
+	display: none;
+}
+@media only screen and (max-width: 700px) {
+	.wb-win .post_content {
+		display: block;
+		height: auto;
+		overflow: visible;
+		background: var(--paper, #fbfafb);
+		padding: 16px 14px 40px;
+	}
+	.wb {
+		display: none;
+	}
+	.wb-phone {
+		display: block;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.wb-sch .chg { animation: none; }
+	.wb-sch [data-k] { transition: none !important; }
+}

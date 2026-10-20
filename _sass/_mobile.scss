@@ -31,12 +31,13 @@
 	}
 
 	// Windows become the page. The variant selectors are listed because
-	// .content.deck-win, .content.dos-win and .content.help-win outrank a bare .content.
+	// .content.deck-win, .content.dos-win, .content.help-win and .content.wb-win outrank a bare .content.
 	.wrapper,
 	.content,
 	.content.deck-win,
 	.content.dos-win,
-	.content.help-win {
+	.content.help-win,
+	.content.wb-win {
 		display: block;
 		position: static;
 		width: auto;
