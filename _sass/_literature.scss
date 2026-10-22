@@ -211,7 +211,7 @@ $lit-link: #008000;
 	}
 	li {
 		white-space: nowrap;
-		padding: 1px 0;
+		padding: 0;
 	}
 	li.closed > ul {
 		display: none;
@@ -221,8 +221,9 @@ $lit-link: #008000;
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
+	vertical-align: top;
 	max-width: 100%;
-	padding: 1px 3px;
+	padding: 0 3px;
 	border: 1px dotted transparent;
 	cursor: default;
 
