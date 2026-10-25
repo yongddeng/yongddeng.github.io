@@ -1,4 +1,4 @@
-# 303. blocks: fail the build on a dangling id in _data/decoder_block.yml,
+# 302. blocks: fail the build on a dangling id in _data/decoder_block.yml,
 # which would otherwise blank the workbench with a script error in the browser.
 Jekyll::Hooks.register :site, :post_read do |site|
   d = site.data["decoder_block"]

@@ -10,18 +10,13 @@
 		+ '<span class="dh-type">Type</span>'
 		+ '<span class="dh-date" data-sort="date">Date</span></div>';
 
-	// The Type column, named as _includes/post-item.html names it
-	var TYPES = { 'video.svg': 'Media Clip', 'tree.png': 'Tree File', 'cardfile.png': 'Card File', 'cube.png': 'Model File' };
-	function typeFor(icon) {
-		return TYPES[icon] || 'Notepad';
-	}
-
+	// post.type is the Type column, named from _data/types.yml as the built list is
 	function itemHtml(post, tagParam) {
 		return '<li data-date="' + (post.sortdate || '') + '" data-size="' + (post.size || '') + '"><a href="' + post.url + (tagParam || '') + '" title="' + escapeHtml(post.title) + '">'
 			+ '<img src="/assets/img/' + (post.icon || 'notepad.png') + '" title="' + escapeHtml(post.title) + '" />'
 			+ '<span class="nm">' + escapeHtml(post.title) + '</span>'
 			+ '<span class="sz">' + (post.size || '') + '</span>'
-			+ '<span class="ty">' + typeFor(post.icon) + '</span>'
+			+ '<span class="ty">' + post.type + '</span>'
 			+ '<span class="dt">' + (post.date || '') + '</span></a></li>';
 	}
 
@@ -338,11 +333,15 @@
 					history.pushState(null, '', key);
 				}
 				placeWindow(newContent, opts.geom);
-				// DOMParser scripts are inert; recreate them so they run
+				// DOMParser scripts are inert; recreate them so they run. A
+				// created script is async by default; async = false runs them
+				// in document order, as the page would, so a script can rely on
+				// a library loaded above it
 				newContent.querySelectorAll('script').forEach(function(old) {
 					var s = document.createElement('script');
-					if (old.type) s.type = old.type;
-					if (old.src) { s.src = old.src; } else { s.textContent = old.textContent; }
+					Array.prototype.forEach.call(old.attributes, function(a) { s.setAttribute(a.name, a.value); });
+					s.async = false;
+					if (!old.src) s.textContent = old.textContent;
 					old.replaceWith(s);
 				});
 				// highlight before the swap event: 002.js splits this markup

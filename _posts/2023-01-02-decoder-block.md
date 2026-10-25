@@ -1,9 +1,9 @@
 ---
 layout: default
-title: "303. blocks"
+title: "302. blocks"
 permalink: /20230102/decoder-block
 tags: cs300
-icon: cardfile.png
+icon: defragment.png
 winclass: wb-win
 no_comment: true
 ---

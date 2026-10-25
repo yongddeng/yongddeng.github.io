@@ -1,4 +1,4 @@
-# 302. papers: fail the build on a dangling id in _data/ml_literature.yml,
+# 303. papers: fail the build on a dangling id in _data/ml_literature.yml,
 # which would otherwise blank the reader with a script error in the browser.
 Jekyll::Hooks.register :site, :post_read do |site|
   lit = site.data["ml_literature"]

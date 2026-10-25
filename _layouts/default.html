@@ -45,8 +45,8 @@
 		<a href="/"><img src="/assets/img/mycomputerv2.png" alt="" /><span>My Computer</span></a>
 		<a href="/?tag=cs600"><img src="/assets/img/folder.png" alt="" /><span>cs600</span></a>
 		<a href="/20260109/videos"><img src="/assets/img/video.svg" alt="" /><span>699. videos</span></a>
-		<a href="/20230102/decoder-block"><img src="/assets/img/cardfile.png" alt="" /><span>303. blocks</span></a>
-		<a href="/20230101/ml-paper"><img src="/assets/img/tree.png" alt="" /><span>302. papers</span></a>
+		<a href="/20230102/decoder-block"><img src="/assets/img/defragment.png" alt="" /><span>302. blocks</span></a>
+		<a href="/20230101/ml-paper"><img src="/assets/img/tree.png" alt="" /><span>303. papers</span></a>
 	</div>
 	<div class="desktop-icons desktop-right">
 		<a><img src="/assets/img/aubergine.png" alt="" /><span>untitled</span></a>
@@ -228,6 +228,7 @@
 				title: {{ post.title | jsonify }},
 				url: {{ post.url | jsonify }},
 				icon: {{ post.icon | default: 'notepad.png' | jsonify }},
+				type: {{ site.data.types[post.icon] | default: 'Notepad' | jsonify }},
 				date: {{ post.date | date: "%-d/%-m/%y" | jsonify }},
 				sortdate: {{ post.date | date: "%Y%m%d" | jsonify }},
 				size: {% capture psize %}{% include post-size.html post=post %}{% endcapture %}{{ psize | jsonify }},

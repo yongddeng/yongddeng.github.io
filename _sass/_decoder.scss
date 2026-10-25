@@ -1,4 +1,4 @@
-// 303. blocks: a workbench in the post window (assets/js/decoder.js).
+// 302. blocks: a workbench in the post window (assets/js/decoder.js).
 // The model tree and the parts sheet stack on the left; the block is drawn on
 // the right. Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
 @use "main";
@@ -15,7 +15,7 @@ $wb-newtext: #8a6d00;
 	.post_content {
 		display: flex;
 		flex-direction: column;
-		height: 700px;
+		height: 720px;
 		overflow: hidden;
 		background: #bfb8bf;
 		border: 0;
@@ -51,7 +51,8 @@ $wb-newtext: #8a6d00;
 }
 .wb-left {
 	display: grid;
-	grid-template-rows: 236px minmax(0, 1fr);
+	// the rail shows every model without scrolling; the parts sheet scrolls in what is left
+	grid-template-rows: 260px minmax(0, 1fr);
 	gap: 4px;
 	min-height: 0;
 }

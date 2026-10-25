@@ -1,0 +1,6 @@
+# The Type column of the file list, by a post's icon; any other icon is a Notepad.
+# Read by _includes/post-item.html and by the post list in _layouts/default.html.
+video.svg: Media Clip
+tree.png: Tree File
+defragment.png: Card File
+msagent.png: Model File

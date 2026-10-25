@@ -131,12 +131,30 @@
 	const lerp3 = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
 
 	// ---- the eighteen steps -----------------------------------------------------
-	const ST = { arrive: 0, norm: 1, qkv: 2, rope: 3, cache: 4, scores: 5, softmax: 6, blend: 7, wo: 8, add: 9, norm2: 10, gateUp: 11, swiglu: 12, down: 13, add2: 14, finalNorm: 15, logits: 16, pick: 17 };
-	const NST = DATA.steps.length;
-	// the walls lit at each step; the others fade back
-	const FOCUS = [['x'], ['x'], ['x', 'q', 'k', 'v'], ['q', 'k'], ['k', 'v'], ['q', 'k', 'a'], ['a'], ['a', 'v', 'o'], ['o', 'h'], ['x', 'h'], ['h'], ['h'], [], [], ['h', 'y'], ['y'], [], []];
-	// where the camera looks at each step, in units down the page
-	const FOCUS_Y = [0, 0, 22, 23, 24, 26, 27, 27, 30, 30, 37, 52, 56, 61, 67, 79, 87, 91];
+	// One row a step: its name in the code, the walls lit (the others fade back), and where the
+	// camera looks, in units down the page. _plugins/check_toy.rb counts these rows against toy.yml.
+	const STEPS = [
+		['arrive', ['x'], 0],
+		['norm', ['x'], 0],
+		['qkv', ['x', 'q', 'k', 'v'], 22],
+		['rope', ['q', 'k'], 23],
+		['cache', ['k', 'v'], 24],
+		['scores', ['q', 'k', 'a'], 26],
+		['softmax', ['a'], 27],
+		['blend', ['a', 'v', 'o'], 27],
+		['wo', ['o', 'h'], 30],
+		['add', ['x', 'h'], 30],
+		['norm2', ['h'], 37],
+		['gateUp', ['h'], 52],
+		['swiglu', [], 56],
+		['down', [], 61],
+		['add2', ['h', 'y'], 67],
+		['finalNorm', ['y'], 79],
+		['logits', [], 87],
+		['pick', [], 91],
+	];
+	const ST = Object.fromEntries(STEPS.map(([name], s) => [name, s]));
+	const FOCUS = STEPS.map(r => r[1]), FOCUS_Y = STEPS.map(r => r[2]), NST = STEPS.length;
 
 	// ---- geometry -----------------------------------------------------------------
 	// Scene units: a cube is one unit; x runs right, y runs down the page (stored
@@ -193,7 +211,7 @@
 		const put = (b, h, t, i, val, colour, extra = {}) => {
 			const [x, y, z] = cellPos(b, h, t, i), live = t === p;
 			const back = live ? (lit.includes(b) ? 0 : 0.45) : (b === 'k' || b === 'v') ? (lit.includes(b) ? 0 : 0.5) : 0.86;
-			cells.set(`${b}|${h}|${t}|${i}`, { b, h, t, i, val, x, y, z, base: colour, fade: back, op: 1, sc: 1, ...extra });
+			cells.set(`${b}|${h}|${t}|${i}`, { b, h, t, i, val, st: s, x, y, z, base: colour, fade: back, op: 1, sc: 1, ...extra }); // st: the step whose value it holds
 		};
 		const ghost = (id, from, to, colour, extra = {}) => {
 			cells.set(id, { ghost: true, peak: 1, from, x: to[0], y: to[1], z: to[2], base: colour, fade: 0, op: 0, sc: 0.8, ...extra });
@@ -370,7 +388,7 @@
 
 	// ---- drawing ---------------------------------------------------------------------
 	const SERIF = 'Georgia, serif', UI = '"Helvetica Neue", Arial, sans-serif';
-	let cur = 0, tau = 0, lastStep = -1, hoverKey = null, faces = [], nodeHits = [];
+	let cur = 0, tau = 0, lastStep = -1, explainTimer = 0, hoverKey = null, faces = [], nodeHits = [];
 
 	// text with a paper-coloured halo, so it reads over edges and cubes
 	function write(str, x, y, font, colour, align = 'left', baseline = 'middle', halo = true) {
@@ -407,10 +425,29 @@
 		draw();
 		ctx.restore();
 	}
-	// a weight edge; while the sweep lights it, it casts a soft shadow, so the products being summed stand off the board
+	// Lifted things, the lit edges and the networks' nodes, cast soft shadows. A blur a drawing is the costly part
+	// of a frame, so they are collected and their shadows cast in one pass: their outlines as one path, drawn off
+	// the canvas so only the blurred shadow lands (as drawShadows does), then the drawings themselves over it.
+	const OFF = 10000;
+	let liftedEdges = [], liftedNodes = [];
+	// a weight edge; while the sweep lights it, it stands off the board, so the products being summed show
 	function edge(a, b, colour, alpha, width, lit) {
-		if (lit) shadowed('rgba(20,20,50,0.45)', 4, 1.5, 2.5, () => line(a, b, colour, alpha, width));
+		if (lit) liftedEdges.push([a, b, colour, alpha, width]);
 		else line(a, b, colour, alpha, width);
+	}
+	// ends a bundle of edges: the lit ones over their shadows, and the alpha back to 1
+	function flushEdges() {
+		if (liftedEdges.length) {
+			ctx.beginPath();
+			liftedEdges.forEach(([a, b]) => { ctx.moveTo(a[0] - OFF, a[1]); ctx.lineTo(b[0] - OFF, b[1]); });
+			ctx.globalAlpha = LIT;
+			ctx.strokeStyle = '#000000';
+			ctx.lineWidth = 2.2;
+			shadowed('rgba(20,20,50,0.45)', 4, OFF + 1.5, 2.5, () => ctx.stroke());
+			liftedEdges.forEach(e => line(...e));
+			liftedEdges = [];
+		}
+		ctx.globalAlpha = 1;
 	}
 	function poly(pts, fill, stroke, width) {
 		ctx.beginPath();
@@ -454,7 +491,12 @@
 			write('scroll in this pane to move the token ▾', W / 2, H - 10, `bold 11px ${UI}`, C.navy, 'center', 'bottom');
 			ctx.globalAlpha = 1;
 		}
-		if (SL !== lastStep) { lastStep = SL; explain(SL); }
+		// the side pane is rebuilt after the frame, not in it, and once for a scroll that crosses several steps
+		if (SL !== lastStep) {
+			lastStep = SL;
+			clearTimeout(explainTimer);
+			explainTimer = setTimeout(() => explain(lastStep), 60);
+		}
 	}
 
 	// the residual stream: a rail down the left, a tick into x, h and y, a ⊕ where a sum lands
@@ -577,7 +619,6 @@
 	// the nearer head layer. One path for all of them, drawn off the canvas so only its blurred shadow lands
 	const SHADOW = 'rgba(30,30,60,0.14)';
 	function drawShadows(cells) {
-		const OFF = 10000;
 		ctx.beginPath();
 		cells.forEach(c => {
 			if (c.ghost || c.op < 0.5 || c.sc < 0.5) return;
@@ -627,17 +668,24 @@
 		return hovered;
 	}
 
-	// a node of a network: white until the sweep reaches it, then its value's colour
+	// a node of a network: white until the sweep reaches it, then its value's colour. Drawn by flushNodes
 	function drawNode(p, r, val, max, fill, id, on, hit) {
-		ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 2 * Math.PI);
-		ctx.fillStyle = fill > 0 ? rgb(fade(valueColour(val, max), 1 - fill)) : '#ffffff';
-		shadowed('rgba(30,30,60,0.30)', 6, 1, 3, () => ctx.fill()); // lifted clearly off the board
-		ctx.lineWidth = 1; ctx.strokeStyle = on || fill > 0 ? C.ink : C.dim; ctx.stroke();
-		if (id === hoverKey) {
-			ctx.beginPath(); ctx.arc(p[0], p[1], r + 2.5, 0, 2 * Math.PI);
-			ctx.strokeStyle = C.gold; ctx.lineWidth = 2.4; ctx.stroke();
-		}
+		liftedNodes.push({ p, r, id, fill: fill > 0 ? rgb(fade(valueColour(val, max), 1 - fill)) : '#ffffff', stroke: on || fill > 0 ? C.ink : C.dim });
 		nodeHits.push({ id, ...hit, val, fill, x: p[0], y: p[1], r: Math.max(r, 6) });
+	}
+	function flushNodes() {
+		const disc = (n, r) => { ctx.beginPath(); ctx.arc(n.p[0], n.p[1], r, 0, 2 * Math.PI); };
+		ctx.beginPath();
+		liftedNodes.forEach(n => { ctx.moveTo(n.p[0] - OFF + n.r, n.p[1]); ctx.arc(n.p[0] - OFF, n.p[1], n.r, 0, 2 * Math.PI); });
+		ctx.fillStyle = '#000000';
+		shadowed('rgba(30,30,60,0.30)', 6, OFF + 1, 3, () => ctx.fill()); // lifted clearly off the board
+		liftedNodes.forEach(n => {
+			disc(n, n.r);
+			ctx.fillStyle = n.fill; ctx.fill();
+			ctx.lineWidth = 1; ctx.strokeStyle = n.stroke; ctx.stroke();
+			if (n.id === hoverKey) { disc(n, n.r + 2.5); ctx.strokeStyle = C.gold; ctx.lineWidth = 2.4; ctx.stroke(); }
+		});
+		liftedNodes = [];
 	}
 	// a label to the right of the FFN or the LM head: a name over its LLaMA size
 	function sideLabel(y, name, sub, on) {
@@ -686,7 +734,7 @@
 				edge(pm[c], pout[j], sign(w), lit ? LIT : 0.05 + done * fm * 0.4 * Math.abs(t.m[c] * w) / c2, lit ? 2.2 : 0.8, lit);
 			}
 		}
-		ctx.globalAlpha = 1;
+		flushEdges();
 		hovE.forEach(([a, b]) => line(a, b, C.gold, 1, 2.6));
 		// the nodes fill as the sweep reaches them
 		const node = (kind, i, p, val, fill, id) => drawNode(p, NR[kind] * S, val, 3, fill, id, on, { kind, i });
@@ -699,6 +747,7 @@
 		}
 		for (let c = 0; c < FF; c++) { const a0 = 0.15 + 0.7 * c / FF; node('m', c, pm[c], t.m[c], at(ST.swiglu, a0, a0 + 0.1), `m|0|${cur}|${c}`); }
 		for (let j = 0; j < D; j++) { const a0 = 0.1 + 0.75 * j / D; node('out', j, pout[j], t.f[j], at(ST.down, a0, a0 + 0.08), `fc|0|${cur}|${j}`); }
+		flushNodes();
 		sideLabel(NY.in, 'ĥ · 8 inputs', '8,192 in LLaMA', on);
 		sideLabel((NY.in + NY.g) / 2 + 0.2, 'W1 and W3', '8 × 22 edges each', on);
 		sideLabel(NY.g, 'g · gates', 'fed by W1', on);
@@ -732,7 +781,7 @@
 						}
 					}
 				});
-				ctx.globalAlpha = 1;
+				flushEdges();
 				// one screen line for the three, at Wq's height: turned, the scene drops to the right and Wv would land on the Attention heading
 				const atY = project(WALLS.q.x + 2, yt - 0.75, 0)[1];
 				[['Wq', 'q'], ['Wk', 'k'], ['Wv', 'v']].forEach(([name, b]) => bundleLabel(WALLS[b].x + 2, yt - 0.75, name, '8 × 8 edges', SL === ST.qkv, atY));
@@ -751,7 +800,7 @@
 						edge(src[c], dst, sign(w), lit ? LIT : 0.04 + done * fm * 0.45 * Math.abs(t.cat[c] * w) / cm, lit ? 2 : 0.8, lit);
 					}
 				}
-				ctx.globalAlpha = 1;
+				flushEdges();
 				bundleLabel(WALLS.o.x + 2, (yt + yb) / 2, 'Wo', '8 × 8 edges · the heads mix', SL === ST.wo);
 			}
 		}
@@ -791,7 +840,7 @@
 				edge(pin[f], pv[j], sign(w), lit ? LIT : 0.05 + done * fm * 0.4 * Math.abs(t.zn[f] * w) / cm, lit ? 2.2 : 0.8, lit);
 			}
 		}
-		ctx.globalAlpha = 1;
+		flushEdges();
 		hovE.forEach(([a, b]) => line(a, b, C.gold, 1, 2.6));
 		const zDone = at(ST.finalNorm, 0.3, 0.45);
 		for (let f = 0; f < D; f++) drawNode(pin[f], 0.42 * S, t.zn[f], 3, zDone, `z|0|${cur}|${f}`, on, { kind: 'zin', i: f });
@@ -799,6 +848,7 @@
 			const a0 = 0.1 + 0.75 * j / NV;
 			drawNode(pv[j], 0.36 * S, t.logits[j], 4, at(ST.logits, a0 + 0.02, a0 + 0.06), `lg|0|${cur}|${j}`, on, { kind: 'voc', i: j });
 		}
+		flushNodes();
 		// the probability bars, then the pick
 		const grow = at(ST.pick, 0.05, 0.55), pick = at(ST.pick, 0.6, 0.78), pmax = Math.max(...t.probs);
 		let realAt = null;
@@ -1459,7 +1509,8 @@
 			if (n.kind === 'voc' || n.kind === 'bar') return `“${VOCAB[n.i]}”: logit ${fmt(t.logits[n.i], 3)}, p = ${t.probs[n.i].toFixed(3)}${wait}`;
 			return { in: `input ĥ[${n.i}] = ${v}`, g: `gate g, neuron ${n.i} = ${v} · SiLU ${fmt(t.sg[n.i], 3)}`, u: `value u, neuron ${n.i} = ${v}`, m: `neuron ${n.i}: SiLU(g) × u = ${v}`, out: `output f[${n.i}] = ${v}` }[n.kind] + wait;
 		}
-		const s = Math.round(tau), name = wallLabel(c.b, s)[0], who = tokName(c.t);
+		// named for the step its value comes from: mid-move a carried cube already holds the next step's
+		const s = c.st, name = wallLabel(c.b, s)[0], who = tokName(c.t);
 		const past = c.t < cur && c.b !== 'k' && c.b !== 'v' ? ' · from an earlier pass' : '';
 		const v = c.b === 'a' && !(s === ST.scores && c.t === cur) ? c.val.toFixed(3) : fmt(c.val, 3);
 		if (c.b === 'a') return `${name}[head ${c.h}, query ${who}, key ${tokName(c.i)}] = ${v}${past}`;
@@ -1505,18 +1556,39 @@
 	canvas.addEventListener('pointerleave', () => { tip.hidden = true; if (hoverKey) setHover(null); });
 
 	// ---- start -----------------------------------------------------------------------------
-	// KaTeX loads beside this script; when the desktop swaps the window in, the two scripts
-	// are re-created and race, so wait for it (briefly) before typesetting the side
-	function whenKatex(fn, tries = 0) {
-		if (window.katex || tries > 60) fn();
-		else setTimeout(() => whenKatex(fn, tries + 1), 50);
+	// The toy starts the first time its pane has a size, so never on a phone, where it is hidden.
+	// Only then is KaTeX fetched, pinned by its hashes; the side is typeset once it has run, or
+	// failed, which leaves the TeX as code.
+	const KATEX = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min';
+	const SRI = { css: 'sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+', js: 'sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg' };
+	let started = false;
+	function start() {
+		started = true;
+		const css = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: KATEX + '.css', integrity: SRI.css, crossOrigin: 'anonymous' });
+		root.append(css);
+		const run = () => {
+			buildSide();
+			buildMap();
+			layout();
+			fit();
+			setTok(cur);
+		};
+		if (window.katex) return run();
+		const js = Object.assign(document.createElement('script'), { src: KATEX + '.js', integrity: SRI.js, crossOrigin: 'anonymous', onload: run, onerror: run });
+		root.append(js);
 	}
-	whenKatex(() => {
-		buildSide();
-		buildMap();
-		new ResizeObserver(() => { layout(); readTau(); fit(); draw(); }).observe(scroller);
-		layout();
-		fit();
-		setTok(cur);
+	const resized = new ResizeObserver(() => {
+		if (!scroller.clientHeight) return;
+		if (!started) start();
+		else if (W) { layout(); readTau(); fit(); draw(); }
+	});
+	resized.observe(scroller);
+	// a closed window lets go of everything, so it can be freed
+	document.addEventListener('content:swapped', function closed() {
+		if (root.isConnected) return;
+		resized.disconnect();
+		stopPlay();
+		clearTimeout(explainTimer);
+		document.removeEventListener('content:swapped', closed);
 	});
 })();

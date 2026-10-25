@@ -1,4 +1,4 @@
-# 303. blocks — sixteen models, each with its parent in the family tree, and the versions of each part.
+# 302. blocks — sixteen models, each with its parent in the family tree, and the versions of each part.
 # Numbers come from each paper's configuration table; the KV cache per token is computed from them in the browser.
 # attn: mha | mqa | gqa | window | mla | hybrid.  pos: sin | learned | rope | rope-dec | rope-partial | none.  norm: LN | RMS | RMS0.
 

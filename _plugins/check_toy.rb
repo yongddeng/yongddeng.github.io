@@ -21,7 +21,11 @@ Jekyll::Hooks.register :site, :post_read do |site|
   raise "toy.yml: prerequisite #{stray.join(', ')} is filed under no component" unless stray.empty?
   twice = filed.tally.select { |_, n| n > 1 }.keys
   raise "toy.yml: prerequisite #{twice.join(', ')} is filed under two components" unless twice.empty?
-  raise "toy.yml: toy.js is drawn for 18 steps, the file has #{d["steps"].size}" unless d["steps"].size == 18
+  # toy.js draws one step a row of its STEPS table
+  table = File.read(File.join(site.source, "assets/js/toy.js"))[/^\tconst STEPS = \[\n(.*?)^\t\];/m, 1]
+  raise "check_toy.rb: no STEPS table in toy.js" if table.nil?
+  drawn = table.lines.size
+  raise "toy.yml: toy.js is drawn for #{drawn} steps, the file has #{d["steps"].size}" unless d["steps"].size == drawn
   steps = d["components"].flat_map { |c| c["steps"] }.sort
   raise "toy.yml: the components' steps must cover 0..#{d["steps"].size - 1} once each" unless steps == (0...d["steps"].size).to_a
   d["steps"].each_with_index do |s, i|

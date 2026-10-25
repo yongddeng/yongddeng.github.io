@@ -1,4 +1,4 @@
-// 303. blocks: a workbench inside the post window. The tree on the
+// 302. blocks: a workbench inside the post window. The tree on the
 // left picks a model, the sheet under it browses one part's versions, and
 // the pane on the right draws the block with the parts that changed from the
 // parent model lit. Data comes from _data/decoder_block.yml via the JSON
@@ -382,7 +382,7 @@
 	const LAB = { 'Google DeepMind': 'Google', 'Meta AI': 'Meta', 'Mistral AI': 'Mistral', 'AI21 Labs': 'AI21' };
 	const lab = m => LAB[m.org] || m.org;
 	function railHtml() {
-		const RH = 13.5, rowOf = {}; chrono.forEach((m, i) => rowOf[m.id] = i);
+		const RH = 15, rowOf = {}; chrono.forEach((m, i) => rowOf[m.id] = i);
 		const last = {}; const span = id => { let r = rowOf[id]; (kids[id] || []).forEach(k => r = Math.max(r, span(k))); last[id] = r; return r; }; span(chrono[0].id);
 		const lane = {}, occ = [], taken = {};
 		chrono.forEach(m => {
@@ -396,10 +396,13 @@
 		chrono.forEach(m => { if (!m.parent) return; const p = byId[m.parent], x0 = X(lane[p.id]), y0 = Y(rowOf[p.id]), x1 = X(lane[m.id]), y1 = Y(rowOf[m.id]);
 			o.push(x0 === x1 ? `<path d="M${x0},${y0}V${y1}" class="rail"/>` : `<path d="M${x0},${y0}V${y1 - 8}Q${x0},${y1} ${x0 + 8},${y1}H${x1}" class="rail"/>`); });
 		chrono.forEach(m => { const y = Y(rowOf[m.id]);
-			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - 7}" width="100%" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text></g>`); });
+			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - RH / 2}" width="100%" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text></g>`); });
 		return `<svg height="${chrono.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
 	}
 	$('.wb-tree').innerHTML = railHtml();
+	// at one unit a pixel the names can run past a narrow pane; the rail is as wide as they are, so the pane scrolls
+	const rail = $('.wb-tree svg'), right = Math.max(...[...rail.querySelectorAll('.nm')].map(t => { const b = t.getBBox(); return b.x + b.width; }));
+	rail.style.minWidth = Math.ceil(right + 6) + 'px';
 	$('.wb-tabs').innerHTML = data.parts.map(p => `<button type="button" class="wb-tab" data-tab="${p.id}">${p.no}. ${esc(p.name)}</button>`).join('');
 	const state = { cur: null, view: 'block', back: [], fwd: [], tab: 'attn' };
 	function tab(id) {
