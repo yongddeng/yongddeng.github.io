@@ -1,6 +1,7 @@
 ---
 layout: default
-title: "302. blocks"
+title: "303. blocks"
+permalink: /20230102/decoder-block
 tags: cs300
 icon: cardfile.png
 winclass: wb-win

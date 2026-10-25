@@ -1,4 +1,4 @@
-// 302. decoder block: a workbench in the post window (assets/js/decoder.js).
+// 303. blocks: a workbench in the post window (assets/js/decoder.js).
 // The model tree and the parts sheet stack on the left; the block is drawn on
 // the right. Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
 @use "main";
@@ -10,12 +10,12 @@ $wb-newline: #c8a000;
 $wb-newtext: #8a6d00;
 
 .wb-win {
-	width: 980px;
+	width: 860px;
 
 	.post_content {
 		display: flex;
 		flex-direction: column;
-		height: 620px;
+		height: 700px;
 		overflow: hidden;
 		background: #bfb8bf;
 		border: 0;
@@ -44,7 +44,9 @@ $wb-newtext: #8a6d00;
 	flex: 1;
 	min-height: 0;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+	// 2 : 3, so at the window's own size the block pane is about as wide as the drawing at full
+	// height, and the rest goes to the model rail and the parts sheet
+	grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 	gap: 4px;
 }
 .wb-left {
@@ -60,10 +62,10 @@ $wb-newtext: #8a6d00;
 	overflow: auto;
 	min-height: 0;
 
+	// drawn at one unit a pixel (no viewBox), so the rail's text is the same size as the parts sheet's at any window width
 	svg {
 		display: block;
 		width: 100%;
-		height: auto;
 		font-family: $wb-ui;
 	}
 	.rail { stroke: #000000; stroke-width: 1.2; fill: none; }
@@ -179,9 +181,6 @@ $wb-newtext: #8a6d00;
 			color: #ddddee;
 		}
 		.g-ln, .g-wave {
-			stroke: #ffffff;
-		}
-		.g-norm {
 			stroke: #ffffff;
 		}
 		.g-rt {

@@ -1,4 +1,4 @@
-// 302. decoder block: a workbench inside the post window. The tree on the
+// 303. blocks: a workbench inside the post window. The tree on the
 // left picks a model, the sheet under it browses one part's versions, and
 // the pane on the right draws the block with the parts that changed from the
 // parent model lit. Data comes from _data/decoder_block.yml via the JSON
@@ -38,7 +38,6 @@
 		mla: () => `multi-head latent: ${m.heads} heads; K and V rebuilt from a ${m.mla.dc}-d latent plus ${m.mla.dr} RoPE dims`,
 		hybrid: () => `${m.state} in ${m.layers - m.full_layers} of ${m.layers} layers; attention, ${m.heads}/${m.kv_heads} heads of ${m.head_dim}, in the rest`
 	})[m.attn]();
-	const POS = { sin: 'sinusoidal, added to the embedding', learned: 'learned, added to the embedding', rope: 'RoPE, rotating Q and K', 'rope-dec': 'decoupled RoPE on 64 dims of Q and K', 'rope-partial': 'RoPE on a quarter of the Q and K dims', none: 'none; the state layers carry order' };
 	const NORM = m => (m.pre ? 'pre-' : m.norm_after ? 'inside-' : 'post-') + NORMN[m.norm] + (m.pre && m.norm_after ? ' and after' : '') + (m.par ? ', parallel branches' : '') + (m.qk ? ' + QK-norm' : '');
 	const FFN = m => (m.ffn.kind === 'dense' ? `${m.ffn.act}, d_ff = ${n(m.ffn.dff)} (${m.ffn.ratio}×)` : `${m.ffn.n} ${m.ffn.act} experts, each ${n(m.ffn.ed)} wide`);
 	const EXP = m => (m.ffn.kind === 'dense' ? 'none' : `${m.ffn.n} routed${m.ffn.sh ? ' + ' + m.ffn.sh + ' shared' : ''}, top-${m.ffn.k}`);
@@ -54,9 +53,9 @@
 	// the FFN glyphs follow the token: in on the left, through a router (the diamond) and the experts, out on the right.
 	// Idle experts keep a faint wire; a shared expert is wired straight past the router; LOAD shows equal load with the bias on the router.
 	const ROUTER = (x, y, lab) => `<path d="M${x - 4},${y}L${x},${y - 4}L${x + 4},${y}L${x},${y + 4}Z" class="g-rt"/>` + (lab ? `<text x="${x}" y="${y - 6}" font-size="7" text-anchor="middle">${lab}</text>` : '');
-	const WIRE = (n, lit, h, shared) => {
+	const WIRE = (n, lit, h, shared, lab) => {
 		const top = (22 - (n * h + (n - 1)) - (shared ? 6 : 0)) / 2;
-		let s = '<path d="M0,11H10" class="g-ln"/>' + ROUTER(14, 11);
+		let s = '<path d="M0,11H10" class="g-ln"/>' + ROUTER(14, 11, lab);
 		for (let i = 0; i < n; i++) { const y = top + i * (h + 1), cy = y + h / 2, k = lit.includes(i) ? 'g-ln' : 'g-hint'; s += `<path d="M18,11C24,11 24,${cy} 30,${cy}" class="${k}"/><rect x="30" y="${y}" width="16" height="${h}" class="${lit.includes(i) ? 'g-on' : 'g-off'}"/><path d="M46,${cy}C52,${cy} 52,11 58,11" class="${k}"/>`; }
 		if (shared) { const y = top + n * (h + 1) + 2; s += `<path d="M10,11V${y + 2}H30" class="g-ln"/><rect x="30" y="${y}" width="16" height="4" class="g-sh"/><path d="M46,${y + 2}H54V11" class="g-ln"/>`; }
 		return s + '<path d="M58,11H64" class="g-ln"/>';
@@ -103,7 +102,7 @@
 		norm: { post: '<path d="M0,11H6" class="g-ln"/><path d="M6,11H27.5" class="g-hint"/><path d="M6,11V4H12" class="g-ln"/><rect x="12" y="1" width="12" height="6" class="g-off"/><path d="M24,4H30V8.5" class="g-ln"/>' + ADD(30) + '<path d="M32.5,11H38" class="g-ln"/><rect x="38" y="7" width="14" height="8" class="g-norm"/><path d="M52,11H64" class="g-ln"/>', pre: FLOW(true, false), inside: FLOW(false, true), sandwich: FLOW(true, true), rms: BARS(4, [6, 14, 9, 17, 4]) + '<path d="M22,11H26" class="g-ln"/><rect x="26" y="6" width="12" height="10" class="g-norm"/><path d="M38,11H42" class="g-ln"/>' + BARS(44, [3, 7, 4.5, 8.5, 2]) + '<path d="M4,19H19M44,19H59" class="g-ax"/>', qk: '<path d="M0,6H10M0,16H10" class="g-ln"/><rect x="0" y="4" width="6" height="4" class="g-q"/><rect x="0" y="14" width="6" height="4" class="g-k"/><rect x="10" y="3" width="12" height="6" class="g-norm"/><rect x="10" y="13" width="12" height="6" class="g-norm"/><path d="M22,6H30V9M22,16H30V13" class="g-ln"/><circle cx="30" cy="11" r="3" class="g-rt"/><circle cx="30" cy="11" r="0.8" class="g-cur"/><path d="M33,11H40" class="g-ln"/><text x="42" y="13.5" font-size="6">softmax</text>', zero: '<rect x="2" y="4" width="24" height="14" class="g-norm"/><path d="M6,11H22" class="g-ax"/><path d="M14,8V14" class="g-ln"/><circle cx="14" cy="11" r="2.2" class="g-rt"/><text x="32" y="13" font-size="7">\u03b3 \u2248 0</text>' },
 		attn: { mha: HEADS([4.5, 12.5, 20.5, 28.5, 36.5, 44.5, 52.5, 60.5]), mqa: HEADS([32.5]), gqa: HEADS([16.5, 48.5]), window: REACH(i => i >= 9), mla: LATENT(), linear: STATE(), sinks: SINKS(), gated: GATED() },
 		act: { relu: MLP(C_RELU), gelu: MLP(C_GELU), swiglu: GLU(), geglu: GLU('GELU') },
-		ffn: { dense: '<path d="M0,11H18" class="g-ln"/><path d="M18,7L30,1H36L48,7V15L36,21H30L18,15Z" class="g-dw"/><path d="M48,11H64" class="g-ln"/>', moe: WIRE(4, [1], 4, false), shared: WIRE(5, [1, 3], 2, true), auxfree: LOAD(), sigmoid: WIRE(4, [1], 4, false).replace('class="g-rt"/>', 'class="g-rt"/><text x="14" y="5" font-size="7" text-anchor="middle">\u03c3</text>') },
+		ffn: { dense: '<path d="M0,11H18" class="g-ln"/><path d="M18,7L30,1H36L48,7V15L36,21H30L18,15Z" class="g-dw"/><path d="M48,11H64" class="g-ln"/>', moe: WIRE(4, [1], 4, false), shared: WIRE(5, [1, 3], 2, true), auxfree: LOAD(), sigmoid: WIRE(4, [1], 4, false, '\u03c3') },
 		ctx: { interleave: '<path d="M2,7H40" class="g-hint"/>' + RULER(40, 62, EVEN(40, 62, 8), 7) + RULER(2, 62, EVEN(2, 62, 16), 17) + CURTOK(62), full: RULER(2, 34, EVEN(2, 34, 16)) + TRAINED(34) + CURTOK(34), base: RULER(2, 62, EVEN(2, 62, 16)) + TRAINED(34) + CURTOK(62), yarn: RULER(2, 62, [0, 1, 2, 3].map(i => [2 + i * 20, true]).concat([1, 2, 3].flatMap(i => [[2 + i * 20 - 6, false], [2 + i * 20 - 11, false], [2 + i * 20 - 15, false]]))) + TRAINED(34) + CURTOK(62), window: '<path d="M2,14H40" class="g-hint"/>' + RULER(40, 62, EVEN(40, 62, 8)) + CURTOK(62), linear: '<path d="M14,14H56" class="g-hint"/><rect x="2" y="8" width="11" height="11" class="g-k"/><path d="M56,14H14" class="g-ln"/><path d="M16,12l-3,2l3,2" class="g-ln"/>' + CURTOK(60) },
 	};
 	const uses = (part, m) => part.techniques.filter(t => t.models.includes(m.id));
@@ -129,7 +128,7 @@
 	// ---- the block ----------------------------------------------------------------
 	function schematic(m, p) {
 		const c = changes(m, p), o = [], { box, ln, up, left, txt, svg } = pen(o);
-		const T = 80, BX = 165, BR = 505, BW = BR - BX, post = !m.pre && !m.norm_after;
+		const TX = 80, BX = 165, BR = 505, BW = BR - BX, post = !m.pre && !m.norm_after;
 		const plus = (x, y) => { o.push(`<circle cx="${x}" cy="${y}" r="8" class="plus"/><text x="${x}" y="${y + 4}" class="plust" text-anchor="middle">+</text>`); up(x, y + 10); left(x + 10, y); };
 		const sq = (x0, yy, cnt, k) => { for (let i = 0; i < cnt; i++) o.push(`<rect x="${x0 + i * 11}" y="${yy - 8}" width="9" height="9" class="${k}"/>`); return x0 + cnt * 11; };
 		const meter = (x, y, fr) => o.push(`<rect x="${x}" y="${y}" width="80" height="4" class="mt"/><rect x="${x}" y="${y}" width="${Math.max(2, 80 * Math.min(1, Math.max(0, fr)))}" height="4" class="mf"/>`);
@@ -205,45 +204,45 @@
 			o.push('</g>');
 		}
 		const normName = NORMN[m.norm].replace(', zero-centred', ' (0-centred)');
-		o.push(`<path d="M${T},556V${post ? 34 : 42}" class="trunk"/>`);
-		txt(T, 566, 'tokens in', 'io', 'middle'); txt(T + 70, 12, 'next-token distribution →', 'io', 'start');
-		box(22, 512, 116, 26, 'emb', 'Embedding', `V = ${n(m.vocab.n)}`, 'emb', c.embed);
-		if (m.pos === 'sin' || m.pos === 'learned') box(22, 472, 116, 26, 'pos', '+ position', m.pos === 'sin' ? 'sinusoidal' : `learned, ${n(m.ctx)} slots`, 'pos', c.pos);
+		o.push(`<path d="M${TX},556V${post ? 34 : 42}" class="trunk"/>`);
+		txt(TX, 566, 'tokens in', 'io', 'middle'); txt(TX + 70, 12, 'next-token distribution →', 'io', 'start');
+		box(22, 512, 116, 26, 'emb', 'Embedding', `V = ${n(m.vocab.n)}`, c.embed, 'emb');
+		if (m.pos === 'sin' || m.pos === 'learned') box(22, 472, 116, 26, 'pos', '+ position', m.pos === 'sin' ? 'sinusoidal' : `learned, ${n(m.ctx)} slots`, c.pos, 'pos');
 		else { o.push(`<rect x="22" y="472" width="116" height="26" class="bx ghost${c.pos ? ' chg' : ''}" data-k="pos"/>`); txt(80, 483, m.pos === 'none' ? 'no position encoding' : 'no position added here', 'gs', 'middle'); txt(80, 494, m.pos === 'none' ? 'the state layers carry order' : 'RoPE acts inside attention', 'gs', 'middle'); }
 		const fy0 = post ? 44 : 92;
 		o.push(`<rect x="14" y="${fy0}" width="496" height="${452 - fy0}" class="frame" data-k="frame"/>`);
 		// the two axes every norm sits on: the residual stream (trunk) and the branch into each sub-block
-		txt(T + 6, 464, 'residual stream', 'axis'); txt(BX + 43, 464, 'branch', 'axis', 'middle');
+		txt(TX + 6, 464, 'residual stream', 'axis'); txt(BX + 43, 464, 'branch', 'axis', 'middle');
 		o.push(`<text x="502" y="${fy0 + 14}" class="fl${c.layers ? ' chgt' : ''}" text-anchor="end">× ${m.layers} layers${m.full_layers ? `, ${m.full_layers} of them with full attention` : ''}${m.dense_first ? ` · the first ${m.dense_first} with a dense FFN` : ''}${m.moe_every ? ' · experts in every other layer' : ''}</text>`);
 		if (m.par) {
-			ln(`M${T},432H${BX}`); box(BX, 422, 86, 20, 'norm', normName, '', c.norm, 'n1');
+			ln(`M${TX},432H${BX}`); box(BX, 422, 86, 20, 'norm', normName, '', c.norm, 'n1');
 			ln(`M${BX + 43},422V412H422V400`); ln(`M${BX + 43},412V400`);
 			ln(`M${BX + 43},400V380`); ln(`M422,400V380`);
 			attnBox(BX, 250, 165, 130, true); ffnBox(340, 250, 165, 130, true);
-			ln(`M${BX + 43},250V230H${T + 8}`); ln(`M422,250V230`); ln(`M${BX + 43},230H422`); plus(T, 230);
-			box(22, 58, 116, 20, 'norm', 'Final ' + normName, '', c.norm, 'fn'); up(T, 80);
+			ln(`M${BX + 43},250V230H${TX + 8}`); ln(`M422,250V230`); ln(`M${BX + 43},230H422`); plus(TX, 230);
+			box(22, 58, 116, 20, 'norm', 'Final ' + normName, '', c.norm, 'fn'); up(TX, 80);
 		} else if (!post) {
-			if (m.pre) { ln(`M${T},432H${BX}`); box(BX, 422, 86, 20, 'norm', normName, '', c.norm, 'n1'); ln(`M${BX + 43},422V410`); } else ln(`M${T},432H${BX + 43}V410`);
-			attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${T + 8}`); plus(T, 300);
+			if (m.pre) { ln(`M${TX},432H${BX}`); box(BX, 422, 86, 20, 'norm', normName, '', c.norm, 'n1'); ln(`M${BX + 43},422V410`); } else ln(`M${TX},432H${BX + 43}V410`);
+			attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${TX + 8}`); plus(TX, 300);
 			if (m.norm_after) box(100, 290, 86, 20, 'norm', normName, '', c.norm, 'na1');
-			if (m.pre) { ln(`M${T},272H${BX}`); box(BX, 262, 86, 20, 'norm', normName, '', c.norm, 'n2'); ln(`M${BX + 43},262V250`); } else ln(`M${T},272H${BX + 43}V250`);
-			ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${T + 8}`); plus(T, 140);
+			if (m.pre) { ln(`M${TX},272H${BX}`); box(BX, 262, 86, 20, 'norm', normName, '', c.norm, 'n2'); ln(`M${BX + 43},262V250`); } else ln(`M${TX},272H${BX + 43}V250`);
+			ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${TX + 8}`); plus(TX, 140);
 			if (m.norm_after) box(100, 130, 86, 20, 'norm', normName, '', c.norm, 'na2');
-			box(22, 58, 116, 20, 'norm', 'Final ' + normName, '', c.norm, 'fn'); up(T, 80);
+			box(22, 58, 116, 20, 'norm', 'Final ' + normName, '', c.norm, 'fn'); up(TX, 80);
 		} else if (m.xattn) {
 			// the Transformer's decoder: masked self-attention, cross-attention to the encoder, then the MLP, a norm on the trunk after each
-			ln(`M${T},432H${BX + 43}V412`); attnBox(BX, 326, BW, 86, false); ln(`M${BX + 43},326V314H${T + 8}`); plus(T, 314); box(T - 43, 288, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n1');
-			ln(`M${T},272H${BX + 43}V260`);
+			ln(`M${TX},432H${BX + 43}V412`); attnBox(BX, 326, BW, 86, false); ln(`M${BX + 43},326V314H${TX + 8}`); plus(TX, 314); box(TX - 43, 288, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n1');
+			ln(`M${TX},272H${BX + 43}V260`);
 			box(BX, 212, BW, 48, 'xattn', 'Cross-attention', 'reads the encoder output', false, 'xa');
-			ln(`M${BX + 43},212V200H${T + 8}`); plus(T, 200); box(T - 43, 176, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'nx');
-			ln(`M${T},164H${BX + 43}V152`); ffnBox(BX, 84, BW, 68, false); ln(`M${BX + 43},84V72H${T + 8}`); plus(T, 72); box(T - 43, 48, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n2');
+			ln(`M${BX + 43},212V200H${TX + 8}`); plus(TX, 200); box(TX - 43, 176, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'nx');
+			ln(`M${TX},164H${BX + 43}V152`); ffnBox(BX, 84, BW, 68, false); ln(`M${BX + 43},84V72H${TX + 8}`); plus(TX, 72); box(TX - 43, 48, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n2');
 		} else {
 			// post-norm decoder-only (GPT-1): the same two sub-blocks as pre-norm, with the norm on the trunk after each add
-			ln(`M${T},432H${BX + 43}V410`); attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${T + 8}`); plus(T, 300); box(T - 43, 268, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n1');
-			ln(`M${T},256H${BX + 43}V250`); ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${T + 8}`); plus(T, 140); box(T - 43, 108, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n2');
+			ln(`M${TX},432H${BX + 43}V410`); attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${TX + 8}`); plus(TX, 300); box(TX - 43, 268, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n1');
+			ln(`M${TX},256H${BX + 43}V250`); ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${TX + 8}`); plus(TX, 140); box(TX - 43, 108, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n2');
 		}
 		box(22, post ? 8 : 16, 116, 26, 'head', 'Linear · softmax', 'over the vocabulary', false, 'head');
-		if (post) up(T, 36);
+		if (post) up(TX, 36);
 		return svg(`The decoder block of ${m.name}, drawn bottom to top`);
 	}
 
@@ -251,7 +250,7 @@
 	// One token at position t, bottom to top: the projections with their real shapes, where RoPE and QK-norm act,
 	// the scores, the mask as a matrix, softmax, the weighted sum, concat, the output projection, and what is cached.
 	function openedAttn(m, p) {
-		const c = changes(m, p), o = [], { T, box, ln, up, left, txt, vec, chrome, svg } = pen(o);
+		const o = [], { T, box, ln, up, left, txt, vec, chrome, svg } = pen(o);
 		const mla = m.attn === 'mla', W = n(m.width), H = m.heads, Hk = m.kv_heads, hd = m.head_dim;
 		const headsChg = p && (p.heads !== H || p.kv_heads !== Hk || p.head_dim !== hd || p.attn !== m.attn), posChg = p && p.pos !== m.pos, cacheChg = p && kv(p) !== kv(m);
 		chrome(`Attention, opened · ${m.name}`, m.attn === 'hybrid' ? `one of the ${m.full_layers} attention layers; the ${m.state} layers keep a state instead` : m.attn === 'window' ? `one token at position t; this layer sees the last ${n(m.win)} tokens` : 'one token at position t, bottom to top', 'attn');
@@ -284,9 +283,9 @@
 		box(100, 340, 190, 30, 'zop', mla ? `[q; q_rope] · [k; k_rope]ᵀ ÷ √${hd + m.mla.dr}` : `q · kᵀ ÷ √${hd}`, 'one score per earlier token', headsChg); up(130, 370); up(260, 370);
 		ln('M195,340V318'); up(195, 318);
 		txt(48, 236, 'mask', 'lab');
-		const win = m.attn === 'window', sink = !!m.sinks, x0 = sink ? 57 : 48;
-		for (let r = 0; r < 8; r++) { if (sink) T(`<rect x="48" y="${242 + r * 9}" width="8" height="8" class="c-on"/>`); for (let col = 0; col < 8; col++) T(`<rect x="${x0 + col * 9}" y="${242 + r * 9}" width="8" height="8" class="${col > r ? 'c-off' : col === r ? 'c-cur' : (win && r - col > 2) ? 'c-dim' : 'c-on'}"/>`); }
-		txt(48, 325, win ? `row t sees the last ${n(m.win)} columns${sink ? ', or the sink' : ''}` : `row t sees columns ≤ t${sink ? ', or the sink' : ''}`, 'bs');
+		const sliding = m.attn === 'window', sink = !!m.sinks, x0 = sink ? 57 : 48;
+		for (let r = 0; r < 8; r++) { if (sink) T(`<rect x="48" y="${242 + r * 9}" width="8" height="8" class="c-on"/>`); for (let col = 0; col < 8; col++) T(`<rect x="${x0 + col * 9}" y="${242 + r * 9}" width="8" height="8" class="${col > r ? 'c-off' : col === r ? 'c-cur' : (sliding && r - col > 2) ? 'c-dim' : 'c-on'}"/>`); }
+		txt(48, 325, sliding ? `row t sees the last ${n(m.win)} columns${sink ? ', or the sink' : ''}` : `row t sees columns ≤ t${sink ? ', or the sink' : ''}`, 'bs');
 		box(140, 280, 110, 28, 'zop', 'softmax', 'weights over the past'); ln('M195,280V258'); up(195, 258);
 		box(140, 222, 110, 30, 'zop', '× V', `weights · ${hd}-d values`); if (!mla) ln('M390,237H250'); left(250, 237);
 		ln('M195,222V200'); up(195, 200);
@@ -301,7 +300,7 @@
 	// Dense: up (and gate), the nonlinearity, down, with the real widths and the parameter count. Mixture of experts: the
 	// router and its rule, the chosen experts as small MLPs with their gate weights, the shared expert, the weighted sum.
 	function openedFfn(m, p) {
-		const c = changes(m, p), o = [], { T, box, ln, up, txt, cells, vec, chrome, svg } = pen(o), f = m.ffn, W = n(m.width);
+		const o = [], { T, box, ln, up, txt, cells, vec, chrome, svg } = pen(o), f = m.ffn, W = n(m.width);
 		const glu = /GLU$/.test(f.act), actName = f.act === 'SwiGLU' ? 'SiLU' : f.act === 'GeGLU' ? 'GELU' : f.act;
 		const pf = x => (x >= 1e9 ? (x / 1e9).toFixed(x >= 1e10 ? 0 : 1) + 'B' : (x / 1e6).toFixed(0) + 'M');
 		const curve = (x, y, k) => T(k === 'ReLU' ? `<path d="M${x - 14},${y + 6}H${x}L${x + 12},${y - 8}" class="wave"/>` : `<path d="M${x - 14},${y + 6}C${x - 4},${y + 6} ${x - 4},${y + 10} ${x},${y + 6}S${x + 6},${y - 8} ${x + 12},${y - 8}" class="wave"/>`);
@@ -397,8 +396,8 @@
 		chrono.forEach(m => { if (!m.parent) return; const p = byId[m.parent], x0 = X(lane[p.id]), y0 = Y(rowOf[p.id]), x1 = X(lane[m.id]), y1 = Y(rowOf[m.id]);
 			o.push(x0 === x1 ? `<path d="M${x0},${y0}V${y1}" class="rail"/>` : `<path d="M${x0},${y0}V${y1 - 8}Q${x0},${y1} ${x0 + 8},${y1}H${x1}" class="rail"/>`); });
 		chrono.forEach(m => { const y = Y(rowOf[m.id]);
-			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - 7}" width="290" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text></g>`); });
-		return `<svg viewBox="0 0 294 ${chrono.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
+			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - 7}" width="100%" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text></g>`); });
+		return `<svg height="${chrono.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
 	}
 	$('.wb-tree').innerHTML = railHtml();
 	$('.wb-tabs').innerHTML = data.parts.map(p => `<button type="button" class="wb-tab" data-tab="${p.id}">${p.no}. ${esc(p.name)}</button>`).join('');
@@ -453,11 +452,14 @@
 		const op = e.target.closest('[data-open]'); if (op) { e.preventDefault(); actions.open(op.dataset.open); return; }
 		const pick = e.target.closest('[data-id]'); if (pick) { e.preventDefault(); go(pick.dataset.id); }
 	});
-	// arrow keys step through time while this window is in front
-	document.addEventListener('keydown', e => {
+	// arrow keys step through time while this window is in front. The listener sits on the
+	// document, so once the window is closed it removes itself and lets the window be freed
+	function onArrow(e) {
+		if (!win.isConnected) { document.removeEventListener('keydown', onArrow); return; }
 		if (e.target.matches('input, textarea') || !win.classList.contains('active-win')) return;
 		if (e.key === 'ArrowRight' && !$('[data-act=next]').disabled) actions.next();
 		if (e.key === 'ArrowLeft' && !$('[data-act=prev]').disabled) actions.prev();
-	});
+	}
+	document.addEventListener('keydown', onArrow);
 	go('llama', false);
 })();

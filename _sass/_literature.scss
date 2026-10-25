@@ -1,4 +1,4 @@
-// 301. papers: a WinHelp-style reader in the post window
+// 302. papers: a WinHelp-style reader in the post window
 // (assets/js/literature.js). Contents on the left, a page on the right;
 // the Timeline and Lineage views replace the page.
 @use "main";
@@ -11,13 +11,13 @@ $lit-link: #008000;
 
 .help-win {
 	// two panes side by side want more than the 750px of a reading window
-	width: 940px;
+	width: 860px;
 
 	// the pane is window chrome here; the Contents and page panes inside carry the paper
 	.post_content {
 		display: flex;
 		flex-direction: column;
-		height: 456px;
+		height: 645px;
 		overflow: hidden;
 		background: #bfb8bf;
 		border: 0;

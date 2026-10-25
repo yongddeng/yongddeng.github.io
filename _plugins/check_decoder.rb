@@ -1,4 +1,4 @@
-# 302. decoder block: fail the build on a dangling id in _data/decoder_block.yml,
+# 303. blocks: fail the build on a dangling id in _data/decoder_block.yml,
 # which would otherwise blank the workbench with a script error in the browser.
 Jekyll::Hooks.register :site, :post_read do |site|
   d = site.data["decoder_block"]
@@ -7,7 +7,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
   raise "decoder_block.yml: duplicate model id #{dup.join(', ')}" unless dup.empty?
   d["models"].each do |m|
     raise "decoder_block.yml: model #{m["id"]} has unknown parent #{m["parent"]}" if m["parent"] && !ids.include?(m["parent"])
-    %w[layers width heads kv_heads head_dim attn pos norm ffn vocab ctx params why].each do |k|
+    %w[name date org paper layers width heads kv_heads head_dim attn pos norm ffn vocab ctx params why].each do |k|
       raise "decoder_block.yml: model #{m["id"]} is missing #{k}" if m[k].nil?
     end
   end

@@ -1,4 +1,4 @@
-// 301. papers: a WinHelp-style reader inside the post window.
+// 302. papers: a WinHelp-style reader inside the post window.
 // Contents lists venue types and venues as books and papers as pages; the
 // right pane shows the overview, one book, or one paper. View ▸ Timeline and View ▸ Lineage
 // redraw the current selection laid out by subject shelf; Lineage fetches d3

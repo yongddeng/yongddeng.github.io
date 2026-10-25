@@ -37,7 +37,7 @@
 	}
 
 	// Restore: back to the stylesheet size, which differs per window
-	// class (750px reader, 940px help, ...), so clear rather than pin;
+	// class (750px reader, 860px help, ...), so clear rather than pin;
 	// a maximized window also goes back to where it was
 	function minimize (content) {
 		var cont = content.querySelector(".post_content");

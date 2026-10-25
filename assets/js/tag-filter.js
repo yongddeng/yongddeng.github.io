@@ -10,8 +10,10 @@
 		+ '<span class="dh-type">Type</span>'
 		+ '<span class="dh-date" data-sort="date">Date</span></div>';
 
+	// The Type column, named as _includes/post-item.html names it
+	var TYPES = { 'video.svg': 'Media Clip', 'tree.png': 'Tree File', 'cardfile.png': 'Card File', 'cube.png': 'Model File' };
 	function typeFor(icon) {
-		return icon === 'video.svg' ? 'Media Clip' : 'Notepad';
+		return TYPES[icon] || 'Notepad';
 	}
 
 	function itemHtml(post, tagParam) {
@@ -303,7 +305,7 @@
 		box.querySelector('button').addEventListener('click', function() { box.remove(); });
 	}
 
-	// Opens a post as a window; at most three, a fourth is refused.
+	// Opens a post as a window; at most five, a sixth is refused.
 	// opts.geom pins the position, opts.force waives the cap (session restore).
 	// Returns a promise so a restore can reopen windows in their saved order.
 	function loadPost(url, opts) {
@@ -315,7 +317,7 @@
 			dup.dispatchEvent(new MouseEvent('mousedown'));
 			return Promise.resolve();
 		}
-		if (!opts.force && openPosts().length >= 3) {
+		if (!opts.force && openPosts().length >= 5) {
 			showError('There is not enough memory to open another window. '
 				+ 'Close one of the open posts, and then try again.');
 			return Promise.resolve();
@@ -374,8 +376,8 @@
 		if (!link) return;
 		var href = link.getAttribute('href');
 		if (!href || href.startsWith('http')) return;
-		// Phones navigate instead of opening windows: stacking three posts
-		// in one scroll and refusing the fourth is desktop behaviour
+		// Phones navigate instead of opening windows: stacking five posts
+		// in one scroll and refusing the sixth is desktop behaviour
 		if (phone()) return;
 		e.preventDefault();
 		loadPost(href);
