@@ -1,0 +1,494 @@
+// 301. toy: one LLaMA layer in the post window (assets/js/toy.js). The cubes
+// scroll in the pane on the left; the maths, one section per component, is the
+// pane on the right. Toolbar, buttons and panes reuse the WinHelp chrome from
+// _literature.scss; KaTeX typesets the maths.
+@use "main";
+
+$toy-ui: "Helvetica Neue", Arial, sans-serif;
+$toy-serif: Georgia, "Times New Roman", serif;
+$toy-mute: #55505a;
+$toy-navy: #000080;
+$toy-rule: #ebe8ee;
+$toy-gold: #c8a000;
+
+.toy-win {
+	width: 1080px;
+
+	.post_content {
+		display: flex;
+		flex-direction: column;
+		height: 645px;
+		overflow: hidden;
+		background: #bfb8bf;
+		border: 0;
+		padding: 0 4px 2px;
+	}
+}
+
+.toy {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	font: 12px/1.35 $toy-ui;
+	color: #000000;
+
+	// outrank the post body's own rules
+	ul, li, p {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		line-height: inherit;
+	}
+	table, th, td {
+		border: 0;
+		padding: 0;
+	}
+	[hidden] {
+		display: none !important;
+	}
+	.lit-btn.on {
+		background: #d4d0d4;
+	}
+	.lit-btn sub {
+		font-size: 8px;
+		line-height: 0;
+	}
+}
+.toy-lbl {
+	color: $toy-mute;
+	padding: 0 2px 0 4px;
+}
+.toy-toks {
+	display: inline-flex;
+	gap: 4px;
+}
+.toy-body {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+	gap: 4px;
+
+	&.nomaths {
+		grid-template-columns: 1fr;
+
+		.toy-side {
+			display: none;
+		}
+	}
+}
+
+// the cube pane: a sticky stage over a spacer, so the pane's own scroll is the clock
+.toy-scroll {
+	position: relative;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	touch-action: pan-y;
+
+	&:focus-visible {
+		outline: 1px dotted #000000;
+		outline-offset: -3px;
+	}
+	&::-webkit-scrollbar {
+		width: 16px;
+	}
+	&::-webkit-scrollbar-track {
+		background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 0 0 / 2px 2px;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: #c0c0c0;
+		border: 2px solid;
+		border-color: #ffffff #000000 #000000 #ffffff;
+		box-shadow: inset -1px -1px #808080;
+	}
+}
+.toy-stage {
+	position: sticky;
+	top: 0;
+	overflow: hidden;
+}
+.toy-cube {
+	display: block;
+	width: 100%;
+	height: 100%;
+	cursor: grab;
+
+	&.drag {
+		cursor: grabbing;
+	}
+}
+.toy-tip {
+	position: absolute;
+	pointer-events: none;
+	background: #ffffe1;
+	border: 1px solid #000000;
+	padding: 2px 6px;
+	font: 11.5px $toy-ui;
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+// the maths pane: a sticky step map and component nav, then one section per component
+.toy-side {
+	position: relative;
+	overflow-y: auto;
+	overflow-anchor: none;
+	padding: 0 14px 18px;
+}
+.toy-sidehead {
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	display: grid;
+	gap: 6px;
+	margin: 0 -14px;
+	padding: 8px 14px 6px;
+	background: var(--paper, #fbfafb);
+	border-bottom: 1px solid #d6d2da;
+}
+.toy-map {
+	display: grid;
+	gap: 2px;
+	align-items: end;
+
+	.grp {
+		grid-row: 1;
+		font: bold 10px $toy-ui;
+		color: $toy-mute;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+	button {
+		grid-row: 2;
+		height: 12px;
+		padding: 0;
+		border: 1px solid #808080;
+		background: #ffffff;
+		cursor: pointer;
+
+		&.done { background: #8b8bc4; }
+		&.on { background: $toy-navy; border-color: $toy-navy; }
+		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
+	}
+}
+.toy-nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+
+	button {
+		font: 11.5px $toy-ui;
+		color: #000000;
+		background: #c0c0c0;
+		border: 1px solid;
+		border-color: #ffffff #808080 #808080 #ffffff;
+		padding: 1px 8px;
+		cursor: pointer;
+
+		span { color: $toy-navy; }
+		&.on {
+			background: #ffffff;
+			border-color: #808080 #ffffff #ffffff #808080;
+			font-weight: bold;
+		}
+		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
+	}
+}
+
+// a component: heading, its line, prerequisites, then the steps of its forward pass
+.toy-cp {
+	padding-bottom: 10px;
+	border-bottom: 2px solid #d6d2da;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+	.toy-cph {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 2px 8px;
+		margin: 18px 0 2px;
+		font: bold 17px/1.3 $toy-serif;
+
+		.num { color: $toy-navy; min-width: 14px; }
+		small {
+			flex-basis: 100%;
+			padding-left: 22px;
+			font: 11.5px $toy-ui;
+			color: $toy-mute;
+		}
+	}
+	&.here .toy-cph .num {
+		background: $toy-navy;
+		color: #ffffff;
+		padding: 0 5px;
+		min-width: 0;
+	}
+}
+.toy-intro {
+	margin: 6px 0 2px;
+	font: 12.5px/1.5 $toy-ui;
+	color: #45404a;
+}
+.toy-cpeq {
+	margin: 2px 0 2px 22px;
+}
+.toy-sub {
+	margin: 12px 0 2px;
+	padding-bottom: 3px;
+	border-bottom: 1px solid $toy-rule;
+	font: bold 10px $toy-ui;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: $toy-navy;
+}
+.toy-tok {
+	margin-left: 4px;
+	font: normal 13px $toy-ui;
+	text-transform: none;
+	letter-spacing: 0;
+	color: $toy-mute;
+
+	i { font: italic bold 14px $toy-serif; color: $toy-navy; }
+	sub { font-size: 9px; }
+}
+.toy-also {
+	margin: 4px 0 0;
+	font: 11.5px/1.5 $toy-ui;
+	color: $toy-mute;
+}
+// a prerequisite; `now` when the current step uses it, `flash` when a reference jumps to it
+.toy-pre {
+	margin: 0 -14px;
+	padding: 8px 14px 8px 11px;
+	border-left: 3px solid transparent;
+
+	&.now {
+		border-left-color: $toy-navy;
+		background: #f1f1f8;
+	}
+	&.flash {
+		animation: toy-flash 1.4s ease-out;
+	}
+	.toy-preh {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 2px 8px;
+		margin: 0 0 2px;
+		font: bold 13px $toy-ui;
+
+		.num { color: $toy-navy; font-weight: normal; }
+		em { font: italic 11.5px $toy-serif; color: $toy-mute; }
+	}
+	p {
+		margin: 4px 0;
+		font: 13px/1.55 $toy-serif;
+	}
+}
+@keyframes toy-flash {
+	from { background: #fff3b0; }
+}
+.toy-used {
+	margin-top: 4px;
+	font: 11px $toy-ui;
+	color: $toy-mute;
+}
+.toy-ref {
+	font: 11px $toy-ui;
+	color: $toy-navy;
+	background: none;
+	border: 0;
+	padding: 0 1px;
+	cursor: pointer;
+	text-decoration: underline;
+	text-decoration-color: #9a9ad0;
+	text-underline-offset: 2px;
+
+	&:hover { color: #b00000; }
+	&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
+}
+.toy-dims {
+	border-collapse: collapse;
+	font: 12px $toy-ui;
+	font-variant-numeric: tabular-nums;
+	margin: 2px 0;
+
+	th {
+		font: bold 10px $toy-ui;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: $toy-mute;
+		text-align: right;
+		padding: 0 0 2px 12px;
+	}
+	td {
+		padding: 1px 0 1px 12px;
+		border-top: 1px solid $toy-rule;
+		text-align: right;
+		white-space: nowrap;
+	}
+	td:first-child { padding-left: 0; text-align: left; }
+	td:nth-child(2) { text-align: left; color: #45404a; white-space: normal; }
+}
+
+// the forward pass: one row per step; the current one holds the detail block
+.toy-fp {
+	margin: 0 -14px;
+	padding: 0 14px 0 11px;
+	border-top: 1px solid $toy-rule;
+	border-left: 3px solid transparent;
+
+	&.future .toy-fph { opacity: 0.45; }
+	&.cur {
+		border-left-color: $toy-navy;
+		background: #f6f6fb;
+
+		.toy-fph b { color: $toy-navy; font-size: 15px; }
+		.toy-fph .n { color: $toy-navy; font-weight: bold; }
+	}
+}
+.toy-fph {
+	display: grid;
+	grid-template-columns: 30px minmax(0, 1fr);
+	gap: 0 4px;
+	width: 100%;
+	margin: 0;
+	padding: 5px 0 4px;
+	text-align: left;
+	background: none;
+	border: 0;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+
+	.n { font: 11px/1.6 $toy-ui; color: $toy-mute; font-variant-numeric: tabular-nums; }
+	b { font: bold 13px/1.5 $toy-serif; }
+	.eq {
+		grid-column: 2;
+		overflow-x: auto;
+		overflow-y: hidden;
+		padding: 1px 0 2px;
+
+		.katex { font-size: 1.12em; }
+	}
+	&:hover b { color: $toy-navy; }
+	&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
+}
+.toy-detail {
+	display: grid;
+	gap: 6px;
+	padding: 0 0 12px 24px;
+	min-width: 0;
+
+	> * { min-width: 0; }
+}
+.toy-lab {
+	margin-top: 4px;
+	font: bold 10px $toy-ui;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: $toy-mute;
+
+	span { font-weight: normal; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+}
+.toy-uses {
+	font: 11px $toy-ui;
+	color: $toy-mute;
+}
+.toy-cap {
+	font: 13.5px/1.5 $toy-serif;
+
+	i { font-style: normal; font-weight: bold; color: $toy-navy; }
+}
+.toy-notes {
+	padding: 8px 0 0 16px;
+	border-top: 1px solid #dddddd;
+	font: 12px/1.45 $toy-ui;
+	color: #45404a;
+	display: grid;
+	gap: 3px;
+
+	li { list-style: disc; }
+}
+.toy-end {
+	padding-top: 4px;
+}
+
+// the maths: KaTeX lines, each scrolling sideways on its own if it must
+.toy-mx {
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding: 1px 0;
+
+	.katex-display { margin: 4px 0; }
+	.katex-display.fleqn > .katex { padding-left: 0; }
+	.katex { font-size: 1.1em; }
+	&.tight .arraycolsep { width: 0.24em !important; }
+}
+.toy-mnote {
+	margin: 2px 0 6px;
+	font: 12.5px/1.5 $toy-serif;
+	color: #2b2830;
+
+	i { font-style: normal; font-weight: bold; color: $toy-navy; }
+}
+.toy .katex {
+	color: inherit;
+}
+
+// the cells: the step's numbers as an SVG, each cell keyed to a cube
+.toy-panel {
+	svg {
+		display: block;
+		width: 100%;
+		max-width: 440px;
+		height: auto;
+	}
+	text { font-family: $toy-ui; }
+	[data-k].on rect { stroke: $toy-gold; stroke-width: 2.5; }
+	.cl { stroke: #ffffff; stroke-width: 1; }
+	.cv { font-size: 10px; font-variant-numeric: tabular-nums; }
+	.cv9 { font-size: 8.5px; font-variant-numeric: tabular-nums; }
+	.pl { font-size: 11px; fill: $toy-mute; }
+	.pv { font: italic bold 14px $toy-serif; fill: #000000; }
+	.ps { font-size: 10.5px; fill: $toy-mute; }
+	.po { font-size: 11.5px; fill: #000000; }
+	.hl { font-size: 9px; font-weight: bold; fill: $toy-mute; }
+	.hb { stroke: $toy-mute; stroke-width: 1; fill: none; }
+	.rl { font-size: 11px; fill: #000000; }
+	.rl.cur { font-weight: bold; fill: $toy-navy; }
+	.wb { fill: $toy-navy; }
+	.wv { font-size: 9.5px; fill: #000000; font-variant-numeric: tabular-nums; }
+	.new { fill: none; stroke: $toy-navy; stroke-width: 2; }
+	.dl { fill: #ffffff; stroke: #b8b8b8; }
+	.dax { stroke: #e2e2e2; }
+	.dbe { stroke: #9a9a9a; stroke-dasharray: 2 2; fill: none; }
+	.darc { fill: none; stroke: #b00000; stroke-width: 1; }
+}
+
+// On a phone the toy is hidden behind a one-line notice (.toy-phone);
+// the window chrome goes back to the ordinary page
+.toy-phone {
+	display: none;
+}
+@media only screen and (max-width: 700px) {
+	.toy-win .post_content {
+		display: block;
+		height: auto;
+		overflow: visible;
+		background: var(--paper, #fbfafb);
+		padding: 16px 14px 40px;
+	}
+	.toy {
+		display: none;
+	}
+	.toy-phone {
+		display: block;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.toy-pre.flash { animation: none; }
+}

@@ -1,0 +1,277 @@
+# 301. toy — the maths beside the cubes. One section per component, each with the
+# prerequisites it assumes and the steps of its forward pass; the current token's
+# numbers are worked out in the browser (assets/js/toy.js). TeX between $…$ and
+# $$…$$ is typeset by KaTeX. Checked at build time by _plugins/check_toy.rb.
+
+components:
+  - id: toy
+    n: 0
+    name: The toy
+    nav: Toy
+    tag: sizes, notation, the whole model
+    intro: >-
+      Scroll inside the cube pane to move one token through a LLaMA layer. The scroll is the
+      clock: every fold, drop and merge plays forward on the way down and backward on the
+      way up. Every weight is drawn, Wq, Wk, Wv and Wo as bundles of edges between the
+      walls, lit by input × weight as the token crosses them, and the FFN as the network it
+      is. This side is the maths, one section per component, with the current step worked in the
+      token's numbers. The maths button hides it.
+    pre: [sizes, note, params, layer]
+    steps: []
+  - id: emb
+    n: 1
+    name: Embedding
+    nav: Embedding
+    tag: step (1) · 262 M weights in LLaMA 65B
+    eq: x_t = E_{w_t}
+    pre: [lookup]
+    also: [note]
+    steps: [0]
+  - id: att
+    n: 2
+    name: Attention
+    nav: Attention
+    tag: steps (2)–(10) · 268 M weights a layer
+    eq: h_t = x_t + \operatorname{MHA}\big(\operatorname{RMSNorm}(x_t)\big)
+    pre: [lin, rms, soft, attn, mh, rope, res]
+    steps: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  - id: ffn
+    n: 3
+    name: Feed-forward
+    nav: FFN
+    tag: steps (11)–(15) · 541 M weights a layer
+    eq: y_t = h_t + \operatorname{FFN}\big(\operatorname{RMSNorm}(h_t)\big)
+    pre: [mlp, silu, glu]
+    also: [lin, rms, res]
+    steps: [10, 11, 12, 13, 14]
+  - id: head
+    n: 4
+    name: LM head
+    nav: LM head
+    tag: steps (16)–(18), after the last layer · 262 M weights
+    eq: p_t = \operatorname{softmax}\big(\operatorname{RMSNorm}(y_t)\, W_U\big)
+    pre: [unemb, dec, xent]
+    also: [rms, soft]
+    steps: [15, 16, 17]
+
+# what each component assumes, filed under the component that first needs it
+prerequisites:
+  - id: sizes
+    title: Sizes
+    body: |
+      <table class="toy-dims"><thead><tr><th></th><th></th><th>toy</th><th>LLaMA 65B</th></tr></thead><tbody>
+      <tr><td>$d$</td><td>width of a token’s row</td><td>8</td><td>8,192</td></tr>
+      <tr><td>$H$</td><td>attention heads</td><td>2</td><td>64</td></tr>
+      <tr><td>$d_h = d/H$</td><td>head width</td><td>4</td><td>128</td></tr>
+      <tr><td>$d_{ff}$</td><td>FFN width</td><td>22</td><td>22,016</td></tr>
+      <tr><td>$|V|$</td><td>vocabulary</td><td>16</td><td>32,000</td></tr>
+      <tr><td>$L$</td><td>layers</td><td>1</td><td>80</td></tr>
+      <tr><td>$T$</td><td>tokens in the context</td><td>6</td><td>up to 2,048</td></tr>
+      </tbody></table>
+  - id: note
+    title: Notation
+    body: |
+      <p>A token is a row: $x_t \in \mathbb{R}^{1\times d}$ at position $t = 0, \dots, T-1$, and a matrix acts on the right, $x_t W$. $x_{t,i}$ is entry $i$, counted from 0 as the cubes are. A superscript $(n)$ takes head $n$’s $d_h$ entries. A prime marks a vector after RoPE, and $\odot$ multiplies entry by entry.</p>
+  - id: params
+    title: Parameters
+    body: |
+      $$\begin{aligned} W_q, W_k, W_v, W_o &\in \mathbb{R}^{d\times d}, \quad \gamma_1 \in \mathbb{R}^{d} \\ W_1, W_3 &\in \mathbb{R}^{d\times d_{ff}}, \quad W_2 \in \mathbb{R}^{d_{ff}\times d}, \quad \gamma_2 \in \mathbb{R}^{d} \\[5pt] E &\in \mathbb{R}^{|V|\times d}, \quad W_U \in \mathbb{R}^{d\times |V|}, \quad \gamma_f \in \mathbb{R}^{d} \end{aligned}$$
+      <p>The first two lines repeat in every layer, one for attention and one for the FFN. The last line is the model’s, once. There are no biases. The toy draws each weight at random and rounds it to one decimal, and every gain $\gamma$ is 1.</p>
+  - id: layer
+    title: The model in four lines
+    body: |
+      $$\begin{aligned} x_t &= E_{w_t} && \text{1 Embedding} \\ h_t &= x_t + \operatorname{MHA}\big(\operatorname{RMSNorm}(x_t)\big) && \text{2 Attention} \\ y_t &= h_t + \operatorname{FFN}\big(\operatorname{RMSNorm}(h_t)\big) && \text{3 Feed-forward} \\ p_t &= \operatorname{softmax}\big(\operatorname{RMSNorm}(y_t)\, W_U\big) && \text{4 LM head} \end{aligned}$$
+      <p>The middle two lines are one layer. LLaMA 65B stacks 80 of them, each with its own weights, and $y_t$ of one is $x_t$ of the next. The toy has one. Each section below takes one line: what it assumes, then the line step by step in the numbers of the token on the left.</p>
+  - id: lookup
+    title: Tokens and the embedding table
+    body: |
+      $$\begin{aligned} e_w &\in \{0,1\}^{1\times |V|}, \quad (e_w)_v = [\,v = w\,] \\ e_w E &= E_w, \quad \text{row } w \text{ of } E \end{aligned}$$
+      <p>The vocabulary is a fixed list of tokens. LLaMA cuts text into 32,000 sub-word pieces with a byte-pair encoder; here one word is one token. A one-hot row times $E$ picks out one row, so code indexes the table instead of multiplying.</p>
+  - id: lin
+    title: Linear maps
+    body: |
+      $$(uW)_j = \textstyle\sum_{i} u_i\, W_{i,j}, \qquad u \in \mathbb{R}^{1\times m},\ W \in \mathbb{R}^{m\times n}$$
+      <p>Each output entry is the dot product of $u$ with one column of $W$, so a map costs $m \cdot n$ multiplications. LLaMA’s maps have no bias: $uW$, not $uW + b$.</p>
+  - id: rms
+    title: RMSNorm
+    cite: Zhang and Sennrich, 2019
+    body: |
+      $$\begin{aligned} \operatorname{RMSNorm}(u) &= \frac{u}{\operatorname{rms}(u)} \odot \gamma \\ \operatorname{rms}(u) &= \sqrt{\tfrac{1}{d}\textstyle\sum_{i} u_i^2 + \varepsilon}, \quad \varepsilon = 10^{-6} \end{aligned}$$
+      <p>It rescales a row to root mean square 1, then the gain scales each entry. Unlike LayerNorm, it subtracts no mean and adds no bias.</p>
+  - id: soft
+    title: Softmax
+    body: |
+      $$\operatorname{softmax}(z)_j = \frac{e^{z_j}}{\sum_k e^{z_k}}$$
+      <p>Every output is positive and they sum to 1. Adding one constant to every $z_j$ changes nothing, so code subtracts $\max_k z_k$ first.</p>
+  - id: attn
+    title: Scaled dot-product attention, causal
+    cite: Vaswani et al., 2017
+    body: |
+      $$\operatorname{Attn}(q_t) = \operatorname{softmax}\Big(\frac{q_t\, K^{\top}_{\le t}}{\sqrt{d_h}}\Big)\, V_{\le t}$$
+      <p>One query, one head. $K_{\le t}$ and $V_{\le t}$ stack the key and value rows for positions $0, \dots, t$. If the entries of $q$ and $k$ have variance 1, their dot product has variance $d_h$, and $\sqrt{d_h}$ brings it back to 1 before the softmax.</p>
+      <p>Rows after $t$ are never read: that is the causal mask. When generating, those rows don’t exist yet, and the rows before $t$ come from the cache instead of being recomputed.</p>
+  - id: mh
+    title: Multiple heads
+    body: |
+      $$\begin{aligned} q_t &= \big[\,q^{(0)}_t;\ \dots;\ q^{(H-1)}_t\,\big], \quad q^{(n)}_t \in \mathbb{R}^{1\times d_h} \\ \operatorname{MHA}(\hat x_t) &= \big[\,\operatorname{Attn}^{(0)};\ \dots;\ \operatorname{Attn}^{(H-1)}\,\big]\, W_o \end{aligned}$$
+      <p>Each head attends with its own slice of $q$, $k$ and $v$, so it can look at different tokens from the other heads. Splitting costs nothing extra. $W_o$ is the only place the heads mix.</p>
+  - id: rope
+    title: RoPE
+    cite: Su et al., 2021
+    body: |
+      $$\begin{aligned} R(\phi) &= \begin{pmatrix} \cos\phi & \sin\phi \\ -\sin\phi & \cos\phi \end{pmatrix} \\ R_t &= \operatorname{diag}\big(R(t\theta_0),\ R(t\theta_1),\ \dots\big) \\ \theta_i &= 10000^{-2i/d_h} \end{aligned}$$
+      <p>Entries $2i$ and $2i+1$ of a head are a pair, and $R_t$ turns pair $i$ by $t\theta_i$ radians. The toy has $\theta = (1,\ 0.01)$. LLaMA has 64 pairs a head, from 1 down to $1.2\times 10^{-4}$. Since $R_j^{\top} = R_{-j}$,</p>
+      $$(q R_t)\,(k R_j)^{\top} = q\, R_{t-j}\, k^{\top}$$
+      <p>so a score sees only the offset $t-j$, not where the pair sits in the sentence. Only $q$ and $k$ are turned, never $v$.</p>
+  - id: res
+    title: Residual stream, pre-norm
+    cite: He et al., 2016
+    body: |
+      $$h = x + F\big(\operatorname{RMSNorm}(x)\big)$$
+      <p>A sublayer $F$ reads a normalised copy of the row and adds its result back. $x$ itself passes by untouched, which keeps a clean path through all 80 layers. LLaMA normalises before each sublayer, as GPT-2 did. The original Transformer normalised after the add.</p>
+  - id: mlp
+    title: The two-layer MLP
+    cite: Vaswani et al., 2017
+    body: |
+      $$\operatorname{FFN}(u) = \sigma(uW_1 + b_1)\, W_2 + b_2$$
+      <p>Each column of $W_1$ is a neuron: a dot product, then a nonlinearity $\sigma$. $W_2$ writes the neurons back to width $d$. It is position-wise: every token gets the same weights, and no token sees another. The original Transformer used ReLU and $d_{ff} = 4d$.</p>
+  - id: silu
+    title: SiLU
+    cite: Elfwing et al., 2018
+    body: |
+      $$\operatorname{SiLU}(z) = z\,\sigma(z) = \frac{z}{1+e^{-z}}$$
+      <p>Close to $z$ for large $z$, close to 0 for very negative $z$, and smooth in between. Its minimum is −0.28, at $z \approx -1.28$. It is also called Swish.</p>
+  - id: glu
+    title: "Gating: SwiGLU"
+    cite: Shazeer, 2020
+    body: |
+      $$\operatorname{FFN}(u) = \big(\operatorname{SiLU}(uW_1) \odot uW_3\big)\, W_2$$
+      <p>A gated linear unit multiplies two projections (Dauphin et al., 2017). $uW_1$, through SiLU, sets how far each neuron opens, and $uW_3$ is what it lets through. The third matrix costs weights, so LLaMA shrinks $d_{ff}$ from $4d$ to about $\tfrac23 \cdot 4d$: 22,016 for $d = 8192$. There are no biases.</p>
+  - id: unemb
+    title: Unembedding
+    body: |
+      $$\ell = z\, W_U, \qquad \ell_w = z \cdot (W_U)_{:,w}$$
+      <p>One logit per token in the vocabulary: how well $z$ lines up with that token’s column. A final RMSNorm with its own gain $\gamma_f$ comes first. LLaMA keeps $W_U$ separate from $E$.</p>
+  - id: dec
+    title: Picking the next token
+    body: |
+      $$\hat w = \arg\max_w\, p_w \quad\text{(greedy)}, \qquad w \sim \operatorname{softmax}(\ell/\tau) \quad\text{(sampling)}$$
+      <p>Greedy takes the top token. Sampling draws from the distribution, and a temperature $\tau$ below 1 sharpens it. The page uses greedy. The pick is appended to the sentence and fed back in as the next position.</p>
+  - id: xent
+    title: Cross-entropy
+    body: |
+      $$\mathcal{L}_t = -\log p_{t,\,w_{t+1}}, \qquad \mathcal{L} = \tfrac{1}{T-1}\textstyle\sum_{t=0}^{T-2} \mathcal{L}_t$$
+      <p>Training raises the probability of the token that actually came next. Every position is a prediction, so one pass over a sentence of $T$ tokens gives $T-1$ of them. A uniform guess scores $\log |V|$: 2.77 here, 10.4 for LLaMA.</p>
+
+# the forward pass, one entry per step the cubes play: its name, its line in general,
+# the prerequisites it uses, and two notes on the LLaMA-sized version
+steps:
+  - title: x arrives
+    eq: x_t = E_{w_t}
+    uses: [lookup, note]
+    notes:
+      - 'LLaMA 65B: 8,192 numbers per token.'
+      - 'Layer 1 of 80, so x is the token embedding.'
+  - title: RMSNorm
+    eq: \hat x_t = \operatorname{RMSNorm}(x_t)
+    uses: [rms, res]
+    notes:
+      - 'LLaMA learns an 8,192-number gain here.'
+      - 'x itself stays on the residual stream, the grey rail on the left.'
+  - title: q, k and v
+    eq: q_t = \hat x_t W_q,\quad k_t = \hat x_t W_k,\quad v_t = \hat x_t W_v
+    uses: [lin, mh]
+    notes:
+      - 'Wq, Wk, Wv: 8,192 × 8,192 each in LLaMA, no bias.'
+      - 'Each vector folds into 64 heads of 128 there; 2 of 4 here.'
+      - 'k and v wait in front of the cache.'
+  - title: RoPE
+    eq: q'^{(n)}_t = q^{(n)}_t R_t,\quad k'^{(n)}_t = k^{(n)}_t R_t
+    uses: [rope]
+    notes:
+      - 'LLaMA: 64 pairs per head, θ from 1 down to 0.00012 rad per position.'
+      - 'Dashed is before, solid after, red the turn. v is not turned.'
+  - title: Write the cache
+    eq: K'_{\le t} = \begin{bmatrix} K'_{<t} \\ k'_t \end{bmatrix},\quad V_{\le t} = \begin{bmatrix} V_{<t} \\ v_t \end{bmatrix}
+    uses: [attn]
+    notes:
+      - 'Nothing in the cache is ever rewritten.'
+      - 'LLaMA: 2 × 8,192 numbers × 2 bytes × 80 layers = 2.6 MB a token.'
+  - title: Scores
+    eq: s^{(n)}_{t,j} = q'^{(n)}_t \cdot k'^{(n)}_j \big/ \sqrt{d_h},\quad j \le t
+    uses: [attn, rope]
+    notes:
+      - 'Scaled by √4 = 2 here, √128 in LLaMA.'
+      - 'No slots after this token exist: that is the causal mask at inference.'
+  - title: Softmax
+    eq: a^{(n)}_t = \operatorname{softmax}\big(s^{(n)}_t\big)
+    uses: [soft, attn]
+    notes:
+      - 'Each weight is e^score ÷ the sum over its row.'
+      - 'The pale rows of a above came from earlier passes: the triangle.'
+  - title: Blend the values
+    eq: o^{(n)}_t = \textstyle\sum_{j \le t} a^{(n)}_{t,j}\, v^{(n)}_j
+    uses: [attn]
+    notes:
+      - 'Each head blends only its own value columns.'
+      - 'o₀ over o₁ is the concat: 64 heads of 128 give 8,192 in LLaMA.'
+  - title: Wo
+    eq: o_t W_o,\quad o_t = \big[\,o^{(0)}_t;\ o^{(1)}_t\,\big]
+    uses: [mh, lin]
+    notes:
+      - 'Wo: 8,192 × 8,192 in LLaMA, the only place the heads mix.'
+      - 'Attention holds 4 × 67 M = 268 M weights a layer.'
+  - title: Add to the residual
+    eq: h_t = x_t + o_t W_o
+    uses: [res]
+    notes:
+      - 'h is the residual stream after attention.'
+      - 'The rail carries x around the whole attention block.'
+  - title: RMSNorm again
+    eq: \hat h_t = \operatorname{RMSNorm}(h_t)
+    uses: [rms, res]
+    notes:
+      - 'A second RMSNorm with its own gain.'
+      - 'h itself stays on the rail.'
+  - title: Gate and up
+    eq: g_t = \hat h_t W_1,\quad u_t = \hat h_t W_3
+    uses: [lin, mlp, glu]
+    notes:
+      - 'Every weight is an edge: W1 and W3 are 8,192 × 22,016 each in LLaMA, 180 M edges each.'
+      - 'Edge brightness is input × weight, so you see which connections carried this token. The FFN reads no cache and keeps nothing.'
+  - title: SwiGLU
+    eq: m_t = \operatorname{SiLU}(g_t) \odot u_t
+    uses: [silu, glu]
+    notes:
+      - 'SiLU(z) = z ÷ (1 + e^−z): about 0 for negative z, about z for positive.'
+      - 'This is SwiGLU: a learned gate on every neuron, 22,016 of them per layer in LLaMA.'
+  - title: Down
+    eq: f_t = m_t W_2
+    uses: [lin, mlp]
+    notes:
+      - 'W2: 22,016 × 8,192 in LLaMA. The FFN’s three matrices are 541 M edges, two thirds of the layer’s 809 M weights.'
+      - 'A neuron’s W1 edges are what it looks for; its W2 edges are what it writes back.'
+  - title: Add to the residual
+    eq: y_t = h_t + f_t
+    uses: [res]
+    notes:
+      - 'y becomes x for layer 2; 80 layers in LLaMA 65B.'
+      - 'Only K′ and V stay behind in this layer.'
+  - title: Final RMSNorm
+    eq: z_t = \operatorname{RMSNorm}(y_t)
+    uses: [rms]
+    notes:
+      - 'The final norm runs once, after the last layer, with its own 8,192 gains.'
+      - 'In prefill every position gets logits, which is how training scores a whole sentence at once. In generation only the newest position needs them.'
+  - title: Logits
+    eq: \ell_t = z_t W_U
+    uses: [unemb, lin]
+    notes:
+      - 'W_U: 8,192 × 32,000 in LLaMA, 262 M weights, kept separate from the input embedding.'
+      - 'A token’s column is the direction the stream must point for that token to win.'
+  - title: Softmax, then pick
+    eq: p_t = \operatorname{softmax}(\ell_t),\quad \hat w_{t+1} = \arg\max_w\, p_{t,w}
+    uses: [soft, dec, xent]
+    notes:
+      - 'LLaMA usually samples, with a temperature and top-p, instead of always taking the top token.'
+      - 'The weights here are random, so the pick means nothing. The arithmetic is the real one.'
