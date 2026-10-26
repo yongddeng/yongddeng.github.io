@@ -1,6 +1,7 @@
 // 302. blocks: a workbench in the post window (assets/js/decoder.js).
-// The model tree and the parts sheet stack on the left; the block is drawn on
-// the right. Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
+// The part menus run under the toolbar; the model tree and the shown model's
+// parts stack on the left; the block (or the diff) is drawn on the right.
+// Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
 @use "main";
 
 $wb-ui: "Helvetica Neue", Arial, sans-serif;
@@ -45,13 +46,13 @@ $wb-newtext: #8a6d00;
 	min-height: 0;
 	display: grid;
 	// 2 : 3, so at the window's own size the block pane is about as wide as the drawing at full
-	// height, and the rest goes to the model rail and the parts sheet
+	// height, and the rest goes to the model rail and the parts card
 	grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 	gap: 4px;
 }
 .wb-left {
 	display: grid;
-	// the rail shows every model without scrolling; the parts sheet scrolls in what is left
+	// the rail shows every model without scrolling; the parts card scrolls in what is left
 	grid-template-rows: 260px minmax(0, 1fr);
 	gap: 4px;
 	min-height: 0;
@@ -63,7 +64,7 @@ $wb-newtext: #8a6d00;
 	overflow: auto;
 	min-height: 0;
 
-	// drawn at one unit a pixel (no viewBox), so the rail's text is the same size as the parts sheet's at any window width
+	// drawn at one unit a pixel (no viewBox), so the rail's text is the same size as the card's at any window width
 	svg {
 		display: block;
 		width: 100%;
@@ -81,7 +82,25 @@ $wb-newtext: #8a6d00;
 	.rl.on .nm { fill: #ffffff; font-weight: bold; }
 	.rl.on .yr, .rl.on .lb { fill: #ddddee; }
 	.rl.on .dot { fill: #ffffff; stroke: #000080; }
+	// while searching: the highlighter on the models with every tick, the rest dimmed, and a cell a part at the
+	// end of each row (its part's colour where the model passes, grey where it fails, hollow where nothing is ticked)
+	.rl.hit .bg { fill: $wb-new; }
+	.rl.on.hit .bg { fill: #000080; stroke: $wb-newline; stroke-width: 2; }
+	&.filtering .rl:not(.hit):not(.on) { opacity: 0.32; }
+	.mx { display: none; fill: var(--pc); }
+	&.filtering .mx { display: inline; }
+	.mx[data-st="fail"] { fill: #e4e1e8; }
+	.mx[data-st="idle"] { fill: none; stroke: #dcd8e0; }
 }
+
+// one colour a part: on its menu, its ticked rows, its card line and its cells
+.pc-tok { --pc: #707000; }
+.pc-pos { --pc: #800080; }
+.pc-norm { --pc: #008080; }
+.pc-attn { --pc: #000080; }
+.pc-ctx { --pc: #b05a00; }
+.pc-ffn { --pc: #1d6b2a; }
+.pc-act { --pc: #9a0000; }
 
 // the two references, at the right end of the toolbar
 .wb-see {
@@ -97,47 +116,153 @@ $wb-newtext: #8a6d00;
 	}
 }
 
-// the parts sheet: a property sheet with one tab per part
-.wb-sheet {
+// the part menus, under the toolbar: a set menu turns yellow and names its ticks
+.wb-menus {
+	flex: none;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 3px;
+	padding: 0 4px 4px;
+	font-size: 11px;
+
+	.lab {
+		color: $wb-mute;
+		margin-right: 3px;
+	}
+	.res {
+		font-weight: bold;
+		margin-left: 6px;
+	}
+	.lit-link {
+		margin-left: 4px;
+	}
+}
+.wb-menu {
+	height: 21px;
+	padding: 0 6px;
+	background: #c0c0c0;
+	@include main.bevel;
+	color: #000000;
+	font: 11px $wb-ui;
+	white-space: nowrap;
+	cursor: pointer;
+
+	&::before {
+		content: "";
+		display: inline-block;
+		width: 7px;
+		height: 7px;
+		margin-right: 4px;
+		background: var(--pc);
+	}
+	&.set {
+		background: $wb-new;
+	}
+	&.open {
+		@include main.bevel(false);
+		background: #d4d0d4;
+	}
+}
+// a menu's techniques; fixed, like the window menus' flyouts, so a shrunk window cannot clip it. A black edge
+// all round and a silver frame keep it apart from the light panes it opens over
+.wb-drop {
+	position: fixed;
+	z-index: 5;
+	width: 340px;
+	overflow: auto;
+	padding: 2px;
+	background: #c0c0c0;
+	border: 1px solid #000000;
+	box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080, 3px 3px 0 rgba(0, 0, 0, 0.35);
+
+	.wb-vers {
+		background: var(--paper, #fbfafb);
+	}
+}
+.wb-droph {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	gap: 8px;
+	align-items: baseline;
+	padding: 4px 8px;
+	background: #c0c0c0;
+	border-bottom: 1px solid #7f787f;
+	font-size: 11px;
+	font-weight: bold;
+
+	&::before {
+		content: "";
+		width: 7px;
+		height: 7px;
+		align-self: center;
+		background: var(--pc);
+	}
+	span {
+		font-weight: normal;
+		color: $wb-mute;
+	}
+}
+// the shown model, part by part, under the tree; a line finds the models that share that part
+.wb-card {
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
-}
-.wb-tabs {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0 1px;
-	padding: 4px 4px 0;
-}
-.wb-tab {
-	font: 11px $wb-ui;
-	color: #000000;
-	padding: 3px 7px 2px;
-	background: #c0c0c0;
-	border: 1px solid;
-	border-color: #ffffff #000000 transparent #ffffff;
-	margin-bottom: -1px;
-	cursor: pointer;
-
-	&.on {
-		font-weight: bold;
-		padding-bottom: 4px;
-		background: var(--paper, #fbfafb);
-		position: relative;
-		z-index: 1;
-	}
-}
-.wb-tabbody {
-	flex: 1;
-	min-height: 0;
 	overflow: auto;
-	margin: 0 4px 4px;
+	padding: 4px 0;
 	background: var(--paper, #fbfafb);
 	border: 1px solid;
 	border-color: #ffffff #000000 #000000 #ffffff;
 }
-// each technique is one row: its name, then when and which models in italic, then what it does,
-// and the glyph on the right across all three lines
+.wb-cardh {
+	padding: 3px 8px 5px;
+	font-weight: bold;
+
+	span {
+		display: block;
+		font-weight: normal;
+		font-size: 10.5px;
+		color: $wb-mute;
+	}
+}
+.wb-part {
+	display: grid;
+	grid-template-columns: 70px minmax(0, 1fr);
+	gap: 0 8px;
+	padding: 4px 8px 4px 6px;
+	text-align: left;
+	background: none;
+	border: 0;
+	border-left: 5px solid var(--pc);
+	border-top: 1px dotted #d6d2da;
+	color: #000000;
+	font: 12px $wb-ui;
+	cursor: pointer;
+
+	&:hover {
+		background: #eef1f8;
+	}
+	&.set {
+		background: $wb-new;
+	}
+	.pn {
+		grid-row: 1 / span 2;
+		padding-top: 2px;
+		font-size: 9.5px;
+		font-weight: bold;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: $wb-mute;
+	}
+	.how {
+		font-size: 10.5px;
+		color: $wb-mute;
+	}
+}
+// each technique is one row: its tick and name, then when and which model brought it, then what it does,
+// and the glyph on the right across all three lines. A ticked row carries its part's colour on its edge
 .wb .wb-vers li {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) 64px;
@@ -174,11 +299,20 @@ $wb-newtext: #8a6d00;
 	svg text {
 		fill: currentColor;
 	}
+	.tk {
+		display: inline-block;
+		width: 1.3em;
+		font-weight: normal;
+		color: #000080;
+	}
+	&.ticked {
+		box-shadow: inset 5px 0 0 var(--pc);
+	}
 	&.on {
 		background: #000080;
 		color: #ffffff;
 
-		.meta {
+		.meta, .tk, .lit-link {
 			color: #ddddee;
 		}
 		.g-ln, .g-wave {
@@ -286,6 +420,66 @@ $wb-newtext: #8a6d00;
 		background: $wb-new;
 		border: 1px solid $wb-newline;
 	}
+	.lg-d {
+		background: #fbe9e9;
+		border-color: #8f0000;
+	}
+	.lg-a {
+		background: #e6f4e6;
+		border-color: #135a1f;
+	}
+}
+
+// the diff: the model compared with, then this one, part by part and then the numbers
+.wb-view {
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.wb-vbar {
+	flex: none;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 2px 10px;
+	font-size: 11px;
+	color: $wb-mute;
+
+	select {
+		height: 20px;
+		max-width: 230px;
+		font: 11px $wb-ui;
+	}
+	.sum {
+		flex-basis: 100%;
+		color: #000000;
+	}
+}
+.wb-diff {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 4px 0;
+	background: #ffffff;
+	border: 1px solid #dddddd;
+	font: 11px/1.55 "Lucida Console", Monaco, "Courier New", monospace;
+
+	div {
+		display: grid;
+		grid-template-columns: 2ch 15ch minmax(0, 1fr);
+		padding: 0 8px;
+	}
+	b { font-weight: normal; }
+	i { font-style: normal; }
+	.h { display: block; color: #000080; background: #eef0fa; }
+	.d { color: #8f0000; background: #fbe9e9; }
+	.a { color: #135a1f; background: #e6f4e6; }
+	.c { color: $wb-mute; }
+	[data-menu] { cursor: pointer; }
+	[data-menu]:hover i { text-decoration: underline; }
 }
 
 // the drawing

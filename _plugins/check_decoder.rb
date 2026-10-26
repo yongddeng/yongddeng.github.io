@@ -18,5 +18,13 @@ Jekyll::Hooks.register :site, :post_read do |site|
     end
     none = ids.reject { |i| p["techniques"].any? { |t| t["models"].include?(i) } }
     raise "decoder_block.yml: no #{p["id"]} technique for #{none.join(', ')}" unless none.empty?
+    p["techniques"].each do |t|
+      raise "decoder_block.yml: #{p["id"]}/#{t["id"]} is missing short" if t["short"].nil?
+    end
+    # the search swaps a part's alternatives, so a model may have only one; the rest must be marked extra
+    ids.each do |i|
+      alts = p["techniques"].reject { |t| t["extra"] }.select { |t| t["models"].include?(i) }.map { |t| t["id"] }
+      raise "decoder_block.yml: #{i} has #{alts.join(' and ')} in #{p["id"]}; mark all but one extra" if alts.size > 1
+    end
   end
 end

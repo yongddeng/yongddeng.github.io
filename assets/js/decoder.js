@@ -1,9 +1,12 @@
-// 302. blocks: a workbench inside the post window. The tree on the
-// left picks a model, the sheet under it browses one part's versions, and
-// the pane on the right draws the block with the parts that changed from the
-// parent model lit. Data comes from _data/decoder_block.yml via the JSON
-// script in the post. The desktop re-creates a post's scripts when it swaps
-// the window in, so this runs once per window and claims it with data-ready.
+// 302. blocks: a workbench inside the post window. The tree on the left
+// picks a model; the pane on the right draws its block with the parts that
+// changed from the parent lit, or the diff, the model against its parent (or
+// any other) part by part. The menus above find models by their parts: tick
+// techniques and the tree marks the models that use all of them. The card
+// under the tree lists the shown model's parts. Data comes from
+// _data/decoder_block.yml via the JSON script in the post. The desktop
+// re-creates a post's scripts when it swaps the window in, so this runs once
+// per window and claims it with data-ready.
 (function () {
 	const root = document.querySelector('.wb:not([data-ready])');
 	if (!root) return;
@@ -25,6 +28,8 @@
 	const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 	const fmtB = b => (b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.round(b / 1e3) + ' KB');
 	const fmtP = p => (p >= 1000 ? (p / 1000).toFixed(2).replace(/\.?0+$/, '') + 'T' : p >= 1 ? (Number.isInteger(p) ? p : p.toFixed(1)) + 'B' : Math.round(p * 1000) + 'M');
+	// what follows a mixture's parameter count: ", 37B active"
+	const activeP = m => (m.active ? `, ${fmtP(m.active)} active` : '');
 	// KV cache written per token, two bytes a value: layers × KV heads × head size × (K and V)
 	const kv = m => (m.attn === 'mla' ? m.layers * (m.mla.dc + m.mla.dr) * 2 : m.attn === 'hybrid' ? m.full_layers * m.kv_heads * m.head_dim * 4 : m.layers * m.kv_heads * m.head_dim * 4);
 	const NORMN = { LN: 'LayerNorm', RMS: 'RMSNorm', RMS0: 'RMSNorm, zero-centred' };
@@ -357,13 +362,46 @@
 		}
 		return svg(`The feed-forward block of ${m.name}, opened`);
 	}
-	// draw the block; boxes with the same key slide from where they were in the previous model
+	// ---- the diff: the model against its parent, or any other model ------------------------------
+	// The parts first, by the techniques each uses; then the numbers, through the same helpers the block's labels use.
+	// A changed part opens its menu.
+	const NUMBERS = [
+		['layers', m => n(m.layers)], ['width', m => n(m.width)], ['attention', ATT], ['norm', NORM], ['feed-forward', FFN], ['experts', EXP],
+		['context', m => n(m.ctx)], ['vocabulary', m => `${n(m.vocab.n)} · ${m.vocab.tok}`], ['parameters', m => fmtP(m.params) + activeP(m)], ['KV a token', m => fmtB(kv(m))],
+	];
+	// the model compared with: the one picked in the diff's menu, unless that is the shown model; else the parent (the
+	// first model has none, so the second)
+	const base = (m, p) => (state.base && state.base !== m.id ? byId[state.base] : p || chrono[1]);
+	function diffView(m, p) {
+		const b = base(m, p), lines = [];
+		const line = (k, sign, label, value, part) => lines.push(`<div class="${k}"${part ? ` data-menu="${part}" title="Open the ${esc(partById[part].name)} menu"` : ''}><b>${sign}</b><i>${esc(label)}</i><span>${esc(value)}</span></div>`);
+		const row = (label, x, y, part) => {
+			if (x === y) { line('c', '', label, x, part); return; }
+			line('d', '−', label, x, part);
+			line('a', '+', label, y, part);
+		};
+		const head = t => lines.push(`<div class="h">${esc(t)}</div>`);
+		const techs = (part, q) => uses(part, q).map(t => t.what).join(' + ');
+		head(`--- ${b.name} · ${b.date} · ${b.org}`);
+		head(`+++ ${m.name} · ${m.date} · ${m.org}`);
+		head('@@ parts @@');
+		data.parts.forEach(part => row(`${part.no}. ${part.name}`, techs(part, b), techs(part, m), part.id));
+		head('@@ numbers @@');
+		NUMBERS.forEach(([label, f]) => row(label, f(b), f(m)));
+		const changed = data.parts.filter(part => techs(part, b) !== techs(part, m)).length;
+		const r = kv(m) / kv(b), cache = r < 1 ? '−' + Math.round((1 - r) * 100) + '%' : r > 1 ? '×' + r.toFixed(1) : 'the same';
+		const opts = chrono.filter(q => q !== m).map(q => `<option value="${q.id}"${q === b ? ' selected' : ''}>${esc(q.name)}${q.id === m.parent ? ' (parent)' : ''}</option>`).join('');
+		return `<div class="wb-view"><div class="wb-vbar"><label>against <select data-pick="base">${opts}</select></label><span class="sum">${changed} of ${data.parts.length} parts changed · KV a token ${cache} · parameters ×${(m.params / b.params).toFixed(1)}</span></div><div class="wb-diff">${lines.join('')}</div></div>`;
+	}
+
+	// draw the current view; between block views, boxes with the same key slide from where they were in the previous model
+	const VIEWS = { block: schematic, attn: openedAttn, ffn: openedFfn, diff: diffView };
 	function mount(m, p) {
 		const pane = $('.wb-sch'), svgOld = pane.querySelector('svg'), old = new Map();
 		if (svgOld) svgOld.querySelectorAll('[data-k]').forEach(e => old.set(e.dataset.k, e.getBoundingClientRect()));
-		pane.innerHTML = state.view === 'attn' ? openedAttn(m, p) : state.view === 'ffn' ? openedFfn(m, p) : schematic(m, p);
+		pane.innerHTML = VIEWS[state.view](m, p);
 		const svg = pane.querySelector('svg');
-		if (!old.size || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		if (!svg || !old.size || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 		const scale = svg.getBoundingClientRect().width / 520;
 		svg.querySelectorAll('[data-k]').forEach(e => {
 			const a = old.get(e.dataset.k); if (!a) return;
@@ -375,7 +413,7 @@
 		requestAnimationFrame(() => requestAnimationFrame(() => { svg.querySelectorAll('[data-k]').forEach(e => { e.style.transition = 'transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1)'; e.style.transform = ''; }); svg.classList.remove('dim'); }));
 	}
 
-	// ---- tree, sheet, navigation -------------------------------------------------------
+	// ---- tree, menus, navigation -------------------------------------------------------
 	// the model pane is a rail: one row per model in date order, a rail per branch that forks where a child leaves its
 	// parent. A first child inherits its parent's lane; any other child takes the lowest lane with nothing on it between
 	// the parent's row and the end of its own branch, so a rail never runs through a dead-end sibling.
@@ -396,26 +434,91 @@
 		chrono.forEach(m => { if (!m.parent) return; const p = byId[m.parent], x0 = X(lane[p.id]), y0 = Y(rowOf[p.id]), x1 = X(lane[m.id]), y1 = Y(rowOf[m.id]);
 			o.push(x0 === x1 ? `<path d="M${x0},${y0}V${y1}" class="rail"/>` : `<path d="M${x0},${y0}V${y1 - 8}Q${x0},${y1} ${x0 + 8},${y1}H${x1}" class="rail"/>`); });
 		chrono.forEach(m => { const y = Y(rowOf[m.id]);
-			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - RH / 2}" width="100%" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text></g>`); });
+			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - RH / 2}" width="100%" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text>${data.parts.map((p, i) => `<rect x="${i * 8}" y="${y - 5}" width="7" height="10" class="mx pc-${p.id}" data-p="${p.id}"/>`).join('')}</g>`); });
 		return `<svg height="${chrono.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
 	}
 	$('.wb-tree').innerHTML = railHtml();
-	// at one unit a pixel the names can run past a narrow pane; the rail is as wide as they are, so the pane scrolls
-	const rail = $('.wb-tree svg'), right = Math.max(...[...rail.querySelectorAll('.nm')].map(t => { const b = t.getBBox(); return b.x + b.width; }));
-	rail.style.minWidth = Math.ceil(right + 6) + 'px';
-	$('.wb-tabs').innerHTML = data.parts.map(p => `<button type="button" class="wb-tab" data-tab="${p.id}">${p.no}. ${esc(p.name)}</button>`).join('');
-	const state = { cur: null, view: 'block', back: [], fwd: [], tab: 'attn' };
-	function tab(id) {
-		state.tab = id;
-		const part = partById[id], m = byId[state.cur], used = uses(part, m);
-		$('.wb-tabs').querySelectorAll('.wb-tab').forEach(t => t.classList.toggle('on', t.dataset.tab === id));
-		$('.wb-tabbody').innerHTML = '<ul class="wb-vers">' + part.techniques.map(t => {
-				// the year it arrived and the model that introduced it, then how many others use it: A +N more
-				const intro = byId[t.models[0]], rest = t.models.length - 1;
-				const who = intro.name + (rest ? ' +' + rest + ' more' : '');
-				return `<li data-id="${intro.id}" tabindex="0"${used.includes(t) ? ' class="on"' : ''}><b class="what">${esc(t.what)}</b><span class="meta">${year(intro)} · ${esc(who)}</span><span class="how">${esc(t.how)}</span><svg viewBox="0 0 64 22" aria-hidden="true">${GLYPH[id][t.id] || ''}</svg></li>`;
-			}).join('') + '</ul>';
+	// at one unit a pixel the names can run past a narrow pane; the rail is as wide as they are, so the pane scrolls.
+	// The part cells start after the longest name
+	const rail = $('.wb-tree svg'), right = Math.ceil(Math.max(...[...rail.querySelectorAll('.nm')].map(t => { const b = t.getBBox(); return b.x + b.width; })) + 8);
+	rail.querySelectorAll('.mx').forEach(c => c.setAttribute('x', +c.getAttribute('x') + right));
+	rail.style.minWidth = right + data.parts.length * 8 + 4 + 'px';
+	const state = { cur: null, view: 'block', back: [], fwd: [], base: null, ticked: {}, menu: null };
+
+	// ---- finding models by their parts -----------------------------------------------------------
+	// Ticking a technique keeps the models that use it, and ticks add up across parts. A part holds one of its
+	// alternatives at a time (a block has one kind of attention), so ticking another swaps it; extras add up.
+	const techOf = (part, id) => partById[part].techniques.find(t => t.id === id);
+	const tickedIn = part => state.ticked[part] || [];
+	// one part's ticks against one model: null when the part has none
+	const passes = (m, part) => (tickedIn(part).length ? tickedIn(part).every(id => techOf(part, id).models.includes(m.id)) : null);
+	// whether a part's ticks are the shown model's techniques there, no more and no fewer
+	const isLike = part => { const mine = uses(partById[part], byId[state.cur]), now = tickedIn(part); return mine.length === now.length && mine.every(t => now.includes(t.id)); };
+	function tick(part, id) {
+		let now = tickedIn(part);
+		if (now.includes(id)) now = now.filter(x => x !== id);
+		else {
+			if (!techOf(part, id).extra) now = now.filter(x => techOf(part, x).extra);
+			now = [...now, id];
+		}
+		state.ticked[part] = now;
+		render();
 	}
+	// the shown model's techniques in a part become that part's ticks; the same click again clears them
+	function findLike(part) {
+		state.ticked[part] = isLike(part) ? [] : uses(partById[part], byId[state.cur]).map(t => t.id);
+		render();
+	}
+	// one technique as a row: its tick, its name, when it arrived and the model that brought it (a link), how, its glyph
+	function techRow(part, t) {
+		const intro = byId[t.models[0]], rest = t.models.length - 1, on = tickedIn(part).includes(t.id);
+		const cls = [t.models.includes(state.cur) ? 'on' : '', on ? `ticked pc-${part}` : ''].filter(Boolean).join(' ');
+		return `<li data-part="${part}" data-tick="${t.id}" role="checkbox" aria-checked="${on}" tabindex="0"${cls ? ` class="${cls}"` : ''}><b class="what"><span class="tk" aria-hidden="true">${on ? '☑' : '☐'}</span>${esc(t.what)}</b>`
+			+ `<span class="meta">${year(intro)} · <span class="lit-link" data-id="${intro.id}" title="Show ${esc(intro.name)}, which introduced it">${esc(intro.name)}</span>${rest ? ' +' + rest + ' more' : ''}</span><span class="how">${esc(t.how)}</span><svg viewBox="0 0 64 22" aria-hidden="true">${GLYPH[part][t.id] || ''}</svg></li>`;
+	}
+	// after any change: the tree marks the models that pass every part's ticks, then the menus, the card and an open
+	// drop-down are drawn afresh. The control that had the keys gets them back, or its menu does if its drop-down closed
+	function render() {
+		const f = document.activeElement, key = root.contains(f) && ['menu', 'like', 'tick'].find(k => f.dataset[k]);
+		const any = data.parts.some(p => tickedIn(p.id).length), found = M.filter(m => data.parts.every(p => passes(m, p.id) !== false));
+		$('.wb-tree').classList.toggle('filtering', any);
+		$('.wb-tree').querySelectorAll('.rl').forEach(r => {
+			const m = byId[r.dataset.id];
+			r.classList.toggle('hit', any && found.includes(m));
+			// a cell a part: its colour where the model passes that part's ticks, grey where it fails, hollow where none
+			r.querySelectorAll('.mx').forEach(c => { const ok = passes(m, c.dataset.p); c.dataset.st = ok === null ? 'idle' : ok ? 'pass' : 'fail'; });
+		});
+		const result = !found.length ? 'no model has all of these' : found.length === 1 ? `1 of ${M.length}: ${esc(found[0].name)}` : `${found.length} of ${M.length}`;
+		$('.wb-menus').innerHTML = '<span class="lab">models with</span>' + data.parts.map(p => {
+			const ids = tickedIn(p.id), open = state.menu === p.id;
+			const now = p.techniques.filter(t => ids.includes(t.id)).map(t => t.short).join(' + ');
+			return `<button type="button" class="wb-menu pc-${p.id}${open ? ' open' : ''}${ids.length ? ' set' : ''}" data-menu="${p.id}" aria-expanded="${open}">${esc(p.name)}${now ? ': ' + esc(now) : ''} ▾</button>`;
+		}).join('') + (any ? `<span class="res">${result}</span><span class="lit-link" data-act="clear">clear</span>` : '');
+		const m = byId[state.cur];
+		$('.wb-card').innerHTML = `<div class="wb-cardh">${esc(m.name)}, part by part<span>click a part to find the models that share it</span></div>` + data.parts.map(p => {
+			const ts = uses(p, m);
+			return `<button type="button" class="wb-part pc-${p.id}${isLike(p.id) ? ' set' : ''}" data-like="${p.id}"><span class="pn">${esc(p.name)}</span><b>${ts.map(t => esc(t.what)).join(' + ')}</b><span class="how">${esc(ts.map(t => t.how).join('; '))}</span></button>`;
+		}).join('');
+		drop();
+		if (key) { const again = $(key === 'tick' && !state.menu ? `[data-menu="${f.dataset.part}"]` : `[data-${key}="${f.dataset[key]}"]`); if (again) again.focus(); }
+	}
+	// the drop-down under an open menu: that part's techniques. It is fixed, like the window menus' flyouts, so a
+	// shrunk window cannot clip it
+	function drop() {
+		const d = $('.wb-drop'), a = state.menu && $(`[data-menu="${state.menu}"]`, $('.wb-menus'));
+		d.hidden = !a;
+		if (!a) return;
+		const p = partById[state.menu], r = a.getBoundingClientRect();
+		d.innerHTML = `<div class="wb-droph pc-${p.id}">${p.no}. ${esc(p.name)}<span>tick to find the models</span></div><ul class="wb-vers">${p.techniques.map(t => techRow(p.id, t)).join('')}</ul>`;
+		d.style.left = Math.max(4, Math.min(r.left, window.innerWidth - d.offsetWidth - 4)) + 'px';
+		d.style.top = r.bottom + 2 + 'px';
+		d.style.maxHeight = Math.max(160, window.innerHeight - r.bottom - 10) + 'px';
+	}
+	const toggleMenu = part => { state.menu = state.menu === part ? null : part; render(); };
+	const LEGEND = {
+		block: '<i></i>changed from the parent model &middot; tokens enter at the bottom and leave at the top as a distribution',
+		diff: '<i class="lg-d"></i>the model compared with <i class="lg-a"></i>this model &middot; a part opens its menu',
+	};
 	function go(id, remember, view) {
 		view = view || state.view;
 		if (remember !== false && state.cur && (id !== state.cur || view !== state.view)) { state.back.push({ id: state.cur, view: state.view }); state.fwd = []; }
@@ -423,15 +526,18 @@
 		const m = byId[id], p = m.parent ? byId[m.parent] : null, k = idx(id);
 		mount(m, p);
 		$('.wb-head b').textContent = m.name;
-		$('.wb-head span').textContent = `${m.date} · ${m.org} · ${fmtP(m.params)} parameters${m.active ? ', ' + fmtP(m.active) + ' active' : ''} · ${fmtB(kv(m))} KV per token`;
+		$('.wb-head span').textContent = `${m.date} · ${m.org} · ${fmtP(m.params)} parameters${activeP(m)} · ${fmtB(kv(m))} KV per token`;
 		$('.wb-foot').innerHTML = esc(m.why) + ' <span class="wb-src">' + esc(m.paper) + '</span>';
 		const path = []; for (let q = m; q; q = q.parent ? byId[q.parent] : null) path.unshift(q);
-		const opened_ = state.view !== 'block', VIEW = { attn: 'attention', ffn: 'feed-forward' };
+		const opened_ = state.view !== 'block', VIEW = { attn: 'attention', ffn: 'feed-forward', diff: `diff with ${esc(base(m, p).name)}` };
 		$('.lit-crumb').innerHTML = path.map((q, i) => (i === path.length - 1 && !opened_ ? '<b>' + esc(q.name) + '</b>' : '<span class="lit-link" data-go="' + q.id + '">' + esc(q.name) + '</span>')).join(' › ') + (opened_ ? ' › <b>' + VIEW[state.view] + '</b>' : '');
 		$('.wb-tree').querySelectorAll('.rl').forEach(r => r.classList.toggle('on', r.dataset.id === id));
+		const shown = view === 'diff' ? 'diff' : 'block';
+		win.querySelectorAll('[data-view]').forEach(b => b.classList.toggle(b.classList.contains('tb-item') ? 'cur' : 'on', b.dataset.view === shown));
+		$('.wb-legend').innerHTML = LEGEND[shown];
 		$('[data-act=prev]').disabled = k === 0; $('[data-act=next]').disabled = k === chrono.length - 1;
 		$('[data-act=back]').disabled = !state.back.length; $('[data-act=fwd]').disabled = !state.fwd.length;
-		tab(state.tab);
+		render();
 	}
 	const actions = {
 		back() { if (state.back.length) { state.fwd.push({ id: state.cur, view: state.view }); const e = state.back.pop(); go(e.id, false, e.view); } },
@@ -439,30 +545,54 @@
 		open(kind) { go(state.cur, true, kind); },
 		close() { go(state.cur, true, 'block'); },
 		prev() { go(chrono[idx(state.cur) - 1].id); },
+		clear() { state.ticked = {}; render(); },
 		next() { go(chrono[idx(state.cur) + 1].id); }
 	};
 	root.addEventListener('click', e => {
 		const b = e.target.closest('[data-act]'); if (b) { if (!b.disabled) actions[b.dataset.act](); return; }
-		const t = e.target.closest('.wb-tab'); if (t) { tab(t.dataset.tab); return; }
+		const mn = e.target.closest('[data-menu]'); if (mn) { toggleMenu(mn.dataset.menu); return; }
+		const lk = e.target.closest('[data-like]'); if (lk) { findLike(lk.dataset.like); return; }
 		const op = e.target.closest('[data-open]'); if (op) { actions.open(op.dataset.open); return; }
-		// a breadcrumb segment closes the opened box; a rail row or a card row keeps it
-		const pick = e.target.closest('[data-id], [data-go]'); if (pick) go(pick.dataset.id || pick.dataset.go, true, pick.dataset.go ? 'block' : undefined);
+		// a breadcrumb segment closes the opened box; a rail row or a technique's model link keeps it
+		const pick = e.target.closest('[data-id], [data-go]'); if (pick) { go(pick.dataset.id || pick.dataset.go, true, pick.dataset.go ? 'block' : undefined); return; }
+		const tk = e.target.closest('[data-tick]'); if (tk) tick(tk.dataset.part, tk.dataset.tick);
+	});
+	// the views, from the toolbar or the window's View menu (outside the workbench, so the listener sits on the window)
+	win.addEventListener('click', e => {
+		const v = e.target.closest('[data-view]'); if (!v) return;
+		go(state.cur, true, v.dataset.view);
+		const menu = v.closest('.tb-menu'); if (menu) menu.classList.remove('open');
+	});
+	// the diff's menu: the model it compares with
+	root.addEventListener('change', e => {
+		if (e.target.matches('[data-pick="base"]')) { state.base = e.target.value; go(state.cur, false); }
 	});
 	root.addEventListener('keydown', e => {
-		if (e.key === 'Escape' && state.view !== 'block') { actions.close(); return; }
+		if (e.key === 'Escape' && !state.menu && state.view !== 'block') { actions.close(); return; }
 		if (e.key !== 'Enter' && e.key !== ' ') return;
 		const b = e.target.closest('[data-act]'); if (b && b.tagName !== 'BUTTON') { e.preventDefault(); actions[b.dataset.act](); return; }
 		const op = e.target.closest('[data-open]'); if (op) { e.preventDefault(); actions.open(op.dataset.open); return; }
+		const tk = e.target.closest('[data-tick]'); if (tk) { e.preventDefault(); tick(tk.dataset.part, tk.dataset.tick); return; }
 		const pick = e.target.closest('[data-id]'); if (pick) { e.preventDefault(); go(pick.dataset.id); }
 	});
-	// arrow keys step through time while this window is in front. The listener sits on the
-	// document, so once the window is closed it removes itself and lets the window be freed
-	function onArrow(e) {
-		if (!win.isConnected) { document.removeEventListener('keydown', onArrow); return; }
-		if (e.target.matches('input, textarea') || !win.classList.contains('active-win')) return;
+	// arrow keys step through time while this window is in front, unless a drop-down is open, which Escape closes.
+	// Pressing anywhere outside an open drop-down and its menus closes it too. Both listeners sit on the document,
+	// so once the window is closed they remove themselves and let the window be freed
+	function onKey(e) {
+		if (!win.isConnected) { document.removeEventListener('keydown', onKey); return; }
+		if (e.key === 'Escape' && state.menu) { toggleMenu(state.menu); return; }
+		if (state.menu || e.target.matches('input, textarea, select') || !win.classList.contains('active-win')) return;
 		if (e.key === 'ArrowRight' && !$('[data-act=next]').disabled) actions.next();
 		if (e.key === 'ArrowLeft' && !$('[data-act=prev]').disabled) actions.prev();
 	}
-	document.addEventListener('keydown', onArrow);
+	function onPress(e) {
+		if (!win.isConnected) { document.removeEventListener('pointerdown', onPress); return; }
+		if (state.menu && !e.target.closest('.wb-drop, .wb-menus')) toggleMenu(state.menu);
+	}
+	document.addEventListener('keydown', onKey);
+	document.addEventListener('pointerdown', onPress);
+	// The window's View menu normally lists headings (menubar.js); filled here, it lists the two views, as 303's does
+	const viewMenu = $('.tb-outline', win);
+	if (viewMenu) viewMenu.innerHTML = '<button type="button" class="tb-item cur" data-view="block">Block</button><button type="button" class="tb-item" data-view="diff">Diff</button>';
 	go('llama', false);
 })();

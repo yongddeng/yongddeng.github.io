@@ -353,65 +353,66 @@ models:
     why: Three Gated DeltaNet layers for every full-attention layer, so the KV cache grows in only a quarter of the stack. 512 small experts; 3B of the 80B parameters work on each token.
 
 # the techniques of each part; each lists every model here that uses it, the one that introduced it first.
-# A model can use several techniques of one part. Sizes and settings belong to the model, not here.
+# A model has at most one of a part's alternatives (one kind of attention); a technique marked extra rides on top
+# of it. short is the technique's name in the menus. Sizes and settings belong to the model, not here.
 parts:
   - id: tok
     name: Tokeniser
     techniques:
-      - { id: wbpe, what: "BPE over words", how: "merges learned on whitespace-split text; unseen characters become unknown", models: [tf, gpt1] }
-      - { id: bbpe, what: "Byte-level BPE", how: "merges over UTF-8 bytes; any string tokenises, nothing is unknown", models: [gpt2, dsv2, llama3, olmo2, dsv3, gptoss, qnext] }
-      - { id: spm, what: "SentencePiece with byte fallback", how: "raw text in, spaces kept as a symbol; rare characters drop to bytes", models: [palm, llama, llama2, mistral, mixtral, jamba, gemma2] }
+      - { id: wbpe, short: "word BPE", what: "BPE over words", how: "merges learned on whitespace-split text; unseen characters become unknown", models: [tf, gpt1] }
+      - { id: bbpe, short: "byte BPE", what: "Byte-level BPE", how: "merges over UTF-8 bytes; any string tokenises, nothing is unknown", models: [gpt2, dsv2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: spm, short: "SentencePiece", what: "SentencePiece with byte fallback", how: "raw text in, spaces kept as a symbol; rare characters drop to bytes", models: [palm, llama, llama2, mistral, mixtral, jamba, gemma2] }
   - id: pos
     name: PE
     techniques:
-      - { id: sin, what: "Sinusoidal", how: "fixed sine waves added to the embedding", models: [tf] }
-      - { id: learned, what: "Learned absolute", how: "one trained vector per slot, added to the embedding", models: [gpt1, gpt2] }
-      - { id: rope, what: "RoPE", how: "rotate queries and keys by position; nothing is added", models: [palm, llama, llama2, mistral, mixtral, dsv2, gemma2, llama3, olmo2, dsv3, gptoss, qnext] }
-      - { id: nope, what: "No position encoding", how: "nothing added or rotated; the state layers carry order", models: [jamba] }
-      - { id: rope_dec, what: "Decoupled RoPE", how: "rotation on a few extra dims, so the KV latent stays compressible", models: [dsv2, dsv3] }
-      - { id: rope_part, what: "Partial RoPE", how: "rotation on part of each head; the rest carries no position", models: [qnext] }
+      - { id: sin, short: "sinusoidal", what: "Sinusoidal", how: "fixed sine waves added to the embedding", models: [tf] }
+      - { id: learned, short: "learned", what: "Learned absolute", how: "one trained vector per slot, added to the embedding", models: [gpt1, gpt2] }
+      - { id: rope, short: "RoPE", what: "RoPE", how: "rotate queries and keys by position; nothing is added", models: [palm, llama, llama2, mistral, mixtral, dsv2, gemma2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: nope, short: "none", what: "No position encoding", how: "nothing added or rotated; the state layers carry order", models: [jamba] }
+      - { id: rope_dec, short: "decoupled", extra: true, what: "Decoupled RoPE", how: "rotation on a few extra dims, so the KV latent stays compressible", models: [dsv2, dsv3] }
+      - { id: rope_part, short: "partial", extra: true, what: "Partial RoPE", how: "rotation on part of each head; the rest carries no position", models: [qnext] }
   - id: norm
     name: Norm
     techniques:
-      - { id: post, what: "Post-norm", how: "on the trunk, after each residual add", models: [tf, gpt1] }
-      - { id: pre, what: "Pre-norm", how: "on the branch, before each sub-block, plus one at the end", models: [gpt2, palm, llama, llama2, mistral, mixtral, jamba, dsv2, gemma2, llama3, dsv3, gptoss, qnext] }
-      - { id: rms, what: "RMSNorm", how: "divide by the root mean square; no mean, no bias", models: [llama, llama2, mistral, mixtral, jamba, dsv2, gemma2, llama3, olmo2, dsv3, gptoss, qnext] }
-      - { id: sandwich, what: "Norm before and after", how: "a norm on the branch input and another on its output", models: [gemma2] }
-      - { id: inside, what: "Post-norm inside the residual", how: "the norm sits on the branch output, before the add; the trunk stays raw", models: [olmo2] }
-      - { id: qk, what: "QK-norm", how: "normalise queries and keys before the dot product", models: [olmo2, qnext] }
-      - { id: zero, what: "Zero-centred RMSNorm", how: "the scale is learned around zero, so weight decay keeps it small", models: [qnext] }
+      - { id: post, short: "post", what: "Post-norm", how: "on the trunk, after each residual add", models: [tf, gpt1] }
+      - { id: pre, short: "pre", what: "Pre-norm", how: "on the branch, before each sub-block, plus one at the end", models: [gpt2, palm, llama, llama2, mistral, mixtral, jamba, dsv2, gemma2, llama3, dsv3, gptoss, qnext] }
+      - { id: rms, short: "RMS", extra: true, what: "RMSNorm", how: "divide by the root mean square; no mean, no bias", models: [llama, llama2, mistral, mixtral, jamba, dsv2, gemma2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: sandwich, short: "sandwich", extra: true, what: "Norm before and after", how: "a norm on the branch input and another on its output", models: [gemma2] }
+      - { id: inside, short: "inside", what: "Post-norm inside the residual", how: "the norm sits on the branch output, before the add; the trunk stays raw", models: [olmo2] }
+      - { id: qk, short: "QK", extra: true, what: "QK-norm", how: "normalise queries and keys before the dot product", models: [olmo2, qnext] }
+      - { id: zero, short: "zero-centred", extra: true, what: "Zero-centred RMSNorm", how: "the scale is learned around zero, so weight decay keeps it small", models: [qnext] }
   - id: attn
     name: Attention
     techniques:
-      - { id: mha, what: "Multi-head", how: "every query head has its own keys and values", models: [tf, gpt1, gpt2, llama, olmo2] }
-      - { id: mqa, what: "Multi-query", how: "all query heads share one key and value head", models: [palm] }
-      - { id: gqa, what: "Grouped-query", how: "groups of query heads share a key and value head", models: [llama2, mistral, mixtral, jamba, gemma2, llama3, gptoss, qnext] }
-      - { id: window, what: "Sliding window", how: "a layer sees a fixed number of recent tokens", models: [mistral, gemma2, gptoss] }
-      - { id: linear, what: "State-space hybrid", how: "most layers keep a fixed-size state instead of a cache", models: [jamba, qnext] }
-      - { id: mla, what: "Multi-head latent", how: "keys and values rebuilt from one small latent per token", models: [dsv2, dsv3] }
-      - { id: sinks, what: "Attention sinks", how: "a learned score per head that a query can attend to instead of any token", models: [gptoss] }
-      - { id: gated, what: "Gated output", how: "a sigmoid of the block input scales what attention writes back", models: [qnext] }
+      - { id: mha, short: "MHA", what: "Multi-head", how: "every query head has its own keys and values", models: [tf, gpt1, gpt2, llama, olmo2] }
+      - { id: mqa, short: "MQA", what: "Multi-query", how: "all query heads share one key and value head", models: [palm] }
+      - { id: gqa, short: "GQA", what: "Grouped-query", how: "groups of query heads share a key and value head", models: [llama2, mistral, mixtral, jamba, gemma2, llama3, gptoss, qnext] }
+      - { id: window, short: "window", extra: true, what: "Sliding window", how: "a layer sees a fixed number of recent tokens", models: [mistral, gemma2, gptoss] }
+      - { id: linear, short: "hybrid", extra: true, what: "State-space hybrid", how: "most layers keep a fixed-size state instead of a cache", models: [jamba, qnext] }
+      - { id: mla, short: "MLA", what: "Multi-head latent", how: "keys and values rebuilt from one small latent per token", models: [dsv2, dsv3] }
+      - { id: sinks, short: "sinks", extra: true, what: "Attention sinks", how: "a learned score per head that a query can attend to instead of any token", models: [gptoss] }
+      - { id: gated, short: "gated", extra: true, what: "Gated output", how: "a sigmoid of the block input scales what attention writes back", models: [qnext] }
   - id: ctx
     name: Context
     techniques:
-      - { id: full, what: "Train at full length", how: "the whole context is seen in pre-training", models: [tf, gpt1, gpt2, palm, llama, llama2, mixtral, jamba, gemma2, olmo2] }
-      - { id: window, what: "Sliding window", how: "a fixed cache, with reach growing through the layers", models: [mistral] }
-      - { id: linear, what: "State-space hybrid", how: "a fixed-size state carries most of the history", models: [jamba, qnext] }
-      - { id: yarn, what: "YaRN", how: "rescale the RoPE frequencies unevenly, then a short fine-tune", models: [dsv2, dsv3, gptoss] }
-      - { id: interleave, what: "Local-global interleave", how: "windowed layers alternate with full ones; half the cache stays small", models: [gemma2, gptoss] }
-      - { id: base, what: "Raise the RoPE base", how: "a slower rotation, then continued training on long documents", models: [llama3] }
+      - { id: full, short: "full", what: "Train at full length", how: "the whole context is seen in pre-training", models: [tf, gpt1, gpt2, palm, llama, llama2, mixtral, jamba, gemma2, olmo2] }
+      - { id: window, short: "window", extra: true, what: "Sliding window", how: "a fixed cache, with reach growing through the layers", models: [mistral] }
+      - { id: linear, short: "state", extra: true, what: "State-space hybrid", how: "a fixed-size state carries most of the history", models: [jamba, qnext] }
+      - { id: yarn, short: "YaRN", what: "YaRN", how: "rescale the RoPE frequencies unevenly, then a short fine-tune", models: [dsv2, dsv3, gptoss] }
+      - { id: interleave, short: "local/global", extra: true, what: "Local-global interleave", how: "windowed layers alternate with full ones; half the cache stays small", models: [gemma2, gptoss] }
+      - { id: base, short: "RoPE base", what: "Raise the RoPE base", how: "a slower rotation, then continued training on long documents", models: [llama3] }
   - id: ffn
     name: FFN
     techniques:
-      - { id: dense, what: "Dense MLP", how: "every token goes through the same expand-and-project block", models: [tf, gpt1, gpt2, palm, llama, llama2, mistral, gemma2, llama3, olmo2] }
-      - { id: moe, what: "Mixture of experts", how: "a router sends each token to a few of many MLPs", models: [mixtral, jamba, dsv2, dsv3, gptoss, qnext] }
-      - { id: shared, what: "Fine-grained and shared experts", how: "many small experts, plus a few that every token uses", models: [dsv2, dsv3, qnext] }
-      - { id: auxfree, what: "Aux-loss-free balancing", how: "a bias on the router balances load, with no extra loss", models: [dsv3] }
-      - { id: sigmoid, what: "Sigmoid router", how: "expert scores from a sigmoid, not a softmax, so they need not compete", models: [dsv3] }
+      - { id: dense, short: "dense", what: "Dense MLP", how: "every token goes through the same expand-and-project block", models: [tf, gpt1, gpt2, palm, llama, llama2, mistral, gemma2, llama3, olmo2] }
+      - { id: moe, short: "MoE", what: "Mixture of experts", how: "a router sends each token to a few of many MLPs", models: [mixtral, jamba, dsv2, dsv3, gptoss, qnext] }
+      - { id: shared, short: "shared", extra: true, what: "Fine-grained and shared experts", how: "many small experts, plus a few that every token uses", models: [dsv2, dsv3, qnext] }
+      - { id: auxfree, short: "aux-free", extra: true, what: "Aux-loss-free balancing", how: "a bias on the router balances load, with no extra loss", models: [dsv3] }
+      - { id: sigmoid, short: "sigmoid", extra: true, what: "Sigmoid router", how: "expert scores from a sigmoid, not a softmax, so they need not compete", models: [dsv3] }
   - id: act
     name: Activation
     techniques:
-      - { id: relu, what: "ReLU", how: "keep the positive part, zero the rest", models: [tf] }
-      - { id: gelu, what: "GELU", how: "a smooth ReLU, weighted by how likely the input is positive", models: [gpt1, gpt2] }
-      - { id: swiglu, what: "SwiGLU", how: "a gated unit: a SiLU gate times an up projection, then down", models: [palm, llama, llama2, mistral, mixtral, jamba, dsv2, llama3, olmo2, dsv3, gptoss, qnext] }
-      - { id: geglu, what: "GeGLU", how: "the same gated unit with a GELU gate", models: [gemma2] }
+      - { id: relu, short: "ReLU", what: "ReLU", how: "keep the positive part, zero the rest", models: [tf] }
+      - { id: gelu, short: "GELU", what: "GELU", how: "a smooth ReLU, weighted by how likely the input is positive", models: [gpt1, gpt2] }
+      - { id: swiglu, short: "SwiGLU", what: "SwiGLU", how: "a gated unit: a SiLU gate times an up projection, then down", models: [palm, llama, llama2, mistral, mixtral, jamba, dsv2, llama3, olmo2, dsv3, gptoss, qnext] }
+      - { id: geglu, short: "GeGLU", what: "GeGLU", how: "the same gated unit with a GELU gate", models: [gemma2] }
