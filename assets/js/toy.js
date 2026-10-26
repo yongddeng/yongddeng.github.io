@@ -271,13 +271,13 @@
 				}
 			}
 		}
-		// the blend: each head's weights and the cached value rows converge on the new row of o
+		// the blend: each head's weights and the cached value rows converge on the new row of o. Every cached row is
+		// read, so the cache stays lit; how much of a row arrives is its weight, in the size and strength of its cubes
 		if (s === ST.blend) {
 			for (let h = 0; h < NH; h++) {
 				const ws = r.heads[h].w, top = Math.max(...ws);
 				for (let j = 0; j <= p; j++) {
 					for (let i = 0; i < DH; i++) {
-						cells.get(`v|${h}|${j}|${i}`).fade = 0.85 * (1 - ws[j] / top);
 						ghost(`g7|${h}|${j}|${i}`, cellPos('v', h, j, i), cellPos('o', h, p, i), valueColour(TOK[j].v[h * DH + i]), { peak: 0.2 + 0.8 * ws[j] / top, sz: 0.3 + 0.6 * ws[j] / top, win: [0.3, 1] });
 					}
 					const beside = [WALLS.o.x - 1.1 - 0.12 * j, -(WALLS.o.top + p + 0.5) + 0.1 * j, -h * HZ];
@@ -912,7 +912,7 @@
 		q: ['q′', 'RoPE(x̂ Wq)', '64 × 128'],
 		k: ['K′ cache', 'RoPE(x̂ Wk)', '64 × t × 128'],
 		v: ['V cache', 'x̂ Wv', '64 × t × 128'],
-		a: s === ST.scores ? ['scores', 'q′K′ᵀ ÷ √4', '64 × t'] : ['a', 'softmax(q′K′ᵀ ÷ √4)', '64 × t'],
+		a: s === ST.scores ? ['scores', 'q′K′ᵀ ÷ √dₕ', '64 × t'] : ['a', 'softmax(q′K′ᵀ ÷ √dₕ)', '64 × t'],
 		o: ['o', 'a V', '64 × 128'],
 		h: s === ST.wo ? ['o Wo', 'concat(o) Wo, leaving attention', '8,192'] : s === ST.norm2 ? ['ĥ', 'RMSNorm(h), this step', '8,192'] : ['h · intermediate', 'x + attention', '8,192'],
 		y: ['y · output', 'h + f, to layer 2', '8,192'],
@@ -1100,7 +1100,7 @@
 			[ST.qkv]: () => 'Wq, Wk and Wv make q, k and v. Each 8-number row folds into two heads of 4, so the cubes land in two layers.',
 			[ST.rope]: () => `RoPE turns q and k pair by pair: pair 0 by ${p} rad, pair 1 by ${(p * 0.01).toFixed(2)} rad. The same word at another position gets a different key.`,
 			[ST.cache]: () => `k′ and v drop into row ${p} of the cache. ${p ? `Rows 0–${p - 1} were written by earlier passes.` : 'The cache was empty.'} They stay for every later token.`,
-			[ST.scores]: () => 'q′ meets every cached key, head by head: q′·k′ⱼ ÷ √4. A new row of scores grows in a.',
+			[ST.scores]: () => 'q′ meets every cached key, head by head: q′·k′ⱼ ÷ √dₕ. A new row of scores grows in a.',
 			[ST.softmax]: () => `Softmax turns each head's scores into weights that sum to 1. Head 0 puts most on ${best(0)}, head 1 on ${best(1)}.`,
 			[ST.blend]: () => 'o = a V uses both. Each head’s weights and the cached value rows converge on o: every row of V arrives scaled by its weight aⱼ, bright where the weight is large, and they add up into the new row of o.',
 			[ST.wo]: () => 'The two head layers unfold into one row, and Wo mixes them.',
@@ -1189,7 +1189,7 @@
 			}),
 			[ST.scores]: () => [0, 1].forEach(h => {
 				const hd = t.heads[h], sl = v => v.slice(h * 4, h * 4 + 4);
-				sh.head(`head ${h}: q′${SUB[h]} · k′ⱼ ÷ √4`);
+				sh.head(`head ${h}: q′${SUB[h]} · k′ⱼ ÷ √dₕ`);
 				sh.lab(sh.y, 'q′' + SUB[h]);
 				sl(t.qr).forEach((v, i) => sh.push(cell(VX + i * 30, sh.y, v, `q|${h}|${p}|${i}`, 3, 30)));
 				sh.y += 24;
@@ -1292,7 +1292,11 @@
 	// One section per component, each with its prerequisites and its forward pass, built
 	// once from the data. The current step's detail block moves into that step's row.
 	const side = $('.toy-side'), sideHead = $('.toy-sidehead'), nav = $('.toy-nav'), map = $('.toy-map'), secs = $('.toy-secs');
-	const detail = $('.toy-detail'), panel = $('.toy-panel'), crumb = $('.lit-crumb');
+	const detail = $('.toy-detail'), panel = $('.toy-panel');
+	// the window's status bar: the step in words, then the token and how far through the pass it is. The layout
+	// draws the bar after the post, so the post defers this script
+	const status = $('.post_total', win), place = document.createElement('span');
+	if (status) status.append(place);
 	const PRE = {};
 	DATA.prerequisites.forEach(it => { PRE[it.id] = it; });
 	DATA.components.forEach(c => c.pre.forEach((id, k) => { PRE[id].tag = c.n + 'abcdefgh'[k]; }));
@@ -1368,7 +1372,10 @@
 		$$('button', map).forEach((b, i) => { b.classList.toggle('on', i === s); b.classList.toggle('done', i < s); });
 		$('.toy-end').hidden = s !== NST - 1;
 		$('[data-act="nexttok"]').textContent = cur < T - 1 ? `Run the next token: ${tokName(cur + 1)} →` : 'Back to the first token';
-		crumb.textContent = `${tokName(cur)} · step ${s + 1} of ${NST}`;
+		if (status) {
+			$('.left', status).textContent = `${COMP_OF[s].nav} · ${DATA.steps[s].title}`;
+			place.textContent = `${WORDS[cur]} · step ${s + 1} of ${NST}`;
+		}
 		// the side follows the step, as the cubes do; on first load it stays at the top
 		if (shownStep !== null && shownStep !== s) sideTo(row);
 		shownStep = s;
@@ -1409,7 +1416,7 @@
 
 	// ---- controls ------------------------------------------------------------------------
 	const tool = $('.lit-tool'), playBtn = $('[data-act="play"]', tool);
-	$('.toy-toks', tool).innerHTML = WORDS.map((w, j) => `<button type="button" class="lit-btn" data-tok="${j}">${w}<sub>${j}</sub></button>`).join('');
+	$('.toy-toks', tool).innerHTML = WORDS.map((w, j) => `<button type="button" class="lit-btn" data-tok="${j}">${w}</button>`).join('');
 	function setTok(p) {
 		cur = p;
 		lastStep = -1;

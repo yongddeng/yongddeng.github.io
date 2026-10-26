@@ -6,7 +6,8 @@
 	function init(win) {
 		var cont = win.querySelector('.post_content');
 		var bar = win.querySelector('.post_total');
-		if (!cont || !bar || bar.dataset.progress) return;
+		// a post that scrolls in panes of its own has no blocks; its status is its own
+		if (!cont || !bar || !bar.querySelector('.right i') || bar.dataset.progress) return;
 		bar.dataset.progress = '1';
 		var label = bar.querySelector('.left');
 		var blocks = bar.querySelectorAll('.right i');

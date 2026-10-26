@@ -443,7 +443,7 @@
 	const rail = $('.wb-tree svg'), right = Math.ceil(Math.max(...[...rail.querySelectorAll('.nm')].map(t => { const b = t.getBBox(); return b.x + b.width; })) + 8);
 	rail.querySelectorAll('.mx').forEach(c => c.setAttribute('x', +c.getAttribute('x') + right));
 	rail.style.minWidth = right + data.parts.length * 8 + 4 + 'px';
-	const state = { cur: null, view: 'block', back: [], fwd: [], base: null, ticked: {}, menu: null };
+	const state = { cur: null, view: 'block', base: null, ticked: {}, menu: null };
 
 	// ---- finding models by their parts -----------------------------------------------------------
 	// Ticking a technique keeps the models that use it, and ticks add up across parts. A part holds one of its
@@ -519,53 +519,45 @@
 		block: '<i></i>changed from the parent model &middot; tokens enter at the bottom and leave at the top as a distribution',
 		diff: '<i class="lg-d"></i>the model compared with <i class="lg-a"></i>this model &middot; a part opens its menu',
 	};
-	function go(id, remember, view) {
+	function go(id, view) {
 		view = view || state.view;
-		if (remember !== false && state.cur && (id !== state.cur || view !== state.view)) { state.back.push({ id: state.cur, view: state.view }); state.fwd = []; }
 		state.cur = id; state.view = view;
-		const m = byId[id], p = m.parent ? byId[m.parent] : null, k = idx(id);
+		const m = byId[id], p = m.parent ? byId[m.parent] : null;
 		mount(m, p);
 		$('.wb-head b').textContent = m.name;
 		$('.wb-head span').textContent = `${m.date} · ${m.org} · ${fmtP(m.params)} parameters${activeP(m)} · ${fmtB(kv(m))} KV per token`;
 		$('.wb-foot').innerHTML = esc(m.why) + ' <span class="wb-src">' + esc(m.paper) + '</span>';
-		const path = []; for (let q = m; q; q = q.parent ? byId[q.parent] : null) path.unshift(q);
-		const opened_ = state.view !== 'block', VIEW = { attn: 'attention', ffn: 'feed-forward', diff: `diff with ${esc(base(m, p).name)}` };
-		$('.lit-crumb').innerHTML = path.map((q, i) => (i === path.length - 1 && !opened_ ? '<b>' + esc(q.name) + '</b>' : '<span class="lit-link" data-go="' + q.id + '">' + esc(q.name) + '</span>')).join(' › ') + (opened_ ? ' › <b>' + VIEW[state.view] + '</b>' : '');
 		$('.wb-tree').querySelectorAll('.rl').forEach(r => r.classList.toggle('on', r.dataset.id === id));
 		const shown = view === 'diff' ? 'diff' : 'block';
 		win.querySelectorAll('[data-view]').forEach(b => b.classList.toggle(b.classList.contains('tb-item') ? 'cur' : 'on', b.dataset.view === shown));
 		$('.wb-legend').innerHTML = LEGEND[shown];
-		$('[data-act=prev]').disabled = k === 0; $('[data-act=next]').disabled = k === chrono.length - 1;
-		$('[data-act=back]').disabled = !state.back.length; $('[data-act=fwd]').disabled = !state.fwd.length;
 		render();
 	}
 	const actions = {
-		back() { if (state.back.length) { state.fwd.push({ id: state.cur, view: state.view }); const e = state.back.pop(); go(e.id, false, e.view); } },
-		fwd() { if (state.fwd.length) { state.back.push({ id: state.cur, view: state.view }); const e = state.fwd.pop(); go(e.id, false, e.view); } },
-		open(kind) { go(state.cur, true, kind); },
-		close() { go(state.cur, true, 'block'); },
-		prev() { go(chrono[idx(state.cur) - 1].id); },
-		clear() { state.ticked = {}; render(); },
-		next() { go(chrono[idx(state.cur) + 1].id); }
+		open(kind) { go(state.cur, kind); },
+		close() { go(state.cur, 'block'); },
+		clear() { state.ticked = {}; render(); }
 	};
+	// the model a step earlier (-1) or later (1) in time, if there is one
+	const step = d => { const m = chrono[idx(state.cur) + d]; if (m) go(m.id); };
 	root.addEventListener('click', e => {
-		const b = e.target.closest('[data-act]'); if (b) { if (!b.disabled) actions[b.dataset.act](); return; }
+		const b = e.target.closest('[data-act]'); if (b) { actions[b.dataset.act](); return; }
 		const mn = e.target.closest('[data-menu]'); if (mn) { toggleMenu(mn.dataset.menu); return; }
 		const lk = e.target.closest('[data-like]'); if (lk) { findLike(lk.dataset.like); return; }
 		const op = e.target.closest('[data-open]'); if (op) { actions.open(op.dataset.open); return; }
-		// a breadcrumb segment closes the opened box; a rail row or a technique's model link keeps it
-		const pick = e.target.closest('[data-id], [data-go]'); if (pick) { go(pick.dataset.id || pick.dataset.go, true, pick.dataset.go ? 'block' : undefined); return; }
+		// a rail row or a technique's model link keeps an opened box open
+		const pick = e.target.closest('[data-id]'); if (pick) { go(pick.dataset.id); return; }
 		const tk = e.target.closest('[data-tick]'); if (tk) tick(tk.dataset.part, tk.dataset.tick);
 	});
 	// the views, from the toolbar or the window's View menu (outside the workbench, so the listener sits on the window)
 	win.addEventListener('click', e => {
 		const v = e.target.closest('[data-view]'); if (!v) return;
-		go(state.cur, true, v.dataset.view);
+		go(state.cur, v.dataset.view);
 		const menu = v.closest('.tb-menu'); if (menu) menu.classList.remove('open');
 	});
 	// the diff's menu: the model it compares with
 	root.addEventListener('change', e => {
-		if (e.target.matches('[data-pick="base"]')) { state.base = e.target.value; go(state.cur, false); }
+		if (e.target.matches('[data-pick="base"]')) { state.base = e.target.value; go(state.cur); }
 	});
 	root.addEventListener('keydown', e => {
 		if (e.key === 'Escape' && !state.menu && state.view !== 'block') { actions.close(); return; }
@@ -582,8 +574,8 @@
 		if (!win.isConnected) { document.removeEventListener('keydown', onKey); return; }
 		if (e.key === 'Escape' && state.menu) { toggleMenu(state.menu); return; }
 		if (state.menu || e.target.matches('input, textarea, select') || !win.classList.contains('active-win')) return;
-		if (e.key === 'ArrowRight' && !$('[data-act=next]').disabled) actions.next();
-		if (e.key === 'ArrowLeft' && !$('[data-act=prev]').disabled) actions.prev();
+		if (e.key === 'ArrowRight') step(1);
+		if (e.key === 'ArrowLeft') step(-1);
 	}
 	function onPress(e) {
 		if (!win.isConnected) { document.removeEventListener('pointerdown', onPress); return; }
@@ -594,5 +586,9 @@
 	// The window's View menu normally lists headings (menubar.js); filled here, it lists the two views, as 303's does
 	const viewMenu = $('.tb-outline', win);
 	if (viewMenu) viewMenu.innerHTML = '<button type="button" class="tb-item cur" data-view="block">Block</button><button type="button" class="tb-item" data-view="diff">Diff</button>';
-	go('llama', false);
+	// The two references take a cell of the window's status bar, which leaves the toolbar to the menus and the views.
+	// The layout draws the bar after the post, so the post defers this script
+	const status = $('.post_total', win);
+	if (status) status.append($('.wb-see'));
+	go('llama');
 })();

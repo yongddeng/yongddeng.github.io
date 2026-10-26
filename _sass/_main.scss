@@ -1037,7 +1037,8 @@ img.task-menu-ic {
 	display: flex;
 	column-gap: 4px;
 
-	.left, .right {
+	// its cells: the layout's, and any an interactive post adds
+	> * {
 		border: 1px solid;
 		border-color: #888888 #dadada #dadada #888888;
 		box-sizing: border-box;
@@ -1055,13 +1056,19 @@ img.task-menu-ic {
 	flex-direction: column;
 
 	// F1 status line: "Ready/Done" cell plus Win95 progress blocks that
-	// fill as the post is scrolled (assets/js/progress.js)
+	// fill as the post is scrolled (assets/js/progress.js). A post that
+	// scrolls in panes of its own (a winclass) has no blocks, and may
+	// write the cells itself
 	.post_total {
 		width: 98.5%;
 		margin: 3px auto 0;
 
 		.left {
 			flex: 1 1 auto;
+		}
+		// the last cell, unless it is the blocks, keeps clear of the corner grip
+		> :last-child:not(.right) {
+			padding-right: 16px;
 		}
 		.right {
 			flex: 0 0 150px;

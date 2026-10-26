@@ -1,6 +1,7 @@
 // 302. blocks: a workbench in the post window (assets/js/decoder.js).
-// The part menus run under the toolbar; the model tree and the shown model's
-// parts stack on the left; the block (or the diff) is drawn on the right.
+// The part menus and the two views make the toolbar; the model tree and the shown
+// model's parts stack on the left; the block (or the diff) is drawn on the right;
+// two references sit in the window's status bar.
 // Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
 @use "main";
 
@@ -102,28 +103,24 @@ $wb-newtext: #8a6d00;
 .pc-ffn { --pc: #1d6b2a; }
 .pc-act { --pc: #9a0000; }
 
-// the two references, at the right end of the toolbar
+// the two references, a cell of the window's status bar (decoder.js moves them there)
 .wb-see {
-	margin-left: auto;
-	padding-right: 6px;
-	font-size: 11px;
-	color: $wb-mute;
 	white-space: nowrap;
 
 	a {
-		color: $wb-mute;
+		color: inherit;
 		text-decoration: underline;
 	}
 }
 
-// the part menus, under the toolbar: a set menu turns yellow and names its ticks
+// the part menus, along the toolbar up to the two views: a set menu turns yellow and names its ticks
 .wb-menus {
-	flex: none;
+	flex: 1;
+	min-width: 0;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 3px;
-	padding: 0 4px 4px;
 	font-size: 11px;
 
 	.lab {
