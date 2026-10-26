@@ -239,14 +239,22 @@ body {
 		// The clapperboard reads squashed at 32px square; let it breathe
 		// (slightly taller than wide, scaled down a notch)
 		img[src$="video.svg"] {
-			width: 32px;
-			height: 34px;
+			width: 31px;
+			height: 33px;
 		}
 
-		// The tree and the blocks fill their 32px bitmaps edge to edge; take them down a notch
-		img[src$="tree.png"], img[src$="defragment.png"] {
+		// The blocks fill their 32px bitmap edge to edge; take them down a notch
+		img[src$="defragment.png"] {
 			width: 30px;
 			height: 30px;
+		}
+
+		// The agent's face is 24px inside its 32px bitmap; bring it up a notch,
+		// and down onto the row's bottom edge past the bitmap's empty margin
+		img[src$="msagent.png"] {
+			width: 35px;
+			height: 35px;
+			margin-bottom: -4px;
 		}
 
 		// Wide emoji: keep its natural aspect at icon height
