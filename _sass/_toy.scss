@@ -11,6 +11,14 @@ $toy-navy: #000080;
 $toy-rule: #ebe8ee;
 $toy-gold: #c8a000;
 
+// the reading text, set in Georgia, follows System Properties' Font and Text size;
+// Small (12px) gives the size it was drawn at
+@mixin reading($size, $leading) {
+	font-family: var(--font, $toy-serif);
+	font-size: calc(var(--text, 12px) + #{$size - 12px});
+	line-height: $leading;
+}
+
 .toy-win {
 	width: 1080px;
 
@@ -33,7 +41,7 @@ $toy-gold: #c8a000;
 	font: 12px/1.35 $toy-ui;
 	color: #000000;
 
-	// outrank the post body's own rules
+	// outrank the post body's own rules; a class on one of these needs .toy in front to outrank this in turn
 	ul, li, p {
 		margin: 0;
 		padding: 0;
@@ -146,6 +154,7 @@ $toy-gold: #c8a000;
 	padding: 8px 14px 6px;
 	background: var(--paper, #fbfafb);
 	border-bottom: 1px solid #d6d2da;
+	box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 .toy-map {
 	display: grid;
@@ -210,7 +219,8 @@ $toy-gold: #c8a000;
 		align-items: baseline;
 		gap: 2px 8px;
 		margin: 18px 0 2px;
-		font: bold 17px/1.3 $toy-serif;
+		@include reading(17px, 1.3);
+		font-weight: bold;
 
 		.num { color: $toy-navy; min-width: 14px; }
 		small {
@@ -227,10 +237,10 @@ $toy-gold: #c8a000;
 		min-width: 0;
 	}
 }
-.toy-intro {
-	margin: 6px 0 2px;
-	font: 12.5px/1.5 $toy-ui;
-	color: #45404a;
+.toy .toy-intro {
+	margin: 8px 0 4px 22px;
+	@include reading(13px, 1.55);
+	color: #2b2830;
 }
 .toy-cpeq {
 	margin: 2px 0 2px 22px;
@@ -254,7 +264,7 @@ $toy-gold: #c8a000;
 	i { font: italic bold 14px $toy-serif; color: $toy-navy; }
 	sub { font-size: 9px; }
 }
-.toy-also {
+.toy .toy-also {
 	margin: 4px 0 0;
 	font: 11.5px/1.5 $toy-ui;
 	color: $toy-mute;
@@ -285,7 +295,7 @@ $toy-gold: #c8a000;
 	}
 	p {
 		margin: 4px 0;
-		font: 13px/1.55 $toy-serif;
+		@include reading(13px, 1.55);
 	}
 }
 @keyframes toy-flash {
@@ -346,7 +356,7 @@ $toy-gold: #c8a000;
 		border-left-color: $toy-navy;
 		background: #f6f6fb;
 
-		.toy-fph b { color: $toy-navy; font-size: 15px; }
+		.toy-fph b { color: $toy-navy; font-size: calc(var(--text, 12px) + 3px); }
 		.toy-fph .n { color: $toy-navy; font-weight: bold; }
 	}
 }
@@ -365,7 +375,7 @@ $toy-gold: #c8a000;
 	cursor: pointer;
 
 	.n { font: 11px/1.6 $toy-ui; color: $toy-mute; font-variant-numeric: tabular-nums; }
-	b { font: bold 13px/1.5 $toy-serif; }
+	b { @include reading(13px, 1.5); font-weight: bold; }
 	.eq {
 		grid-column: 2;
 		overflow-x: auto;
@@ -380,7 +390,7 @@ $toy-gold: #c8a000;
 .toy-detail {
 	display: grid;
 	gap: 6px;
-	padding: 0 0 12px 24px;
+	padding: 0 0 12px 34px;
 	min-width: 0;
 
 	> * { min-width: 0; }
@@ -399,11 +409,11 @@ $toy-gold: #c8a000;
 	color: $toy-mute;
 }
 .toy-cap {
-	font: 13.5px/1.5 $toy-serif;
+	@include reading(13.5px, 1.5);
 
 	i { font-style: normal; font-weight: bold; color: $toy-navy; }
 }
-.toy-notes {
+.toy .toy-notes {
 	padding: 8px 0 0 16px;
 	border-top: 1px solid #dddddd;
 	font: 12px/1.45 $toy-ui;
@@ -428,9 +438,9 @@ $toy-gold: #c8a000;
 	.katex { font-size: 1.1em; }
 	&.tight .arraycolsep { width: 0.24em !important; }
 }
-.toy-mnote {
+.toy .toy-mnote {
 	margin: 2px 0 6px;
-	font: 12.5px/1.5 $toy-serif;
+	@include reading(12.5px, 1.5);
 	color: #2b2830;
 
 	i { font-style: normal; font-weight: bold; color: $toy-navy; }

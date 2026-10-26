@@ -433,8 +433,8 @@
 		const X = l => 44 + l * 9, Y = r => 11 + r * RH, o = [];
 		chrono.forEach(m => { if (!m.parent) return; const p = byId[m.parent], x0 = X(lane[p.id]), y0 = Y(rowOf[p.id]), x1 = X(lane[m.id]), y1 = Y(rowOf[m.id]);
 			o.push(x0 === x1 ? `<path d="M${x0},${y0}V${y1}" class="rail"/>` : `<path d="M${x0},${y0}V${y1 - 8}Q${x0},${y1} ${x0 + 8},${y1}H${x1}" class="rail"/>`); });
-		chrono.forEach(m => { const y = Y(rowOf[m.id]);
-			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - RH / 2}" width="100%" height="${RH}" class="bg"/><text x="4" y="${y + 3.5}" class="yr">${year(m)}</text><circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text>${data.parts.map((p, i) => `<rect x="${i * 8}" y="${y - 5}" width="7" height="10" class="mx pc-${p.id}" data-p="${p.id}"/>`).join('')}</g>`); });
+		chrono.forEach((m, i) => { const y = Y(i), yr = i && year(chrono[i - 1]) === year(m) ? '' : `<text x="4" y="${y + 3.5}" class="yr">${year(m)}</text>`;
+			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - RH / 2}" width="100%" height="${RH}" class="bg"/>${yr}<circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text>${data.parts.map((p, i) => `<rect x="${i * 8}" y="${y - 5}" width="7" height="10" class="mx pc-${p.id}" data-p="${p.id}"/>`).join('')}</g>`); });
 		return `<svg height="${chrono.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
 	}
 	$('.wb-tree').innerHTML = railHtml();

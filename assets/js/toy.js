@@ -111,7 +111,8 @@
 	const model = makeToy(187), TOK = model.tok;
 
 	// ---- colours and formatting -------------------------------------------------
-	const NAVY = [0, 0, 128], RED = [176, 0, 0], PAPER = [251, 250, 251];
+	const NAVY = [0, 0, 128], RED = [176, 0, 0];
+	let PAPER = [251, 250, 251]; // System Properties' paper; readPaper keeps it and C.paper current
 	const C = { ink: '#000000', navy: '#000080', red: '#b00000', mute: '#55505a', dim: '#9a949f', faint: '#b0aab4', paper: '#fbfafb', gold: '#c8a000' };
 	const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
 	const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
@@ -354,6 +355,14 @@
 	};
 	const scroller = $('.toy-scroll'), stage = $('.toy-stage'), spacer = $('.toy-spacer');
 	const canvas = $('.toy-cube'), ctx = canvas.getContext('2d'), tip = $('.toy-tip');
+	// the paper the canvas sits on, as a #rrggbb in --paper: its background, the halos, and what cells fade to
+	function readPaper() {
+		const hex = getComputedStyle(canvas).getPropertyValue('--paper').trim();
+		if (!/^#[0-9a-f]{6}$/i.test(hex)) return;
+		PAPER = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+		C.paper = hex;
+	}
+	readPaper();
 
 	// pixels a unit: the scene's full width at the turned view has to fit the pane
 	function fit() {
@@ -398,7 +407,7 @@
 		ctx.textBaseline = baseline;
 		if (halo) {
 			ctx.lineWidth = 3;
-			ctx.strokeStyle = 'rgba(251,250,251,0.92)';
+			ctx.strokeStyle = rgba(PAPER, 0.92);
 			ctx.lineJoin = 'round';
 			ctx.strokeText(str, x, y);
 		}
@@ -1583,10 +1592,14 @@
 		else if (W) { layout(); readTau(); fit(); draw(); }
 	});
 	resized.observe(scroller);
+	// a new paper from System Properties: the cached scenes faded to the old one go
+	const repaper = () => { readPaper(); sceneCache.clear(); draw(); };
+	document.addEventListener('settings:changed', repaper);
 	// a closed window lets go of everything, so it can be freed
 	document.addEventListener('content:swapped', function closed() {
 		if (root.isConnected) return;
 		resized.disconnect();
+		document.removeEventListener('settings:changed', repaper);
 		stopPlay();
 		clearTimeout(explainTimer);
 		document.removeEventListener('content:swapped', closed);

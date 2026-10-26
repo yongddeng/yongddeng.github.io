@@ -354,7 +354,7 @@
 					.on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
 					.on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
 					.on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
-			nodeSel.append('circle').attr('r', d => d.r).attr('fill', d => shelves[d.p.shelf].color).attr('stroke', d => d.ctx ? shelves[d.p.shelf].color : '#fff');
+			nodeSel.append('circle').attr('r', d => d.r).attr('fill', d => shelves[d.p.shelf].color).attr('stroke', d => d.ctx ? shelves[d.p.shelf].color : null);
 			nodeSel.append('text').attr('x', d => d.r + 3).attr('y', 3.5).text(d => d.p.name);
 			function tick() {
 				link.attr('d', d => {
