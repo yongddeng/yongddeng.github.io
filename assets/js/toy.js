@@ -173,33 +173,35 @@
 	const FOCUS = STEPS.map(r => r[1]), FOCUS_Y = STEPS.map(r => r[2]), NST = STEPS.length;
 
 	// ---- geometry -----------------------------------------------------------------
-	// Scene units: a cube is one unit; x runs right, y runs down the page (stored
-	// negative, so up is up for the camera), z toward the viewer. A wall holds one
-	// row per token and a layer of depth per query head: head 0 in front, each next
-	// one HZ further back and SX further right, so the stack fans out and a layer
-	// behind shows beside the one in front. Key-value head g sits in the layer of its
-	// group's first query head; the group's other layers hold, empty, the heads
-	// multi-head attention would keep.
-	const HS = 0.42, HZ = 2.2, SX = 1.1, HOLD = 0.18, PEND = 3.4, RAILX = -1.7;
+	// Scene units: a cube of the residual stream is one unit; x runs right, y runs down
+	// the page (stored negative, so up is up for the camera), z toward the viewer. A
+	// wall holds one row per token and a layer of depth per query head: head 0 in
+	// front, each next one HZ further back and SX further right, so the stack fans out
+	// and a layer behind shows beside the one in front. Key-value head g sits in the
+	// layer of its group's first query head; the group's other layers hold, empty, the
+	// heads multi-head attention would keep. Attention's walls are drawn at u of a
+	// unit, smaller than the stream's and with air between them.
+	const HS = 0.42, HZ = 2.2, SX = 1.1, SMALL = 0.85, HOLD = 0.18, PEND = 3.4, RAILX = -1.7;
 	const SUM_X = -0.85; // the two ⊕, between the rail and the walls
 	const FX = 2, NETW = 22; // the networks' left edge and width: the experts', and the LM head's
 	const PANEL = { x0: 0.8, x1: FX + NETW + 7.2, z: -HZ - 0.7 }; // the boards: one column, behind the front walls
 	const WALLS = {
-		x: { x: 0, top: 0, w: 8 },
-		q: { x: 2.4, top: 19.4, w: DH },
-		k: { x: 13.5, top: 19.4, w: DH },
-		v: { x: 24.5, top: 19.4, w: DH },
-		a: { x: 4, top: 33.8, w: T },
-		o: { x: 20.5, top: 33.8, w: DH },
-		h: { x: 0, top: 45.8, w: 8 },
-		y: { x: 0, top: 81, w: 8 },
+		x: { x: 0, top: 0, w: 8, u: 1 },
+		q: { x: 2.4, top: 19.4, w: DH, u: SMALL },
+		k: { x: 13.5, top: 19.4, w: DH, u: SMALL },
+		v: { x: 24.5, top: 19.4, w: DH, u: SMALL },
+		a: { x: 4, top: 33.8, w: T, u: SMALL },
+		o: { x: 20.5, top: 33.8, w: DH, u: SMALL },
+		h: { x: 0, top: 45.8, w: 8, u: 1 },
+		y: { x: 0, top: 81, w: 8, u: 1 },
 	};
 	// the copies of a key or value head, kc and vc, go in the layer of its group's second query head; until Repeat
 	// and after the blend that layer holds kd and vd, empty cubes for the head multi-head attention would keep there
 	const COPY = { kc: 'k', vc: 'v', kd: 'k', vd: 'v' }, LAYER = { k: 0, v: 0, kc: 1, vc: 1, kd: 1, vd: 1 };
 	// h is a query head in q, a and o, a key-value head in k and v and their copies
 	const layerOf = (b, h) => b in LAYER ? h * GRP + LAYER[b] : h;
-	const cellPos = (b, h, t, i) => { const w = WALLS[COPY[b] ?? b], n = layerOf(b, h); return [w.x + i + 0.5 + n * SX, -(w.top + t + 0.5), -n * HZ]; };
+	const wallOf = b => WALLS[COPY[b] ?? b];
+	const cellPos = (b, h, t, i) => { const { x, top, u } = wallOf(b), n = layerOf(b, h); return [x + (i + 0.5 + n * SX) * u, -(top + (t + 0.5) * u), -n * HZ]; };
 	// the experts as networks: 8 inputs, the router's score for each expert, each expert's 3 neurons in a box of its
 	// own (a gate node fed by W1, a value node fed by W3, their product), 8 outputs. Neuron n is neuron n mod 3 of
 	// expert ⌊n/3⌋
@@ -219,7 +221,7 @@
 	// y0 and y1 for the view. tint fills the board; accent draws its spine, its edge and its heading's square; ink sets
 	// its heading
 	const CASES = [
-		{ name: 'Attention', sub: '4 query heads on 2 key-value heads here; 32 on 8, 42 M weights in Mixtral', top: 15.0, bottom: 41.4, z: -(NH - 1) * HZ - 0.7, wide: 3, tint: [221, 232, 255], accent: [47, 85, 180], ink: '#22407f', steps: [ST.norm, ST.wo] },
+		{ name: 'Attention', sub: '4 query heads on 2 key-value heads here; 32 on 8, 42 M weights in Mixtral', top: 15.0, bottom: 40.5, z: -(NH - 1) * HZ - 0.7, wide: 3, tint: [221, 232, 255], accent: [47, 85, 180], ink: '#22407f', steps: [ST.norm, ST.wo] },
 		{ name: 'Mixture of experts · SwiGLU', sub: '8 experts of 3, 2 run a token; 8 of 14,336 in Mixtral, 1.4 B weights', top: 55.8, bottom: 78.0, z: PANEL.z, wide: 0, tint: [227, 242, 218], accent: [46, 125, 58], ink: '#235f2d', steps: [ST.norm2, ST.down] },
 		{ name: 'LM head · next token', sub: '16 tokens here; 32,000 in Mixtral, 131 M weights', top: 92.0, bottom: 112.6, z: PANEL.z, wide: 0, tint: [236, 228, 248], accent: [122, 79, 179], ink: '#5a3790', steps: [ST.finalNorm, ST.pick] },
 	];
@@ -249,8 +251,9 @@
 	// ---- scenes -----------------------------------------------------------------------
 	// scene(p, s): every cube on show when token p is at step s, keyed wall|head|row|col.
 	// Cached for the current token only; setTok clears it.
-	// A cube carries its value, position, colour and how far it fades back; `from`,
-	// `win`, `grow` say how it enters. Ghosts are cubes in flight between two scenes.
+	// A cube carries its value, position, unit, colour and how far it fades back;
+	// `from`, `win`, `grow` say how it enters. Ghosts are cubes in flight between two
+	// scenes.
 	const sceneCache = new Map();
 	function scene(p, s) {
 		const key = p + ':' + s;
@@ -259,10 +262,10 @@
 		const put = (b, h, t, i, val, colour, extra = {}) => {
 			const [x, y, z] = cellPos(b, h, t, i), live = t === p;
 			const back = live ? (lit.includes(b) ? 0 : 0.45) : (b === 'k' || b === 'v' || b in COPY) ? (lit.includes(b) ? 0 : 0.5) : 0.86;
-			cells.set(`${b}|${h}|${t}|${i}`, { b, h, t, i, val, st: s, x, y, z, base: colour, fade: back, op: 1, sc: 1, ...extra }); // st: the step whose value it holds
+			cells.set(`${b}|${h}|${t}|${i}`, { b, h, t, i, val, st: s, x, y, z, u: wallOf(b).u, base: colour, fade: back, op: 1, sc: 1, ...extra }); // st: the step whose value it holds
 		};
 		const ghost = (id, from, to, colour, extra = {}) => {
-			cells.set(id, { ghost: true, peak: 1, from, x: to[0], y: to[1], z: to[2], base: colour, fade: 0, op: 0, sc: 0.8, ...extra });
+			cells.set(id, { ghost: true, peak: 1, from, x: to[0], y: to[1], z: to[2], u: 1, base: colour, fade: 0, op: 0, sc: 0.8, ...extra });
 		};
 		for (let t = 0; t <= p; t++) {
 			const r = TOK[t], live = t === p, reached = step => !live || s >= step;
@@ -331,8 +334,8 @@
 				for (let j = 0; j <= p; j++) {
 					const to = cellPos('a', h, p, j), win = [0.05 + 0.06 * j, 0.55 + 0.06 * j];
 					for (let i = 0; i < DH; i++) {
-						ghost(`gq|${h}|${j}|${i}`, cellPos('q', h, p, i), to, valueColour(r.qr[h * DH + i]), { peak: 0.85, sz: 0.6, win });
-						ghost(`gk|${h}|${j}|${i}`, cellPos(h % GRP ? 'kc' : 'k', g, j, i), to, valueColour(TOK[j].kr[g * DH + i]), { peak: 0.85, sz: 0.6, win });
+						ghost(`gq|${h}|${j}|${i}`, cellPos('q', h, p, i), to, valueColour(r.qr[h * DH + i]), { peak: 0.85, sz: 0.6, win, u: SMALL });
+						ghost(`gk|${h}|${j}|${i}`, cellPos(h % GRP ? 'kc' : 'k', g, j, i), to, valueColour(TOK[j].kr[g * DH + i]), { peak: 0.85, sz: 0.6, win, u: SMALL });
 					}
 				}
 			}
@@ -345,10 +348,10 @@
 				const ws = r.heads[h].w, top = Math.max(...ws), g = kvOf(h);
 				for (let j = 0; j <= p; j++) {
 					for (let i = 0; i < DH; i++) {
-						ghost(`g7|${h}|${j}|${i}`, cellPos(h % GRP ? 'vc' : 'v', g, j, i), cellPos('o', h, p, i), valueColour(TOK[j].v[g * DH + i]), { peak: 0.2 + 0.8 * ws[j] / top, sz: 0.3 + 0.6 * ws[j] / top, win: [0.3, 1] });
+						ghost(`g7|${h}|${j}|${i}`, cellPos(h % GRP ? 'vc' : 'v', g, j, i), cellPos('o', h, p, i), valueColour(TOK[j].v[g * DH + i]), { peak: 0.2 + 0.8 * ws[j] / top, sz: 0.3 + 0.6 * ws[j] / top, win: [0.3, 1], u: SMALL });
 					}
-					const beside = [WALLS.o.x - 1.1 - 0.12 * j + h * SX, -(WALLS.o.top + p + 0.5) + 0.1 * j, -h * HZ];
-					ghost(`ga|${h}|${j}`, cellPos('a', h, p, j), beside, weightColour(ws[j]), { life: 0.8, sz: 0.85, win: [0, 0.5], sc: 0.85 });
+					const [ox, oy, oz] = cellPos('o', h, p, 0), beside = [ox - 1.6 * SMALL - 0.12 * j, oy + 0.1 * j, oz];
+					ghost(`ga|${h}|${j}`, cellPos('a', h, p, j), beside, weightColour(ws[j]), { life: 0.8, sz: 0.85, win: [0, 0.5], sc: 0.85, u: SMALL });
 				}
 			}
 		}
@@ -440,7 +443,7 @@
 		let lo = Infinity, hi = -Infinity;
 		placeBoards();
 		// the boards as the turned view places them, and the stacked walls' labels, which ride over their back layers
-		const labels = Object.keys(WALLS).filter(b => !FRONT.includes(b)).map(b => [WALLS[b].x + (NH - 1) * SX + 6.5, HS - (NH - 1) * HZ]);
+		const labels = Object.keys(WALLS).filter(b => !FRONT.includes(b)).map(b => { const w = WALLS[b]; return [w.x + (NH - 1) * SX * w.u + 6.5, HS * w.u - (NH - 1) * HZ]; });
 		[[RAILX - 1.2, 0], [PANEL.x1 + 0.4, 0.8], ...CASES.map(c => [c.x1 + 0.4, c.z]), ...labels].forEach(([x, z]) => {
 			const r = rotate(x - CX, 0, z + 1);
 			lo = Math.min(lo, r[0]);
@@ -616,7 +619,7 @@
 	function drawOutlines() {
 		ctx.setLineDash([3, 3]);
 		Object.values(WALLS).forEach(w => {
-			const q = [project(w.x + 0.08, -w.top - 0.08, HS), project(w.x + w.w - 0.08, -w.top - 0.08, HS), project(w.x + w.w - 0.08, -w.top - T + 0.08, HS), project(w.x + 0.08, -w.top - T + 0.08, HS)];
+			const q = [[0.08, 0.08], [w.w - 0.08, 0.08], [w.w - 0.08, T - 0.08], [0.08, T - 0.08]].map(([i, t]) => project(w.x + i * w.u, -(w.top + t * w.u), HS * w.u));
 			if (q.every(p => p[1] < -40) || q.every(p => p[1] > H + 40)) return;
 			poly(q, null, 'rgba(0,0,0,0.15)', 0.8);
 		});
@@ -712,7 +715,7 @@
 		ctx.beginPath();
 		cells.forEach(c => {
 			if (c.ghost || c.hollow || c.op < 0.5 || c.sc < 0.5) return;
-			const z = backAt(c.y), d = 0.15 + 0.08 * (c.z - z), x = c.x + d, y = c.y - d, h = HS * c.sc;
+			const z = backAt(c.y), d = 0.15 + 0.08 * (c.z - z), x = c.x + d, y = c.y - d, h = HS * c.sc * c.u;
 			const q = [project(x - h, y + h, z), project(x + h, y + h, z), project(x + h, y - h, z), project(x - h, y - h, z)];
 			if (!onScreen(q[0], 60)) return;
 			q.forEach((pt, i) => (i ? ctx.lineTo(pt[0] - OFF, pt[1]) : ctx.moveTo(pt[0] - OFF, pt[1])));
@@ -727,8 +730,9 @@
 	const FACES = [[[1, 0, 0], [1, 3, 7, 5]], [[-1, 0, 0], [0, 4, 6, 2]], [[0, 1, 0], [2, 6, 7, 3]], [[0, -1, 0], [0, 1, 5, 4]], [[0, 0, 1], [4, 5, 7, 6]], [[0, 0, -1], [0, 2, 3, 1]]];
 	const LIGHT = (() => { const l = [-0.35, 0.75, 0.6], n = Math.hypot(...l); return l.map(v => v / n); })();
 	function drawCubes(cells) {
-		const offsets = sc => CORNERS.map(q => { const r = rotate(q[0] * HS * sc, q[1] * HS * sc, q[2] * HS * sc); return [S * r[0], -S * r[1]]; });
-		const unit = offsets(1);
+		// a cube's corners on screen, by its half-size; cubes at rest share two sizes
+		const corners = new Map();
+		const offsets = h => { if (!corners.has(h)) corners.set(h, CORNERS.map(q => { const r = rotate(q[0] * h, q[1] * h, q[2] * h); return [S * r[0], -S * r[1]]; })); return corners.get(h); };
 		const visible = FACES.map(([n, idx]) => {
 			const r = rotate(...n);
 			return { idx, front: r[2] > 0.002, shade: 0.66 + 0.34 * Math.max(0, r[0] * LIGHT[0] + r[1] * LIGHT[1] + r[2] * LIGHT[2]) };
@@ -743,7 +747,7 @@
 		faces = [];
 		let hovered = null;
 		list.forEach(({ id, c, p }) => {
-			const off = Math.abs(c.sc - 1) < 0.01 ? unit : offsets(c.sc);
+			const off = offsets(HS * c.sc * c.u);
 			const quads = visible.map(f => f.idx.map(i => [p[0] + off[i][0], p[1] + off[i][1]]));
 			const strong = c.fade < 0.3;
 			ctx.globalAlpha = Math.min(1, c.op);
@@ -913,7 +917,7 @@
 		sideLabel(NY.out, 'f · 8 outputs', '4,096 in Mixtral', on);
 	}
 
-	// attention's weights, drawn as the FFN's are: every entry of Wq, Wk, Wv and Wo an edge between the walls
+	// attention's weights, drawn as the experts' are: every entry of Wq, Wk, Wv and Wo an edge between the walls
 	function drawProjections(s, k, SL) {
 		const t = TOK[cur], { at, live } = sweep(s, k);
 		const bundleLabel = (x, y, name, sub, on, atY) => {
@@ -921,6 +925,7 @@
 			write(name, p[0], py, `bold 11px ${SERIF}`, on ? C.ink : C.dim, 'center');
 			write(sub, p[0], py + 11, `9.5px ${UI}`, on ? C.mute : C.faint, 'center');
 		};
+		const mid = b => { const w = WALLS[b]; return w.x + w.w * w.u / 2; }; // the middle of a wall's front layer
 		// x̂ → q, k, v: from the token's row of x to the top of each wall's columns; the row itself then drops into the wall
 		{
 			const yt = -(WALLS.x.top + T), yb = -WALLS.q.top;
@@ -941,13 +946,13 @@
 				});
 				flushEdges();
 				// one screen line for the three, at Wq's height: turned, the scene drops to the right and Wv would land on the Attention heading
-				const atY = project(WALLS.q.x + WALLS.q.w / 2, yt - 0.75, 0)[1];
-				[['Wq', 'q', '8 × 16 edges'], ['Wk', 'k', '8 × 8 edges'], ['Wv', 'v', '8 × 8 edges']].forEach(([name, b, sub]) => bundleLabel(WALLS[b].x + WALLS[b].w / 2, yt - 0.75, name, sub, SL === ST.qkv, atY));
+				const atY = project(mid('q'), yt - 0.75, 0)[1];
+				[['Wq', 'q', '8 × 16 edges'], ['Wk', 'k', '8 × 8 edges'], ['Wv', 'v', '8 × 8 edges']].forEach(([name, b, sub]) => bundleLabel(mid(b), yt - 0.75, name, sub, SL === ST.qkv, atY));
 			}
 		}
 		// o → o Wo: from the bottom of o's columns to the top of h's
 		{
-			const yt = -(WALLS.o.top + T), yb = -WALLS.h.top;
+			const yt = -(WALLS.o.top + T * WALLS.o.u), yb = -WALLS.h.top;
 			if (project(0, yb, 0)[1] > -30 && project(0, yt, 0)[1] < H + 30) {
 				const fm = SL === ST.wo ? 1 : SL < ST.wo ? 0 : 0.35, done = at(ST.wo, 0.1, 0.9), cm = brightest(t.cat, model.Wo);
 				const src = range(NH * DH).map(c => { const [cx, , cz] = cellPos('o', Math.floor(c / DH), 0, c % DH); return project(cx, yt - 0.05, cz); });
@@ -959,7 +964,7 @@
 					}
 				}
 				flushEdges();
-				bundleLabel(WALLS.o.x + WALLS.o.w / 2, (yt + yb) / 2, 'Wo', '16 × 8 edges · the heads mix', SL === ST.wo);
+				bundleLabel(mid('o'), (yt + yb) / 2, 'Wo', '16 × 8 edges · the heads mix', SL === ST.wo);
 			}
 		}
 	}
@@ -967,17 +972,17 @@
 	// the mask: the cells of a that no token reads, hatched, so the staircase of weights and the grey make the full
 	// square. It is the same for every head, so it is drawn once, on the back layer, which nothing lies behind
 	function drawMask(SL) {
-		const { x, top, w: n } = WALLS.a, x0 = x + (NH - 1) * SX, z = HS - (NH - 1) * HZ;
-		if (project(x0, -top, z)[1] < -40 || project(x0, -(top + T), z)[1] > H + 40) return;
+		const { x, top, w: n, u } = WALLS.a, x0 = x + (NH - 1) * SX * u, z = HS * u - (NH - 1) * HZ;
+		if (project(x0, -top, z)[1] < -40 || project(x0, -(top + T * u), z)[1] > H + 40) return;
 		const on = SL === ST.scores || SL === ST.softmax;
 		for (let t = 0; t < T; t++) {
 			for (let j = t + 1; j < n; j++) {
-				const q = [project(x0 + j + 0.1, -(top + t + 0.1), z), project(x0 + j + 0.9, -(top + t + 0.1), z), project(x0 + j + 0.9, -(top + t + 0.9), z), project(x0 + j + 0.1, -(top + t + 0.9), z)];
+				const q = [[j + 0.1, t + 0.1], [j + 0.9, t + 0.1], [j + 0.9, t + 0.9], [j + 0.1, t + 0.9]].map(([i, r]) => project(x0 + i * u, -(top + r * u), z));
 				poly(q, on ? 'rgba(0,0,0,0.09)' : 'rgba(0,0,0,0.05)', on ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.14)', 0.6);
 				ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[2][0], q[2][1]); ctx.stroke();
 			}
 		}
-		const p = project(x0 + n + 0.6, -(top + 1.0), z);
+		const p = project(x0 + (n + 0.6) * u, -(top + u), z);
 		write('mask', p[0], p[1], `bold 10px ${UI}`, on ? C.ink : C.dim);
 		write('row t reads keys ≤ t', p[0], p[1] + 11, `9px ${UI}`, on ? C.mute : C.faint);
 		write('grey is never read', p[0], p[1] + 21, `9px ${UI}`, on ? C.mute : C.faint);
@@ -1049,7 +1054,7 @@
 				write(WORDS[t], px[0], px[1], font, colour);
 				write(String(t), px[0] + wordW + 1, px[1] + 3, small, colour);
 			}
-			const pa = project(WALLS.a.x - 0.35, -(WALLS.a.top + t + 0.5), HS);
+			const a = WALLS.a, pa = project(a.x - 0.35, -(a.top + (t + 0.5) * a.u), HS * a.u);
 			if (onScreen(pa, 10)) {
 				write(String(t), pa[0] - numW, pa[1] + 3, small, colour);
 				write(WORDS[t], pa[0] - numW - 1 - wordW, pa[1], font, colour);
@@ -1070,7 +1075,7 @@
 	function drawWallLabels(SL) {
 		Object.keys(WALLS).forEach(b => {
 			const [name, formula, size] = wallLabel(b, SL), on = FOCUS[SL].includes(b), w = WALLS[b];
-			const back = FRONT.includes(b) ? 0 : NH - 1, p = project(w.x + back * SX, -w.top + 0.3, HS - back * HZ);
+			const back = FRONT.includes(b) ? 0 : NH - 1, p = project(w.x + back * SX * w.u, -w.top + 0.3, HS * w.u - back * HZ);
 			if (p[1] < -10 || p[1] > H + 60) return;
 			// k and v count the heads GQA keeps against multi-head attention's, whose empty layers show the rest
 			const heads = b === 'k' || b === 'v' ? `${NKV} of MHA’s ${NH} heads` : '', up = heads ? 12 : 0;
@@ -1152,21 +1157,21 @@
 					['', R`= (${num(a)},\ ${num(b)}) \begin{pmatrix} ${num(c)} & ${num(sn)} \\ ${num(-sn)} & ${num(c)} \end{pmatrix}`],
 					['', R`\approx (${num(a2)},\ ${num(b2)})`],
 				])) + mx(aligned([[`q'^{(0,1)}_{${p}}`, R`\approx ` + rowv(t.qr.slice(0, 8), 2, 4)], [`q'^{(2,3)}_{${p}}`, R`\approx ` + rowv(t.qr.slice(8), 2, 4)], [`k'_{${p}}`, R`\approx ` + rowv(t.kr, 2, 4)]]))
-					+ note(`A turn keeps length: ${tex(R`\lVert(q_{${p},0},\, q_{${p},1})\rVert = \lVert(q'_{${p},0},\, q'_{${p},1})\rVert \approx ${num(Math.hypot(a, b))}`)}. Pair 1 turns by only ${num(slow, 3)} rad: Mixtral’s base of 1,000,000 makes it ten times slower than LLaMA’s 10,000 would, ${num(p * 0.01)}. ${tex('v')} is not turned.`);
+					+ note(`A turn keeps length: ${tex(R`\lVert(q_{${p},0},\, q_{${p},1})\rVert = \lVert(q'_{${p},0},\, q'_{${p},1})\rVert \approx ${num(Math.hypot(a, b))}`)}. ${p ? `Pair 1 turns by only ${num(slow, 3)} rad: Mixtral’s base of 1,000,000 makes it ten times slower than LLaMA’s 10,000 would, ${num(p * 0.01)}.` : `At position 0 nothing turns: ${tex('R(0)')} is the identity.`} ${tex('v')} is not turned.`);
 			},
 			[ST.cache]: () => mx(aligned([[R`K'_{\le ${p}},\ V_{\le ${p}}`, R`\in \mathbb{R}^{${p + 1}\times 8}`]]))
 				+ note(p ? `Rows ${tex(R`0, \dots, ${p - 1}`)} were written by earlier passes; row ${tex(`${p}`)} is ${tex(`k'_{${p}}`)} and ${tex(`v_{${p}}`)}, and it stays for every later token.` : `The cache was empty; row 0 is ${tex(`k'_0`)} and ${tex('v_0')}.`)
 				+ mx(R`\underbrace{2}_{K',\,V} \times \underbrace{8 \cdot 128}_{H_{kv} d_h} \times \underbrace{2\ \text{B}}_{\text{bf16}} \times \underbrace{32}_{L} \approx 131\ \text{KB a token}`)
 				+ note('That is Mixtral 8x7B, a quarter of what 32 key-value heads would hold. A full context of 32,768 tokens holds 4.3 GB of cache.'),
 			[ST.repeat]: () => mx(aligned([
-				[R`\big[K'^{(0)}, K'^{(0)}, K'^{(1)}, K'^{(1)}\big]`, R`= \big[K'^{(0)}, K'^{(1)}\big]\, E`],
-				[R`E`, R`= \begin{bmatrix} I_4 & I_4 & 0 & 0 \\ 0 & 0 & I_4 & I_4 \end{bmatrix} \in \mathbb{R}^{8\times 16}`],
+				[R`\big[K'^{(0)}, K'^{(0)}, K'^{(1)}, K'^{(1)}\big]`, R`= \big[K'^{(0)}, K'^{(1)}\big]\, C`],
+				[R`C`, R`= \begin{bmatrix} I_4 & I_4 & 0 & 0 \\ 0 & 0 & I_4 & I_4 \end{bmatrix} \in \mathbb{R}^{8\times 16}`],
 			])) + mx(aligned([
 				[`k'_{${p}}`, R`\approx ` + rowv(t.kr, 2, 4)],
-				[`k'_{${p}}E`, R`\approx ` + rowv(repeatKV(t.kr).slice(0, 8), 2, 4)],
+				[`k'_{${p}}C`, R`\approx ` + rowv(repeatKV(t.kr).slice(0, 8), 2, 4)],
 				['', R`\quad ` + rowv(repeatKV(t.kr).slice(8), 2, 4)],
-			])) + note(`The same ${tex('E')} copies ${tex('V')}. The copies serve this pass only; the cache keeps ${tex(`K'^{(0)}`)}, ${tex(`K'^{(1)}`)} and their ${tex('V')}s, which is the saving. From here the scores, softmax and blend are multi-head attention’s, head by head.`)
-				+ note(`Folded into the weights, ${tex(R`k = \hat x\,(W_k E)`)}: GQA is multi-head attention whose key and value projections pass through a fixed copy. Multi-head latent attention (DeepSeek-V2) learns that second factor instead, and caches the small latent before it.`),
+			])) + note(`The same ${tex('C')} copies ${tex('V')}. The copies serve this pass only; the cache keeps ${tex(`K'^{(0)}`)}, ${tex(`K'^{(1)}`)} and their ${tex('V')}s, which is the saving. From here the scores, softmax and blend are multi-head attention’s, head by head.`)
+				+ note(`Folded into the weights, ${tex(R`k = \hat x\,(W_k C)`)}: GQA is multi-head attention whose key and value projections pass through a fixed copy. Multi-head latent attention (DeepSeek-V2) learns that second factor instead, and caches the small latent before it.`),
 			[ST.scores]: () => {
 				const { nh, j, j1 } = focusKey(p), g = kvOf(nh), hd = t.heads[nh], hs = `^{(${nh})}`, gs = `^{(${g})}`;
 				const pr = prods(t.qr.slice(nh * DH, nh * DH + DH), TOK[j].kr.slice(g * DH, g * DH + DH), 2, 2);
@@ -1383,7 +1388,7 @@
 			// the token's cached row, then that row per query head: the second of each group reading a copy
 			[ST.repeat]: () => [['k′', t.kr, 'k', 'kc'], ['v', t.v, 'v', 'vc']].forEach(([name, vals, b, bc]) => {
 				sh.kv8(vals, kh(b), name, 'cached');
-				sh.op('× E: a copy for each group’s second head');
+				sh.op('× C: a copy for each group’s second head');
 				sh.q16(repeatKV(vals), f => { const n = Math.floor(f / DH); return `${n % GRP ? bc : b}|${kvOf(n)}|${p}|${f % DH}`; }, name, 'per head');
 				sh.y += 6;
 			}),
@@ -1793,7 +1798,7 @@
 		if (c.hollow) return `empty: the ${c.b === 'kd' ? 'key' : 'value'} head multi-head attention would keep for head ${c.h * GRP + 1}, ${tokName(c.t)}, ${c.i}`;
 		if (c.b in COPY) return `${c.b === 'kc' ? 'K′' : 'V'} copy[kv head ${c.h}, for head ${c.h * GRP + 1}, ${tokName(c.t)}, ${c.i}] = ${fmt(c.val, 3)} · not cached`;
 		const s = c.st, name = wallLabel(c.b, s)[0], who = tokName(c.t);
-		const past = c.t < cur && c.b !== 'k' && c.b !== 'v' ? ' · from an earlier pass' : '';
+		const past = c.t < cur ? ' · from an earlier pass' : '';
 		const v = c.b === 'a' && !(s === ST.scores && c.t === cur) ? c.val.toFixed(3) : fmt(c.val, 3);
 		if (c.b === 'a') return `${name}[head ${c.h}, query ${who}, key ${tokName(c.i)}] = ${v}${past}`;
 		if (c.b === 'k' || c.b === 'v') return `${name}[kv head ${c.h}, for heads ${c.h * GRP} and ${c.h * GRP + 1}, ${who}, ${c.i}] = ${v}`;

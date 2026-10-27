@@ -74,7 +74,7 @@ prerequisites:
   - id: note
     title: Notation
     body: |
-      <p>A token is a row: $x_t \in \mathbb{R}^{1\times d}$ at position $t = 0, \dots, T-1$, and a matrix acts on the right, $x_t W$. $x_{t,i}$ is entry $i$, counted from 0 as the cubes are. A superscript $(n)$ takes head $n$’s $d_h$ entries, and $[e]$ marks expert $e$’s weights and values. A prime marks a vector after RoPE, and $\odot$ multiplies entry by entry.</p>
+      <p>A token is a row: $x_t \in \mathbb{R}^{1\times d}$ at position $t = 0, \dots, T-1$, and a matrix acts on the right, $x_t W$. $x_{t,i}$ is entry $i$, counted from 0 as the cubes are. A superscript $(n)$ takes head $n$’s $d_h$ entries, $(\bar n)$ those of the key-value head it reads, and $[e]$ marks expert $e$’s weights and values. A prime marks a vector after RoPE, and $\odot$ multiplies entry by entry.</p>
   - id: params
     title: Parameters
     body: |
@@ -88,7 +88,7 @@ prerequisites:
   - id: lookup
     title: Tokens and the embedding table
     body: |
-      $$\begin{aligned} e_w &\in \{0,1\}^{1\times |V|}, \quad (e_w)_v = [\,v = w\,] \\ e_w E &= E_w, \quad \text{row } w \text{ of } E \end{aligned}$$
+      $$\begin{aligned} \mathbf{1}_w &\in \{0,1\}^{1\times |V|}, \quad (\mathbf{1}_w)_v = [\,v = w\,] \\ \mathbf{1}_w E &= E_w, \quad \text{row } w \text{ of } E \end{aligned}$$
       <p>The vocabulary is a fixed list of tokens. Mixtral cuts text into 32,000 sub-word pieces with a byte-pair encoder; here one word is one token. A one-hot row times $E$ picks out one row, so code indexes the table instead of multiplying.</p>
   - id: lin
     title: Linear maps
@@ -122,8 +122,8 @@ prerequisites:
     title: Grouped-query attention
     cite: Ainslie et al., 2023
     body: |
-      $$\operatorname{head}_n = \operatorname{Attn}\big(q^{(n)}_t;\ K^{(g)}, V^{(g)}\big), \qquad g = \lfloor n / G \rfloor, \quad G = H / H_{kv}$$
-      <p>Queries keep all $H$ heads, but keys and values have only $H_{kv}$: each group of $G$ query heads reads one key head and one value head. The heads still score and blend in their own ways, since their queries differ. Written as matrices, the sharing is a fixed copy, $[K^{(0)}, K^{(0)}, K^{(1)}, K^{(1)}] = [K^{(0)}, K^{(1)}]\,E$ with $E$ made of identity blocks; code makes the copies just before the scores. $W_k$ and $W_v$ shrink to $d \times H_{kv} d_h$, and so does the cache, by a factor of $G$: 4 in Mixtral, with 32 query heads on 8 key-value heads, and 2 here. $H_{kv} = H$ is multi-head attention again, and $H_{kv} = 1$ is multi-query (Shazeer, 2019).</p>
+      $$\operatorname{head}_n = \operatorname{Attn}\big(q^{(n)}_t;\ K^{(\bar n)}, V^{(\bar n)}\big), \qquad \bar n = \big\lfloor n \big/ (H / H_{kv}) \big\rfloor$$
+      <p>Queries keep all $H$ heads, but keys and values have only $H_{kv}$: each group of $H / H_{kv}$ query heads reads one key head and one value head. The heads still score and blend in their own ways, since their queries differ. Written as matrices, the sharing is a fixed copy, $[K^{(0)}, K^{(0)}, K^{(1)}, K^{(1)}] = [K^{(0)}, K^{(1)}]\,C$ with $C$ made of identity blocks; code makes the copies just before the scores. $W_k$ and $W_v$ shrink to $d \times H_{kv} d_h$, and so does the cache, by a factor of $H / H_{kv}$: 4 in Mixtral, with 32 query heads on 8 key-value heads, and 2 here. $H_{kv} = H$ is multi-head attention again, and $H_{kv} = 1$ is multi-query (Shazeer, 2019).</p>
   - id: rope
     title: RoPE
     cite: Su et al., 2021
@@ -201,7 +201,7 @@ steps:
       - 'q folds into 32 heads of 128 there, k and v into 8; 4 and 2 heads of 4 here, so q is 16 wide, twice d.'
       - 'k and v wait in front of the cache.'
   - title: RoPE
-    eq: q'^{(n)}_t = q^{(n)}_t R_t,\quad k'^{(g)}_t = k^{(g)}_t R_t
+    eq: q'^{(n)}_t = q^{(n)}_t R_t,\quad k'^{(\bar n)}_t = k^{(\bar n)}_t R_t
     uses: [rope]
     notes:
       - 'Mixtral: 64 pairs per head, θ from 1 down to 0.0000012 rad per position; 2 here, at 1 and 0.001.'
@@ -214,14 +214,14 @@ steps:
       - 'Mixtral: 2 × 1,024 numbers × 2 bytes × 32 layers = 131 KB a token. LLaMA 65B keeps 2.6 MB.'
       - 'The empty grids are the key and value heads multi-head attention would keep for query heads 1 and 3: GQA keeps 2 of 4, Mixtral 8 of 32.'
   - title: Repeat K and V
-    eq: \big[K'^{(0)}, K'^{(0)}, K'^{(1)}, K'^{(1)}\big] = \big[K'^{(0)}, K'^{(1)}\big]\, E
+    eq: \big[K'^{(0)}, K'^{(0)}, K'^{(1)}, K'^{(1)}\big] = \big[K'^{(0)}, K'^{(1)}\big]\, C
     uses: [gqa, attn]
     notes:
       - 'Code calls this repeat_kv: Mistral’s reference code and Hugging Face both make the copies. Fused attention kernels skip them and index the shared head instead; either way the cache keeps 2 heads.'
       - 'Mixtral copies each of its 8 key-value heads 4 times, one for each query head of its group.'
-      - 'E is a fixed block of copies. Multi-head latent attention (DeepSeek-V2) learns this up-projection instead, and caches the small latent before it.'
+      - 'C is a fixed block of copies. Multi-head latent attention (DeepSeek-V2) learns this up-projection instead, and caches the small latent before it.'
   - title: Scores
-    eq: s^{(n)}_{t,j} = q'^{(n)}_t \cdot k'^{(g)}_j \big/ \sqrt{d_h},\quad g = \lfloor n/2 \rfloor,\ j \le t
+    eq: s^{(n)}_{t,j} = q'^{(n)}_t \cdot k'^{(\bar n)}_j \big/ \sqrt{d_h},\quad \bar n = \lfloor n/2 \rfloor,\ j \le t
     uses: [attn, gqa, rope]
     notes:
       - 'Scaled by √4 = 2 here, √128 in Mixtral.'
@@ -233,7 +233,7 @@ steps:
       - 'Each weight is e^score ÷ the sum over its row.'
       - 'The pale rows of a above came from earlier passes: the triangle.'
   - title: Blend the values
-    eq: o^{(n)}_t = \textstyle\sum_{j \le t} a^{(n)}_{t,j}\, v^{(g)}_j,\quad g = \lfloor n/2 \rfloor
+    eq: o^{(n)}_t = \textstyle\sum_{j \le t} a^{(n)}_{t,j}\, v^{(\bar n)}_j,\quad \bar n = \lfloor n/2 \rfloor
     uses: [attn, gqa]
     notes:
       - 'Two heads blend the same value rows, each with its own weights.'
