@@ -1,22 +1,23 @@
-# 301. toy — the maths beside the cubes. One section per component, each with the
-# prerequisites it assumes and the steps of its forward pass; the current token's
-# numbers are worked out in the browser (assets/js/toy.js). TeX between $…$ and
-# $$…$$ is typeset by KaTeX. Checked at build time by _plugins/check_toy.rb.
+# 301. toy — the maths beside the cubes. One section per component: the prerequisites it
+# assumes, each folded to its defining line, then the steps of its forward pass. A step comes
+# in fixed parts: its maths with shapes, one entry by hand, the PyTorch lines and what they
+# print, the cells, the toy against Mixtral 8x7B, and a note. The current token's numbers are
+# worked out in the browser (assets/js/toy.js). TeX between $…$ and $$…$$ is typeset by
+# KaTeX, **…** is bold and `…` is code. Checked at build time by _plugins/check_toy.rb.
 
 components:
   - id: toy
     n: 0
     name: The toy
     nav: Toy
-    tag: sizes, notation, the whole model
+    tag: sizes, notation, the model in maths and in code
     intro: >-
       Scroll inside the cube pane to move one token through a Mixtral layer. The scroll is the
-      clock: every fold, drop and merge plays forward on the way down and backward on the
-      way up. Every weight is drawn, Wq, Wk, Wv and Wo as bundles of edges between the
-      walls, lit by input × weight as the token crosses them, and the router and the experts
-      as the networks they are. This side is the maths, one section per component, with the
-      current step worked in the token's numbers. The maths button hides it.
-    pre: [sizes, note, params, layer]
+      clock: every fold, drop and merge plays forward on the way down and backward on the way
+      up, and every weight is drawn, lit by input × weight as the token crosses it. This side
+      is the maths. Each section folds what it assumes to one line, then works its line step
+      by step, by hand and in PyTorch, in the numbers of the token on the left.
+    pre: [sizes, note, params, layer, code]
     steps: []
   - id: emb
     n: 1
@@ -51,13 +52,15 @@ components:
     tag: steps (18)–(20), after the last layer · 131 M weights
     eq: p_t = \operatorname{softmax}\big(\operatorname{RMSNorm}(y_t)\, W_U\big)
     pre: [unemb, dec, xent]
-    also: [rms, soft]
+    also: [lin, rms, soft]
     steps: [17, 18, 19]
 
-# what each component assumes, filed under the component that first needs it
+# what each component assumes, filed under the component that first needs it: the defining
+# line (def), shown folded; then points, a table of the toy against Mixtral (scale) and code
 prerequisites:
   - id: sizes
     title: Sizes
+    def: d = 8,\ H = 4,\ H_{kv} = 2,\ d_h = 4,\ N = 8,\ k = 2,\ d_{ff} = 3,\ |V| = 16
     body: |
       <table class="toy-dims"><thead><tr><th></th><th></th><th>toy</th><th>Mixtral 8x7B</th></tr></thead><tbody>
       <tr><td>$d$</td><td>width of a token’s row</td><td>8</td><td>4,096</td></tr>
@@ -71,237 +74,625 @@ prerequisites:
       <tr><td>$L$</td><td>layers</td><td>1</td><td>32</td></tr>
       <tr><td>$T$</td><td>tokens in the context</td><td>6</td><td>up to 32,768</td></tr>
       </tbody></table>
+    code: |-
+      d, H, Hkv, dh, dff = 8, 4, 2, 4, 3
+      # Mixtral 8x7B: 4096, 32, 8, 128, 14336
   - id: note
     title: Notation
-    body: |
-      <p>A token is a row: $x_t \in \mathbb{R}^{1\times d}$ at position $t = 0, \dots, T-1$, and a matrix acts on the right, $x_t W$. $x_{t,i}$ is entry $i$, counted from 0 as the cubes are. A superscript $(n)$ takes head $n$’s $d_h$ entries, $(\bar n)$ those of the key-value head it reads, and $[e]$ marks expert $e$’s weights and values. A prime marks a vector after RoPE, and $\odot$ multiplies entry by entry.</p>
+    def: x_t \in \mathbb{R}^{1\times d},\quad x_t W,\quad q^{(n)},\ k^{(\bar n)},\ W^{[e]},\ q',\quad [a, b]
+    points:
+      - >-
+        **Rows.** A token is a row, $x_t \in \mathbb{R}^{1\times d}$, at position $t = 0, \dots, T-1$,
+        and a matrix acts on the right, $x_t W$. In code the row is a vector of shape `[d]`, and
+        `x @ W` is the same product.
+      - >-
+        **From 0.** $x_{t,i}$ is entry $i$, counted from 0, as the cubes and the code count.
+      - >-
+        **Marks.** $(n)$ takes query head $n$’s $d_h$ entries, $(\bar n)$ those of the key-value
+        head it reads, and $[e]$ marks expert $e$. A prime marks a vector after RoPE.
+      - >-
+        **Joins.** $[a, b]$ sets rows side by side; a column of rows stacks them. $\odot$
+        multiplies entry by entry.
+      - >-
+        **In code** $\hat x$ is `xh` and $\hat h$ is `hh`; $q'$ and $k'$ overwrite `q` and `k`.
+        The cache $K'$, $V$ is `K`, `V`, and its copies are `Kr`, `Vr`.
   - id: params
     title: Parameters
-    body: |
-      $$\begin{aligned} W_q &\in \mathbb{R}^{d\times H d_h}, \quad W_k, W_v \in \mathbb{R}^{d\times H_{kv} d_h}, \quad W_o \in \mathbb{R}^{H d_h\times d}, \quad \gamma_1 \in \mathbb{R}^{d} \\ W_g &\in \mathbb{R}^{d\times N}, \quad W^{[e]}_1, W^{[e]}_3 \in \mathbb{R}^{d\times d_{ff}}, \quad W^{[e]}_2 \in \mathbb{R}^{d_{ff}\times d}, \quad \gamma_2 \in \mathbb{R}^{d} \\[5pt] E &\in \mathbb{R}^{|V|\times d}, \quad W_U \in \mathbb{R}^{d\times |V|}, \quad \gamma_f \in \mathbb{R}^{d} \end{aligned}$$
-      <p>The first two lines repeat in every layer, one for attention and one for the experts, with a set of $W_1, W_2, W_3$ for each of the $N$ experts. The last line is the model’s, once. In Mixtral $H d_h = d$, so $W_q$ and $W_o$ are square; the toy’s heads of 4 make them 8 × 16 and 16 × 8, so that RoPE has two pairs to turn. There are no biases. The toy draws each weight at random and rounds it to one decimal, and every gain $\gamma$ is 1.</p>
+    def: >-
+      \begin{aligned} W_q &\in \mathbb{R}^{d\times H d_h}, \quad W_k, W_v \in \mathbb{R}^{d\times H_{kv} d_h}, \quad W_o \in \mathbb{R}^{H d_h\times d}, \quad \gamma_1 \in \mathbb{R}^{d} \\ W_g &\in \mathbb{R}^{d\times N}, \quad W^{[e]}_1, W^{[e]}_3 \in \mathbb{R}^{d\times d_{ff}}, \quad W^{[e]}_2 \in \mathbb{R}^{d_{ff}\times d}, \quad \gamma_2 \in \mathbb{R}^{d} \\[5pt] E &\in \mathbb{R}^{|V|\times d}, \quad W_U \in \mathbb{R}^{d\times |V|}, \quad \gamma_f \in \mathbb{R}^{d} \end{aligned}
+    points:
+      - >-
+        **Per layer:** the first line for attention and the second for the experts, with its
+        own $W_1, W_2, W_3$ for each of the $N$ experts. **Once:** the last line.
+      - >-
+        **Wide heads.** In Mixtral $H d_h = d$, so $W_q$ and $W_o$ are square. The toy’s heads
+        of 4 make them 8 × 16 and 16 × 8, so that RoPE has two pairs to turn.
+      - >-
+        **Values.** No biases. The toy draws each weight at random and rounds it to one
+        decimal, and every gain $\gamma$ is 1.
+    code: |-
+      # E [16, d]  Wq [d, H*dh]  Wk, Wv [d, Hkv*dh]  Wo [H*dh, d]
+      # Wg [d, N]  W1, W3 [N, d, dff]  W2 [N, dff, d]  WU [d, 16]
   - id: layer
     title: The model in four lines
-    body: |
-      $$\begin{aligned} x_t &= E_{w_t} && \text{1 Embedding} \\ h_t &= x_t + \operatorname{GQA}\big(\operatorname{RMSNorm}(x_t)\big) && \text{2 Attention} \\ y_t &= h_t + \operatorname{MoE}\big(\operatorname{RMSNorm}(h_t)\big) && \text{3 Experts} \\ p_t &= \operatorname{softmax}\big(\operatorname{RMSNorm}(y_t)\, W_U\big) && \text{4 LM head} \end{aligned}$$
-      <p>The middle two lines are one layer. Mixtral 8x7B stacks 32 of them, each with its own weights, and $y_t$ of one is $x_t$ of the next. The toy has one. It is LLaMA’s layer with two parts swapped: grouped-query attention for multi-head, and a mixture of experts for the one FFN. Each section below takes one line: what it assumes, then the line step by step in the numbers of the token on the left.</p>
+    def: >-
+      \begin{aligned} x_t &= E_{w_t} && \text{1 Embedding} \\ h_t &= x_t + \operatorname{GQA}\big(\operatorname{RMSNorm}(x_t)\big) && \text{2 Attention} \\ y_t &= h_t + \operatorname{MoE}\big(\operatorname{RMSNorm}(h_t)\big) && \text{3 Experts} \\ p_t &= \operatorname{softmax}\big(\operatorname{RMSNorm}(y_t)\, W_U\big) && \text{4 LM head} \end{aligned}
+    points:
+      - >-
+        **One layer** is the middle two lines. Mixtral 8x7B stacks 32, each with its own
+        weights, and $y_t$ of one is $x_t$ of the next. The toy has one.
+      - >-
+        **Two swaps.** It is LLaMA’s layer with grouped-query attention for multi-head, and a
+        mixture of experts for the one FFN.
+  - id: code
+    title: The layer in PyTorch
+    points:
+      - >-
+        **The steps’ code, in one place.** With the weights of §0.3 as tensors, these lines
+        compute every number on this side. Each step shows its own lines, and what they print
+        for the token on the left.
+      - >-
+        **One token a pass,** as in generation: $K$ and $V$ grow a row each pass, and nothing
+        after $t$ exists yet, so no mask is needed.
+    code: |-
+      import torch
+      import torch.nn.functional as F
+      torch.set_printoptions(precision=2, sci_mode=False,
+                             linewidth=64)
+
+      d, H, Hkv, dh, dff = 8, 4, 2, 4, 3
+      theta = torch.tensor([1.0, 0.001])  # 1e6 ** (-2i/dh)
+      # the cat sat on the mat
+      ids = torch.tensor([0, 1, 2, 3, 0, 4])
+
+      def rope(u, t):  # pair i of every head turns by t·θᵢ
+          z = torch.view_as_complex(u.unflatten(-1, (-1, 2)))
+          turn = torch.polar(torch.ones(2), t * theta)
+          return torch.view_as_real(z * turn).flatten(-2)
+
+      K = V = torch.empty(0, Hkv, dh)  # the cache
+      for t, w in enumerate(ids):
+          x = E[w]                                   # (1)
+          xh = F.rms_norm(x, (d,), eps=1e-5)         # (2)
+          q = (xh @ Wq).view(H, dh)                  # (3)
+          k = (xh @ Wk).view(Hkv, dh)
+          v = (xh @ Wv).view(Hkv, dh)
+          q, k = rope(q, t), rope(k, t)              # (4)
+          K = torch.cat([K, k[None]])                # (5)
+          V = torch.cat([V, v[None]])
+          Kr = K.repeat_interleave(H // Hkv, dim=1)  # (6)
+          Vr = V.repeat_interleave(H // Hkv, dim=1)
+          s = torch.einsum('nd,jnd->nj', q, Kr) / dh**0.5  # (7)
+          a = s.softmax(-1)                          # (8)
+          o = torch.einsum('nj,jnd->nd', a, Vr)      # (9)
+          att = o.flatten() @ Wo                     # (10)
+          h = x + att                                # (11)
+          hh = F.rms_norm(h, (d,), eps=1e-5)         # (12)
+          r = hh @ Wg                                # (13)
+          G, top = r.topk(2)
+          G = G.softmax(-1)
+          g, u = hh @ W1[top], hh @ W3[top]          # (14)
+          m = F.silu(g) * u                          # (15)
+          f = torch.einsum('e,ec,ecd->d', G, m, W2[top])  # (16)
+          y = h + f                                  # (17)
+          z = F.rms_norm(y, (d,), eps=1e-5)          # (18)
+          logits = z @ WU                            # (19)
+          p = logits.softmax(-1)                     # (20)
+          nxt = p.argmax()
   - id: lookup
     title: Tokens and the embedding table
-    body: |
-      $$\begin{aligned} \mathbf{1}_w &\in \{0,1\}^{1\times |V|}, \quad (\mathbf{1}_w)_v = [\,v = w\,] \\ \mathbf{1}_w E &= E_w, \quad \text{row } w \text{ of } E \end{aligned}$$
-      <p>The vocabulary is a fixed list of tokens. Mixtral cuts text into 32,000 sub-word pieces with a byte-pair encoder; here one word is one token. A one-hot row times $E$ picks out one row, so code indexes the table instead of multiplying.</p>
+    def: \mathbf{1}_w E = E_w, \qquad \mathbf{1}_w \in \{0,1\}^{1\times |V|},\ (\mathbf{1}_w)_v = [\,v = w\,]
+    points:
+      - >-
+        **Vocabulary.** A fixed list of tokens. Mixtral cuts text into 32,000 sub-word pieces
+        with a byte-pair encoder; here one word is one token.
+      - >-
+        **A lookup.** A one-hot row times $E$ picks out row $w$, so code indexes the table
+        instead of multiplying.
+    code: |-
+      E[w]  # = F.one_hot(w, 16).float() @ E
   - id: lin
     title: Linear maps
-    body: |
-      $$(uW)_j = \textstyle\sum_{i} u_i\, W_{i,j}, \qquad u \in \mathbb{R}^{1\times m},\ W \in \mathbb{R}^{m\times n}$$
-      <p>Each output entry is the dot product of $u$ with one column of $W$, so a map costs $m \cdot n$ multiplications. Mixtral’s maps have no bias: $uW$, not $uW + b$.</p>
+    def: (uW)_j = \textstyle\sum_{i} u_i\, W_{i,j}, \qquad u \in \mathbb{R}^{1\times m},\ W \in \mathbb{R}^{m\times n}
+    points:
+      - >-
+        **Cost.** Each output entry is the dot product of $u$ with one column of $W$: $m \cdot n$
+        multiplications in all.
+      - >-
+        **No bias** anywhere in Mixtral: $uW$, not $uW + b$.
+    code: |-
+      u @ W  # nn.Linear(m, n, bias=False) stores W.T
   - id: rms
     title: RMSNorm
     cite: Zhang and Sennrich, 2019
-    body: |
-      $$\begin{aligned} \operatorname{RMSNorm}(u) &= \frac{u}{\operatorname{rms}(u)} \odot \gamma \\ \operatorname{rms}(u) &= \sqrt{\tfrac{1}{d}\textstyle\sum_{i} u_i^2 + \varepsilon}, \quad \varepsilon = 10^{-5} \end{aligned}$$
-      <p>It rescales a row to root mean square 1, then the gain scales each entry. Unlike LayerNorm, it subtracts no mean and adds no bias.</p>
+    def: \operatorname{RMSNorm}(u) = \frac{u}{\operatorname{rms}(u)} \odot \gamma, \qquad \operatorname{rms}(u) = \sqrt{\tfrac{1}{d}\textstyle\sum_{i} u_i^2 + \varepsilon}
+    points:
+      - >-
+        **Rescales only.** Unlike LayerNorm it subtracts no mean and adds no bias: one
+        reduction, not two.
+      - >-
+        **Unit scale.** Before the gain, the row comes out with root mean square 1, up to
+        $\varepsilon = 10^{-5}$, whatever its size going in.
+    code: |-
+      F.rms_norm(u, (d,), gamma, eps=1e-5)
   - id: soft
     title: Softmax
-    body: |
-      $$\operatorname{softmax}(z)_j = \frac{e^{z_j}}{\sum_k e^{z_k}}$$
-      <p>Every output is positive and they sum to 1. Adding one constant to every $z_j$ changes nothing, so code subtracts $\max_k z_k$ first.</p>
+    def: \operatorname{softmax}(z)_j = \frac{e^{z_j}}{\sum_k e^{z_k}}
+    points:
+      - >-
+        **A distribution.** Every output is positive, and they sum to 1.
+      - >-
+        **Shift-free.** Adding one constant to every $z_j$ changes nothing, so code subtracts
+        $\max_k z_k$ first and never overflows.
+    code: |-
+      z.softmax(-1)  # subtracts z.max() inside
   - id: attn
     title: Scaled dot-product attention, causal
     cite: Vaswani et al., 2017
-    body: |
-      $$\operatorname{Attn}(q_t) = \operatorname{softmax}\Big(\frac{q_t\, K^{\top}_{\le t}}{\sqrt{d_h}}\Big)\, V_{\le t}$$
-      <p>One query, one head. $K_{\le t}$ and $V_{\le t}$ stack the key and value rows for positions $0, \dots, t$. If the entries of $q$ and $k$ have variance 1, their dot product has variance $d_h$, and $\sqrt{d_h}$ brings it back to 1 before the softmax.</p>
-      <p>Rows after $t$ are never read: that is the causal mask. When generating, those rows don’t exist yet, and the rows before $t$ come from the cache instead of being recomputed.</p>
+    def: \operatorname{Attn}(q_t) = \operatorname{softmax}\Big(\frac{q_t\, K^{\top}_{\le t}}{\sqrt{d_h}}\Big)\, V_{\le t}
+    points:
+      - >-
+        **One query, one head.** $K_{\le t}$ and $V_{\le t}$ stack the key and value rows of
+        positions $0, \dots, t$.
+      - >-
+        **Why $\sqrt{d_h}$.** If $q$ and $k$ have entries of variance 1, $q \cdot k$ has variance
+        $d_h$; dividing brings it back to 1, so the softmax does not saturate.
+      - >-
+        **Causal.** Rows after $t$ are never read. When generating they don’t exist yet, and the
+        rows before $t$ come from the cache instead of being recomputed.
+    code: |-
+      # Q, K, V [H, T, dh]: all T queries at once
+      F.scaled_dot_product_attention(Q, K, V, is_causal=True)
   - id: mh
     title: Multiple heads
-    body: |
-      $$\begin{aligned} q_t &= \big[\,q^{(0)}_t;\ \dots;\ q^{(H-1)}_t\,\big], \quad q^{(n)}_t \in \mathbb{R}^{1\times d_h} \\ \operatorname{MHA}(\hat x_t) &= \big[\,\operatorname{Attn}^{(0)};\ \dots;\ \operatorname{Attn}^{(H-1)}\,\big]\, W_o \end{aligned}$$
-      <p>Each head attends with its own slice of $q$, $k$ and $v$, so it can look at different tokens from the other heads. Splitting costs nothing extra. $W_o$ is the only place the heads mix.</p>
+    def: \operatorname{MHA}(\hat x_t) = \big[\operatorname{Attn}^{(0)}, \dots, \operatorname{Attn}^{(H-1)}\big]\, W_o, \qquad q^{(n)}_t \in \mathbb{R}^{1\times d_h}
+    points:
+      - >-
+        **Own slices.** Head $n$ attends with its own $q^{(n)}$, $k^{(n)}$ and $v^{(n)}$, so it
+        can look at other tokens than the other heads do.
+      - >-
+        **A free split.** Folding a row into heads is a reshape and costs nothing. $W_o$ is the
+        only place the heads mix.
+    code: |-
+      q.view(H, dh)  # a head a row
   - id: gqa
     title: Grouped-query attention
     cite: Ainslie et al., 2023
-    body: |
-      $$\operatorname{head}_n = \operatorname{Attn}\big(q^{(n)}_t;\ K^{(\bar n)}, V^{(\bar n)}\big), \qquad \bar n = \big\lfloor n \big/ (H / H_{kv}) \big\rfloor$$
-      <p>Queries keep all $H$ heads, but keys and values have only $H_{kv}$: each group of $H / H_{kv}$ query heads reads one key head and one value head. The heads still score and blend in their own ways, since their queries differ. Written as matrices, the sharing is a fixed copy, $[K^{(0)}, K^{(0)}, K^{(1)}, K^{(1)}] = [K^{(0)}, K^{(1)}]\,C$ with $C$ made of identity blocks; code makes the copies just before the scores. $W_k$ and $W_v$ shrink to $d \times H_{kv} d_h$, and so does the cache, by a factor of $H / H_{kv}$: 4 in Mixtral, with 32 query heads on 8 key-value heads, and 2 here. $H_{kv} = H$ is multi-head attention again, and $H_{kv} = 1$ is multi-query (Shazeer, 2019).</p>
+    def: \operatorname{head}_n = \operatorname{Attn}\big(q^{(n)}_t;\ K^{(\bar n)}, V^{(\bar n)}\big), \qquad \bar n = \big\lfloor n \big/ (H / H_{kv}) \big\rfloor
+    points:
+      - >-
+        **Shared keys and values.** Queries keep all $H$ heads, but each group of $H / H_{kv}$
+        query heads reads one key head and one value head. Their queries differ, so they still
+        score and blend in their own ways.
+      - >-
+        **The saving.** $W_k$, $W_v$ and the cache shrink to $H_{kv} d_h$ wide, by a factor of
+        $H / H_{kv}$: 4 in Mixtral, with 32 query heads on 8, and 2 here.
+      - >-
+        **As a copy.** $[K^{(0)}, K^{(0)}, K^{(1)}, K^{(1)}] = [K^{(0)}, K^{(1)}]\,C$, with $C$ made
+        of identity blocks; code makes the copies just before the scores.
+      - >-
+        **The two ends.** $H_{kv} = H$ is multi-head attention again, and $H_{kv} = 1$ is
+        multi-query (Shazeer, 2019).
+    code: |-
+      # Q [H, T, dh]; K, V [Hkv, T, dh]
+      F.scaled_dot_product_attention(Q, K, V, is_causal=True,
+                                     enable_gqa=True)
   - id: rope
     title: RoPE
     cite: Su et al., 2021
-    body: |
-      $$\begin{aligned} R(\phi) &= \begin{pmatrix} \cos\phi & \sin\phi \\ -\sin\phi & \cos\phi \end{pmatrix} \\ R_t &= \operatorname{diag}\big(R(t\theta_0),\ R(t\theta_1),\ \dots\big) \\ \theta_i &= 1{,}000{,}000^{-2i/d_h} \end{aligned}$$
-      <p>Entries $2i$ and $2i+1$ of a head are a pair, and $R_t$ turns pair $i$ by $t\theta_i$ radians. A head of 4 in the toy has two pairs, $\theta = (1,\ 0.001)$. Mixtral has 64 pairs a head, from 1 down to $1.2\times 10^{-6}$; its base of a million, up from LLaMA’s 10,000, slows the slow pairs for its longer context. Since $R_j^{\top} = R_{-j}$,</p>
-      $$(q R_t)\,(k R_j)^{\top} = q\, R_{t-j}\, k^{\top}$$
-      <p>so a score sees only the offset $t-j$, not where the pair sits in the sentence. Only $q$ and $k$ are turned, never $v$.</p>
+    def: >-
+      \begin{aligned} R_t &= \operatorname{diag}\big(R(t\theta_0),\ R(t\theta_1),\ \dots\big), \qquad R(\phi) = \begin{pmatrix} \cos\phi & \sin\phi \\ -\sin\phi & \cos\phi \end{pmatrix} \\ \theta_i &= 1{,}000{,}000^{-2i/d_h} \end{aligned}
+    points:
+      - >-
+        **Pairs.** Entries $2i$ and $2i+1$ of a head are pair $i$, and $R_t$ turns it by
+        $t\theta_i$ radians. A toy head has two pairs, $\theta = (1,\ 0.001)$; Mixtral’s has 64,
+        from 1 down to $1.2\times 10^{-6}$.
+      - >-
+        **Offsets only.** Since $R_j^{\top} = R_{-j}$, $(q R_t)(k R_j)^{\top} = q\, R_{t-j}\, k^{\top}$:
+        a score sees how far apart two tokens are, not where. Only $q$ and $k$ turn, never $v$.
+      - >-
+        **Base $10^6$,** up from LLaMA’s $10^4$, slows the slow pairs for Mixtral’s longer
+        context.
+      - >-
+        **Pair layout.** Mistral’s reference code pairs neighbours, as here. Hugging Face pairs
+        $i$ with $i + d_h/2$, and permutes the columns of $W_q$ and $W_k$ to match.
+    code: |-
+      def rope(u, t):  # pairs as complex numbers
+          z = torch.view_as_complex(u.unflatten(-1, (-1, 2)))
+          turn = torch.polar(torch.ones(2), t * theta)
+          return torch.view_as_real(z * turn).flatten(-2)
   - id: res
     title: Residual stream, pre-norm
     cite: He et al., 2016
-    body: |
-      $$h = x + F\big(\operatorname{RMSNorm}(x)\big)$$
-      <p>A sublayer $F$ reads a normalised copy of the row and adds its result back. $x$ itself passes by untouched, which keeps a clean path through all 32 layers. Mixtral normalises before each sublayer, as GPT-2 did. The original Transformer normalised after the add.</p>
+    def: h = x + F\big(\operatorname{RMSNorm}(x)\big)
+    points:
+      - >-
+        **A clean path.** A sublayer $F$ reads a normalised copy of the row and adds its result
+        back. $x$ itself passes untouched through all 32 layers.
+      - >-
+        **Pre-norm,** as GPT-2 did. The original Transformer normalised after the add.
+    code: |-
+      h = x + sublayer(F.rms_norm(x, (d,), eps=1e-5))
   - id: mlp
     title: The two-layer MLP
     cite: Vaswani et al., 2017
-    body: |
-      $$\operatorname{FFN}(u) = \sigma(uW_1 + b_1)\, W_2 + b_2$$
-      <p>Each column of $W_1$ is a neuron: a dot product, then a nonlinearity $\sigma$. $W_2$ writes the neurons back to width $d$. It is position-wise: every token gets the same weights, and no token sees another. The original Transformer used ReLU and $d_{ff} = 4d$.</p>
+    def: \operatorname{FFN}(u) = \sigma(uW_1 + b_1)\, W_2 + b_2
+    points:
+      - >-
+        **Neurons.** Each column of $W_1$ is one: a dot product, then a nonlinearity $\sigma$.
+        $W_2$ writes the neurons back to width $d$.
+      - >-
+        **Position-wise.** Every token gets the same weights, and no token sees another. The
+        original Transformer used ReLU and $d_{ff} = 4d$.
   - id: silu
     title: SiLU
     cite: Elfwing et al., 2018
-    body: |
-      $$\operatorname{SiLU}(z) = z\,\sigma(z) = \frac{z}{1+e^{-z}}$$
-      <p>Close to $z$ for large $z$, close to 0 for very negative $z$, and smooth in between. Its minimum is −0.28, at $z \approx -1.28$. It is also called Swish.</p>
+    def: \operatorname{SiLU}(z) = z\,\sigma(z) = \frac{z}{1+e^{-z}}
+    points:
+      - >-
+        **Shape.** Close to $z$ for large $z$, close to 0 for very negative $z$, smooth in
+        between. Its minimum is −0.28, at $z \approx -1.28$. Also called Swish.
+    code: |-
+      F.silu(z)  # = z * torch.sigmoid(z)
   - id: glu
     title: "Gating: SwiGLU"
     cite: Shazeer, 2020
-    body: |
-      $$\operatorname{FFN}(u) = \big(\operatorname{SiLU}(uW_1) \odot uW_3\big)\, W_2$$
-      <p>A gated linear unit multiplies two projections (Dauphin et al., 2017). $uW_1$, through SiLU, sets how far each neuron opens, and $uW_3$ is what it lets through. Every Mixtral expert is one of these, with $d_{ff} = 14{,}336 = 3.5d$, the width of Mistral 7B’s one FFN. There are no biases.</p>
+    def: \operatorname{FFN}(u) = \big(\operatorname{SiLU}(uW_1) \odot uW_3\big)\, W_2
+    points:
+      - >-
+        **Gate and value.** $\operatorname{SiLU}(uW_1)$ sets how far each neuron opens, and
+        $uW_3$ is what it lets through: a gated linear unit (Dauphin et al., 2017).
+      - >-
+        **In Mixtral** every expert is one, with $d_{ff} = 14{,}336 = 3.5d$, the width of Mistral
+        7B’s one FFN, and no biases.
+    code: |-
+      (F.silu(u @ W1) * (u @ W3)) @ W2
   - id: moe
     title: Sparse mixture of experts
     cite: Shazeer et al., 2017; Jiang et al., 2024
-    body: |
-      $$\begin{aligned} r &= u\, W_g, \qquad G = \operatorname{softmax}\big(\operatorname{top}_k(r)\big) \\ \operatorname{MoE}(u) &= \textstyle\sum_{e \in \operatorname{top}_k(r)} G_e\, \operatorname{FFN}^{[e]}(u) \end{aligned}$$
-      <p>The one FFN becomes $N$ of them, the experts, and a router $W_g$ scores all $N$ for each token. Only the $k$ best are run; $\operatorname{top}_k$ keeps their scores and sets the rest to $-\infty$, so the softmax shares the weight between those $k$ alone. Mixtral’s code softmaxes all $N$ scores, keeps the top $k$ and divides them by their sum, which gives the same weights. Mixtral has $N = 8$ and $k = 2$: each layer holds 8 experts’ weights, 1.4 B, but a token runs through 2, 352 M. The model has 46.7 B weights and runs 12.9 B a token. The toy is lopsided the other way: its experts hold 576 of a layer’s 1,024 weights and it runs 592, where Mixtral’s hold 97% of 1.45 B and it runs 394 M. Which experts a token gets is decided per token and per layer; attention, the norms and the embeddings stay shared.</p>
+    def: >-
+      \begin{aligned} r &= u\, W_g, \qquad G = \operatorname{softmax}\big(\operatorname{top}_k(r)\big) \\ \operatorname{MoE}(u) &= \textstyle\sum_{e \in \operatorname{top}_k(r)} G_e\, \operatorname{FFN}^{[e]}(u) \end{aligned}
+    points:
+      - >-
+        **Route.** The one FFN becomes $N$ experts, and a router $W_g$ scores all $N$ for each
+        token. Only the $k$ best run: $\operatorname{top}_k$ keeps their scores and sets the
+        rest to $-\infty$, so the softmax shares the weight between those $k$ alone.
+      - >-
+        **Same weights, other order.** Mixtral’s code softmaxes all $N$ scores, keeps the top
+        $k$ and divides them by their sum. That gives the same $G$.
+      - >-
+        **Per token, per layer.** Which experts run is decided afresh for each; attention, the
+        norms and the embeddings stay shared.
+    scale:
+      - ['experts, run a token', '8, 2', '8, 2']
+      - ['expert weights a layer', '576 of 1,024', '1.41 B of 1.45 B']
+      - ['weights a token runs, a layer', '592', '394 M']
+      - ['the whole model', '–', '46.7 B, 12.9 B run']
+    code: |-
+      probs = (u @ Wg).softmax(-1)  # Mixtral's order
+      G, top = probs.topk(2)
+      G = G / G.sum()               # = softmax of the top 2
   - id: unemb
     title: Unembedding
-    body: |
-      $$\ell = z\, W_U, \qquad \ell_w = z \cdot (W_U)_{:,w}$$
-      <p>One logit per token in the vocabulary: how well $z$ lines up with that token’s column. A final RMSNorm with its own gain $\gamma_f$ comes first. Mixtral keeps $W_U$ separate from $E$.</p>
+    def: \ell = z\, W_U, \qquad \ell_w = z \cdot (W_U)_{:,w}
+    points:
+      - >-
+        **One logit a token** in the vocabulary: how well $z$ lines up with that token’s
+        column.
+      - >-
+        **Its own norm.** A final RMSNorm with its own gain $\gamma_f$ comes first. Mixtral keeps
+        $W_U$ separate from $E$.
   - id: dec
     title: Picking the next token
-    body: |
-      $$\hat w = \arg\max_w\, p_w \quad\text{(greedy)}, \qquad w \sim \operatorname{softmax}(\ell/\tau) \quad\text{(sampling)}$$
-      <p>Greedy takes the top token. Sampling draws from the distribution, and a temperature $\tau$ below 1 sharpens it. The page uses greedy. The pick is appended to the sentence and fed back in as the next position.</p>
+    def: \hat w = \arg\max_w\, p_w \quad\text{(greedy)}, \qquad w \sim \operatorname{softmax}(\ell/\tau) \quad\text{(sampling)}
+    points:
+      - >-
+        **Greedy** takes the top token, as the page does. **Sampling** draws from the
+        distribution, and a temperature $\tau$ below 1 sharpens it.
+      - >-
+        **Fed back.** The pick is appended to the sentence and becomes the next position.
+    code: |-
+      torch.multinomial((logits / tau).softmax(-1), 1)
   - id: xent
     title: Cross-entropy
-    body: |
-      $$\mathcal{L}_t = -\log p_{t,\,w_{t+1}}, \qquad \mathcal{L} = \tfrac{1}{T-1}\textstyle\sum_{t=0}^{T-2} \mathcal{L}_t$$
-      <p>Training raises the probability of the token that actually came next. Every position is a prediction, so one pass over a sentence of $T$ tokens gives $T-1$ of them. A uniform guess scores $\log |V|$: 2.77 here, 10.4 for Mixtral.</p>
+    def: \mathcal{L}_t = -\log p_{t,\,w_{t+1}}, \qquad \mathcal{L} = \tfrac{1}{T-1}\textstyle\sum_{t=0}^{T-2} \mathcal{L}_t
+    points:
+      - >-
+        **Every position predicts.** One pass over a sentence of $T$ tokens gives $T-1$
+        predictions, and training raises the probability of the token that came next.
+      - >-
+        **The baseline.** A uniform guess scores $\log |V|$: 2.77 here, 10.4 for Mixtral.
+    code: |-
+      F.cross_entropy(logits[:-1], ids[1:])  # logits [T, 16]
 
-# the forward pass, one entry per step the cubes play: its name, its line in general,
-# the prerequisites it uses, and two notes on the Mixtral-sized version
+# the forward pass, one entry per step the cubes play: its name; its line, short (eq) and with
+# shapes (maths); the prerequisites it uses; its PyTorch lines, cut from §0.5; the toy against
+# Mixtral 8x7B (scale); and notes
 steps:
   - title: x arrives
     eq: x_t = E_{w_t}
+    maths: x_t = \mathbf{1}_{w_t} E = E_{w_t} \in \mathbb{R}^{1\times d}
     uses: [lookup, note]
+    code: |-
+      x = E[w]
+      print(x)
+    scale:
+      - ['$E$', '16 × 8', '32,000 × 4,096']
     notes:
-      - 'Mixtral 8x7B: 4,096 numbers per token.'
-      - 'Layer 1 of 32, so x is the token embedding.'
+      - >-
+        **Layer 1** of 32 in Mixtral, so $x$ is the token embedding. A deeper layer reads the
+        layer before’s $y$.
   - title: RMSNorm
     eq: \hat x_t = \operatorname{RMSNorm}(x_t)
+    maths: \hat x_t = x_t / \operatorname{rms}(x_t) \odot \gamma_1 \in \mathbb{R}^{1\times d}
     uses: [rms, res]
+    code: |-
+      xh = F.rms_norm(x, (d,), eps=1e-5)  # γ1 = 1
+      print(xh)
+    scale:
+      - ['gain $\gamma_1$', '8 ones', '4,096 learned']
     notes:
-      - 'Mixtral learns a 4,096-number gain here.'
-      - 'x itself stays on the residual stream, the grey rail on the left.'
+      - >-
+        **Pre-norm.** $x$ itself stays on the residual stream, the grey rail on the left; only
+        the branch reads $\hat x$.
   - title: q, k and v
     eq: q_t = \hat x_t W_q,\quad k_t = \hat x_t W_k,\quad v_t = \hat x_t W_v
+    maths: q_t \in \mathbb{R}^{1\times H d_h},\quad k_t,\ v_t \in \mathbb{R}^{1\times H_{kv} d_h}
     uses: [lin, mh, gqa]
+    code: |-
+      q = (xh @ Wq).view(H, dh)
+      k = (xh @ Wk).view(Hkv, dh)
+      v = (xh @ Wv).view(Hkv, dh)
+      print(q, k, v, sep='\n')
+    scale:
+      - ['$W_q$', '8 × 16', '4,096 × 4,096']
+      - ['$W_k$, $W_v$', '8 × 8', '4,096 × 1,024']
+      - ['heads: query, key-value', '4, 2', '32, 8']
+      - ['$d_h$', '4', '128']
     notes:
-      - 'Wq: 4,096 × 4,096 in Mixtral; Wk and Wv: 4,096 × 1,024, a quarter of it. No bias.'
-      - 'q folds into 32 heads of 128 there, k and v into 8; 4 and 2 heads of 4 here, so q is 16 wide, twice d.'
-      - 'k and v wait in front of the cache.'
+      - >-
+        **Folding is free.** `.view(H, dh)` reads the row as heads, one to a row; no number
+        changes.
   - title: RoPE
     eq: q'^{(n)}_t = q^{(n)}_t R_t,\quad k'^{(\bar n)}_t = k^{(\bar n)}_t R_t
+    maths: R_t = \operatorname{diag}\big(R(t\theta_0),\ R(t\theta_1)\big) \in \mathbb{R}^{d_h\times d_h},\quad \theta = (1,\ 0.001)
     uses: [rope]
+    code: |-
+      q, k = rope(q, t), rope(k, t)
+      print(q, k, sep='\n')
+    scale:
+      - ['pairs a head', '2', '64']
+      - ['$\theta_i$, rad a position', '1, 0.001', '1 … 1.2 × 10⁻⁶']
     notes:
-      - 'Mixtral: 64 pairs per head, θ from 1 down to 0.0000012 rad per position; 2 here, at 1 and 0.001.'
-      - 'Dashed is before, solid after, red the turn. v is not turned.'
+      - >-
+        **Not $v$.** Only $q$ and $k$ meet in a score, so only they carry position.
   - title: Write the cache
     eq: K'_{\le t} = \begin{bmatrix} K'_{<t} \\ k'_t \end{bmatrix},\quad V_{\le t} = \begin{bmatrix} V_{<t} \\ v_t \end{bmatrix}
+    maths: K'_{\le t},\ V_{\le t} \in \mathbb{R}^{(t+1)\times H_{kv} d_h}
     uses: [attn, gqa]
+    code: |-
+      K = torch.cat([K, k[None]])  # [t+1, Hkv, dh]
+      V = torch.cat([V, v[None]])
+      print(K.shape, V.shape)
+    scale:
+      - ['kept a token, a layer', '2 × 8', '2 × 1,024']
+      - ['bytes a token, 32 layers, bf16', '–', '131 KB']
+      - ['… at 32,768 tokens', '–', '4.3 GB']
+      - ['of what MHA keeps', '½', '¼']
     notes:
-      - 'Nothing in the cache is ever rewritten.'
-      - 'Mixtral: 2 × 1,024 numbers × 2 bytes × 32 layers = 131 KB a token. LLaMA 65B keeps 2.6 MB.'
-      - 'The empty grids are the key and value heads multi-head attention would keep for query heads 1 and 3: GQA keeps 2 of 4, Mixtral 8 of 32.'
+      - >-
+        **Append-only.** Nothing in the cache is ever rewritten; row $t$ is read by every later
+        token.
   - title: Repeat K and V
     eq: \big[K'^{(0)}, K'^{(0)}, K'^{(1)}, K'^{(1)}\big] = \big[K'^{(0)}, K'^{(1)}\big]\, C
+    maths: C = \begin{bmatrix} I_4 & I_4 & 0 & 0 \\ 0 & 0 & I_4 & I_4 \end{bmatrix} \in \mathbb{R}^{H_{kv} d_h\times H d_h},\quad \text{and } V\! \text{ alike}
     uses: [gqa, attn]
+    code: |-
+      Kr = K.repeat_interleave(H // Hkv, dim=1)  # [t+1, H, dh]
+      Vr = V.repeat_interleave(H // Hkv, dim=1)
+      print(Kr[t])
+    scale:
+      - ['copies of a key-value head', '2', '4']
     notes:
-      - 'Code calls this repeat_kv: Mistral’s reference code and Hugging Face both make the copies. Fused attention kernels skip them and index the shared head instead; either way the cache keeps 2 heads.'
-      - 'Mixtral copies each of its 8 key-value heads 4 times, one for each query head of its group.'
-      - 'C is a fixed block of copies. Multi-head latent attention (DeepSeek-V2) learns this up-projection instead, and caches the small latent before it.'
+      - >-
+        **Never cached.** The copies serve this pass only; the cache keeps $H_{kv}$ heads, which
+        is the saving.
+      - >-
+        **`repeat_kv`** in Mistral’s code and Hugging Face’s. Fused kernels index the shared
+        head instead of copying it.
+      - >-
+        **A fixed factor.** Folded into the weights, $k = \hat x\,(W_k C)$. Multi-head latent
+        attention (DeepSeek-V2) learns that second factor instead, and caches the small latent
+        before it.
   - title: Scores
-    eq: s^{(n)}_{t,j} = q'^{(n)}_t \cdot k'^{(\bar n)}_j \big/ \sqrt{d_h},\quad \bar n = \lfloor n/2 \rfloor,\ j \le t
+    eq: s^{(n)}_{t,j} = q'^{(n)}_t \cdot k'^{(\bar n)}_j \big/ \sqrt{d_h}
+    maths: s^{(n)}_t = q'^{(n)}_t\, K'^{(\bar n)\top}_{\le t} \big/ \sqrt{d_h} \in \mathbb{R}^{1\times(t+1)},\quad \bar n = \lfloor n/2 \rfloor
     uses: [attn, gqa, rope]
+    code: |-
+      s = torch.einsum('nd,jnd->nj', q, Kr) / dh**0.5
+      print(s)  # [H, t+1]
+    scale:
+      - ['$\sqrt{d_h}$', '2', '11.3']
+      - ['query heads a key head serves', '2', '4']
     notes:
-      - 'Scaled by √4 = 2 here, √128 in Mixtral.'
-      - 'In Mixtral each key head is read by 4 query heads; here by 2.'
+      - >-
+        **Causal for free.** $K'_{\le t}$ has no rows after $t$, so one token a pass needs no
+        mask. A prefill of the whole sentence sets those scores to $-\infty$ instead.
   - title: Softmax
     eq: a^{(n)}_t = \operatorname{softmax}\big(s^{(n)}_t\big)
+    maths: a^{(n)}_{t,j} = e^{s^{(n)}_{t,j}} \big/ \textstyle\sum_{k \le t} e^{s^{(n)}_{t,k}},\qquad \textstyle\sum_{j} a^{(n)}_{t,j} = 1
     uses: [soft, attn]
+    code: |-
+      a = s.softmax(-1)
+      print(a)
     notes:
-      - 'Each weight is e^score ÷ the sum over its row.'
-      - 'The pale rows of a above came from earlier passes: the triangle.'
+      - >-
+        **The triangle.** Row $t$ has $t + 1$ weights; the pale rows of $a$ above came from
+        earlier passes.
   - title: Blend the values
-    eq: o^{(n)}_t = \textstyle\sum_{j \le t} a^{(n)}_{t,j}\, v^{(\bar n)}_j,\quad \bar n = \lfloor n/2 \rfloor
+    eq: o^{(n)}_t = \textstyle\sum_{j \le t} a^{(n)}_{t,j}\, v^{(\bar n)}_j
+    maths: o^{(n)}_t = a^{(n)}_t\, V^{(\bar n)}_{\le t} \in \mathbb{R}^{1\times d_h},\quad \bar n = \lfloor n/2 \rfloor
     uses: [attn, gqa]
+    code: |-
+      o = torch.einsum('nj,jnd->nd', a, Vr)
+      print(o)  # [H, dh]
+    scale:
+      - ['$o_t$, the heads joined', '4 × 4 = 16', '32 × 128 = 4,096']
     notes:
-      - 'Two heads blend the same value rows, each with its own weights.'
-      - 'The four layers of o are the concat: 32 heads of 128 give 4,096 in Mixtral.'
+      - >-
+        **Shared values.** Two heads blend the same value rows, each with its own weights: the
+        weights pick rows, and the values carry the content.
   - title: Wo
-    eq: o_t W_o,\quad o_t = \big[\,o^{(0)}_t;\ \dots;\ o^{(3)}_t\,\big]
+    eq: o_t W_o,\quad o_t = \big[\,o^{(0)}_t, \dots, o^{(3)}_t\,\big]
+    maths: o_t \in \mathbb{R}^{1\times H d_h},\quad o_t W_o \in \mathbb{R}^{1\times d}
     uses: [mh, lin]
+    code: |-
+      att = o.flatten() @ Wo
+      print(att)
+    scale:
+      - ['$W_o$', '16 × 8', '4,096 × 4,096']
+      - ['attention weights a layer', '384', '42 M']
     notes:
-      - 'Wo: 4,096 × 4,096 in Mixtral, 16 × 8 here; the only place the heads mix.'
-      - 'Attention holds 2 × 16.8 M + 2 × 4.2 M = 42 M weights a layer.'
+      - >-
+        **The only mixing.** Until here each head kept to its own slice; every entry of
+        $o_t W_o$ sums all $H d_h$ entries of $o_t$.
   - title: Add to the residual
     eq: h_t = x_t + o_t W_o
+    maths: h_t \in \mathbb{R}^{1\times d}
     uses: [res]
+    code: |-
+      h = x + att
+      print(h)
     notes:
-      - 'h is the residual stream after attention.'
-      - 'The rail carries x around the whole attention block.'
+      - >-
+        **Attention is done.** The rail carried $x$ around the whole block; $h$ is the residual
+        stream after it.
   - title: RMSNorm again
     eq: \hat h_t = \operatorname{RMSNorm}(h_t)
+    maths: \hat h_t = h_t / \operatorname{rms}(h_t) \odot \gamma_2 \in \mathbb{R}^{1\times d}
     uses: [rms, res]
+    code: |-
+      hh = F.rms_norm(h, (d,), eps=1e-5)  # γ2 = 1
+      print(hh)
+    scale:
+      - ['gain $\gamma_2$', '8 ones', '4,096 learned']
     notes:
-      - 'A second RMSNorm with its own gain, shared by all eight experts.'
-      - 'h itself stays on the rail.'
+      - >-
+        **One norm, eight experts.** The router and every expert read the same $\hat h_t$; $h$
+        itself stays on the rail.
   - title: Route
     eq: r_t = \hat h_t W_g,\quad G_t = \operatorname{softmax}\big(\operatorname{top}_2(r_t)\big)
+    maths: r_t \in \mathbb{R}^{1\times N},\quad G_t \in \mathbb{R}^{1\times N},\ \text{2 entries nonzero, summing to 1}
     uses: [lin, moe, soft]
+    code: |-
+      r = hh @ Wg
+      G, top = r.topk(2)
+      G = G.softmax(-1)
+      print(r, top, G, sep='\n')
+    scale:
+      - ['$W_g$', '8 × 8', '4,096 × 8']
+      - ['experts run a token', '2 of 8', '2 of 8']
     notes:
-      - 'W_g: 4,096 × 8 in Mixtral, 32,768 weights: the smallest matrix in the layer decides which of the largest run.'
-      - 'The router picks again for every token in every layer; the same word at another position can get other experts.'
-      - 'The toy’s router is random, so its picks and weights mean nothing. Training usually adds a load-balancing loss, as in the Switch Transformer, so that tokens spread across the experts.'
+      - >-
+        **The smallest matrix** in the layer decides which of the largest run.
+      - >-
+        **A random router.** The toy’s picks mean nothing. Training usually adds a
+        load-balancing loss, as in the Switch Transformer, so that tokens spread across the
+        experts.
   - title: Gate and up
     eq: g^{[e]}_t = \hat h_t W^{[e]}_1,\quad u^{[e]}_t = \hat h_t W^{[e]}_3,\quad e \in \operatorname{top}_2(r_t)
+    maths: g^{[e]}_t,\ u^{[e]}_t \in \mathbb{R}^{1\times d_{ff}}
     uses: [lin, mlp, glu, moe]
+    code: |-
+      g, u = hh @ W1[top], hh @ W3[top]  # [2, dff]
+      print(g, u, sep='\n')
+    scale:
+      - ['$W_1$, $W_3$ an expert', '8 × 3', '4,096 × 14,336']
+      - ['neurons run a token', '2 × 3', '2 × 14,336']
     notes:
-      - 'Every weight is an edge: W1 and W3 are 4,096 × 14,336 in each Mixtral expert, 59 M edges each.'
-      - 'Edge brightness is input × weight, so you see which connections carried this token. The six idle experts’ edges stay dark.'
+      - >-
+        **Gather, then multiply.** `W1[top]` takes the two experts’ matrices; the other six
+        are never read.
   - title: SwiGLU
     eq: m^{[e]}_t = \operatorname{SiLU}\big(g^{[e]}_t\big) \odot u^{[e]}_t
+    maths: m^{[e]}_t \in \mathbb{R}^{1\times d_{ff}}
     uses: [silu, glu]
+    code: |-
+      m = F.silu(g) * u
+      print(m)
     notes:
-      - 'SiLU(z) = z ÷ (1 + e^−z): about 0 for negative z, about z for positive.'
-      - 'This is SwiGLU, inside each expert: 14,336 gated neurons an expert in Mixtral, 28,672 of them running a token.'
+      - >-
+        **A soft gate.** SiLU never drops below −0.28, so a neuron with a negative gate passes
+        almost nothing, whatever $u$ says.
   - title: Down, then mix
     eq: f_t = \textstyle\sum_{e \in \operatorname{top}_2(r_t)} G^{[e]}_t\; m^{[e]}_t W^{[e]}_2
+    maths: m^{[e]}_t W^{[e]}_2 \in \mathbb{R}^{1\times d},\quad \textstyle\sum_{e} G^{[e]}_t = 1
     uses: [lin, mlp, moe]
+    code: |-
+      f = torch.einsum('e,ec,ecd->d', G, m, W2[top])
+      print(f)
+    scale:
+      - ['$W_2$ an expert', '3 × 8', '14,336 × 4,096']
+      - ['expert weights a layer', '576', '1.41 B']
+      - ['… of which a token runs', '144', '352 M']
     notes:
-      - 'W2: 14,336 × 4,096 in each Mixtral expert. The eight experts hold 1.4 B weights a layer, 97% of it; two of them, 352 M, run a token.'
-      - 'An expert’s W1 edges are what it looks for; its W2 edges are what it writes back, scaled by its weight from the router.'
+      - >-
+        **Read and write.** An expert’s $W_1$ columns are what it looks for; its $W_2$ rows are
+        what it writes back, scaled by its weight from the router.
   - title: Add to the residual
     eq: y_t = h_t + f_t
+    maths: y_t \in \mathbb{R}^{1\times d}
     uses: [res]
+    code: |-
+      y = h + f
+      print(y)
+    scale:
+      - ['layers', '1', '32']
     notes:
-      - 'y becomes x for layer 2; 32 layers in Mixtral 8x7B.'
-      - 'Only K′ and V stay behind in this layer.'
+      - >-
+        **The layer’s output,** and $x$ for layer 2. Only $K'$ and $V$ stay behind in this
+        one.
   - title: Final RMSNorm
     eq: z_t = \operatorname{RMSNorm}(y_t)
+    maths: z_t = y_t / \operatorname{rms}(y_t) \odot \gamma_f \in \mathbb{R}^{1\times d}
     uses: [rms]
+    code: |-
+      z = F.rms_norm(y, (d,), eps=1e-5)  # γf = 1
+      print(z)
+    scale:
+      - ['gain $\gamma_f$', '8 ones', '4,096 learned']
     notes:
-      - 'The final norm runs once, after the last layer, with its own 4,096 gains.'
-      - 'In prefill every position gets logits, which is how training scores a whole sentence at once. In generation only the newest position needs them.'
+      - >-
+        **Once,** after the last layer.
+      - >-
+        **Prefill and generation.** In prefill every position gets logits, which is how
+        training scores a whole sentence at once. In generation only the newest needs them.
   - title: Logits
     eq: \ell_t = z_t W_U
+    maths: \ell_t \in \mathbb{R}^{1\times |V|},\quad \ell_{t,w} = z_t \cdot (W_U)_{:,w}
     uses: [unemb, lin]
+    code: |-
+      logits = z @ WU
+      print(logits)
+    scale:
+      - ['$W_U$', '8 × 16', '4,096 × 32,000']
     notes:
-      - 'W_U: 4,096 × 32,000 in Mixtral, 131 M weights, kept separate from the input embedding.'
-      - 'A token’s column is the direction the stream must point for that token to win.'
+      - >-
+        **A direction a token.** A token’s column is the direction the stream must point for
+        that token to win.
   - title: Softmax, then pick
     eq: p_t = \operatorname{softmax}(\ell_t),\quad \hat w_{t+1} = \arg\max_w\, p_{t,w}
+    maths: p_t \in \mathbb{R}^{1\times |V|},\quad \textstyle\sum_{w} p_{t,w} = 1
     uses: [soft, dec, xent]
+    code: |-
+      p = logits.softmax(-1)
+      nxt = p.argmax()
+      print(p, nxt, sep='\n')
+    scale:
+      - ['$\log |V|$, a uniform guess', '2.77', '10.4']
     notes:
-      - 'Mixtral usually samples, with a temperature and top-p, instead of always taking the top token.'
-      - 'The weights here are random, so the pick means nothing. The arithmetic is the real one.'
+      - >-
+        **Random weights.** The pick means nothing; the arithmetic is the real one.
+      - >-
+        **Mixtral usually samples,** with a temperature and top-p, instead of always taking the
+        top token.

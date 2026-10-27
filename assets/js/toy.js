@@ -2,10 +2,10 @@
 // Mixtral's recipe at d = 8 runs in the browser. The pane on the left draws its
 // tensors as cubes and plays one token's pass through the layer as the pane is
 // scrolled; the pane on the right is the maths, one section per component, with
-// the current step worked in that token's numbers. Prose and TeX come from
-// _data/toy.yml via the JSON script in the post; KaTeX typesets them. The desktop
-// re-creates a post's scripts when it swaps the window in, so this runs once per
-// window and claims it with data-ready.
+// the current step worked in that token's numbers, by hand and in PyTorch. Prose,
+// TeX and code come from _data/toy.yml via the JSON script in the post; KaTeX
+// typesets them. The desktop re-creates a post's scripts when it swaps the window
+// in, so this runs once per window and claims it with data-ready.
 (function () {
 	const root = document.querySelector('.toy:not([data-ready])');
 	if (!root) return;
@@ -122,6 +122,52 @@
 		return { Wq, Wk, Wv, Wo, Wg, EX, WU, tok };
 	}
 	const model = makeToy(187, 66611), TOK = model.tok;
+
+	// ---- PyTorch: what each step's lines print ---------------------------------------
+	// A step's code in toy.yml is cut from the listing of §0.5, which prints under
+	// torch.set_printoptions(precision=2, sci_mode=False, linewidth=64). torchStr lays a
+	// value out as torch does: one width for every entry, set by the nonzero ones, and as
+	// many entries a line as fit in 64 columns.
+	const LINE = 64;
+	function torchStr(v, ints = false) {
+		const dims = !Array.isArray(v) ? 0 : Array.isArray(v[0]) ? 2 : 1;
+		const all = dims === 2 ? v.flat() : dims === 1 ? v : [v], nz = all.filter(x => x !== 0);
+		const whole = nz.every(Number.isInteger); // a float tensor of whole numbers prints them as "1."
+		const f = x => ints ? String(x) : whole ? x.toFixed(0) + '.' : x.toFixed(2);
+		const w = Math.max(1, ...(ints ? all : nz).map(x => f(x).length)), el = x => f(x).padStart(w);
+		const vec = (r, indent) => {
+			const per = Math.max(1, Math.floor((LINE - indent) / (w + 2))), lines = [];
+			for (let i = 0; i < r.length; i += per) lines.push(r.slice(i, i + per).map(el).join(', '));
+			return '[' + lines.join(',\n' + ' '.repeat(indent + 1)) + ']';
+		};
+		return 'tensor(' + (dims === 0 ? el(v) : dims === 1 ? vec(v, 7) : '[' + v.map(r => vec(r, 8)).join(',\n' + ' '.repeat(8)) + ']') + ')';
+	}
+	const heads = (v, n) => range(n).map(h => v.slice(h * DH, h * DH + DH)); // .view(n, dh)
+	const size = (...s) => `torch.Size([${s.join(', ')}])`;
+	// one entry a step: the values its print() gets, in order; whole numbers are an int64 tensor
+	const PRINTS = {
+		arrive: a => [a.x],
+		norm: a => [a.xn],
+		qkv: a => [heads(a.q, NH), heads(a.k, NKV), heads(a.v, NKV)],
+		rope: a => [heads(a.qr, NH), heads(a.kr, NKV)],
+		cache: a => [size(a.t + 1, NKV, DH) + ' ' + size(a.t + 1, NKV, DH)],
+		repeat: a => [range(NH).map(n => heads(a.kr, NKV)[kvOf(n)])],
+		scores: a => [a.heads.map(hd => hd.sc)],
+		softmax: a => [a.heads.map(hd => hd.w)],
+		blend: a => [a.heads.map(hd => hd.o)],
+		wo: a => [a.att],
+		add: a => [a.out],
+		norm2: a => [a.hn],
+		route: a => [a.r, { ints: a.top }, a.G],
+		gateUp: a => [a.ex.map(x => x.g), a.ex.map(x => x.u)],
+		swiglu: a => [a.ex.map(x => x.m)],
+		down: a => [a.f],
+		add2: a => [a.y],
+		finalNorm: a => [a.zn],
+		logits: a => [a.logits],
+		pick: a => [a.probs, { ints: a.pick }],
+	};
+	const printed = (name, p) => PRINTS[name](TOK[p]).map(v => typeof v === 'string' ? v : v.ints !== undefined ? torchStr(v.ints, true) : torchStr(v)).join('\n');
 
 	// ---- colours and formatting -------------------------------------------------
 	const NAVY = [0, 0, 128], RED = [176, 0, 0];
@@ -1095,6 +1141,14 @@
 	const note = html => `<p class="toy-mnote">${html}</p>`;
 	// prose from the data file: $$…$$ is a display line, $…$ inline
 	const typeset = html => html.replace(/\$\$([\s\S]+?)\$\$/g, (_, t) => mx(t)).replace(/\$([^$]+?)\$/g, (_, t) => tex(t));
+	// a point or a note: TeX as above, **bold** and `code`
+	const md = s => typeset(s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, (_, c) => `<code>${esc(c)}</code>`));
+	const points = list => `<ul class="toy-pts">${list.map(s => `<li>${md(s)}</li>`).join('')}</ul>`;
+	const codeHtml = src => esc(src).replace(/(^|\s)(#.*)$/gm, '$1<span class="cm">$2</span>');
+	const code = src => `<pre class="toy-code">${codeHtml(src)}</pre>`;
+	// the toy against Mixtral 8x7B, a row a quantity
+	const scale = rows => `<table class="toy-dims toy-scale"><thead><tr><th></th><th>toy</th><th>Mixtral 8x7B</th></tr></thead><tbody>`
+		+ rows.map(r => `<tr>${r.map(c => `<td>${typeset(c)}</td>`).join('')}</tr>`).join('') + '</tbody></table>';
 	const num = (v, d = 2) => { const s = Math.abs(v).toFixed(d); return (v < 0 && +s !== 0 ? '-' : '') + s; };
 	const par = (v, d = 2) => num(v, d)[0] === '-' ? `(${num(v, d)})` : num(v, d);
 	const rowv = (vals, d = 2, split = 0) => R`\bigl(` + vals.map((v, i) => (i === 0 ? '' : split && i % split === 0 ? R`\;\big|\;` : R`,\,`) + num(v, d)).join('') + R`\bigr)`;
@@ -1107,16 +1161,15 @@
 	const argmax = a => a.indexOf(Math.max(...a));
 	const argabs = a => a.reduce((best, v, i) => Math.abs(v) > Math.abs(a[best]) ? i : best, 0);
 	const repeatKV = v => range(NH).flatMap(n => v.slice(kvOf(n) * DH, kvOf(n) * DH + DH)); // a key-value row, a copy for each query head
-	// RMSNorm with the numbers: the sum of squares, the rms, the division
-	const rmsRows = (b, p, u, d, rms, out, ov, gain) => {
+	// RMSNorm by hand: the sum of squares, the rms, the division
+	const rmsRows = (b, p, u, d, rms, out, gain) => {
 		const sq = u.map(v => `${par(v, d)}^2`), sum = u.reduce((a, v) => a + v * v, 0), rel = d === 1 ? '=' : R`\approx`;
 		return mx(aligned([
 			[R`\textstyle\sum_i ${b}_{${p},i}^2`, '= ' + sq.slice(0, 4).join(' + ')],
 			['', R`\quad + ` + sq.slice(4).join(' + ') + ` ${rel} ${num(sum)}`],
 			[R`\operatorname{rms}(${b}_{${p}})`, R`= \sqrt{${num(sum)}/8 + 10^{-5}} \approx ${num(rms, 3)}`],
 			[`${out}_{${p}}`, R`= ${b}_{${p}} / ${num(rms, 3)} \odot ${gain}`],
-			['', R`\approx ` + rowv(ov)],
-		])) + note(`${tex(gain + ' = 1')} in the toy, so the gain changes nothing. ${tex(R`\operatorname{rms}(${out}_{${p}}) = 1`)} afterwards, up to ${tex(R`\varepsilon`)}.`);
+		])) + note(`${tex(gain + ' = 1')} in the toy, so ${tex(R`\operatorname{rms}(${out}_{${p}}) = 1`)} afterwards, up to ${tex(R`\varepsilon`)}.`);
 	};
 	// column addition for the residual: two rows and their sum, entries lined up
 	const colAdd = (a, b, c) => mx(R`\begin{array}{rrc` + 'r'.repeat(D) + '}'
@@ -1132,22 +1185,21 @@
 		return { nh, j: argmax(TOK[p].heads[nh].w), j1: -1 };
 	};
 
-	// ---- the numbers: the current step worked in the token's values -----------------------
+	// ---- by hand: one entry of the current step, worked in the token's values --------------
+	// The whole rows are the PyTorch part's print and the cells; here one entry is worked out.
 	function numbers(p, s) {
 		const t = TOK[p], V = VOCAB;
 		const by = {
 			[ST.arrive]: () => {
 				const i = WORDS.indexOf(WORDS[p]);
 				return mx(aligned([[`x_{${p}}`, R`= E_{${word(WORDS[p])}}`], ['', '= ' + rowv(t.x, 1)]]))
-					+ (i < p ? note(`${tex(`x_{${p}} = x_{${i}}`)}: same word, same row. The embedding knows the word, not the position; position enters only through RoPE, in step (4).`)
-						: note(`Layer 1 of ${tex('L')}, so ${tex('x')} is the token’s row of the embedding.`));
+					+ (i < p ? note(`${tex(`x_{${p}} = x_{${i}}`)}: same word, same row. The embedding knows the word, not the position; position enters only through RoPE, in step (4).`) : '');
 			},
-			[ST.norm]: () => rmsRows('x', p, t.x, 1, t.rms, R`\hat x`, t.xn, R`\gamma_1`),
+			[ST.norm]: () => rmsRows('x', p, t.x, 1, t.rms, R`\hat x`, R`\gamma_1`),
 			[ST.qkv]: () => {
 				const c = argabs(t.q);
 				return mx(aligned(sumRows(`q_{${p},${c}}`, R`\textstyle\sum_i \hat x_{${p},i}\,(W_q)_{i,${c}}`, prods(t.xn, model.Wq.map(r => r[c])), 3, t.q[c])))
-					+ mx(aligned([[`q^{(0,1)}_{${p}}`, R`\approx ` + rowv(t.q.slice(0, 8), 2, 4)], [`q^{(2,3)}_{${p}}`, R`\approx ` + rowv(t.q.slice(8), 2, 4)], [`k_{${p}}`, R`\approx ` + rowv(t.k, 2, 4)], [`v_{${p}}`, R`\approx ` + rowv(t.v, 2, 4)]]))
-					+ note(`Each entry is one such sum of 8 products. The bars split the heads: four in ${tex(`q_{${p}}`)}, two to a line, and two in ${tex(`k_{${p}}`)} and ${tex(`v_{${p}}`)}, so ${tex('W_k')} and ${tex('W_v')} are 8 × 8, half of ${tex('W_q')}’s 8 × 16.`);
+					+ note(`Entry ${c} of ${tex(`q_{${p}}`)}, its largest. Every entry of ${tex('q')}, ${tex('k')} and ${tex('v')} is such a sum of 8 products, 32 sums in all.`);
 			},
 			[ST.rope]: () => {
 				const c = Math.cos(p), sn = Math.sin(p), [a, b] = t.q, [a2, b2] = t.qr, slow = p * THETA[1];
@@ -1156,22 +1208,20 @@
 					[R`(q'_{${p},0},\ q'_{${p},1})`, R`= (q_{${p},0},\ q_{${p},1})\; R(${p})`],
 					['', R`= (${num(a)},\ ${num(b)}) \begin{pmatrix} ${num(c)} & ${num(sn)} \\ ${num(-sn)} & ${num(c)} \end{pmatrix}`],
 					['', R`\approx (${num(a2)},\ ${num(b2)})`],
-				])) + mx(aligned([[`q'^{(0,1)}_{${p}}`, R`\approx ` + rowv(t.qr.slice(0, 8), 2, 4)], [`q'^{(2,3)}_{${p}}`, R`\approx ` + rowv(t.qr.slice(8), 2, 4)], [`k'_{${p}}`, R`\approx ` + rowv(t.kr, 2, 4)]]))
-					+ note(`A turn keeps length: ${tex(R`\lVert(q_{${p},0},\, q_{${p},1})\rVert = \lVert(q'_{${p},0},\, q'_{${p},1})\rVert \approx ${num(Math.hypot(a, b))}`)}. ${p ? `Pair 1 turns by only ${num(slow, 3)} rad: Mixtral’s base of 1,000,000 makes it ten times slower than LLaMA’s 10,000 would, ${num(p * 0.01)}.` : `At position 0 nothing turns: ${tex('R(0)')} is the identity.`} ${tex('v')} is not turned.`);
+				])) + note(`Pair 0 of head 0. A turn keeps length: ${tex(R`\lVert(q_{${p},0},\, q_{${p},1})\rVert = \lVert(q'_{${p},0},\, q'_{${p},1})\rVert \approx ${num(Math.hypot(a, b))}`)}. ${p ? `Pair 1 turns by only ${num(slow, 3)} rad: Mixtral’s base of 1,000,000 makes it ten times slower than LLaMA’s 10,000 would, ${num(p * 0.01)}.` : `At position 0 nothing turns: ${tex('R(0)')} is the identity.`}`);
 			},
-			[ST.cache]: () => mx(aligned([[R`K'_{\le ${p}},\ V_{\le ${p}}`, R`\in \mathbb{R}^{${p + 1}\times 8}`]]))
-				+ note(p ? `Rows ${tex(R`0, \dots, ${p - 1}`)} were written by earlier passes; row ${tex(`${p}`)} is ${tex(`k'_{${p}}`)} and ${tex(`v_{${p}}`)}, and it stays for every later token.` : `The cache was empty; row 0 is ${tex(`k'_0`)} and ${tex('v_0')}.`)
-				+ mx(R`\underbrace{2}_{K',\,V} \times \underbrace{8 \cdot 128}_{H_{kv} d_h} \times \underbrace{2\ \text{B}}_{\text{bf16}} \times \underbrace{32}_{L} \approx 131\ \text{KB a token}`)
-				+ note('That is Mixtral 8x7B, a quarter of what 32 key-value heads would hold. A full context of 32,768 tokens holds 4.3 GB of cache.'),
+			[ST.cache]: () => {
+				const stack = (M, r) => p ? R`\begin{bmatrix} ${M}_{<${p}} \\ ${r}_{${p}} \end{bmatrix}` : `${r}_{0}`;
+				return mx(aligned([
+					[R`K'_{\le ${p}}`, R`= ${stack("K'", "k'")},\quad V_{\le ${p}} = ${stack('V', 'v')}`],
+					[`k'_{${p}}`, R`\approx ` + rowv(t.kr, 2, 4)],
+					[`v_{${p}}`, R`\approx ` + rowv(t.v, 2, 4)],
+				])) + note(p ? `Rows ${tex(R`0, \dots, ${p - 1}`)} came from earlier passes. Row ${p} is new, and stays for every later token.` : 'The cache was empty: row 0 is its first.');
+			},
 			[ST.repeat]: () => mx(aligned([
-				[R`\big[K'^{(0)}, K'^{(0)}, K'^{(1)}, K'^{(1)}\big]`, R`= \big[K'^{(0)}, K'^{(1)}\big]\, C`],
-				[R`C`, R`= \begin{bmatrix} I_4 & I_4 & 0 & 0 \\ 0 & 0 & I_4 & I_4 \end{bmatrix} \in \mathbb{R}^{8\times 16}`],
-			])) + mx(aligned([
 				[`k'_{${p}}`, R`\approx ` + rowv(t.kr, 2, 4)],
-				[`k'_{${p}}C`, R`\approx ` + rowv(repeatKV(t.kr).slice(0, 8), 2, 4)],
-				['', R`\quad ` + rowv(repeatKV(t.kr).slice(8), 2, 4)],
-			])) + note(`The same ${tex('C')} copies ${tex('V')}. The copies serve this pass only; the cache keeps ${tex(`K'^{(0)}`)}, ${tex(`K'^{(1)}`)} and their ${tex('V')}s, which is the saving. From here the scores, softmax and blend are multi-head attention’s, head by head.`)
-				+ note(`Folded into the weights, ${tex(R`k = \hat x\,(W_k C)`)}: GQA is multi-head attention whose key and value projections pass through a fixed copy. Multi-head latent attention (DeepSeek-V2) learns that second factor instead, and caches the small latent before it.`),
+				[`k'_{${p}}C`, R`= \big[\,k'^{(0)}_{${p}},\ k'^{(0)}_{${p}},\ k'^{(1)}_{${p}},\ k'^{(1)}_{${p}}\,\big]`],
+			])) + note(`Each block row of ${tex('C')} copies one key-value head into the places of its group’s two query heads, and ${tex(`v_{${p}}C`)} alike.`),
 			[ST.scores]: () => {
 				const { nh, j, j1 } = focusKey(p), g = kvOf(nh), hd = t.heads[nh], hs = `^{(${nh})}`, gs = `^{(${g})}`;
 				const pr = prods(t.qr.slice(nh * DH, nh * DH + DH), TOK[j].kr.slice(g * DH, g * DH + DH), 2, 2);
@@ -1181,39 +1231,33 @@
 					['', R`\quad + ` + pr.slice(2).join(' + ') + R`\big)`],
 					['', R`\approx ${num(hd.sc[j])}`],
 					...(j1 >= 0 ? [[`s${hs}_{${p},${j1}}`, R`\approx ${num(hd.sc[j1])}`]] : []),
-				])) + note(`Query head ${nh} reads key head ${g}, as head ${nh ^ 1} does.`
-					+ (j1 >= 0 ? ` ${tokHtml(j1)} and ${tokHtml(j)} are one word, so ${tex(`k_{${j1}} = k_{${j}}`)} before RoPE. Their scores differ only through the offsets, ${tex(`${p} - ${j1} = ${p - j1}`)} and ${tex(`${p} - ${j} = ${p - j}`)}.` : ''))
-					+ mx(aligned(range(NH).map(h => [`s^{(${h})}_{${p}}`, R`\approx ` + rowv(t.heads[h].sc)])));
+				])) + note(`Query heads ${g * GRP} and ${g * GRP + 1} both read key head ${g}.`
+					+ (j1 >= 0 ? ` ${tokHtml(j1)} and ${tokHtml(j)} are one word, so ${tex(`k_{${j1}} = k_{${j}}`)} before RoPE. Their scores differ only through the offsets, ${tex(`${p} - ${j1} = ${p - j1}`)} and ${tex(`${p} - ${j} = ${p - j}`)}.` : ''));
 			},
 			[ST.softmax]: () => {
 				const { nh, j } = focusKey(p), hd = t.heads[nh], hs = `^{(${nh})}`, e = hd.sc.map(Math.exp);
 				return mx(aligned([
-					[`a${hs}_{${p},${j}}`, R`= \dfrac{e^{s_{${p},${j}}}}{\sum_{k=0}^{${p}} e^{s_{${p},k}}}`],
+					[`a${hs}_{${p},${j}}`, R`= \dfrac{e^{s${hs}_{${p},${j}}}}{\sum_{k=0}^{${p}} e^{s${hs}_{${p},k}}}`],
 					['', R`= \dfrac{${num(e[j])}}{${e.map(v => num(v)).join(' + ')}}`],
 					['', R`\approx ${num(hd.w[j])}`],
-				])) + note(`Head ${nh}; each ${tex('s')} in the fraction is ${tex(`s${hs}`)}.`)
-					+ mx(aligned(range(NH).map(h => [`a^{(${h})}_{${p}}`, R`\approx ` + rowv(t.heads[h].w)])))
-					+ note('Each row sums to 1.' + (p ? ' Heads 0 and 1 scored the same keys, and still weigh them their own way; so do heads 2 and 3.' : ''));
+				])) + note(`Head ${nh}, key ${tokHtml(j)}. The row of ${tex(`a${hs}_{${p}}`)} sums to 1.`);
 			},
 			[ST.blend]: () => {
 				const { nh } = focusKey(p), g = kvOf(nh), hd = t.heads[nh], hs = `^{(${nh})}`, i = argabs(hd.o);
 				return mx(aligned(sumRows(`o${hs}_{${p},${i}}`, R`\textstyle\sum_{j=0}^{${p}} a${hs}_{${p},j}\; v^{(${g})}_{j,${i}}`, prods(hd.w, TOK.slice(0, p + 1).map(r => r.v[g * DH + i]), 2, 2), 3, hd.o[i])))
-					+ mx(aligned(range(NH).map(h => [`o^{(${h})}_{${p}}`, R`\approx ` + rowv(t.heads[h].o)])))
-					+ note(`Every weight of ${tex(`a${hs}_{${p}}`)} meets its own row of ${tex(`V^{(${g})}`)}, the value head that heads ${g * GRP} and ${g * GRP + 1} share: the weights pick rows, and the values carry the content.`);
+					+ note(`Every weight of ${tex(`a${hs}_{${p}}`)} meets its own row of ${tex(`V^{(${g})}`)}, the value head that heads ${g * GRP} and ${g * GRP + 1} share.`);
 			},
 			[ST.wo]: () => {
 				const c = argabs(t.att);
-				return mx(aligned([[`o_{${p}}`, R`= \big[\,o^{(0)}_{${p}};\ o^{(1)}_{${p}};\ o^{(2)}_{${p}};\ o^{(3)}_{${p}}\,\big]`], ['', R`\approx ` + rowv(t.cat.slice(0, 8), 2, 4)], ['', R`\quad ` + rowv(t.cat.slice(8), 2, 4)]]))
-					+ mx(aligned(sumRows(`(o_{${p}}W_o)_{${c}}`, R`\textstyle\sum_k o_{${p},k}\,(W_o)_{k,${c}}`, prods(t.cat, model.Wo.map(r => r[c])), 4, t.att[c])))
-					+ mx(aligned([[`o_{${p}}W_o`, R`\approx ` + rowv(t.att)]]));
+				return mx(aligned(sumRows(`(o_{${p}}W_o)_{${c}}`, R`\textstyle\sum_k o_{${p},k}\,(W_o)_{k,${c}}`, prods(t.cat, model.Wo.map(r => r[c])), 3, t.att[c])))
+					+ note(`Entry ${c}, the largest: 16 products, four from each head.`);
 			},
 			[ST.add]: () => colAdd([`x_{${p}}`, '=', t.x, 2], [`o_{${p}}W_o`, R`\approx`, t.att, 2], [`h_{${p}}`, R`\approx`, t.out]),
-			[ST.norm2]: () => rmsRows('h', p, t.out, 2, t.hrms, R`\hat h`, t.hn, R`\gamma_2`),
+			[ST.norm2]: () => rmsRows('h', p, t.out, 2, t.hrms, R`\hat h`, R`\gamma_2`),
 			[ST.route]: () => {
 				const [e1, e2] = t.top, [G1, G2] = t.G, ex = e => R`^{[${e}]}`;
 				return mx(aligned(sumRows(`r_{${p},${e1}}`, R`\textstyle\sum_i \hat h_{${p},i}\,(W_g)_{i,${e1}}`, prods(t.hn, model.Wg.map(r => r[e1])), 3, t.r[e1])))
 					+ mx(aligned([
-						[`r_{${p}}`, R`\approx ` + rowv(t.r)],
 						[R`\operatorname{top}_2(r_{${p}})`, R`= \{${e1},\ ${e2}\}`],
 						[R`(G${ex(e1)},\ G${ex(e2)})`, R`= \operatorname{softmax}(${num(t.r[e1])},\ ${num(t.r[e2])})`],
 						['', R`= \Big(\tfrac{1}{1 + e^{${num(t.r[e2] - t.r[e1])}}},\ \tfrac{1}{1 + e^{${num(t.r[e1] - t.r[e2])}}}\Big) \approx (${num(G1)},\ ${num(G2)})`],
@@ -1224,7 +1268,7 @@
 				return mx(aligned([
 					...sumRows(`g${ex}_{${p},${c}}`, R`\textstyle\sum_i \hat h_{${p},i}\,(W${ex}_1)_{i,${c}}`, prods(t.hn, model.EX[x.e].W1.map(r => r[c])), 3, x.g[c]),
 					[`u${ex}_{${p},${c}}`, R`= \textstyle\sum_i \hat h_{${p},i}\,(W${ex}_3)_{i,${c}} \approx ${num(x.u[c])}`],
-				])) + note(`Expert ${x.e}’s neuron ${c}, the one with its largest gate. Experts ${t.top[0]} and ${t.top[1]} have 3 neurons each, all of them in the cells below; the other 18 neurons stay idle.`);
+				])) + note(`Expert ${x.e}’s neuron ${c}, the one with its largest gate. The other 18 neurons stay idle.`);
 			},
 			[ST.swiglu]: () => {
 				const x = t.ex[0], c = argabs(x.g), ex = R`^{[${x.e}]}`, all = t.ex.flatMap(y => y.g.map((g, i) => [g, y, i]));
@@ -1234,7 +1278,7 @@
 					['', R`= \dfrac{${num(x.g[c])}}{1 + e^{${num(-x.g[c])}}} \cdot ${par(x.u[c])}`],
 					['', R`\approx ${num(x.sg[c])} \cdot ${par(x.u[c])} \approx ${num(x.m[c])}`],
 					[R`\operatorname{SiLU}(g${ey}_{${p},${c2}})`, R`= \operatorname{SiLU}(${num(g2)}) \approx ${num(y.sg[c2])}`],
-				])) + note(`SiLU never drops below −0.28, so a neuron with a negative gate passes almost nothing, whatever ${tex('u')} says.`);
+				])) + note('The last line is the lowest of the six gates, all but shut.');
 			},
 			[ST.down]: () => {
 				const i = argabs(t.f), [a, b] = t.ex, [Ga, Gb] = t.G, ea = R`^{[${a.e}]}`, eb = R`^{[${b.e}]}`;
@@ -1243,12 +1287,10 @@
 					[R`(m${eb}_{${p}} W${eb}_2)_{${i}}`, R`\approx ${num(b.f[i])}`],
 					[`f_{${p},${i}}`, R`= G${ea}\,(m${ea}_{${p}} W${ea}_2)_{${i}} + G${eb}\,(m${eb}_{${p}} W${eb}_2)_{${i}}`],
 					['', R`= ${num(Ga)}\cdot ${par(a.f[i])} + ${num(Gb)}\cdot ${par(b.f[i])} \approx ${num(t.f[i])}`],
-				])) + mx(aligned([[`f_{${p}}`, R`\approx ` + rowv(t.f)]]))
-					+ note('Each expert writes all 8 outputs from its own 3 neurons, and the router’s weights mix the two.');
+				])) + note(`Entry ${i}, the largest of ${tex(`f_{${p}}`)}.`);
 			},
-			[ST.add2]: () => colAdd([`h_{${p}}`, R`\approx`, t.out, 2], [`f_{${p}}`, R`\approx`, t.f, 2], [`y_{${p}}`, R`\approx`, t.y])
-				+ note(`${tex(`y_{${p}}`)} is the layer’s output, and ${tex('x')} for the next layer.`),
-			[ST.finalNorm]: () => rmsRows('y', p, t.y, 2, t.zrms, 'z', t.zn, R`\gamma_f`),
+			[ST.add2]: () => colAdd([`h_{${p}}`, R`\approx`, t.out, 2], [`f_{${p}}`, R`\approx`, t.f, 2], [`y_{${p}}`, R`\approx`, t.y]),
+			[ST.finalNorm]: () => rmsRows('y', p, t.y, 2, t.zrms, 'z', R`\gamma_f`),
 			[ST.logits]: () => {
 				const js = argmax(t.logits), wj = word(V[js]);
 				return mx(aligned(sumRows(R`\ell_{${p},${wj}}`, R`z_{${p}} \cdot (W_U)_{:,${wj}}`, prods(t.zn, model.WU.map(r => r[js])), 3, t.logits[js])))
@@ -1270,34 +1312,34 @@
 		return by[s]();
 	}
 
-	// ---- the captions: what the cubes are doing, in the token's numbers ---------------------
+	// ---- the captions: what the cubes are doing, in a sentence or two -------------------------
 	function caption(p, s) {
 		const t = TOK[p], w = `<i>${WORDS[p]}</i>`;
 		const best = h => { const ws = t.heads[h].w, j = argmax(ws); return `<i>${tokName(j)}</i> (${ws[j].toFixed(2)})`; };
 		const by = {
-			[ST.arrive]: () => `${w} arrives at position ${p}, and its row of x lights up. ${p ? 'The pale rows above it are earlier tokens. This layer kept only their keys and values.' : 'Nothing has passed through yet.'}`,
+			[ST.arrive]: () => `${w} arrives at position ${p}, and its row of x lights up.${p ? ' The pale rows above are earlier tokens; this layer kept only their keys and values.' : ''}`,
 			[ST.norm]: () => `RMSNorm divides the row by its root mean square, ${fmt(t.rms, 2)}, so the branch works at unit scale.`,
-			[ST.qkv]: () => 'Wq, Wk and Wv make q, k and v. q folds into four heads of 4, a layer each, four deep. Wk and Wv are half as wide: k and v fold into two heads, in the layers of query heads 0 and 2, and the layers of heads 1 and 3 stay empty, the heads multi-head attention would keep.',
-			[ST.rope]: () => `RoPE turns q and k pair by pair: pair 0 by ${p} rad, pair 1 by ${(p * THETA[1]).toFixed(3)} rad. The same word at another position gets a different key.`,
-			[ST.cache]: () => `k′ and v drop into row ${p} of the cache: 8 numbers each. The empty grids in the layers of heads 1 and 3 are the heads multi-head attention would also keep, 16 numbers in all. ${p ? `Rows 0–${p - 1} were written by earlier passes.` : 'The cache was empty.'} They stay for every later token.`,
-			[ST.repeat]: () => 'Each key and value head is copied for the second query head of its group: K′ and V become four heads, [K′⁰, K′⁰, K′¹, K′¹], and from here attention runs as multi-head attention. The copies fill the empty layers for this pass only and are never cached; they go after the blend.',
-			[ST.scores]: () => 'Each query head meets every cached key of its group: heads 0 and 1 read key head 0, head 1 through its copy, and heads 2 and 3 read key head 1. q′·k′ⱼ ÷ √dₕ. A new row of scores grows in each layer of a.',
-			[ST.softmax]: () => `Softmax turns each head's scores into weights that sum to 1. ` + (p ? `Heads 0 and 1 scored the same keys, yet head 0 puts most on ${best(0)} and head 1 on ${best(1)}.` : 'With one key, every weight is 1.'),
-			[ST.blend]: () => 'o = a V uses both. Each head’s weights and its group’s cached value rows converge on o: every row of V arrives scaled by its weight aⱼ, bright where the weight is large. Two heads read each value head and blend it their own way.',
+			[ST.qkv]: () => 'Wq, Wk and Wv make q, k and v. q folds into four heads, a layer each; k and v into two, in the layers of heads 0 and 2, and the layers of heads 1 and 3 stay empty.',
+			[ST.rope]: () => `RoPE turns q and k pair by pair: pair 0 by ${p} rad, pair 1 by ${(p * THETA[1]).toFixed(3)}. Dashed is before, solid after, red the turn.`,
+			[ST.cache]: () => `k′ and v drop into row ${p} of the cache. The empty grids are the heads multi-head attention would also keep.`,
+			[ST.repeat]: () => 'Each key and value head is copied for the second query head of its group, filling the empty layers for this pass only.',
+			[ST.scores]: () => 'Each query head scores every cached key of its group, and a new row of scores grows in each layer of a.',
+			[ST.softmax]: () => p ? `Each head’s scores become weights. Heads 0 and 1 scored the same keys, yet head 0 puts most on ${best(0)} and head 1 on ${best(1)}.` : 'Each head’s scores become weights; with one key, every weight is 1.',
+			[ST.blend]: () => 'Every row of V arrives scaled by its weight, bright where the weight is large, and the rows sum to o.',
 			[ST.wo]: () => 'The four head layers unfold into one row, and Wo mixes them.',
 			[ST.add]: () => 'x comes down the rail and is added: h = x + o Wo. Attention is done.',
-			[ST.norm2]: () => `The experts start with their own RMSNorm. The row of h is divided by its root mean square, ${fmt(t.hrms, 2)}.`,
-			[ST.route]: () => `ĥ becomes the 8 input nodes, and the router scores all eight experts: r = ĥ W_g, one dot product each. Experts ${t.top[0]} and ${t.top[1]} score highest and open; a softmax over their two scores weighs them ${t.G[0].toFixed(2)} and ${t.G[1].toFixed(2)}. The other six are skipped.`,
-			[ST.gateUp]: () => `Only experts ${t.top[0]} and ${t.top[1]} run. Each of their 3 neurons has a gate node fed by W1 and a value node fed by W3, 8 edges each, lit as the sweep passes. The other experts’ edges stay dark: their weights are there, but this token never touches them.`,
-			[ST.swiglu]: () => `Each running neuron's gate passes through SiLU and scales its value: m = SiLU(g) ⊙ u. ${t.ex.flatMap(x => x.g).filter(v => v < 0).length} of the 6 gates are negative here, and those neurons are nearly shut.`,
-			[ST.down]: () => `Each running expert connects its 3 neurons to all 8 outputs through its own W2, and the router's weights scale the two: f = ${t.G[0].toFixed(2)} · expert ${t.top[0]} + ${t.G[1].toFixed(2)} · expert ${t.top[1]}. The outputs fill one at a time.`,
-			[ST.add2]: () => `The 8 outputs drop back into the residual row, and h comes down the rail: y = h + f. Row ${p} of y is the layer's output for ${w}.`,
-			[ST.finalNorm]: () => `In Mixtral, y would pass through 31 more layers first; this toy has one. A final RMSNorm divides it by ${fmt(t.zrms, 2)} and gives z, the input to the LM head.`,
-			[ST.logits]: () => 'The unembedding W_U scores every token in the vocabulary: each logit is z dotted with that token’s column. 16 tokens here, 32,000 in Mixtral. The sweep fills them one at a time.',
-			[ST.pick]: () => `Softmax turns the logits into probabilities, and greedy decoding picks the largest: <i>${esc(VOCAB[t.pick])}</i> (${t.probs[t.pick].toFixed(2)}). `
+			[ST.norm2]: () => `The experts start with their own RMSNorm: h is divided by ${fmt(t.hrms, 2)}.`,
+			[ST.route]: () => `The router scores all eight experts. Experts ${t.top[0]} and ${t.top[1]} score highest and open, weighed ${t.G[0].toFixed(2)} and ${t.G[1].toFixed(2)}; the other six are skipped.`,
+			[ST.gateUp]: () => `Only experts ${t.top[0]} and ${t.top[1]} run. Their edges light by input × weight as the sweep passes; the idle experts’ stay dark.`,
+			[ST.swiglu]: () => `Each gate passes through SiLU and scales its value. ${t.ex.flatMap(x => x.g).filter(v => v < 0).length} of the 6 gates are negative, and those neurons are nearly shut.`,
+			[ST.down]: () => `Each running expert writes all 8 outputs from its 3 neurons, and the router mixes the two: f = ${t.G[0].toFixed(2)} · expert ${t.top[0]} + ${t.G[1].toFixed(2)} · expert ${t.top[1]}.`,
+			[ST.add2]: () => `The outputs drop back into the residual row, and h comes down the rail: y = h + f.`,
+			[ST.finalNorm]: () => `In Mixtral, y would pass 31 more layers first. A final RMSNorm divides it by ${fmt(t.zrms, 2)}.`,
+			[ST.logits]: () => 'Each logit is z dotted with one token’s column of W_U, and the sweep fills them one at a time.',
+			[ST.pick]: () => `Greedy decoding picks the most probable token: <i>${esc(VOCAB[t.pick])}</i> (${t.probs[t.pick].toFixed(2)}). `
 				+ (t.nextReal >= 0
-					? `The sentence actually continues with <i>${esc(VOCAB[t.nextReal])}</i>, which gets ${t.probs[t.nextReal].toFixed(3)}; training would push that up, and −log of it, ${(-Math.log(t.probs[t.nextReal])).toFixed(2)}, is the loss here.`
-					: 'In generation the pick would be appended as position 6 and fed back in as the next pass.'),
+					? `The sentence goes on with <i>${esc(VOCAB[t.nextReal])}</i>, at ${t.probs[t.nextReal].toFixed(3)}; −log of it, ${(-Math.log(t.probs[t.nextReal])).toFixed(2)}, is the loss here.`
+					: 'In generation the pick would be appended as position 6 and fed back in.'),
 		};
 		return by[s]();
 	}
@@ -1550,7 +1592,8 @@
 	}
 
 	// ---- the side pane ---------------------------------------------------------------------
-	// One section per component, each with its prerequisites and its forward pass, built
+	// One section per component, each with its prerequisites, folded to their defining line and
+	// numbered as the posts number their sections (2.4, cited §2.4), then its forward pass, built
 	// once from the data. The current step's detail block moves into that step's row.
 	const side = $('.toy-side'), sideHead = $('.toy-sidehead'), nav = $('.toy-nav'), map = $('.toy-map'), secs = $('.toy-secs');
 	const detail = $('.toy-detail'), panel = $('.toy-panel');
@@ -1560,19 +1603,21 @@
 	if (status) status.append(place);
 	const PRE = {};
 	DATA.prerequisites.forEach(it => { PRE[it.id] = it; });
-	DATA.components.forEach(c => c.pre.forEach((id, k) => { PRE[id].tag = c.n + 'abcdefgh'[k]; }));
+	DATA.components.forEach(c => c.pre.forEach((id, k) => { PRE[id].tag = `${c.n}.${k + 1}`; }));
 	const COMP_OF = [];
 	DATA.components.forEach(c => c.steps.forEach(s => { COMP_OF[s] = c; }));
-	const preRef = id => `<button type="button" class="toy-ref" data-pre="${id}">${PRE[id].tag} ${PRE[id].title}</button>`;
+	const preRef = (id, short) => `<button type="button" class="toy-ref" data-pre="${id}"${short ? ` title="${PRE[id].title}"` : ''}>§${PRE[id].tag}${short ? '' : ' ' + PRE[id].title}</button>`;
 	const stepRef = s => `<button type="button" class="toy-ref" data-step="${s}">(${s + 1})</button>`;
 
 	function buildSide() {
 		const usedIn = {};
 		DATA.steps.forEach((st, s) => st.uses.forEach(id => (usedIn[id] = usedIn[id] || []).push(s)));
+		// a prerequisite folds to its title and defining line; open, its points, table and code
 		const preItem = id => {
 			const it = PRE[id];
-			return `<div class="toy-pre" data-pre="${id}"><div class="toy-preh" role="heading" aria-level="4"><span class="num">${it.tag}</span>${it.title}${it.cite ? `<em>${it.cite}</em>` : ''}</div>${typeset(it.body)}`
-				+ (usedIn[id] ? `<div class="toy-used">used in ${usedIn[id].map(stepRef).join(' ')}</div>` : '') + '</div>';
+			return `<details class="toy-pre" data-pre="${id}"><summary><span class="toy-preh" role="heading" aria-level="4"><span class="num">${it.tag}</span>${it.title}${it.cite ? `<em>${it.cite}</em>` : ''}</span>${it.def ? mx(it.def) : ''}</summary>`
+				+ (it.body ? typeset(it.body) : '') + (it.points ? points(it.points) : '') + (it.scale ? scale(it.scale) : '') + (it.code ? code(it.code) : '')
+				+ (usedIn[id] ? `<div class="toy-used">used in ${usedIn[id].map(stepRef).join(' ')}</div>` : '') + '</details>';
 		};
 		const stepItem = s => `<section class="toy-fp" data-s="${s}"><button type="button" class="toy-fph" data-step="${s}" aria-label="Go to step ${s + 1}: ${DATA.steps[s].title}">`
 			+ `<span class="n">(${s + 1})</span><b>${DATA.steps[s].title}</b><span class="eq">${tex(DATA.steps[s].eq)}</span></button></section>`;
@@ -1581,7 +1626,7 @@
 			+ (c.intro ? `<p class="toy-intro">${c.intro}</p>` : '')
 			+ (c.eq ? mx(c.eq, 'toy-cpeq') : '')
 			+ `<div class="toy-sub">${c.steps.length ? 'Prerequisites' : 'Setup'}</div>` + c.pre.map(preItem).join('')
-			+ (c.also ? `<p class="toy-also">Also uses ${c.also.map(preRef).join(', ')}.</p>` : '')
+			+ (c.also ? `<p class="toy-also">Also uses ${c.also.map(id => preRef(id)).join(', ')}.</p>` : '')
 			+ (c.steps.length ? '<div class="toy-sub">Forward pass <span class="toy-tok"></span></div>' + c.steps.map(stepItem).join('') : '')
 			+ '</section>').join('');
 	}
@@ -1624,12 +1669,21 @@
 		row.appendChild(detail);
 		$$('.toy-cp', secs).forEach(c => c.classList.toggle('here', c.dataset.cp === COMP_OF[s].id));
 		$$('.toy-pre', secs).forEach(el => el.classList.toggle('now', DATA.steps[s].uses.includes(el.dataset.pre)));
-		$('.toy-uses').innerHTML = 'uses ' + DATA.steps[s].uses.map(preRef).join(' ');
+		// the parts, in their fixed order: maths, by hand, PyTorch, cells, toy against Mixtral, notes
+		const st = DATA.steps[s], out = $('.toy-out');
 		$('.toy-cap').innerHTML = caption(cur, s);
+		$('.toy-uses').innerHTML = st.uses.map(id => preRef(id, true)).join(' ');
+		$('.toy-mth').innerHTML = mx(st.maths);
 		$('.toy-num').innerHTML = numbers(cur, s);
+		$('.toy-py .toy-code').innerHTML = codeHtml(st.code);
+		out.textContent = printed(STEPS[s][0], cur);
+		out.dataset.t = `t = ${cur}`;
 		panel.innerHTML = panelSVG(cur, s);
 		if (hoverKey) markPanel(hoverKey);
-		$('.toy-notes').innerHTML = DATA.steps[s].notes.map(n => `<li>${n}</li>`).join('');
+		$('.toy-at').innerHTML = st.scale ? scale(st.scale) : '';
+		$('.toy-at').hidden = !st.scale;
+		$('.toy-notes').innerHTML = st.notes.map(n => `<li>${md(n)}</li>`).join('');
+		$('.toy-nb').hidden = !st.notes.length;
 		$$('button', map).forEach((b, i) => { b.classList.toggle('on', i === s); b.classList.toggle('done', i < s); });
 		$('.toy-end').hidden = s !== NST - 1;
 		$('[data-act="nexttok"]').textContent = cur < T - 1 ? `Run the next token: ${tokName(cur + 1)} →` : 'Back to the first token';
@@ -1647,7 +1701,7 @@
 		const b = e.target.closest('button');
 		if (!b) return;
 		if (b.dataset.step != null) { stopPlay(); scrollToTau(+b.dataset.step, true); }
-		else if (b.dataset.pre) { const el = $(`.toy-pre[data-pre="${b.dataset.pre}"]`, secs); sideTo(el); flash(el); }
+		else if (b.dataset.pre) { const el = $(`.toy-pre[data-pre="${b.dataset.pre}"]`, secs); el.open = true; sideTo(el); flash(el); }
 		else if (b.dataset.go) sideTo($(`.toy-cp[data-cp="${b.dataset.go}"]`, secs));
 		else if (b.dataset.act === 'nexttok') { setTok(cur < T - 1 ? cur + 1 : 0); scrollToTau(0, false); }
 	});

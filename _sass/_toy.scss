@@ -10,6 +10,8 @@ $toy-mute: #55505a;
 $toy-navy: #000080;
 $toy-rule: #ebe8ee;
 $toy-gold: #c8a000;
+$toy-mono: "Lucida Console", Menlo, Monaco, monospace;
+$toy-green: #006400;
 
 // the reading text, set in Georgia, follows System Properties' Font and Text size;
 // Small (12px) gives the size it was drawn at
@@ -265,10 +267,12 @@ $toy-gold: #c8a000;
 	font: 11.5px/1.5 $toy-ui;
 	color: $toy-mute;
 }
-// a prerequisite; `now` when the current step uses it, `flash` when a reference jumps to it
+// a prerequisite folds to its title and defining line, behind Win98's tree-view box;
+// `now` when the current step uses it, `flash` when a reference opens it
 .toy-pre {
+	display: block;
 	margin: 0 -14px;
-	padding: 8px 14px 8px 11px;
+	padding: 6px 14px 6px 11px;
 	border-left: 3px solid transparent;
 
 	&.now {
@@ -278,21 +282,68 @@ $toy-gold: #c8a000;
 	&.flash {
 		animation: toy-flash 1.4s ease-out;
 	}
+	> summary {
+		display: block;
+		list-style: none;
+		cursor: pointer;
+
+		&::-webkit-details-marker { display: none; }
+		&:hover .toy-preh { color: $toy-navy; }
+		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
+		.toy-mx { padding-left: 19px; }
+		.katex { font-size: 1.02em; }
+	}
+	&[open] > summary { margin-bottom: 4px; }
+	> :not(summary) { margin-left: 19px; }
 	.toy-preh {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: baseline;
 		gap: 2px 8px;
-		margin: 0 0 2px;
+		margin: 0;
 		font: bold 13px $toy-ui;
 
+		&::before {
+			content: "+";
+			flex: none;
+			align-self: center;
+			display: grid;
+			place-items: center;
+			width: 9px;
+			height: 9px;
+			margin-right: -2px;
+			border: 1px solid #808080;
+			background: #ffffff;
+			font: 9px/1 $toy-ui;
+			color: #000000;
+		}
 		.num { color: $toy-navy; font-weight: normal; }
 		em { font: italic 11.5px $toy-serif; color: $toy-mute; }
 	}
+	&[open] .toy-preh::before { content: "−"; }
 	p {
 		margin: 4px 0;
 		@include reading(13px, 1.55);
 	}
+}
+// a prerequisite's points, and a step's notes: a bold lead, then a sentence or two
+.toy .toy-pts,
+.toy .toy-notes {
+	display: grid;
+	gap: 3px;
+	padding-left: 13px;
+	@include reading(12.5px, 1.5);
+
+	li { list-style: disc; }
+	b { font-weight: bold; }
+	code {
+		font: 10.5px $toy-mono;
+		background: #efedf1;
+		padding: 0 3px;
+	}
+}
+.toy .toy-pts {
+	margin: 2px 0 4px;
 }
 @keyframes toy-flash {
 	from { background: #fff3b0; }
@@ -383,14 +434,26 @@ $toy-gold: #c8a000;
 	&:hover b { color: $toy-navy; }
 	&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
 }
+// a step: a line or two on the cubes, then its parts in a fixed order
 .toy-detail {
 	display: grid;
-	gap: 6px;
-	padding: 0 0 12px 34px;
+	gap: 9px;
+	padding: 0 0 12px;
 	min-width: 0;
 
 	> * { min-width: 0; }
 }
+.toy-part {
+	display: grid;
+	gap: 3px;
+	min-width: 0;
+
+	> * { min-width: 0; }
+	> .toy-lab { margin-top: 0; }
+}
+.toy-pm > .toy-lab { color: $toy-navy; }
+.toy-py > .toy-lab { color: $toy-green; }
+.toy-nb > .toy-lab { color: #7a5f00; }
 .toy-lab {
 	margin-top: 4px;
 	font: bold 10px $toy-ui;
@@ -399,25 +462,68 @@ $toy-gold: #c8a000;
 	color: $toy-mute;
 
 	span { font-weight: normal; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+	.toy-ref { font-size: 10.5px; }
 }
-.toy-uses {
-	font: 11px $toy-ui;
-	color: $toy-mute;
+.toy-mth .katex-display {
+	margin: 2px 0;
 }
 .toy-cap {
 	@include reading(13.5px, 1.5);
 
 	i { font-style: normal; font-weight: bold; color: $toy-navy; }
 }
-.toy .toy-notes {
-	padding: 8px 0 0 16px;
-	border-top: 1px solid #dddddd;
-	font: 12px/1.45 $toy-ui;
-	color: #45404a;
-	display: grid;
-	gap: 3px;
+// PyTorch: the lines, then what they print for the token
+.toy-code,
+.toy-out {
+	margin: 0;
+	padding: 4px 8px;
+	font: 10px/1.45 $toy-mono;
+	white-space: pre;
+	overflow-x: auto;
+}
+.toy-code {
+	background: #ffffff;
+	border: 1px solid #d6d2da;
+	border-left: 3px solid $toy-green;
+	color: #000000;
 
-	li { list-style: disc; }
+	.cm { color: #6a6470; }
+	.toy-pre & { margin-top: 4px; }
+}
+.toy-out {
+	background: #f1eff3;
+	border: 1px solid #d6d2da;
+	border-top: 0;
+	border-left: 3px solid #93b893;
+	color: #2b2830;
+
+	&::before {
+		content: "out · " attr(data-t);
+		display: block;
+		padding-bottom: 1px;
+		font: bold 9px $toy-ui;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: $toy-mute;
+	}
+}
+// the toy against Mixtral: the Sizes table's look, the numbers right
+.toy-scale {
+	width: 100%;
+
+	th { white-space: nowrap; }
+	th:first-child { width: 100%; }
+	td:first-child { white-space: normal; color: #45404a; }
+	td:nth-child(2) { text-align: right; color: #000000; white-space: nowrap; }
+}
+// the note: the help balloon's gold
+.toy-nb {
+	padding: 4px 8px 6px 9px;
+	border-left: 3px solid $toy-gold;
+	background: #fbf8ec;
+}
+.toy .toy-notes {
+	color: #2b2830;
 }
 .toy-end {
 	padding-top: 4px;
