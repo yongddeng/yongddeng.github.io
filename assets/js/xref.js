@@ -1,14 +1,12 @@
-// Cross-reference tooltips for §-references in CS400 posts
+// Cross-reference tooltips for §-references in the posts. §NNN names the
+// post titled "NNN. …", read off the index default.html writes, so a new
+// post is citable as soon as it is built (_plugins/check_xref.rb)
 (function () {
-  var refs = {
-    '601': { title: '601. computer', url: '/20260101/computer' },
-    '602': { title: '602. programming', url: '/20260102/program' },
-    '603': { title: '603. operating system', url: '/20260103/operating-system' },
-    '604': { title: '604. concurrency', url: '/20260104/concurrency' },
-    '605': { title: '605. networking', url: '/20260105/networking' },
-    '606': { title: '606. database', url: '/20260106/database' },
-    '607': { title: '607. virtualisation', url: '/20260107/virtualisation' }
-  };
+  var refs = {};
+  (window.searchIndex || []).forEach(function (post) {
+    var n = post.title.match(/^(\d{3})\./);
+    if (n) refs[n[1]] = post;
+  });
 
   var cache = {};
 
@@ -68,7 +66,7 @@
     // to trigger it
     var isPhone = phone();
 
-    // Wrap §4XX and §4XX#section occurrences in <span> elements
+    // Wrap §NNN and §NNN#section occurrences in <span> elements
     var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
     var nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
