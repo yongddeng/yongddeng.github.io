@@ -1,0 +1,34 @@
+---
+title: quincunx.exe
+date: 2026-10-28
+note: "208"
+icon: quincunx-16.png
+large: quincunx-48.png
+description: Drops balls through n rows of pegs, and measures exactly how far Zₙ still is from the normal, against the Berry–Esseen bound.
+---
+
+<div class="exe qx">
+<div class="lit-tool">
+<button type="button" class="lit-btn" data-act="drop">&#9654; Drop</button>
+<button type="button" class="lit-btn" data-act="burst">Drop 1,000</button>
+<button type="button" class="lit-btn" data-act="reset">Reset</button>
+<span class="lit-sep"></span>
+<label class="exe-lbl">rows <i>n</i> <input type="range" min="1" max="30" value="12" data-in="n"></label><output data-out="n"></output>
+<label class="exe-lbl"><i>p</i> <input type="range" min="5" max="95" step="5" value="50" data-in="p"></label><output data-out="p"></output>
+</div>
+<div class="exe-body">
+<div class="lit-pane"><canvas class="qx-board" aria-label="Balls falling through n rows of pegs into the bins 0 to n"></canvas></div>
+<div class="lit-pane"><canvas class="qx-plot" aria-label="The bins rescaled to Zₙ, exactly and as the balls have filled them, against the normal density"></canvas></div>
+</div>
+<dl class="exe-read">
+<div><dt><i>μ</i> = <i>np</i></dt><dd data-out="mu"></dd></div>
+<div><dt><i>σ</i> = √<i>npq</i></dt><dd data-out="sigma"></dd></div>
+<div><dt><i>D<sub>n</sub></i>, exact</dt><dd data-out="d"></dd></div>
+<div><dt>Berry–Esseen bound</dt><dd data-out="bound"></dd></div>
+<div><dt><i>D<sub>n</sub></i> / bound</dt><dd data-out="share"></dd></div>
+</dl>
+<p class="exe-note">Each peg sends a ball right with probability <i>p</i>, so its bin is <i>X</i> ~ Bin(<i>n</i>, <i>p</i>). <i>D<sub>n</sub></i> = sup<sub><i>z</i></sub> |<i>P</i>(<i>Z<sub>n</sub></i> ≤ <i>z</i>) − Φ(<i>z</i>)| comes from the binomial itself, not the balls. The bound is <i>C</i>(<i>p</i>² + <i>q</i>²)/√<i>npq</i>, with <i>C</i> = 0.4748 for i.i.d. summands (Shevtsova, 2011); the 0.56 in (#6) is for summands not identically distributed.</p>
+<a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/quincunx.js" defer></script>

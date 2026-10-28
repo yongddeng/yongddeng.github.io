@@ -10,10 +10,10 @@
 	}
 
 	// Maximize: fill the desktop above the taskbar. Sizes are content-box,
-	// so the window's own frame (bevel + padding) is subtracted, and the
-	// width comes from clientWidth, which excludes the page scrollbar, so
-	// the page never scrolls sideways. The pre-maximize spot is kept for
-	// Restore.
+	// so the window's own frame (bevel + padding) is subtracted; the width
+	// comes from clientWidth, read once the height is set, so the page
+	// scrollbar the window itself caused is gone. The pre-maximize spot is
+	// kept for Restore.
 	function maximize (content) {
 		var cont = content.querySelector(".post_content");
 		if (getWidth() <= 900) return;
@@ -31,8 +31,8 @@
 		content.style.margin = "0";
 		content.style.left = "0";
 		content.style.top = "0";
-		content.style.width = (document.documentElement.clientWidth - frameW) + "px";
 		content.style.height = (window.innerHeight - barH - frameH) + "px";
+		content.style.width = (document.documentElement.clientWidth - frameW) + "px";
 		cont.style.width = "99.4%";
 	}
 

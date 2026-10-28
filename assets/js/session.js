@@ -28,9 +28,10 @@
 	}
 
 	// Inline styles only: an untouched window has none and should be
-	// placed by the usual rules rather than pinned to a stale guess
+	// placed by the usual rules rather than pinned to a stale guess; a
+	// maximized one is saved as the spot 001.js keeps in data-premax
 	function geomOf(el) {
-		var s = el.style;
+		var s = el.dataset.premax ? JSON.parse(el.dataset.premax) : el.style;
 		if (!s.left && !s.top && !s.width && !s.height) return null;
 		return {
 			left: parseInt(s.left, 10) || 0,
@@ -60,6 +61,7 @@
 					kind: kind,
 					id: kind === 'folder' ? win.dataset.tag : win.dataset.url,
 					geom: geomOf(win),
+					maxed: !!win.dataset.premax,
 					front: win.classList.contains('active-win')
 				});
 			});
@@ -89,12 +91,22 @@
 		if (wrapper && state.explorer) {
 			wrapper.style.display = state.explorer.hidden ? 'none' : '';
 			// a session saved before My Computer had places kept a tag, and
-			// one saved before the Folders bar was the default left it out
-			window.explorer.go(state.explorer.at || state.explorer.tag || 'mc', state.explorer.folders !== false);
+			// one saved before the Folders bar left it out, so opens without it
+			window.explorer.go(state.explorer.at || state.explorer.tag || 'mc', state.explorer.folders === true);
 			var g = state.explorer.geom;
 			if (g && !state.explorer.hidden) desktop.applyGeom(wrapper, g);
 		}
 
+		var winOf = function (w) {
+			return document.querySelector(w.kind === 'folder'
+				? '.folder-win[data-tag="' + w.id + '"]'
+				: '.content[data-url="' + w.id + '"]');
+		};
+		// a post saved maximized is maximized again, by its own button
+		var remax = function (w) {
+			var win = w.maxed && winOf(w);
+			if (win) win.querySelector('.btn_max').click();
+		};
 		var chain = Promise.resolve();
 		(state.windows || []).forEach(function (w) {
 			chain = chain.then(function () {
@@ -103,7 +115,7 @@
 					return;
 				}
 				// force: the cap counts a session as already-open windows
-				return desktop.loadPost(w.id, { geom: w.geom, force: true });
+				return desktop.loadPost(w.id, { geom: w.geom, force: true }).then(function () { remax(w); });
 			});
 		});
 
@@ -111,11 +123,7 @@
 			// Raising the saved front window settles the z-order last
 			var front = null;
 			(state.windows || []).forEach(function (w) {
-				if (!w.front) return;
-				var sel = w.kind === 'folder'
-					? '.folder-win[data-tag="' + w.id + '"]'
-					: '.content[data-url="' + w.id + '"]';
-				front = document.querySelector(sel) || front;
+				if (w.front) front = winOf(w) || front;
 			});
 			if (!front && state.explorer && state.explorer.front && !state.explorer.hidden) {
 				front = wrapper;

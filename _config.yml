@@ -11,6 +11,19 @@ cloudflare_analytics_token: d39f12a22c66442389e654cf251872e5
 include: [".htaccess"]
 exclude: ["README.md", "LICENSE"]
 
+# The programs on (D:) in My Computer, each a window of its own
+collections:
+  programs:
+    output: true
+    permalink: /d/:name
+defaults:
+  - scope:
+      type: programs
+    values:
+      layout: default
+      winclass: exe-win
+      no_comment: true
+
 # Sass
 sass:
   style: :compressed

@@ -1049,6 +1049,16 @@ img.task-menu-ic {
 .content.dos-win .post_total, .content.deck-win .post_total {
 	display: none;
 }
+// A window never outgrows the screen: the wide ones (toy 1080, help 860)
+// shrink to the desktop above the taskbar, as Maximize sizes them. Not a
+// maximized one, which 001.js marks with data-premax, nor on a phone, where
+// a window is the page (_mobile.scss). 80: the taskbar and a new window's top
+@media only screen and (min-width: 701px) {
+	.content:not([data-premax]) {
+		max-width: calc(100vw - 40px);
+		max-height: calc(100vh - 80px);
+	}
+}
 // Win95 corner grip: sits above the content pane's scrollbar corner,
 // which swallows the browser-native resize handle
 .win-grip {

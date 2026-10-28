@@ -1,14 +1,15 @@
-// My Computer, as Windows 98's Explorer opened it: the Folders bar down the
-// left, and on the right the place itself. My Computer and its drives show
+// My Computer, as Windows 98 opened it: the place itself, with the Folders bar
+// down the left a toolbar button away. My Computer and its drives show
 // large icons, with a drive's General tab and its pie beneath; a folder lists
-// its posts in Details. Resting the pointer on an item gives its infotip. A
+// its posts in Details, and (D:) holds the programs (_programs), each opening
+// in a window of its own. Resting the pointer on an item gives its infotip. A
 // click selects and a double-click opens, as on the desktop it imitates. On
 // a phone the window is the page: the chips pick a folder, and each row
 // carries its post's opening sentence. The facts come from _plugins/explorer.rb.
 (function () {
 	const win = document.querySelector('.wrapper');
 	if (!win) return;
-	const posts = window.searchIndex || [];
+	const posts = window.searchIndex || [], programs = window.programs || [];
 	const $ = sel => win.querySelector(sel);
 	const side = $('.xp-side'), pane = $('.post_list'), combo = $('.xp-combo'), places = $('.xp-places');
 	const esc = desktop.escapeHtml, kb = desktop.sizeValue;
@@ -17,35 +18,41 @@
 	const many = (n, one) => n.toLocaleString('en-GB') + ' ' + one + (n === 1 ? '' : 's');
 	const hasTex = s => /\$[^$]+\$/.test(s || '');
 
-	// ---- the places: My Computer, its drives, the folders and the posts ----
-	// Every tag is a course on (C:); (D:) waits for the programs
+	// ---- the places: My Computer, its drives, the folders, the posts and the programs ----
+	// Every tag is a course on (C:); (D:) holds the programs. A post or a
+	// program is a leaf: it opens at its URL, and carries its own icon, type,
+	// size and date
 	const N = {};
 	const add = (id, o) => { N[id] = Object.assign({ id: id, kids: [] }, o); };
 	const tags = Array.from(new Set(posts.map(p => p.tags[0]).filter(Boolean))).sort();
 	add('mc', { name: 'My Computer', kind: 'root', addr: 'My Computer', kids: ['C', 'D'] });
 	add('C', { name: '(C:)', kind: 'drive', addr: 'C:\\', up: 'mc', kids: tags });
-	add('D', { name: '(D:)', kind: 'drive', addr: 'D:\\', up: 'mc' });
+	add('D', { name: '(D:)', kind: 'drive', addr: 'D:\\', up: 'mc', kids: programs.map(x => x.url) });
 	tags.forEach(t => add(t, { name: t, kind: 'folder', addr: 'C:\\' + t, up: 'C' }));
 	posts.forEach(p => {
-		add(p.url, { name: p.title, kind: 'file', up: p.tags[0], post: p });
+		add(p.url, { name: p.title, kind: 'file', up: p.tags[0], post: p, url: p.url, icon: p.icon, type: p.type, size: p.size, modified: p.xp.modified });
 		if (N[p.tags[0]]) N[p.tags[0]].kids.push(p.url);
 	});
-	const isBox = n => n.kind !== 'file';
+	programs.forEach(x => add(x.url, { name: x.name, kind: 'exe', up: 'D', exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, modified: x.modified }));
+	const isBox = n => n.kind !== 'file' && n.kind !== 'exe';
 	const TYPE = { drive: 'Local Disk', folder: 'File Folder' };
 	// Windows 98's own icons: 16px drawings, and for the large icons its 48px
-	// ones shown at 24 (_explorer.scss); a post keeps its own
+	// ones shown at 24 (_explorer.scss); a leaf keeps its own, a program one
+	// of each size
 	const SMALL = { root: 'mycomputer-16.png', drive: 'disk-16.png', folder: 'folder-16.png' };
 	const LARGE = { drive: 'disk-48.png', folder: 'folder-48.png' };
-	const icon = (n, large) => '/assets/img/' + (n.kind === 'file' ? n.post.icon : (large ? LARGE : SMALL)[n.kind]);
-	const typeOf = n => (n.kind === 'file' ? n.post.type : TYPE[n.kind]);
-	const hrefOf = n => (n.kind === 'file' ? n.post.url : n.kind === 'folder' ? '/?tag=' + n.id : '/');
+	const icon = (n, large) => '/assets/img/' + (isBox(n) ? (large ? LARGE : SMALL)[n.kind] : (large && n.large) || n.icon);
+	const typeOf = n => n.type || TYPE[n.kind];
+	const hrefOf = n => n.url || (n.kind === 'folder' ? '/?tag=' + n.id : '/');
 	// one view for each place: a folder lists its posts, the rest show icons
 	const listsPosts = n => n.kind === 'folder';
 
-	// a place's posts, size and date, all the way down
-	const files = n => (n.kind === 'file' ? [n.post] : n.kids.flatMap(k => files(N[k])));
-	const kbOf = n => files(n).reduce((a, p) => a + kb(p.size), 0);
-	const modOf = n => files(n).reduce((a, p) => (p.xp.modified > a ? p.xp.modified : a), '');
+	// what a place holds, all the way down: its posts and programs, and so its
+	// size and date; and of those, its posts
+	const leaves = n => (isBox(n) ? n.kids.flatMap(k => leaves(N[k])) : [n]);
+	const files = n => leaves(n).filter(m => m.kind === 'file').map(m => m.post);
+	const kbOf = n => leaves(n).reduce((a, m) => a + kb(m.size), 0);
+	const modOf = n => leaves(n).reduce((a, m) => (m.modified > a ? m.modified : a), '');
 
 	// what a post holds, for its infotip
 	function inside(p) {
@@ -77,7 +84,7 @@
 	// ---- state ----
 	// the folder the page names, by its tag page or its ?tag= (default.html)
 	const start = win.dataset.at;
-	const S = { at: N[start] ? start : 'mc', sel: null, back: [], fwd: [], folders: true, sort: { k: 'name', asc: true }, open: new Set(['mc', 'C']) };
+	const S = { at: N[start] ? start : 'mc', sel: null, back: [], fwd: [], folders: false, sort: { k: 'name', asc: true }, open: new Set(['mc', 'C']) };
 	function kids() {
 		const k = S.sort.k, dir = S.sort.asc ? 1 : -1;
 		const val = m => (k === 'size' ? kbOf(m) : k === 'type' ? typeOf(m) : k === 'mod' ? modOf(m) : m.name);
@@ -106,7 +113,7 @@
 			+ '<ul class="tv">' + treeLi('mc', [], true, 0) + '</ul>';
 	}
 
-	// ---- a drive's General tab: what each folder holds, and the pie ----
+	// ---- a drive's General tab: on (C:) what each folder holds, and the pie; on (D:) the programs ----
 	// Windows 98's pie, here the drive's posts by folder, its depth drawn as
 	// the same slices stacked in a darker shade; the selected folder's slice
 	// pulls out. Posts, not bytes: 699's clip alone would fill the pie
@@ -133,15 +140,18 @@
 		return svg + '</svg>';
 	}
 	function props(id) {
-		const n = N[id], folders = n.kids.map(k => N[k]);
+		const n = N[id], kids = n.kids.map(k => N[k]), hl = n.kids.indexOf(S.sel);
 		const head = '<div class="dp-head"><img src="' + icon(n, true) + '" alt="" /><div><b>' + esc(n.name) + '</b><span>' + TYPE.drive + '</span></div></div>';
-		if (!files(n).length) return '<section class="dp">' + head + '<p>Empty.</p></section>';
-		const hl = n.kids.indexOf(S.sel);
-		return '<section class="dp">' + head + '<div class="dp-body"><table class="dp-table"><tbody>'
-			+ folders.map((f, i) => '<tr' + (i === hl ? ' class="on"' : '') + '><td><i style="background:' + shade(i) + '"></i><span>' + esc(f.name) + '</span></td><td>'
-				+ many(files(f).length, 'file') + '</td><td>' + fmtKB(kbOf(f)) + '</td></tr>').join('')
-			+ '<tr class="dp-total"><td>Total</td><td>' + many(files(n).length, 'file') + '</td><td>' + fmtKB(kbOf(n)) + '</td></tr></tbody></table>'
-			+ '<figure>' + pie(folders.map(f => files(f).length), hl) + '<figcaption>Drive ' + n.name[1] + '</figcaption></figure></div></section>';
+		if (!leaves(n).length) return '<section class="dp">' + head + '<p>Empty.</p></section>';
+		// a row: the item's mark and name, what it holds or is for, and its size
+		const row = (m, i, mark, what) => '<tr' + (i === hl ? ' class="on"' : '') + '><td>' + mark + '<span>' + esc(m.name) + '</span></td><td>' + what + '</td><td>' + fmtKB(kbOf(m)) + '</td></tr>';
+		const table = (rows, total, cls) => '<table class="dp-table' + (cls ? ' ' + cls : '') + '"><tbody>' + rows.join('')
+			+ '<tr class="dp-total"><td>Total</td><td>' + total + '</td><td>' + fmtKB(kbOf(n)) + '</td></tr></tbody></table>';
+		const body = isBox(kids[0])
+			? table(kids.map((f, i) => row(f, i, '<i style="background:' + shade(i) + '"></i>', many(files(f).length, 'file'))), many(files(n).length, 'file'))
+				+ '<figure>' + pie(kids.map(f => files(f).length), hl) + '<figcaption>Drive ' + n.name[1] + '</figcaption></figure>'
+			: table(kids.map((x, i) => row(x, i, '<img src="' + icon(x) + '" alt="" />', 'for ' + esc(x.exe.note))), many(kids.length, 'program'), 'dp-progs');
+		return '<section class="dp">' + head + '<div class="dp-body">' + body + '</div></section>';
 	}
 	// the drive the tab describes: the window's own, or at My Computer the selected one
 	const tabFor = () => (S.at === 'mc' ? (S.sel === 'D' ? 'D' : 'C') : N[S.at].kind === 'drive' ? S.at : null);
@@ -158,7 +168,7 @@
 		}
 		const th = (k, label, cls) => '<span class="' + cls + '" data-k="' + k + '"' + (S.sort.k === k ? ' data-dir="' + (S.sort.asc ? 'asc' : 'desc') + '"' : '') + '>' + label + '</span>';
 		pane.innerHTML = '<div class="det-head">' + th('name', 'Name', 'dh-name') + th('size', 'Size', 'dh-size') + th('type', 'Type', 'dh-type') + th('mod', 'Modified', 'dh-date') + '</div><ul>'
-			+ items.map(n => '<li>' + a(n, '<img src="' + icon(n) + '" alt="" /><span class="nm">' + esc(n.name) + '</span><span class="sz">' + (n.kind === 'file' ? n.post.size : '')
+			+ items.map(n => '<li>' + a(n, '<img src="' + icon(n) + '" alt="" /><span class="nm">' + esc(n.name) + '</span><span class="sz">' + (isBox(n) ? '' : n.size)
 				+ '</span><span class="ty">' + typeOf(n) + '</span><span class="dt">' + (modOf(n) ? dmy(modOf(n)) : '') + '</span>') + '</li>').join('') + '</ul>';
 	}
 
@@ -178,7 +188,7 @@
 		});
 		// Windows 98 put the selection's type and date where the count goes
 		const sel = S.sel && N[S.sel], items = kids();
-		const k = sel ? kbOf(sel) : items.filter(n => n.kind === 'file').reduce((t, n) => t + kbOf(n), 0);
+		const k = sel ? kbOf(sel) : items.filter(n => !isBox(n)).reduce((t, n) => t + kbOf(n), 0);
 		$('.post_total .left').textContent = sel ? 'Type: ' + typeOf(sel) + (modOf(sel) ? '   Modified: ' + dmy(modOf(sel)) : '') : items.length + ' object(s)';
 		$('.post_total .right').textContent = k ? fmtKB(k) : '';
 	}
@@ -210,8 +220,10 @@
 	}
 	function open(id) {
 		const n = N[id];
-		if (n.kind === 'file') desktop.loadPost(n.post.url);
-		else go(id);
+		if (isBox(n)) return go(id);
+		// the infotip would stay over the window that opens
+		hideTip();
+		desktop.loadPost(n.url);
 	}
 	function act(a, el) {
 		if (a === 'back') go(null, 'back');
@@ -311,11 +323,16 @@
 			const p = n.post;
 			return (p.xp.lead ? '<p class="ld"' + (hasTex(p.xp.lead) ? ' data-tex' : '') + '>' + esc(p.xp.lead) + '</p>' : '')
 				+ inside(p).map(f => '<div>' + esc(f) + '</div>').join('')
-				+ '<div class="k">Modified: ' + dmy(p.xp.modified) + ' · Size: ' + p.size + '</div>';
+				+ '<div class="k">Modified: ' + dmy(n.modified) + ' · Size: ' + n.size + '</div>';
 		}
-		const ps = files(n);
-		if (!ps.length) return '<div>Empty.</div>';
-		const what = n.kind === 'drive' ? many(ps.length, 'file') + ' in ' + many(n.kids.length, 'folder') : span(ps);
+		if (n.kind === 'exe') {
+			return '<p class="ld">' + esc(n.exe.about) + '</p><div>For ' + esc(n.exe.note) + '</div>'
+				+ '<div class="k">Modified: ' + dmy(n.modified) + ' · Size: ' + n.size + '</div>';
+		}
+		const ls = leaves(n), ps = files(n);
+		if (!ls.length) return '<div>Empty.</div>';
+		// (D:) holds programs and no posts
+		const what = !ps.length ? many(ls.length, 'program') : n.kind === 'drive' ? many(ps.length, 'file') + ' in ' + many(n.kids.length, 'folder') : span(ps);
 		return '<div>' + esc(what) + '</div><div class="k">Modified: ' + dmy(modOf(n)) + '</div>';
 	}
 	pane.addEventListener('mousemove', e => {
@@ -382,7 +399,7 @@
 			S.fwd = [];
 			go(N[id] ? id : 'mc');
 		},
-		home: () => window.explorer.go('mc', true),
+		home: () => window.explorer.go('mc', false),
 	};
 	phoneQuery.addEventListener('change', render);
 	for (let n = N[S.at]; n; n = N[n.up]) S.open.add(n.id);

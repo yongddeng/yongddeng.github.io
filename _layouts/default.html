@@ -220,12 +220,13 @@
 				{% endif %}
 			</div>
 			{% unless page.winclass %}<div class="jump-end" hidden><span>&#9660;</span></div>{% endunless %}
-			{% if page.previous or page.next %}
+			{% comment %} The notes read in order; the programs on (D:) have a previous and next too, but no order to read them in {% endcomment %}
+			{% if page.collection == 'posts' %}{% if page.previous or page.next %}
 			<div class="pn-nav">
 				{% if page.previous %}<a class="pn-prev" href="{{ page.previous.url }}"><b>&#8249; Previous</b>{{ page.previous.title }}</a>{% endif %}
 				{% if page.next %}<a class="pn-next" href="{{ page.next.url }}"><b>Next &#8250;</b>{{ page.next.title }}</a>{% endif %}
 			</div>
-			{% endif %}
+			{% endif %}{% endif %}
 			<div class="post_total">
 				<div class="left">Ready</div>
 				{% unless page.winclass %}<div class="right"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>{% endunless %}
@@ -249,6 +250,21 @@
 				size: {% capture psize %}{% include post-size.html post=post %}{% endcapture %}{{ psize | jsonify }},
 				tags: {{ post.tags | jsonify }},
 				xp: {{ post.explorer | jsonify }}
+			}{% unless forloop.last %},{% endunless %}
+			{% endfor %}
+		];
+		// (D:)'s programs, for My Computer, with what the plugin read off each
+		window.programs = [
+			{% for x in site.programs %}
+			{
+				name: {{ x.title | jsonify }},
+				url: {{ x.url | jsonify }},
+				icon: {{ x.icon | jsonify }},
+				large: {{ x.large | jsonify }},
+				about: {{ x.description | jsonify }},
+				note: {{ x.explorer.note.title | jsonify }},
+				size: {{ x.explorer.size | jsonify }},
+				modified: {{ x.explorer.modified | jsonify }}
 			}{% unless forloop.last %},{% endunless %}
 			{% endfor %}
 		];

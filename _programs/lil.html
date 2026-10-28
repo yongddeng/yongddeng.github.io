@@ -1,0 +1,31 @@
+---
+title: lil.exe
+date: 2026-10-28
+note: "209"
+icon: lil-16.png
+large: lil-48.png
+description: Five random walks against ±√(2n log log n), the envelope their records trace, and ±√n, where the CLT keeps them at any one n.
+---
+
+<div class="exe lil">
+<div class="lit-tool">
+<button type="button" class="lit-btn" data-act="walk">New walks</button>
+<span class="lit-sep"></span>
+<span class="exe-lbl">up to <i>n</i> =</span>
+<button type="button" class="lit-btn" data-n="1000">10&sup3;</button>
+<button type="button" class="lit-btn" data-n="10000">10&#8308;</button>
+<button type="button" class="lit-btn on" data-n="100000">10&#8309;</button>
+<button type="button" class="lit-btn" data-n="1000000">10&#8310;</button>
+<span class="lit-sep"></span>
+<button type="button" class="lit-btn on" data-view="raw"><span><i>S<sub>n</sub></i></span></button>
+<button type="button" class="lit-btn" data-view="norm"><span><i>S<sub>n</sub></i> / √(2<i>n</i> log log <i>n</i>)</span></button>
+</div>
+<div class="exe-body">
+<div class="lit-pane"><canvas class="lil-plot" aria-label="Five random walks against the iterated-logarithm envelope"></canvas></div>
+</div>
+<dl class="exe-read" data-out="records"></dl>
+<p class="exe-note">Each walk steps ±1 with equal chance, so <i>σ</i> = 1. Grey dashes are ±√<i>n</i>, the scale the CLT gives <i>S<sub>n</sub></i> at any one <i>n</i>; red is ±√(2<i>n</i> log log <i>n</i>), which a walk exceeds by a factor 1 + <i>ε</i> only finitely often but reaches 1 − <i>ε</i> of infinitely often (#2). The readings are each walk’s record ratios past <i>n</i> = 100. One past ±1 is no contradiction: the excursions beyond 1 + <i>ε</i> are finitely many, not none, and about a third of walks make one before <i>n</i> = 10&#8310;. The typical record climbs towards 1 on the scale of log log <i>n</i>, which is only 2.6 at <i>n</i> = 10&#8310;: its median is about 0.6 at <i>n</i> = 10&sup3; and 0.9 at 10&#8310;.</p>
+<a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/lil.js" defer></script>

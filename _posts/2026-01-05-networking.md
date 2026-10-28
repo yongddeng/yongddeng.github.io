@@ -45,7 +45,7 @@ The [open systems interconnection](https://spectrum.ieee.org/osi-the-internet-th
 
 The [transmission control protocol](https://www.youtube.com/watch?v=3b_TAYtzuho) / [internet protocol]() (TCP/IP) model was developed through running implementations on ARPANET (NCP → TCP/IP on 1 January 1983, Flag Day), prevailing by shipping working code ahead of the specification. It stacks four layers: i) [link](): frame transmission over a physical medium; ii) [internet](): logical addressing and best-effort routing; iii) [transport](): end-to-end process-to-process communication; and iv) [application](): user-space service semantics. This embodies the [end-to-end principle](https://en.wikipedia.org/wiki/End-to-end_principle) (1984), which holds that application-specific functions should reside at the endpoints rather than in the network, with the two middle layers implemented in kernel space. 
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/arpanet.gif" width="390"> <a href="https://education.cfr.org/learn/timeline/origins-internet" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">Maps of Arpanet from December 1969 to March 1977.</div> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/arpanet.webp" width="390"> <a href="https://education.cfr.org/learn/timeline/origins-internet" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">Maps of Arpanet from December 1969 to March 1977.</div> </div>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/osi-tcpip.jpg" width="375"> <a href="https://notes.davidvarghese.net/computer-networks/network-models/tcp-ip-model" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
@@ -75,7 +75,7 @@ Same journey as the addressing analogy (Section I → II):
 
 - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/tcp_ip_encapsulation.jpg" width="415"> <div style="position: absolute; top: 3px; left: 143px; width: 112px; height: 20px; background: #fff;"></div> <a href="https://x.com/alexxubyte/status/1592193892530589696" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">The L3 unit here is the formal <i>IP datagram</i> (RFC 791).</div> </div>
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/tcp_ip.gif" width="400"> <a href="https://blog.reallabworkbook.com/p/what-is-tcpip-model" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/tcp_ip.webp" width="400"> <a href="https://blog.reallabworkbook.com/p/what-is-tcpip-model" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/data-encapsulation.gif" width="375"> <a href="https://flylib.com/books/en/3.223.1.18/1/" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> -->
 
@@ -226,7 +226,7 @@ terminology (prefix ≠ subnet ≠ address):
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ipv4_vs_ipv6.png" width="400"> <a href="https://blog.servermania.com/ipv4-vs-ipv6" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ip_versions.png" width="350"> <a href="https://bytebytego.com/guides/ipv4-vs-ipv6/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ip_versions.webp" width="350"> <a href="https://bytebytego.com/guides/ipv4-vs-ipv6/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 IPv4's $2^{32}$ addresses exhausted even under CIDR. [Address allocation for private internets (RFC 1918)]() reserves three non-routable ranges {10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16}, which [network address translation]() (NAT), specifically [port address translation]() (PAT), multiplexes behind one public IP by rewriting source ports, making them reusable across millions of networks but breaking end-to-end addressability. An address thus sits at one of three scopes, [loopback]() (127.0.0.0/8<!--, where 127 is the last Class A network reserved for self-referencing -->)<!-- jekyll/jupyter bind here by default; Docker containers have their own loopback (127.0.0.1 = container, not host), so Docker apps bind to 0.0.0.0 (all interfaces) and use host.docker.internal to reach the host --> $\to$ [private]() (a LAN) $\xrightarrow{\text{NAT}}$ public, and [IPv6]()'s $2^{128}$ space restores end-to-end reachability, largely retiring NAT as the dual-stack transition proceeds.
 <!-- PAT analogy: an apartment building (public IP) has one street address; the front desk (router) uses unit numbers (ports) to route mail to residents (hosts). Unlike real units, port numbers are assigned dynamically per connection. -->
@@ -700,7 +700,7 @@ Note that the format fixes not just how bytes read, but also how they may change
   </div>
   <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The same record in three text formats.</div>
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/api_format.png" width="500"> <a href="https://rayka-co.com/lesson/compare-xml-json-yaml/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/api_format.webp" width="500"> <a href="https://rayka-co.com/lesson/compare-xml-json-yaml/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 Beyond format lies style, the axis to which the remaining sections turn. Styles are graded by coupling, the prior agreement the two ends must share before they interact. Who the ends are decides how much agreement is affordable, since an unknown public client the server cannot redeploy forces the loosest contract while two co-deployed services afford the tightest. The grading does not track the calendar, with the tight procedure contracts of RPC and the [simple object access protocol]() (SOAP) coming first, REST loosening to inherit the web, and GraphQL and gRPC drawing the contract back as relationships narrowed. Each style is the contract its relationship makes possible.
 
@@ -892,7 +892,7 @@ GraphQL also rarely fronts one service, its schema an [aggregation]() layer. [Fe
 
 - <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/rest_vs_graphql.png" width="550"> <a href="https://www.researchgate.net/figure/Comparison-of-the-REST-API-and-the-GraphQL-API-including-an-example-of-overfetching-and_fig1_387425014" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">One REST round-trip per resource against a single shaped query.</div> </div>
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/aws_graphql.png" width="500"> <a href="https://aws.amazon.com/ko/compare/the-difference-between-graphql-and-rest/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/aws_graphql.webp" width="500"> <a href="https://aws.amazon.com/ko/compare/the-difference-between-graphql-and-rest/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/rest_vs_graphql.webp" width="525"> <a href="https://www.contentful.com/blog/graphql-vs-rest-exploring-how-they-work/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
