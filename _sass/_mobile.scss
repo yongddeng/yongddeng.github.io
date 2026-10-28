@@ -133,6 +133,11 @@
 			top: auto;
 			font-size: 14px;
 		}
+
+		// the desktop's pixel glyph, doubled for a fingertip
+		.cap-x {
+			transform: scale(2);
+		}
 	}
 
 	// File rows become full-width list items with touch-sized targets

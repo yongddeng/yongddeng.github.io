@@ -10,6 +10,26 @@
 	}
 }
 
+// Caption glyphs as Marlett draws them, pixel for pixel, in the button's
+// 13x11 face: an icon font for three glyphs weighed 84 KB
+@mixin caption-glyphs {
+	.cap-x, .cap-max, .cap-min {
+		display: block;
+		position: static;
+		width: 13px;
+		height: 11px;
+	}
+	.cap-x {
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h2v1H0zM6 0h2v1H6zM1 1h2v1H1zM5 1h2v1H5zM2 2h4v1H2zM3 3h2v1H3zM2 4h4v1H2zM1 5h2v1H1zM5 5h2v1H5zM0 6h2v1H0zM6 6h2v1H6z'/%3E%3C/svg%3E") no-repeat 2px 2px;
+	}
+	.cap-max {
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' shape-rendering='crispEdges'%3E%3Cpath fill-rule='evenodd' d='M0 0h9v9H0zM1 2v6h7V2z'/%3E%3C/svg%3E") no-repeat 2px 1px;
+	}
+	.cap-min {
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='2'%3E%3Cpath d='M0 0h6v2H0z'/%3E%3C/svg%3E") no-repeat 2px 7px;
+	}
+}
+
 body {
 	background: var(--desk, #008082);
 	font-family: sans-serif, serif, monospace;
@@ -359,6 +379,8 @@ body {
 		left: 2px;
 		top: -2px;
 	}
+
+	@include caption-glyphs;
 }
 .post_title {
 	h1 {
@@ -383,15 +405,7 @@ body {
 			top: -2px;
 		}
 
-		.fa-window-minimize {
-			font-size: 10px;
-			left: 1px;
-		}
-
-		.fa-window-maximize {
-			font-size: 10px;
-			left: 1px;
-		}
+		@include caption-glyphs;
 	}
 
 	.btn_max {
@@ -1298,6 +1312,12 @@ pre code.numbered {
 
 	#search-toggle:active {
 		border-color: #000000 #ffffff #ffffff #000000;
+	}
+
+	// the glass takes the button's colour, so it greys with it when disabled
+	#search-toggle svg {
+		display: block;
+		margin: 0 auto;
 	}
 }
 @media only screen and (max-width: 900px) {

@@ -60,7 +60,7 @@
 		win.className = 'content settings-win';
 		win.innerHTML =
 			'<div class="post_title"><span class="t-emoji">&#9881;&#65039;</span><h1>System Properties</h1>'
-			+ '<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a></div>'
+			+ '<a href="/"><div class="btn"><span class="cap-x"></span></div></a></div>'
 			+ '<div class="post_content">'
 			+ '<div class="set-tabs">'
 			+ '<span class="set-tab on">General</span>'

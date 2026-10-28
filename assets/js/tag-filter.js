@@ -96,7 +96,7 @@
 		win.setAttribute('data-tag', tagName);
 		win.innerHTML =
 			'<div class="post_title"><img src="/assets/img/folder.ico" /><h1>' + escapeHtml(tagName) + '</h1>'
-			+ '<a href="/"><div class="btn"><span class="fa fa-times"></span></div></a></div>'
+			+ '<a href="/"><div class="btn"><span class="cap-x"></span></div></a></div>'
 			+ '<div class="post_content">' + DET_HEAD + '<ul>' + items + '</ul></div>'
 			+ '<div class="folder-status">' + filtered.length + ' object(s)</div>'
 			+ '<div class="win-grip"></div>';
@@ -300,6 +300,28 @@
 		box.querySelector('button').addEventListener('click', function() { box.remove(); });
 	}
 
+	// default.html loads highlight.js only on a page with code, so a window
+	// that brings code to any other page loads it first, once
+	var hljsLoad = null;
+	function loadHljs() {
+		if (hljsLoad) return hljsLoad;
+		var css = document.createElement('link');
+		css.rel = 'stylesheet';
+		css.href = '/assets/css/atom-one-light.css';
+		document.head.appendChild(css);
+		hljsLoad = ['/assets/js/highlight.pack.js', '/assets/js/x86asm.min.js'].reduce(function(prev, src) {
+			return prev.then(function() {
+				return new Promise(function(done) {
+					var s = document.createElement('script');
+					s.src = src;
+					s.onload = s.onerror = done;
+					document.head.appendChild(s);
+				});
+			});
+		}, Promise.resolve());
+		return hljsLoad;
+	}
+
 	// Opens a post as a window; at most five, a sixth is refused.
 	// opts.geom pins the position, opts.force waives the cap (session restore).
 	// Returns a promise so a restore can reopen windows in their saved order.
@@ -345,10 +367,14 @@
 					old.replaceWith(s);
 				});
 				// highlight before the swap event: 002.js splits this markup
-				newContent.querySelectorAll('pre code').forEach(function(block) {
-					hljs.highlightBlock(block);
-				});
-				document.dispatchEvent(new CustomEvent('content:swapped', { detail: { content: newContent } }));
+				function shown() {
+					newContent.querySelectorAll('pre code').forEach(function(block) {
+						if (window.hljs) hljs.highlightBlock(block);
+					});
+					document.dispatchEvent(new CustomEvent('content:swapped', { detail: { content: newContent } }));
+				}
+				if (window.hljs || !newContent.querySelector('pre code')) shown();
+				else loadHljs().then(shown);
 				function typesetMathJax() {
 					if (window.MathJax && MathJax.Hub) {
 						MathJax.Hub.Queue(['Typeset', MathJax.Hub, newContent]);
@@ -356,7 +382,10 @@
 						setTimeout(typesetMathJax, 200);
 					}
 				}
-				typesetMathJax();
+				if (newContent.hasAttribute('data-math')) {
+					needMath();
+					typesetMathJax();
+				}
 			} else {
 				// navigated to an index page: close all post windows
 				open.forEach(function(w) { w.remove(); });

@@ -26,7 +26,18 @@ MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
 CommonHTML: {
     scale: 85
 }-->
-<script type="text/javascript" id="MathJax-script" async
-    integrity="sha384-vi9R4hb1goLJPJDHY+dOmXxcY3HGv6tJIwHxy5JunOTxJGHbsSuubPgl++SNxYYi" crossorigin="anonymous"
-    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-AMS_CHTML">
+<script>
+// MathJax comes with the first maths shown: at once on a use_math page, and
+// from tag-filter.js when a window with maths opens on any other. On load it
+// reads the config above and typesets the whole page.
+function needMath() {
+    if (document.getElementById('MathJax-script')) return;
+    var s = document.createElement('script');
+    s.id = 'MathJax-script';
+    s.integrity = 'sha384-vi9R4hb1goLJPJDHY+dOmXxcY3HGv6tJIwHxy5JunOTxJGHbsSuubPgl++SNxYYi';
+    s.crossOrigin = 'anonymous';
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-AMS_CHTML';
+    document.head.appendChild(s);
+}
+{% if page.use_math %}needMath();{% endif %}
 </script>
