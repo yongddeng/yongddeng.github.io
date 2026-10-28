@@ -7,6 +7,9 @@
 	if (!desktop) return;
 
 	var wrapper = document.querySelector('.wrapper');
+	// The post the layout drew is the one the address bar asked for
+	var asked = document.querySelector('.content[data-url]');
+	var askedTitle = document.title;
 	var restoring = false;
 
 	function read() {
@@ -113,6 +116,13 @@
 			});
 			if (!front && state.explorer && state.explorer.front && !state.explorer.hidden) {
 				front = wrapper;
+			}
+			// A link, bookmark or typed URL lands on top. On F5 it already is
+			// the saved front, since 001.js keeps the address on that window.
+			if (asked) {
+				front = asked;
+				// each reopened post retitled the tab on its way in
+				document.title = askedTitle;
 			}
 			if (front) front.dispatchEvent(new MouseEvent('mousedown'));
 			restoring = false;
