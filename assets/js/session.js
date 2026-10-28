@@ -67,7 +67,8 @@
 			explorer: wrapper ? {
 				hidden: wrapper.style.display === 'none',
 				geom: geomOf(wrapper),
-				tag: desktop.explorerTag(),
+				at: window.explorer.at(),
+				folders: window.explorer.folders(),
 				front: wrapper.classList.contains('active-win')
 			} : null,
 			windows: wins
@@ -87,7 +88,9 @@
 		restoring = true;
 		if (wrapper && state.explorer) {
 			wrapper.style.display = state.explorer.hidden ? 'none' : '';
-			if (state.explorer.tag) desktop.filterByTag(state.explorer.tag);
+			// a session saved before My Computer had places kept a tag, and
+			// one saved before the Folders bar was the default left it out
+			window.explorer.go(state.explorer.at || state.explorer.tag || 'mc', state.explorer.folders !== false);
 			var g = state.explorer.geom;
 			if (g && !state.explorer.hidden) desktop.applyGeom(wrapper, g);
 		}
@@ -162,7 +165,7 @@
 			wrapper.style.width = '';
 			wrapper.style.height = '';
 			wrapper.dispatchEvent(new CustomEvent('win:reset'));
-			desktop.showAllPosts();
+			window.explorer.home();
 		}
 		document.title = document.body.dataset.site || '';
 		if (location.pathname !== '/') history.pushState(null, '', '/');

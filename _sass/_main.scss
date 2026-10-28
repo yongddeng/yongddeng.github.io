@@ -225,12 +225,10 @@ body {
 		width: 84px;
 		text-align: center;
 		text-decoration: none;
-		// every icon stands in the same 34px row, on its bottom edge, so the labels keep one
-		// rhythm down the column whatever each picture's own height
+		// each icon's row is its drawing's own height: the images' empty margins are
+		// trimmed below, so the gaps down the column read even whatever each picture's size
 		display: grid;
-		grid-template-rows: 34px auto;
 		justify-items: center;
-		align-items: end;
 
 		img {
 			display: block;
@@ -257,10 +255,22 @@ body {
 		}
 
 		// The clapperboard reads squashed at 32px square; let it breathe
-		// (slightly taller than wide, scaled down a notch)
+		// (slightly taller than wide, scaled down a notch), trimmed of the
+		// empty unit under its frame
 		img[src$="video.svg"] {
 			width: 31px;
 			height: 33px;
+			margin-bottom: -1px;
+		}
+
+		// Windows 98's 48px folder, a notch under its 32px neighbours and
+		// blended rather than blocky at a size its pixels don't divide into;
+		// trimmed of the 7 empty rows under its drawing
+		img[src$="folder-48.png"] {
+			width: 28px;
+			height: 28px;
+			margin-bottom: -4px;
+			image-rendering: auto;
 		}
 
 		// The blocks fill their 32px bitmap edge to edge; take them down a notch
@@ -270,24 +280,17 @@ body {
 		}
 
 		// The agent's face is 24px inside its 32px bitmap; bring it up a notch,
-		// and down onto the row's bottom edge past the bitmap's empty margin
+		// trimmed of the bitmap's empty margin above and below
 		img[src$="msagent.png"] {
-			width: 35px;
-			height: 35px;
-			margin-bottom: -4px;
+			width: 36px;
+			height: 36px;
+			margin: -4px auto;
 		}
 
 		// Wide emoji: keep its natural aspect at icon height
 		img[src$="aubergine.png"] {
 			width: auto;
 			height: 36px;
-			image-rendering: auto;
-		}
-
-		// Smooth-shaded folder, not pixel art; wider than tall
-		img[src$="folder.png"] {
-			width: auto;
-			height: 21px;
 			image-rendering: auto;
 		}
 	}
@@ -310,22 +313,6 @@ body {
 		margin-left: 100px;
 	}
 }
-// Explorer window: grid keeps the status bar flush with the bottom edge
-// and lets both panes stretch when the window is grip-resized
-.wrapper {
-	width: 720px; // a little narrower than a reading window
-	display: grid;
-	grid-template-columns: 26% minmax(0, 1fr);
-	grid-template-rows: auto minmax(0, 1fr) auto;
-	column-gap: 4px;
-	row-gap: 3px;
-	height: 340px;
-	padding: 2px 4px;
-
-	.default_title, .post_total {
-		grid-column: 1 / -1;
-	}
-}
 .default_title, .post_title {
 	padding: 2px 4px 3px 4px;
 	position: relative;
@@ -336,11 +323,12 @@ body {
 		font-weight: bold;
 	}
 	
+	// a 16px icon at its own size, so its pixels stay whole
 	img {
 		float: left;
-		width: 14px;
-		height: 14px;
-		margin: 0 3px 0 0;
+		width: 16px;
+		height: 16px;
+		margin: -1px 3px -1px 0;
 		image-rendering: pixelated;
 	}
 
@@ -615,7 +603,7 @@ ul.topbar {
 .kw-flash {
 	background: #ffff00;
 }
-.post_list, .tag_list, .post_content {
+.post_list, .post_content {
 	background: var(--paper, #fbfafb);
 	@include bevel(false, ridge groove groove ridge);
 }
@@ -750,9 +738,9 @@ ul.topbar {
 		align-items: flex-start;
 
 		img {
-			width: 48px;
-			height: auto;
-			image-rendering: auto;
+			width: 32px;
+			height: 32px;
+			image-rendering: pixelated;
 		}
 	}
 
@@ -946,12 +934,13 @@ img.task-menu-ic {
 					image-rendering: pixelated;
 				}
 
-				// The clapperboard's artwork carries more padding than the
-				// notepad's; render it a touch larger so they read equal
-				img[src$="video.svg"] {
-					width: 18px;
-					height: 18px;
-					margin: 0 4px 0 -1px;
+				// Notepad's drawing fills its square, where the others carry a
+				// margin; Windows 98's 32px one, blended down, so they read equal
+				img[src$="notepad-32.png"] {
+					width: 14px;
+					height: 14px;
+					margin: 0 7px 0 1px;
+					image-rendering: auto;
 				}
 
 				.nm {
@@ -1004,56 +993,6 @@ img.task-menu-ic {
 	min-height: 0;
 	overflow-y: auto;
 	@include file-details-view;
-}
-.tag_list {
-	box-sizing: border-box;
-	min-height: 0;
-	overflow-y: auto;
-
-	img {
-		height: 16px;
-		width: 16px;
-		margin: -2px 5px;
-	}
-
-	a {
-		text-decoration: none;
-		color: #000000;
-	}
-
-	ul {
-		li {
-			max-width: 27ch;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-	}
-
-	// Search sits above the drive tree
-	.search_box {
-		margin: 6px;
-	}
-}
-#tag-list {
-    background:transparent url(/assets/img/pixel-alt.png) repeat-y 15px 0;
-}
-#tag-list li {
-    padding:0 0 0 2px;
-    margin-bottom: 8px;
-    
-    &:last-child {
-        margin-bottom: 0;
-    }
-}
-#tag-list li a {
-    background: var(--paper, #fbfafb);
-    display:block;
-}
-#tag-list li ul li {
-    background:transparent url(/assets/img/pixel-alt.png) repeat-x 0 8px;
-    margin:4px 0 4px 13px;
-    padding:0 0 0 20px;
 }
 .post_total {
 	display: flex;
@@ -1266,60 +1205,6 @@ pre code.numbered {
 		word-break: break-word;
 	}
 }
-.search_box {
-	position: relative;
-	display: flex;
-	justify-content: flex-end;
-	align-items: center;
-	gap: 3px;
-
-	input {
-		flex: 1;
-		padding: 1px 3px;
-		@include bevel(false);
-		background: var(--paper, #fbfafb);
-		font-size: 12px;
-		font-family: sans-serif, serif, monospace;
-		line-height: 1;
-		height: 16px;
-		box-sizing: border-box;
-
-		&:focus {
-			outline: none;
-		}
-
-		&:disabled {
-			background: #c0c0c0;
-			color: #808080;
-			cursor: not-allowed;
-		}
-	}
-
-	#search-toggle:disabled {
-		color: #808080;
-		cursor: not-allowed;
-	}
-
-	#search-toggle {
-		width: 22px;
-		height: 18px;
-		padding: 0;
-		font-size: 10px;
-		background: #c0c0c0;
-		@include bevel;
-		cursor: pointer;
-	}
-
-	#search-toggle:active {
-		border-color: #000000 #ffffff #ffffff #000000;
-	}
-
-	// the glass takes the button's colour, so it greys with it when disabled
-	#search-toggle svg {
-		display: block;
-		margin: 0 auto;
-	}
-}
 @media only screen and (max-width: 900px) {
     .content {
         width: 90%;
@@ -1336,25 +1221,6 @@ pre code.numbered {
 @media only screen and (max-width: 400px) {
 	.post_content {
 		width: 97%;
-	}
-}
-@media only screen and (max-width: 760px) {
-	.wrapper {
-		width: 90%;
-	}
-}
-// Narrow screens: drive tree stacks above the file list
-@media only screen and (max-width: 750px) {
-	.wrapper {
-		grid-template-columns: minmax(0, 1fr);
-		grid-template-rows: auto auto minmax(0, 1fr) auto;
-		height: 480px;
-	}
-	.tag_list {
-		max-height: 150px;
-	}
-	.post_total .left {
-		flex-basis: 36%;
 	}
 }
 @media only screen and (max-width: 610px) {

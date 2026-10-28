@@ -42,7 +42,7 @@
 	function generalPane() {
 		var postCount = (window.searchIndex || []).length;
 		return '<div class="set-sysrow">'
-			+ '<img src="/assets/img/mycomputerv2.png" alt="" />'
+			+ '<img src="/assets/img/mycomputer-32.png" alt="" />'
 			+ '<div class="set-kv">'
 			+ '<b>System:</b> Hikikomori<br>'
 			+ '<b>Registered to:</b> Sung Kim<br>'

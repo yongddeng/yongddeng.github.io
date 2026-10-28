@@ -10,14 +10,12 @@
 		-webkit-text-size-adjust: 100%;
 	}
 
-	// Chrome with no touch equivalent, plus the drive tree and its
-	// permanently disabled search box
+	// Chrome with no touch equivalent, My Computer's among it (_explorer.scss)
 	.desktop-icons,
 	.taskbar,
 	.win-grip,
 	.post_total,
 	ul.topbar,
-	.tag_list,
 	.post_list .det-head,
 	.default_title .btn,
 	.xref-tip {
@@ -69,8 +67,8 @@
 
 		img {
 			float: none;
-			width: 18px;
-			height: 18px;
+			width: 16px;
+			height: 16px;
 			margin: 0;
 		}
 
@@ -164,9 +162,10 @@
 			font-size: 15px;
 			white-space: normal;
 
+			// the icons' own 16px, so their pixels stay whole
 			img {
-				width: 20px;
-				height: 20px;
+				width: 16px;
+				height: 16px;
 				margin: 0;
 			}
 

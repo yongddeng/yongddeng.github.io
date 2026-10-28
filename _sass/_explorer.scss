@@ -1,0 +1,642 @@
+// My Computer (assets/js/explorer.js): Windows 98's explorer window. The
+// menus, the Standard Buttons and the Address box sit under the title bar;
+// the Folders bar is on the left, the place on the right, and the status bar
+// counts what is shown. Loaded before _mobile.scss, which turns the window
+// into the page on a phone.
+@use "main";
+
+$xp-ui: "Helvetica Neue", Arial, sans-serif;
+$xp-tip: Verdana, Tahoma, $xp-ui;
+$xp-serif: Georgia, "Times New Roman", serif;
+$xp-mute: #55505a;
+$xp-navy: #000080;
+$xp-shade: #7f787f;
+
+// a large icon: Windows 98's 48px drawing at half size, one pixel to a
+// screen pixel on a 2x display, and blended rather than dropped on a 1x one
+@mixin large-icon {
+	width: 24px;
+	height: 24px;
+	image-rendering: auto;
+}
+
+// a toolbar band's etched top edge and the gripper at its left end
+@mixin band {
+	position: relative;
+	padding-left: 10px;
+	border-top: 1px solid $xp-shade;
+	box-shadow: inset 0 1px 0 #ffffff;
+
+	&::before {
+		content: "";
+		position: absolute;
+		left: 2px;
+		top: 4px;
+		bottom: 3px;
+		width: 1px;
+		border: 1px solid;
+		border-color: #ffffff $xp-shade $xp-shade #ffffff;
+	}
+}
+
+.wrapper {
+	width: 760px;
+	height: 440px;
+	display: flex;
+	flex-direction: column;
+	padding: 2px 3px;
+	// the panes answer to the window's width, not the screen's
+	container-type: inline-size;
+
+	> * {
+		flex: none;
+	}
+	// a 16px icon is pixel art at its own size: keep the pixels square
+	img {
+		image-rendering: pixelated;
+	}
+
+	// View marks the current choice; Back with nowhere to go is grey
+	ul.topbar {
+		.tb-item {
+			position: relative;
+		}
+		.tb-item.on::before {
+			content: "\25CF";
+			position: absolute;
+			left: 7px;
+			font-size: 8px;
+		}
+		.tb-item[data-act="folders"].on::before {
+			content: "\2713";
+			left: 6px;
+			font-size: 11px;
+		}
+		.tb-item[disabled],
+		.tb-item[disabled]:hover {
+			background: none;
+			color: #808080;
+			text-shadow: 1px 1px 0 #ffffff;
+		}
+	}
+}
+@media only screen and (max-width: 800px) {
+	.wrapper {
+		width: 90%;
+	}
+}
+
+// ---- the Standard Buttons: flat until pointed at ----
+.xp-bar {
+	@include band;
+	display: flex;
+	align-items: center;
+	gap: 1px;
+	padding-block: 2px;
+}
+.xp-tb {
+	display: grid;
+	justify-items: center;
+	align-content: center;
+	gap: 1px;
+	min-width: 50px;
+	height: 40px;
+	padding: 2px 5px;
+	background: none;
+	border: 1px solid transparent;
+	font: 11px $xp-ui;
+	color: #000000;
+
+	svg {
+		width: 20px;
+		height: 20px;
+		color: #404040;
+		shape-rendering: crispEdges;
+	}
+	&:hover:not([disabled]) {
+		border-color: #ffffff $xp-shade $xp-shade #ffffff;
+
+		svg {
+			color: #0a246a;
+		}
+	}
+	&:active:not([disabled]),
+	&.on {
+		border-color: $xp-shade #ffffff #ffffff $xp-shade;
+	}
+	&[disabled] {
+		color: #808080;
+		text-shadow: 1px 1px 0 #ffffff;
+
+		svg {
+			color: #a0a0a0;
+		}
+	}
+}
+.xp-sep {
+	align-self: stretch;
+	width: 0;
+	margin: 3px 4px;
+	border-left: 1px solid $xp-shade;
+	border-right: 1px solid #ffffff;
+}
+
+// ---- the Address box, and the places it drops down ----
+.xp-addr {
+	@include band;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding-block: 3px;
+	padding-right: 2px;
+	font: 12px $xp-ui;
+
+	.xp-lab {
+		color: #303030;
+
+		u {
+			text-decoration: underline;
+		}
+	}
+}
+.xp-combo {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	height: 21px;
+	padding: 0 0 0 3px;
+	background: #ffffff;
+	@include main.bevel(false);
+	font: 12px $xp-ui;
+	color: #000000;
+	text-align: left;
+
+	img {
+		width: 16px;
+		height: 16px;
+	}
+	span {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	// its drop-down button
+	i {
+		position: relative;
+		align-self: stretch;
+		width: 16px;
+		box-sizing: border-box;
+		background: #c0c0c0;
+		@include main.bevel;
+
+		&::after {
+			content: "";
+			position: absolute;
+			left: 2px;
+			top: 5px;
+			border: 4px solid transparent;
+			border-top-color: #000000;
+			border-bottom: 0;
+		}
+	}
+}
+.xp-places {
+	position: absolute;
+	top: 100%;
+	left: 64px;
+	right: 2px;
+	z-index: 8;
+	max-height: 260px;
+	overflow-y: auto;
+	background: #ffffff;
+	border: 1px solid #000000;
+	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+
+	button {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		width: 100%;
+		padding: 1px 6px 1px calc(6px + var(--d) * 14px);
+		background: none;
+		border: 0;
+		font: 12px $xp-ui;
+		color: #000000;
+		text-align: left;
+
+		img {
+			width: 16px;
+			height: 16px;
+		}
+		&:hover {
+			background: $xp-navy;
+			color: #ffffff;
+		}
+	}
+}
+
+// ---- the body: the Folders bar, while it is on, then the place ----
+.xp-body {
+	flex: 1 1 auto;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 3px;
+	margin-top: 2px;
+}
+.xp-folders .xp-body {
+	grid-template-columns: 196px minmax(0, 1fr);
+}
+.xp-side,
+.wrapper .post_list {
+	min-height: 0;
+	overflow: auto;
+}
+.xp-side {
+	display: none;
+	padding: 0 2px 3px;
+	background: #ffffff;
+	@include main.bevel(false, ridge groove groove ridge);
+	font: 12px/16px $xp-ui;
+}
+.xp-folders .xp-side {
+	display: block;
+}
+@container (max-width: 600px) {
+	.xp-folders .xp-body {
+		grid-template-columns: 150px minmax(0, 1fr);
+	}
+	.xp-tb {
+		min-width: 34px;
+		height: 28px;
+		font-size: 0;
+	}
+	.wrapper .post_total .zone {
+		display: none;
+	}
+}
+
+// TeX stays unshown until MathJax has typeset it
+.wrapper [data-tex],
+.xp-tip [data-tex] {
+	visibility: hidden;
+}
+
+// ---- the Folders bar, on Windows 98's grid: 18px rows, 19px a level ----
+// A row is its connector cells, the icon, a 3px gap and the name, so a
+// child's icon starts where its parent's name does. Each cell draws its own
+// dotted line from the same pixel, so the dots meet across cells
+$dots: repeating-linear-gradient(#808080 0 1px, transparent 1px 2px);
+$dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2px);
+
+.tv-head {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 18px;
+	margin: 0 -2px 3px;
+	padding: 0 2px 0 5px;
+	background: #c0c0c0;
+	border-bottom: 1px solid $xp-shade;
+	font-size: 11.5px;
+}
+.tv-x {
+	width: 17px;
+	height: 15px;
+	padding: 0;
+	background: #c0c0c0;
+	@include main.bevel;
+	@include main.caption-glyphs;
+}
+.tv,
+.tv ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.tv {
+	padding-left: 1px;
+}
+.tv-r {
+	display: flex;
+	align-items: center;
+	height: 18px;
+	white-space: nowrap;
+	cursor: default;
+
+	img {
+		width: 16px;
+		height: 16px;
+		margin-right: 3px;
+	}
+}
+.tv-c {
+	position: relative;
+	flex: none;
+	width: 19px;
+	height: 18px;
+
+	// i: an ancestor's line running past; t: a child with siblings below; l: the last child
+	&.i {
+		background: $dots 8px 0 / 1px 18px no-repeat;
+	}
+	&.t,
+	&.l {
+		background: $dots-across 8px 8px / 10px 1px no-repeat, $dots 8px 0 / 1px 18px no-repeat;
+	}
+	&.l {
+		background-size: 10px 1px, 1px 9px;
+	}
+}
+// the +/- box, drawn rather than typed, centred on the line
+.tv-pm {
+	position: absolute;
+	left: 4px;
+	top: 4px;
+	width: 9px;
+	height: 9px;
+	box-sizing: border-box;
+	border: 1px solid #808080;
+	background: linear-gradient(#000000, #000000) 1px 3px / 5px 1px no-repeat, #ffffff;
+
+	&.shut {
+		background: linear-gradient(#000000, #000000) 1px 3px / 5px 1px no-repeat, linear-gradient(#000000, #000000) 3px 1px / 1px 5px no-repeat, #ffffff;
+	}
+}
+.tv-l {
+	height: 16px;
+	padding: 0 2px;
+
+	.on > & {
+		background: $xp-navy;
+		color: #ffffff;
+	}
+}
+
+// ---- the list: a click selects, as Windows 98's did; there is no hover ----
+.wrapper .post_list {
+	.det-head [data-k] {
+		cursor: pointer;
+	}
+	.ty {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	ul li a:hover .nm {
+		background: none;
+		color: inherit;
+		border-color: transparent;
+	}
+	a.sel .nm,
+	ul li a.sel .nm {
+		background: $xp-navy;
+		color: #ffffff;
+	}
+	&:focus a.sel .nm,
+	&:focus ul li a.sel .nm {
+		border-color: #ffff00;
+	}
+}
+.xp-icons {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 78px);
+	gap: 6px 4px;
+	padding: 8px 6px;
+	align-content: start;
+
+	a {
+		display: grid;
+		justify-items: center;
+		gap: 3px;
+		padding: 2px 0;
+		color: #000000;
+		font-size: 12px;
+		line-height: 1.25;
+		text-align: center;
+		text-decoration: none;
+	}
+	.xi {
+		display: grid;
+		place-items: center;
+		width: 24px;
+		height: 24px;
+
+		img {
+			@include large-icon;
+		}
+	}
+	.nm {
+		max-width: 76px;
+		padding: 0 2px;
+		border: 1px dotted transparent;
+		overflow-wrap: anywhere;
+	}
+	// a selected icon takes Windows 98's blue wash
+	a.sel img {
+		filter: sepia(1) saturate(5) hue-rotate(190deg) brightness(0.6);
+	}
+}
+// a drive's General tab, under its icons: each folder's files and size, and the pie
+.dp {
+	max-width: 470px;
+	margin: 6px 12px 12px;
+	padding-top: 10px;
+	border-top: 1px solid #c0c0c0;
+	font: 12px $xp-ui;
+
+	p {
+		margin-top: 10px;
+	}
+}
+.dp-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+
+	img {
+		@include large-icon;
+	}
+	b {
+		display: block;
+		font-size: 13px;
+		font-weight: bold;
+	}
+	span {
+		color: $xp-mute;
+	}
+}
+.dp-body {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 24px;
+	margin-top: 10px;
+
+	figure {
+		display: grid;
+		justify-items: center;
+		gap: 2px;
+		margin: 0;
+		color: #303030;
+	}
+}
+.dp-table {
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+
+	td {
+		height: 18px;
+		padding: 0 0 0 14px;
+		white-space: nowrap;
+	}
+	td:first-child {
+		padding: 0 2px;
+	}
+	td + td {
+		text-align: right;
+	}
+	i {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		margin-right: 6px;
+		border: 1px solid #000000;
+		vertical-align: -1px;
+	}
+	.on span {
+		margin: 0 -2px;
+		padding: 0 2px;
+		background: $xp-navy;
+		color: #ffffff;
+	}
+	.dp-total td {
+		border-top: 1px solid $xp-shade;
+	}
+}
+.dp-pie {
+	display: block;
+	width: 165px;
+	height: 97px;
+}
+
+// ---- the status bar: what is shown, its size, and the zone ----
+.wrapper .post_total {
+	margin-top: 3px;
+
+	// "Type: …   Modified: …" keeps its spaces
+	.left {
+		flex: 1 1 auto;
+		white-space: pre;
+	}
+	.right {
+		flex: 0 0 80px;
+		text-align: right;
+	}
+	.zone {
+		flex: 0 0 140px;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding-right: 16px;
+
+		img {
+			width: 16px;
+			height: 16px;
+		}
+	}
+}
+
+// the infotip: help-balloon yellow
+.xp-tip {
+	position: fixed;
+	z-index: 1002;
+	max-width: 300px;
+	padding: 4px 6px 5px;
+	background: #ffffe1;
+	border: 1px solid #000000;
+	color: #000000;
+	font: 11px/1.45 $xp-tip;
+	pointer-events: none;
+	visibility: hidden;
+
+	.ld {
+		margin-bottom: 4px;
+		font: 11.5px/1.45 $xp-serif;
+	}
+	.k {
+		color: $xp-mute;
+	}
+}
+
+// ---- phones: the chips pick a folder; a row says what its post is ----
+@media only screen and (max-width: 700px) {
+	.wrapper {
+		.xp-bar,
+		.xp-addr,
+		.xp-side {
+			display: none;
+		}
+		.xp-body {
+			display: block;
+			margin: 0;
+		}
+		// the page scrolls, so the folder headers stick under the app bar
+		.post_list {
+			overflow: visible;
+
+			li a {
+				align-items: flex-start;
+			}
+			li a img {
+				margin-top: 1px;
+			}
+			.tx {
+				flex: 1;
+				min-width: 0;
+				display: grid;
+				gap: 2px;
+				white-space: normal;
+			}
+			.ld {
+				display: -webkit-box;
+				-webkit-box-orient: vertical;
+				-webkit-line-clamp: 2;
+				overflow: hidden;
+				font: 13px/1.4 $xp-serif;
+				color: #3a363e;
+			}
+			.mt {
+				font-size: 11.5px;
+				color: #777777;
+			}
+			li a:hover .ld,
+			li a:active .ld,
+			li a:hover .mt,
+			li a:active .mt {
+				color: #c8c8e0;
+			}
+		}
+	}
+	.drive-chips small {
+		margin-left: 5px;
+		color: $xp-mute;
+		font-weight: normal;
+	}
+	.xp-group {
+		position: sticky;
+		top: 48px;
+		z-index: 2;
+		padding: 5px 12px;
+		background: #e8e4ec;
+		border-bottom: 1px solid #d8d4cc;
+		color: #303030;
+		font: bold 12px $xp-ui;
+	}
+}

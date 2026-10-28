@@ -1,9 +1,9 @@
 (function() {
-	var tagList = document.querySelector('.tag_list');
-	if (!tagList) return;
+	// My Computer itself is explorer.js; this opens the windows it and the
+	// desktop launch: posts, and the folder windows of the desktop's icons
+	if (!document.querySelector('.wrapper')) return;
 
 	var posts = window.searchIndex || [];
-	var originalTitle = document.querySelector('.default_title h1').textContent;
 
 	var DET_HEAD = '<div class="det-head"><span class="dh-name">Name</span>'
 		+ '<span class="dh-size" data-sort="size">Size</span>'
@@ -11,9 +11,9 @@
 		+ '<span class="dh-date" data-sort="date">Date</span></div>';
 
 	// post.type is the Type column, named from _data/types.yml as the built list is
-	function itemHtml(post, tagParam) {
-		return '<li data-date="' + (post.sortdate || '') + '" data-size="' + (post.size || '') + '"><a href="' + post.url + (tagParam || '') + '" title="' + escapeHtml(post.title) + '">'
-			+ '<img src="/assets/img/' + (post.icon || 'notepad.png') + '" title="' + escapeHtml(post.title) + '" />'
+	function itemHtml(post) {
+		return '<li data-date="' + (post.sortdate || '') + '" data-size="' + (post.size || '') + '"><a href="' + post.url + '" title="' + escapeHtml(post.title) + '">'
+			+ '<img src="/assets/img/' + post.icon + '" title="' + escapeHtml(post.title) + '" />'
 			+ '<span class="nm">' + escapeHtml(post.title) + '</span>'
 			+ '<span class="sz">' + (post.size || '') + '</span>'
 			+ '<span class="ty">' + post.type + '</span>'
@@ -27,55 +27,12 @@
 		return div.innerHTML.replace(/"/g, '&quot;');
 	}
 
-	function renderPostList(filtered, activeTag) {
-		var postListDiv = document.querySelector('.post_list');
-		var tagParam = activeTag ? '?tag=' + encodeURIComponent(activeTag) : '';
-		var html = DET_HEAD + '<ul>';
-		for (var i = 0; i < filtered.length; i++) {
-			html += itemHtml(filtered[i], tagParam);
-		}
-		html += '</ul>';
-		postListDiv.innerHTML = html;
-	}
-
-	function updateObjectCount(count) {
-		var countDiv = document.querySelector('.post_total .left');
-		if (countDiv) {
-			countDiv.textContent = count + ' object(s)';
-		}
-	}
-
-	function updateTitleBar(tagName) {
-		var titleEl = document.querySelector('.default_title h1');
-		if (titleEl) {
-			titleEl.textContent = tagName || originalTitle;
-		}
-	}
-
 	function postsForTag(tagName) {
 		return posts.filter(function(post) {
 			return post.tags.some(function(t) {
 				return t.toLowerCase().replace(/\s+/g, '-') === tagName.toLowerCase();
 			});
 		});
-	}
-
-	// Which tag the explorer pane is filtered to, null for all posts
-	var explorerTag = null;
-
-	function filterByTag(tagName) {
-		var filtered = postsForTag(tagName);
-		renderPostList(filtered, tagName);
-		updateObjectCount(filtered.length);
-		updateTitleBar(tagName);
-		explorerTag = tagName;
-	}
-
-	function showAllPosts() {
-		renderPostList(posts, null);
-		updateObjectCount(posts.length);
-		updateTitleBar(null);
-		explorerTag = null;
 	}
 
 	// A tag folder is its own window: files only, no drive tree.
@@ -95,7 +52,7 @@
 		win.className = 'content folder-win';
 		win.setAttribute('data-tag', tagName);
 		win.innerHTML =
-			'<div class="post_title"><img src="/assets/img/folder.ico" /><h1>' + escapeHtml(tagName) + '</h1>'
+			'<div class="post_title"><img src="/assets/img/folder-16.png" /><h1>' + escapeHtml(tagName) + '</h1>'
 			+ '<a href="/"><div class="btn"><span class="cap-x"></span></div></a></div>'
 			+ '<div class="post_content">' + DET_HEAD + '<ul>' + items + '</ul></div>'
 			+ '<div class="folder-status">' + filtered.length + ' object(s)</div>'
@@ -174,57 +131,17 @@
 			if (openShortcut(href)) {
 				e.preventDefault();
 			} else if (href === '/') {
+				// My Computer opens at its top, or comes forward where it is
 				e.preventDefault();
 				var wrapper = document.querySelector('.wrapper');
-				var wasHidden = wrapper.style.display === 'none';
-				wrapper.style.display = '';
-				showAllPosts();
-				if (wasHidden) placeWindow(wrapper);
+				if (wrapper.style.display === 'none') {
+					wrapper.style.display = '';
+					window.explorer.home();
+					placeWindow(wrapper);
+				}
 				wrapper.dispatchEvent(new MouseEvent('mousedown'));
 			}
 		});
-	}
-
-	// Hovering a file reports its full path in the status bar
-	function pathFor(link) {
-		var href = (link.getAttribute('href') || '').split('?')[0];
-		var post = null;
-		for (var i = 0; i < posts.length; i++) {
-			if (posts[i].url === href) { post = posts[i]; break; }
-		}
-		if (!post) return link.getAttribute('title') || '';
-		var tag = (post.tags && post.tags[0]) || '';
-		var drive = tag === 'open' ? 'D:' : 'C:';
-		return drive + '\\' + (tag ? tag + '\\' : '') + post.title;
-	}
-
-	var statusRight = document.querySelector('.post_total .right');
-	if (statusRight) {
-		document.querySelector('.post_list').addEventListener('mouseover', function(e) {
-			var link = e.target.closest('a');
-			if (link) statusRight.textContent = pathFor(link);
-		});
-		document.querySelector('.post_list').addEventListener('mouseout', function() {
-			statusRight.innerHTML = '&nbsp;';
-		});
-	}
-
-	// Apply the ?tag= filter (default.html hides the list pre-render)
-	var postListDiv = document.querySelector('.post_list');
-	var activeTag = new URLSearchParams(window.location.search).get('tag');
-
-	// Drive chips (phones): press the chip whose tag the URL carries.
-	// Chips are plain links, so filtering arrives by navigation, same as
-	// the post rows.
-	document.querySelectorAll('.drive-chips a').forEach(function (chip) {
-		var q = (chip.getAttribute('href') || '').split('?')[1] || '';
-		var t = new URLSearchParams(q).get('tag');
-		chip.classList.toggle('on', t === activeTag);
-	});
-
-	if (activeTag) {
-		filterByTag(activeTag);
-		postListDiv.style.visibility = 'visible';
 	}
 
 	// Pin a window to saved coordinates, used when restoring a session.
@@ -399,47 +316,15 @@
 		});
 	}
 
-	postListDiv.addEventListener('click', function(e) {
-		var link = e.target.closest('a');
-		if (!link) return;
-		var href = link.getAttribute('href');
-		if (!href || href.startsWith('http')) return;
-		// Phones navigate instead of opening windows: stacking five posts
-		// in one scroll and refusing the sixth is desktop behaviour
-		if (phone()) return;
-		e.preventDefault();
-		loadPost(href);
-	});
-
 	window.addEventListener('popstate', function() {
 		if (phone()) return;
 		loadPost(location.pathname + location.search);
-	});
-
-	tagList.addEventListener('click', function(e) {
-		var link = e.target.closest('a');
-		if (!link) return;
-
-		var href = link.getAttribute('href');
-		if (!href) return;
-
-		if (href.match(/^\/tag\//)) {
-			e.preventDefault();
-			var tagName = href.replace(/^\/tag\//, '').replace(/\/$/, '');
-			filterByTag(tagName);
-		} else if (href === '/') {
-			e.preventDefault();
-			showAllPosts();
-		}
 	});
 
 	// session.js reopens windows through the same paths a click takes
 	window.desktop = {
 		loadPost: loadPost,
 		openFolderWindow: openFolderWindow,
-		filterByTag: filterByTag,
-		showAllPosts: showAllPosts,
-		applyGeom: applyGeom,
-		explorerTag: function() { return explorerTag; }
+		applyGeom: applyGeom
 	};
 })();

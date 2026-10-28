@@ -44,8 +44,8 @@
 </head>
 <body data-site="{{ site.name }}"{% if page.title %} class="has-post"{% endif %}>
 	<div class="desktop-icons">
-		<a href="/"><img src="/assets/img/mycomputerv2.png" alt="" /><span>My Computer</span></a>
-		<a href="/?tag=cs600"><img src="/assets/img/folder.png" alt="" /><span>cs600</span></a>
+		<a href="/"><img src="/assets/img/mycomputer-32.png" alt="" /><span>My Computer</span></a>
+		<a href="/?tag=cs600"><img src="/assets/img/folder-48.png" alt="" /><span>cs600</span></a>
 		<a href="/20260109/videos"><img src="/assets/img/video.svg" alt="" /><span>699. videos</span></a>
 		<a href="/20230101/toy"><img src="/assets/img/msagent.png" alt="" /><span>301. toy</span></a>
 		<a href="/20230102/decoder-block"><img src="/assets/img/defragment.png" alt="" /><span>302. blocks</span></a>
@@ -53,78 +53,94 @@
 	<div class="desktop-icons desktop-right">
 		<a><img src="/assets/img/aubergine.png" alt="" /><span>untitled</span></a>
 	</div>
-	<div class="wrapper">
+	{% comment %} My Computer (assets/js/explorer.js), which a tag page opens on its folder {% endcomment %}
+	<div class="wrapper"{% if page.tag %} data-at="{{ page.tag }}"{% endif %}>
 		<div class="default_title">
-			<img src="/assets/img/mycomputer.png" />
+			<img src="/assets/img/mycomputer-16.png" />
 			<div class="btn" id="desktop-close"><span class="cap-x"></span></div>
-			{% if page.tag %}
-				<h1>{{ page.tag }}</h1>
-			{% else %}
-				<h1>My Computer</h1>
-			{% endif %}
+			<h1>{{ page.tag | default: 'My Computer' }}</h1>
 		</div>
 		<div class="drive-chips">
-			<a href="/">All</a>
+			<a href="/">All<small>{{ site.posts | size }}</small></a>
 			{% assign sorted_tags = site.tags | sort %}
-			{% for tag in sorted_tags %}<a href="/?tag={{ tag[0] }}">{{ tag[0] }}</a>{% endfor %}
+			{% for tag in sorted_tags %}<a href="/?tag={{ tag[0] }}">{{ tag[0] }}<small>{{ tag[1] | size }}</small></a>{% endfor %}
 		</div>
-		<div class="tag_list">
-			{% include search.html %}
-			<ul id="tag-list">
-				<li><a href="/" ><img src="/assets/img/disk.png" />(C:)</a>
-			<ul>
-				{% assign academic_tags = 'maths200,maths400,cs300,cs600' | split: ',' %}
-				{% assign tags = site.tags | sort %}
-				{% for tag in tags %}
-					{% assign tag_name = tag | first %}
-					{% if academic_tags contains tag_name %}
-					<li><a href="/tag/{{ tag_name | slugify }}/" title="{{ tag_name | replace:'-', ' ' }}"><img src="/assets/img/folder.ico" />{{ tag_name | replace:'-', ' ' }}</a></li>
-					{% endif %}
-				{% endfor %}
-			</ul>
-				</li>
-				<li><a href="/tag/open/" ><img src="/assets/img/disk.png" />(D:)</a>
-			<ul>
-				{% assign general_tags = 'open' | split: ',' %}
-				{% for tag in tags %}
-					{% assign tag_name = tag | first %}
-					{% if general_tags contains tag_name %}
-					<li><a href="/tag/{{ tag_name | slugify }}/" title="{{ tag_name | replace:'-', ' ' }}"><img src="/assets/img/folder.ico" />{{ tag_name | replace:'-', ' ' }}</a></li>
-					{% endif %}
-				{% endfor %}
-			</ul>
-				</li>
-			</ul>
+		<ul class="topbar">
+			<li class="tb-menu"><span class="tb-label">File</span>
+				<div class="tb-drop">
+					<button type="button" class="tb-item" data-act="open">Open<span class="tb-key">Enter</span></button>
+					<div class="tb-sep"></div>
+					<button type="button" class="tb-item" data-act="close">Close</button>
+				</div>
+			</li>
+			<li class="tb-menu"><span class="tb-label">View</span>
+				<div class="tb-drop">
+					<button type="button" class="tb-item" data-act="folders">Explorer Bar &rsaquo; Folders</button>
+					<div class="tb-sep"></div>
+					<button type="button" class="tb-item" data-act="sort" data-k="name">Arrange by Name</button>
+					<button type="button" class="tb-item" data-act="sort" data-k="type">by Type</button>
+					<button type="button" class="tb-item" data-act="sort" data-k="size">by Size</button>
+					<button type="button" class="tb-item" data-act="sort" data-k="mod">by Modified</button>
+				</div>
+			</li>
+			<li class="tb-menu"><span class="tb-label">Go</span>
+				<div class="tb-drop">
+					<button type="button" class="tb-item" data-act="back">Back<span class="tb-key">Alt+Left</span></button>
+					<button type="button" class="tb-item" data-act="fwd">Forward<span class="tb-key">Alt+Right</span></button>
+					<button type="button" class="tb-item" data-act="up">Up One Level<span class="tb-key">Backspace</span></button>
+					<div class="tb-sep"></div>
+					<button type="button" class="tb-item" data-act="home">My Computer</button>
+				</div>
+			</li>
+		</ul>
+		<div class="xp-bar">
+			<button type="button" class="xp-tb" data-act="back"><svg viewBox="0 0 20 20"><path d="M3 10l6-6v4h8v4H9v4z" fill="currentColor"/></svg>Back</button>
+			<button type="button" class="xp-tb" data-act="fwd"><svg viewBox="0 0 20 20"><path d="M17 10l-6-6v4H3v4h8v4z" fill="currentColor"/></svg>Forward</button>
+			<button type="button" class="xp-tb" data-act="up"><svg viewBox="0 0 20 20"><path d="M2.5 6.5h5l1 1h9v10h-15z" fill="#ffd34d" stroke="#000"/><path d="M10 9l-4 4h3v3h2v-3h3z" fill="currentColor"/></svg>Up</button>
+			<i class="xp-sep"></i>
+			<button type="button" class="xp-tb" data-act="folders"><svg viewBox="0 0 20 20"><path d="M3 3v13M3 6h4M3 11h4M3 16h4" stroke="#808080" fill="none"/><path d="M7.5 4.5h3l1 1h5v3h-9zM7.5 9.5h3l1 1h5v3h-9z" fill="#ffd34d" stroke="#000"/><path d="M8 15h8v2H8z" fill="currentColor"/></svg>Folders</button>
 		</div>
-		<div class="post_list">
-			<div class="det-head"><span class="dh-name">Name</span><span class="dh-size" data-sort="size">Size</span><span class="dh-type">Type</span><span class="dh-date" data-sort="date">Date</span></div>
-			{% unless page.date%}
-				{% if page.title == 'MS-DOS Prompt' or page.title == '404...' %}
+		<div class="xp-addr">
+			<span class="xp-lab">A<u>d</u>dress</span>
+			<button type="button" class="xp-combo" aria-haspopup="listbox"><img src="/assets/img/mycomputer-16.png" alt="" /><span>My Computer</span><i></i></button>
+			<div class="xp-places" role="listbox" hidden></div>
+		</div>
+		<div class="xp-body">
+			<div class="xp-side"></div>
+			<div class="post_list" tabindex="0">
+				<div class="det-head"><span class="dh-name">Name</span><span class="dh-size" data-sort="size">Size</span><span class="dh-type">Type</span><span class="dh-date" data-sort="date">Date</span></div>
+				{% unless page.date%}
+					{% if page.title == 'MS-DOS Prompt' or page.title == '404...' %}
+						<ul>
+							{% for post in site.posts %}
+							{% include post-item.html post=post %}
+							{% endfor %}
+						</ul>
+					{% else %}
+						{{ content }}
+					{% endif %}
+				{% else %}
 					<ul>
 						{% for post in site.posts %}
 						{% include post-item.html post=post %}
 						{% endfor %}
 					</ul>
-				{% else %}
-					{{ content }}
-				{% endif %}
-			{% else %}
-				<ul>
-					{% for post in site.posts %}
-					{% include post-item.html post=post %}
-					{% endfor %}
-				</ul>
-			{% endunless %}
+				{% endunless %}
+			</div>
 		</div>
 		<script>
-		// Pre-render decisions: hide the list until the tag filter runs, and
-		// land on a bare desktop when the icons are there to reopen things.
-		// A saved session decides for itself, so the restore never flashes.
+		// Pre-render decisions: hide the list until explorer.js draws it, and
+		// land on a bare desktop when the icons are there to reopen things,
+		// unless the URL names a folder. A saved session decides for itself,
+		// so the restore never flashes.
 		(function () {
-			var tagged = location.search.indexOf('tag=') !== -1;
-			if (tagged) {
-				document.querySelector('.post_list').style.visibility = 'hidden';
-			}
+			// 001.js turns the address to "/" once My Computer is in front, so
+			// the folder ?tag= names is kept on the window for explorer.js
+			var wrapper = document.querySelector('.wrapper');
+			var tag = new URLSearchParams(location.search).get('tag');
+			if (tag) wrapper.dataset.at = tag;
+			var tagged = !!wrapper.dataset.at;
+			document.querySelector('.post_list').style.visibility = 'hidden';
 			var sess = null;
 			try { sess = JSON.parse(sessionStorage.getItem('desk-session')); } catch (e) {}
 			// Pre-paint twin of applyGeom (tag-filter.js) so a restored
@@ -143,20 +159,17 @@
 			// The restore this pre-paints is skipped on phones (session.js),
 			// so the pre-paint is skipped with it
 			if (!phone() && sess && sess.explorer) {
-				if (sess.explorer.hidden) document.querySelector('.wrapper').style.display = 'none';
-				else preGeom(document.querySelector('.wrapper'), sess.explorer.geom);
+				if (sess.explorer.hidden) wrapper.style.display = 'none';
+				else preGeom(wrapper, sess.explorer.geom);
 			} else if (!tagged && window.matchMedia('(min-width: 910px)').matches) {
-				document.querySelector('.wrapper').style.display = 'none';
+				wrapper.style.display = 'none';
 			}
 		})();
 	</script>
 		<div class="post_total">
-			{% if page.tag %}
-				<div class="left">{{ site.tags[page.tag] | size }} object(s)</div>
-			{% else %}
-				<div class="left">{{ site.posts | size }} object(s)</div>
-			{% endif %}
-			<div class="right">&nbsp;</div>
+			<div class="left">{% if page.tag %}{{ site.tags[page.tag] | size }}{% else %}{{ site.posts | size }}{% endif %} object(s)</div>
+			<div class="right"></div>
+			<div class="zone"><img src="/assets/img/mycomputer-16.png" alt="" />My Computer</div>
 		</div>
 		<div class="win-grip"></div>
 	</div>
@@ -173,7 +186,7 @@
 			})(document.currentScript.parentElement);
 			</script>
 			<div class="post_title">
-				<img src="/assets/img/{{ page.icon | default: 'notepad.png' }}" />
+				<img src="/assets/img/{{ page.icon | default: 'notepad-32.png' }}" />
 				<h1>{{  page.title  }}</h1>
 				<div class="btn btn_find"><span>&#128269;</span></div>
 				<div class="btn btn_view"><span>Aa</span></div>
@@ -221,19 +234,21 @@
 		</div>
     {% endif %}
 	<script>
-		// Every post's listing, for the folder windows (tag-filter.js) and
-		// the § cards (xref.js): metadata only, no text
+		// Every post's listing, for My Computer (explorer.js), the folder
+		// windows (tag-filter.js) and the § cards (xref.js): metadata, and
+		// the facts _plugins/explorer.rb reads off each post
 		window.searchIndex = [
 			{% for post in site.posts %}
 			{
 				title: {{ post.title | jsonify }},
 				url: {{ post.url | jsonify }},
-				icon: {{ post.icon | default: 'notepad.png' | jsonify }},
+				icon: {{ post.icon | default: 'notepad-32.png' | jsonify }},
 				type: {{ site.data.types[post.icon] | default: 'Notepad' | jsonify }},
 				date: {{ post.date | date: "%-d/%-m/%y" | jsonify }},
 				sortdate: {{ post.date | date: "%Y%m%d" | jsonify }},
 				size: {% capture psize %}{% include post-size.html post=post %}{% endcapture %}{{ psize | jsonify }},
-				tags: {{ post.tags | jsonify }}
+				tags: {{ post.tags | jsonify }},
+				xp: {{ post.explorer | jsonify }}
 			}{% unless forloop.last %},{% endunless %}
 			{% endfor %}
 		];
@@ -241,6 +256,7 @@
 	<script src="/assets/js/001.js"></script>
 	<script src="/assets/js/002.js"></script>
 	<script src="/assets/js/tag-filter.js"></script>
+	<script src="/assets/js/explorer.js"></script>
 	<script src="/assets/js/sheet.js"></script>
 	<script src="/assets/js/xref.js"></script>
 	<script src="/assets/js/toc.js"></script>
@@ -268,7 +284,7 @@
 				</div>
 			</div>
 		</div>
-		<button class="task-win" id="task-desktop"><img src="/assets/img/mycomputer.png" alt="" />My Computer</button>
+		<button class="task-win" id="task-desktop"><img src="/assets/img/mycomputer-16.png" alt="" />My Computer</button>
 		<span id="task-posts" style="display: flex; gap: 4px;"></span>
 		<button class="task-arr" id="task-cascade" title="Cascade windows">&#10697;</button>
 		<button class="task-arr" id="task-tile" title="Tile windows">&#8862;</button>

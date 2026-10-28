@@ -69,8 +69,8 @@
 	// post is in front, "/" otherwise (explorer, folder windows). Replace,
 	// not push: focus clicks must not pile up history entries.
 	document.addEventListener("window:focused", function (e) {
-		// Not on phones: the page is the window, and rewriting here would
-		// strip ?tag= before tag-filter.js (loaded later) can read it
+		// Not on phones: there the page is the window, and keeps the
+		// address it was opened at
 		if (phone()) return;
 		var url = e.detail.el.dataset.url || "/";
 		if (location.pathname + location.search !== url) {
