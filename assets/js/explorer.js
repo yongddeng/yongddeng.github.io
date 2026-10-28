@@ -11,9 +11,8 @@
 	const posts = window.searchIndex || [];
 	const $ = sel => win.querySelector(sel);
 	const side = $('.xp-side'), pane = $('.post_list'), combo = $('.xp-combo'), places = $('.xp-places');
-	const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+	const esc = desktop.escapeHtml, kb = desktop.sizeValue;
 	const dmy = iso => { const [y, m, d] = iso.split('-'); return +d + '/' + +m + '/' + y.slice(2); };
-	const kb = s => { const m = /([\d.]+)\s*(KB|MB)/i.exec(s || ''); return m ? parseFloat(m[1]) * (m[2].toUpperCase() === 'MB' ? 1024 : 1) : 0; };
 	const fmtKB = k => (k >= 1024 ? (k / 1024).toFixed(1) + 'MB' : Math.round(k) + 'KB');
 	const many = (n, one) => n.toLocaleString('en-GB') + ' ' + one + (n === 1 ? '' : 's');
 	const hasTex = s => /\$[^$]+\$/.test(s || '');
@@ -67,17 +66,12 @@
 		return many(ps.length, kind) + ', ' + (ns.length === 1 ? ns[0] : ns[0] + ' to ' + ns[ns.length - 1]);
 	}
 
-	// MathJax loads with the first TeX shown (mathjax.html); an element
-	// marked data-tex stays unshown until it is typeset
+	// an element marked data-tex stays unshown until it is typeset (mathjax.html)
 	function typeset(el, then) {
-		needMath();
-		(function run() {
-			if (!(window.MathJax && MathJax.Hub)) return setTimeout(run, 200);
-			MathJax.Hub.Queue(['Typeset', MathJax.Hub, el], () => {
-				el.querySelectorAll('[data-tex]').forEach(t => t.removeAttribute('data-tex'));
-				if (then) then();
-			});
-		})();
+		typesetMath(el, () => {
+			el.querySelectorAll('[data-tex]').forEach(t => t.removeAttribute('data-tex'));
+			if (then) then();
+		});
 	}
 
 	// ---- state ----

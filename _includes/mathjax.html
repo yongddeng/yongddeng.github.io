@@ -39,5 +39,12 @@ function needMath() {
     s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-AMS_CHTML';
     document.head.appendChild(s);
 }
+// Typesets el once MathJax is here, then calls then
+function typesetMath(el, then) {
+    needMath();
+    if (!(window.MathJax && MathJax.Hub)) return setTimeout(function () { typesetMath(el, then); }, 200);
+    MathJax.Hub.Queue(['Typeset', MathJax.Hub, el]);
+    if (then) MathJax.Hub.Queue(then);
+}
 {% if page.use_math %}needMath();{% endif %}
 </script>

@@ -292,17 +292,7 @@
 				}
 				if (window.hljs || !newContent.querySelector('pre code')) shown();
 				else loadHljs().then(shown);
-				function typesetMathJax() {
-					if (window.MathJax && MathJax.Hub) {
-						MathJax.Hub.Queue(['Typeset', MathJax.Hub, newContent]);
-					} else {
-						setTimeout(typesetMathJax, 200);
-					}
-				}
-				if (newContent.hasAttribute('data-math')) {
-					needMath();
-					typesetMathJax();
-				}
+				if (newContent.hasAttribute('data-math')) typesetMath(newContent);
 			} else {
 				// navigated to an index page: close all post windows
 				open.forEach(function(w) { w.remove(); });
@@ -321,10 +311,13 @@
 		loadPost(location.pathname + location.search);
 	});
 
-	// session.js reopens windows through the same paths a click takes
+	// session.js reopens windows through the same paths a click takes, and
+	// explorer.js lists its posts with the same helpers
 	window.desktop = {
 		loadPost: loadPost,
 		openFolderWindow: openFolderWindow,
-		applyGeom: applyGeom
+		applyGeom: applyGeom,
+		escapeHtml: escapeHtml,
+		sizeValue: sizeValue
 	};
 })();
