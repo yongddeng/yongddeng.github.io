@@ -1,6 +1,6 @@
-// What the programs on (D:) share (quincunx.js, lil.js): a place in their
-// window's status bar beside the note they draw for, canvases drawn at the
-// screen's density, and a key to what they draw.
+// What the programs on (D:) share (quincunx.js, lil.js, optimiser.js): a
+// place in their window's status bar beside the note they draw for, canvases
+// drawn at the screen's density, and a key to what they draw.
 
 // The note's link moves into the status bar and opens the note in a window of
 // its own, as My Computer does. Returns a setter for the bar's first cell, which

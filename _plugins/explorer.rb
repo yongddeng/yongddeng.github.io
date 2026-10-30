@@ -1,10 +1,8 @@
 # My Computer's facts about each post (assets/js/explorer.js): the opening
-# sentence, parts and sections, figures, formulas, and the date of the last
-# commit to touch it. Read from the markdown before anything renders, so
-# every page's index carries all of them. And about each program on (D:)
+# sentence, parts and sections, figures, formulas, and the date it was
+# created, its own. Read from the markdown before anything renders, so every
+# page's index carries all of them. And about each program on (D:)
 # (_programs): the note it draws for, its script's size, and its date.
-require "open3"
-
 module Explorer
   HIDDEN = /\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|<!--.*?-->/m
   TEX = /(\$\$.+?\$\$|(?<!\\)\$[^$\n]+?(?<!\\)\$)/m
@@ -51,11 +49,10 @@ module Explorer
     s
   end
 
-  # The last commit to touch the document or any of the other paths given;
-  # before the first, the document's own date
-  def modified(site, doc, *paths)
-    out, = Open3.capture2("git", "-C", site.source, "log", "-1", "--format=%cs", "--", doc.relative_path, *paths)
-    out.strip.empty? ? doc.date.strftime("%F") : out.strip
+  # When a document was created: its own date, from its name or front matter,
+  # which places a post in its series rather than on the day it was written
+  def created(doc)
+    doc.date.strftime("%F")
   end
 
   # The programs open on controls rather than prose, so say what they hold
@@ -90,7 +87,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
       "sections" => text.scan(/^### +\*\*\d+(?:\.\d+)+\.\s*.+?\*\*\s*$/).size,
       "figures" => text.scan(/<img\b|!\[/).size,
       "formulas" => text.scan(Explorer::TEX).size,
-      "modified" => Explorer.modified(site, p),
+      "created" => Explorer.created(p),
     }
   end
 
@@ -103,7 +100,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     x.data["explorer"] = {
       "note" => { "title" => note.data["title"], "url" => note.url },
       "size" => "#{(File.size(File.join(site.source, script)) / 1024.0).ceil}KB",
-      "modified" => Explorer.modified(site, x, script),
+      "created" => Explorer.created(x),
     }
   end
 end

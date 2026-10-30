@@ -885,8 +885,14 @@ img.task-menu-ic {
 	object-fit: contain;
 }
 // Explorer "Details" view: header row + one file per row with
-// Name / Type / Date columns. Used by the folder windows and My
-// Computer's file pane.
+// Name / Size / Type / Created columns. Used by the folder windows and My
+// Computer's file pane. A column's head and cells share its width and sit
+// $det-gutter in from its edges, the head's bevel taking 1px of it; text
+// to the left, sizes to the right, sizes and dates in figures of one width
+$det-gutter: 8px;
+$det-size: 64px;   // 10.0MB
+$det-type: 88px;   // Application
+$det-date: 88px;   // 2026-01-01
 @mixin file-details-view {
 	.det-head {
 		display: flex;
@@ -894,16 +900,16 @@ img.task-menu-ic {
 		font-size: 12px;
 
 		span {
-			padding: 2px 8px;
+			padding: 2px ($det-gutter - 1px);
 			box-sizing: border-box;
 			border: 1px solid;
 			border-color: #ffffff #000000 #000000 #ffffff;
 		}
 
 		.dh-name { flex: 1; }
-		.dh-size { width: 60px; text-align: right; }
-		.dh-type { width: 92px; }
-		.dh-date { width: 74px; }
+		.dh-size { width: $det-size; text-align: right; }
+		.dh-type { width: $det-type; }
+		.dh-date { width: $det-date; }
 		[data-sort] { cursor: pointer; }
 		[data-dir="asc"]::after { content: " \25B4"; font-size: 9px; }
 		[data-dir="desc"]::after { content: " \25BE"; font-size: 9px; }
@@ -920,7 +926,7 @@ img.task-menu-ic {
 			a {
 				display: flex;
 				align-items: center;
-				padding: 3px 8px;
+				padding: 3px 0 3px $det-gutter;
 				margin: 0;
 				text-decoration: none;
 				color: #000000;
@@ -954,13 +960,15 @@ img.task-menu-ic {
 				.sz, .ty, .dt {
 					flex: none;
 					box-sizing: border-box;
+					padding: 0 $det-gutter;
 					font-size: 12px;
 					color: #55505a;
 				}
 
-				.sz { width: 60px; padding-right: 8px; text-align: right; }
-				.ty { width: 92px; padding-left: 8px; }
-				.dt { width: 74px; padding-left: 8px; }
+				.sz { width: $det-size; text-align: right; }
+				.ty { width: $det-type; }
+				.dt { width: $det-date; }
+				.sz, .dt { font-variant-numeric: tabular-nums; }
 
 				&:hover .nm {
 					background: #000080;

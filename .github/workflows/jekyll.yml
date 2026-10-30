@@ -19,9 +19,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          # the whole history: My Computer dates each post by its last commit
-          fetch-depth: 0
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:

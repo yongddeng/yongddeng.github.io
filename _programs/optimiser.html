@@ -1,0 +1,72 @@
+---
+title: optimiser.exe
+date: 2026-10-29
+note: "301"
+icon: optimiser-16.png
+large: optimiser-48.png
+winclass: exe-win opt-win
+description: SGD, Momentum, RMSProp, AdamW and Muon down four loss surfaces over two weights, each with its own learning rate and knobs as torch.optim names them, at PyTorch's defaults, tuned by a sweep or set by hand, under a constant, cosine or warmup schedule, clipped or not, in fp32, bf16 or fp16, the loss averaged or scaled up as a sum, from a start, an initialisation, or sixteen seeds of it at once.
+---
+
+<div class="exe opt">
+<div class="lit-tool">
+<button type="button" class="lit-btn" data-act="run" title="Run the race, or pause it">&#9654; Run</button>
+<button type="button" class="lit-btn" data-act="step" title="One step">Step</button>
+<button type="button" class="lit-btn" data-act="reset" title="Back to step 0">Reset</button>
+<span class="lit-sep"></span>
+<button type="button" class="lit-btn" data-surface="ravine" title="A ravine 150 times steeper across than along">Ravine</button>
+<button type="button" class="lit-btn" data-surface="dips" title="A sharp dip beside a wide one">Two dips</button>
+<button type="button" class="lit-btn" data-surface="ab" title="The smallest deep linear network, ½(ab − 1)²"><span><i>ab</i> = 1</span></button>
+<button type="button" class="lit-btn" data-surface="cliff" title="Pascanu et al.’s one-unit recurrent network, a wall in its loss">Cliff</button>
+<span class="lit-sep"></span>
+<span class="exe-lbl">init</span>
+<button type="button" class="lit-btn on" data-init="fixed" title="A fixed θ₀: the surface’s own start, or where you click on the map">fixed</button>
+<button type="button" class="lit-btn" data-init="zero" title="θ = 0">0</button>
+<button type="button" class="lit-btn" data-init="small" title="θ ~ N(0, 0.01²)">0.01</button>
+<button type="button" class="lit-btn" data-init="xavier" title="θ ~ N(0, 2/(fan-in + fan-out)), Glorot and Bengio (2010)">Xavier</button>
+<button type="button" class="lit-btn" data-init="torch" title="PyTorch’s own, as nn.Linear inits its weight: θ ~ U(−1/√fan-in, 1/√fan-in), kaiming_uniform_ with a = √5">PyTorch</button>
+<button type="button" class="lit-btn" data-act="seeds" title="Run 16 seeds of the init at once; press an init first" disabled>16 seeds</button>
+</div>
+<div class="exe-body">
+<div class="lit-pane opt-map-pane"><canvas class="opt-map" aria-label="The loss surface, with each optimiser's path across it"></canvas>
+<div class="opt-views" role="group" aria-label="View">
+<button type="button" class="lit-btn" data-view="flat" title="The surface as contours; a click starts the runs there">Contours</button>
+<button type="button" class="lit-btn on" data-view="mesh" title="The surface as a mesh to turn">3D</button>
+</div>
+<div class="opt-palettes" role="group" aria-label="Palette"></div>
+<button type="button" class="opt-help" aria-expanded="false" title="About this surface">?</button>
+<div class="opt-balloon" hidden>
+<p class="exe-note" data-for="ravine"><i>L</i> = ½((<i>x</i> − 3)² + 150<i>y</i>²). Momentum’s <i>β</i> moves its edge, 2(1 + <i>β</i>)/150 (Goh, 2017): tuned, <i>β</i> = 0, plain SGD, is under 10⁻³ by step 437, 0.5 by 214, 0.9 by 82, 0.95 by 50, and 0.99 still rings at step 600. RMSProp, AdamW and Muon step about <i>η</i> a step, so one <i>η</i> may reach the floor or settle on it, not both: at a constant <i>η</i> Muon ends ringing 4×10⁻³ above the floor, and with cosine decay 3×10⁻¹² above. AdamW’s weight decay holds it 2×10⁻⁵ above, cosine or not, where its step balances wd·<i>θ</i> rather than where the gradient is 0 (Loshchilov and Hutter, 2019); at wd = 0 it gets under 10⁻¹². RMSProp with Hinton’s <i>α</i> = 0.9 never gets under 10⁻³; with PyTorch’s 0.99, by step 220.</p>
+<p class="exe-note" data-for="dips">A sharp dip, the deeper, beside a wide one. From the start shown every run settles in the sharp dip, SGD tuned to 0.02 there by step 11, AdamW to 0.1 by 27. From an init the draw decides, not the knobs: the sweep is flat at the wide dip’s 0.106, where 14 of 16 Xavier seeds end at <i>η</i> = 0.01 whichever optimiser runs them. SGD sits still at a dip’s bottom only if <i>η</i> &lt; 2/<i>λ</i>, <i>λ</i> its curvature, 0.045 for the sharp dip and 1 for the wide: at 0.1 noise <i>σ</i> = 1 throws it into the wide one, one account of why large steps and small batches find flat minima (Keskar et al., 2017; Cohen et al., 2021).</p>
+<p class="exe-note" data-for="ab">The smallest deep network, <i>x</i> to one hidden unit to the output, all linear, fit to <i>y</i> = <i>x</i>: <i>L</i> = ½(<i>ab</i> − 1)², a saddle at 0, lowest all along the dashed <i>ab</i> = 1. From init 0 nothing moves at any <i>η</i>. From <i>σ</i> = 0.01 SGD waits by the saddle about ln(1/|<i>θ</i>₀|)/<i>η</i> steps (Saxe et al., 2014): at 0.01, 3 of 16 seeds are under 10⁻³ by step 600, tuned to 0.5 all by 14. RMSProp divides the tiny gradient by its own size and leaves at once: at torch defaults it is there by step 28 while SGD has not moved. Gradient descent keeps <i>a</i>² − <i>b</i>² as drawn (Du et al., 2018): the rich and lazy regimes (Woodworth et al., 2020).</p>
+<p class="exe-note" data-for="cliff">The loss of the smallest recurrent network, Pascanu et al.’s (2013): one sigmoid unit fed back to itself, <i>x</i> ← <i>w</i>σ(<i>x</i>) + <i>b</i> for 50 steps from 0.5, fit so that σ(<i>x</i>₅₀) = 0.7; their figure 6, drawn wider. Where <i>w</i> gives <i>x</i> two attractors, a little more <i>b</i> tips <i>x</i>₅₀ from one to the other, so the loss steps down a wall where the gradient reaches 10⁴; its lowest points line the lip, dashed. SGD at <i>η</i> = 0.1 climbs to it, steps into the wall at step 32 and is thrown onto the plateau where σ saturates, to stay at (1 − 0.7)² = 0.09; with grad clip on, it slides along the lip to 6×10⁻⁵. Tuned, SGD gets to 3×10⁻² at <i>η</i> = 0.01, and clipped, to 2×10⁻⁶ at <i>η</i> = 1. At torch’s lrs clipping lowers every end but SGD’s, which never climbs as far as the wall.</p>
+<p class="exe-note">Clipping at 1 keeps SGD from diverging at any <i>η</i>, and slows it: on Ravine at torch’s lr it ends 5.85 above the floor, not 1.95; on Cliff it keeps SGD on the lip. Under AMP the gradient sees only the weights’ bf16 or fp16 cast, so tuned runs stall above fp32’s, drawn pale (Micikevicius et al., 2018); on Ravine fp16’s GradScaler skips the first 7 steps, ticked at the foot, halving its scale from 2¹⁶. The dotted 2/<i>λ</i> on the sweep is where SGD diverges at <i>L</i>*; a run that diverges ends in an × where it left the map. loss × scales the loss up, as summing it over a batch of that many instead of averaging would, so every gradient is that many times as long and 2/<i>λ</i> that many times lower: on Ravine at torch’s lrs SGD arrives at ×10, and at ×100 it and Momentum diverge at step 2, while RMSProp and AdamW, whose steps are about <i>η</i> whatever the gradient’s size, read as before to the digit at every scale, and Muon to its bf16 rounding.</p>
+<p class="exe-note">At first each runs as torch.optim makes it, at PyTorch’s own lr and knobs, the long tick on each slider, and PyTorch defaults is pressed; tuned, at the <i>η</i> the sweep finds best for it, the lowest <i>L</i> − <i>L</i>* at the end, then the earliest under 10⁻³, as a fair comparison tunes each (Choi et al., 2019). The pointer on a card shows its torch.optim call. Momentum, Polyak (1964); RMSProp, Hinton (2012), with no bias correction, as in PyTorch; AdamW, Loshchilov and Hutter (2019), Kingma and Ba’s (2015) Adam with its weight decay, wd, decoupled; Muon, Jordan et al. (2024), orthogonalised in bf16 as torch’s is, <i>θ</i> a diagonal 2×2 on Ravine, two 1×1s on <i>ab</i> = 1 and Cliff, a 1×2 row on Two dips, whose fans set Xavier’s <i>σ</i> and PyTorch’s bound; cosine, Loshchilov and Hutter (2017); warmup, Goyal et al. (2017). Seeds set the init’s draw and the gradient noise. After Alec Radford’s animations and Lili Jiang’s arrows (2020); colours, Okabe and Ito (2008).</p>
+</div>
+</div>
+<div class="lit-pane"><canvas class="opt-loss" aria-label="Each optimiser's loss above the lowest, step by step, on a log axis"></canvas></div>
+<div class="lit-pane"><canvas class="opt-sweep" aria-label="Each optimiser's loss above the lowest at its last step, at each learning rate, on log axes"></canvas></div>
+</div>
+<div class="lit-tool opt-hyper">
+<label class="exe-lbl">all at <i>η</i> <input type="range" min="0" data-in="rate" title="One η for every optimiser"></label><output data-out="rate"></output>
+<button type="button" class="lit-btn" data-act="torch" title="Each at torch.optim’s own lr and knobs, the long ticks">PyTorch defaults</button>
+<button type="button" class="lit-btn" data-act="tune" title="Each at the η the sweep finds best for it">tuned</button>
+<span class="lit-sep"></span>
+<button type="button" class="lit-btn" data-schedule="cosine" title="CosineAnnealingLR, η down to 0 over the run">cosine</button>
+<button type="button" class="lit-btn" data-schedule="warmup" title="LinearLR up over the first tenth, then cosine">warmup</button>
+<span class="lit-sep"></span>
+<label class="exe-lbl">noise <i>σ</i> <input type="range" min="0" max="8" value="0" data-in="noise" title="Gaussian noise on each gradient, as a minibatch’s"></label><output data-out="noise">0</output>
+<span class="lit-sep"></span>
+<label class="exe-lbl">loss × <input type="range" min="0" max="3" value="0" data-in="scale" title="The loss scaled up, as summing it over a batch of this many instead of averaging would, reduction='sum': every gradient this many times as long; the readings stay in the mean's units"></label><output data-out="scale">1</output>
+<button type="button" class="lit-btn" data-act="clip" title="clip_grad_norm_(params, max_norm=1.0) before each step">grad clip 1.0</button>
+<span class="lit-sep"></span>
+<span class="exe-lbl">AMP</span>
+<button type="button" class="lit-btn" data-amp="bf16" title="autocast(dtype=torch.bfloat16): the forward and backward in bf16, fp32’s range in 8 bits of significand; the weights and the optimiser’s state stay fp32">bf16</button>
+<button type="button" class="lit-btn" data-amp="fp16" title="autocast(dtype=torch.float16) with a GradScaler: 11 bits of significand up to 65,504; the loss scaled from 2¹⁶, a step whose gradient overflows skipped and the scale halved">fp16</button>
+</div>
+<dl class="exe-read opt-cards"></dl>
+<p class="opt-caption"></p>
+<a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/optimiser.js" defer></script>

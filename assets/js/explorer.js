@@ -13,7 +13,6 @@
 	const $ = sel => win.querySelector(sel);
 	const side = $('.xp-side'), pane = $('.post_list'), combo = $('.xp-combo'), places = $('.xp-places');
 	const esc = desktop.escapeHtml, kb = desktop.sizeValue;
-	const dmy = iso => { const [y, m, d] = iso.split('-'); return +d + '/' + +m + '/' + y.slice(2); };
 	const fmtKB = k => (k >= 1024 ? (k / 1024).toFixed(1) + 'MB' : Math.round(k) + 'KB');
 	const many = (n, one) => n.toLocaleString('en-GB') + ' ' + one + (n === 1 ? '' : 's');
 	const hasTex = s => /\$[^$]+\$/.test(s || '');
@@ -30,10 +29,15 @@
 	add('D', { name: '(D:)', kind: 'drive', addr: 'D:\\', up: 'mc', kids: programs.map(x => x.url) });
 	tags.forEach(t => add(t, { name: t, kind: 'folder', addr: 'C:\\' + t, up: 'C' }));
 	posts.forEach(p => {
-		add(p.url, { name: p.title, kind: 'file', up: p.tags[0], post: p, url: p.url, icon: p.icon, type: p.type, size: p.size, modified: p.xp.modified });
+		add(p.url, { name: p.title, kind: 'file', up: p.tags[0], post: p, url: p.url, icon: p.icon, type: p.type, size: p.size, created: p.xp.created });
 		if (N[p.tags[0]]) N[p.tags[0]].kids.push(p.url);
 	});
-	programs.forEach(x => add(x.url, { name: x.name, kind: 'exe', up: 'D', exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, modified: x.modified }));
+	programs.forEach(x => add(x.url, { name: x.name, kind: 'exe', up: 'D', exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, created: x.created }));
+	// Each place's own order, which its list keeps until Arrange picks another:
+	// a folder's posts by name, as (C:)'s folders are; (D:)'s programs as they
+	// were made, the newest last
+	const byName = (a, b) => a.localeCompare(b, 'en', { numeric: true });
+	tags.forEach(t => N[t].kids.sort((a, b) => byName(N[a].name, N[b].name)));
 	const isBox = n => n.kind !== 'file' && n.kind !== 'exe';
 	const TYPE = { drive: 'Local Disk', folder: 'File Folder' };
 	// Windows 98's own icons: 16px drawings, and for the large icons its 48px
@@ -52,7 +56,10 @@
 	const leaves = n => (isBox(n) ? n.kids.flatMap(k => leaves(N[k])) : [n]);
 	const files = n => leaves(n).filter(m => m.kind === 'file').map(m => m.post);
 	const kbOf = n => leaves(n).reduce((a, m) => a + kb(m.size), 0);
-	const modOf = n => leaves(n).reduce((a, m) => (m.modified > a ? m.modified : a), '');
+	// when a place was created: its own date, or a folder's first
+	const madeOf = n => leaves(n).reduce((a, m) => (!a || m.created < a ? m.created : a), '');
+	// whether a place shows when it was created: a post, a program or a folder, not a drive
+	const dated = n => n.kind !== 'drive';
 
 	// what a post holds, for its infotip
 	function inside(p) {
@@ -84,14 +91,16 @@
 	// ---- state ----
 	// the folder the page names, by its tag page or its ?tag= (default.html)
 	const start = win.dataset.at;
-	const S = { at: N[start] ? start : 'mc', sel: null, back: [], fwd: [], folders: false, sort: { k: 'name', asc: true }, open: new Set(['mc', 'C']) };
+	const S = { at: N[start] ? start : 'mc', sel: null, back: [], fwd: [], folders: false, sort: { k: null, asc: true }, open: new Set(['mc', 'C']) };
+	// what the place holds, in its own order or as Arrange sorts it
 	function kids() {
-		const k = S.sort.k, dir = S.sort.asc ? 1 : -1;
-		const val = m => (k === 'size' ? kbOf(m) : k === 'type' ? typeOf(m) : k === 'mod' ? modOf(m) : m.name);
-		return N[S.at].kids.map(id => N[id]).sort((a, b) => {
+		const k = S.sort.k, dir = S.sort.asc ? 1 : -1, own = N[S.at].kids.map(id => N[id]);
+		if (!k) return own;
+		const val = m => (k === 'size' ? kbOf(m) : k === 'type' ? typeOf(m) : k === 'made' ? madeOf(m) : m.name);
+		return own.sort((a, b) => {
 			if (isBox(a) !== isBox(b)) return isBox(a) ? -1 : 1;
 			const x = val(a), y = val(b);
-			return dir * (typeof x === 'number' ? x - y : String(x).localeCompare(String(y), 'en', { numeric: true }));
+			return dir * (typeof x === 'number' ? x - y : byName(String(x), String(y)));
 		});
 	}
 
@@ -167,9 +176,9 @@
 			return;
 		}
 		const th = (k, label, cls) => '<span class="' + cls + '" data-k="' + k + '"' + (S.sort.k === k ? ' data-dir="' + (S.sort.asc ? 'asc' : 'desc') + '"' : '') + '>' + label + '</span>';
-		pane.innerHTML = '<div class="det-head">' + th('name', 'Name', 'dh-name') + th('size', 'Size', 'dh-size') + th('type', 'Type', 'dh-type') + th('mod', 'Modified', 'dh-date') + '</div><ul>'
+		pane.innerHTML = '<div class="det-head">' + th('name', 'Name', 'dh-name') + th('size', 'Size', 'dh-size') + th('type', 'Type', 'dh-type') + th('made', 'Created', 'dh-date') + '</div><ul>'
 			+ items.map(n => '<li>' + a(n, '<img src="' + icon(n) + '" alt="" /><span class="nm">' + esc(n.name) + '</span><span class="sz">' + (isBox(n) ? '' : n.size)
-				+ '</span><span class="ty">' + typeOf(n) + '</span><span class="dt">' + (modOf(n) ? dmy(modOf(n)) : '') + '</span>') + '</li>').join('') + '</ul>';
+				+ '</span><span class="ty">' + typeOf(n) + '</span><span class="dt">' + (dated(n) && madeOf(n) ? madeOf(n) : '') + '</span>') + '</li>').join('') + '</ul>';
 	}
 
 	// ---- the chrome: title, address, buttons, menus and status bar ----
@@ -189,7 +198,7 @@
 		// Windows 98 put the selection's type and date where the count goes
 		const sel = S.sel && N[S.sel], items = kids();
 		const k = sel ? kbOf(sel) : items.filter(n => !isBox(n)).reduce((t, n) => t + kbOf(n), 0);
-		$('.post_total .left').textContent = sel ? 'Type: ' + typeOf(sel) + (modOf(sel) ? '   Modified: ' + dmy(modOf(sel)) : '') : items.length + ' object(s)';
+		$('.post_total .left').textContent = sel ? 'Type: ' + typeOf(sel) + (dated(sel) ? '   Created: ' + madeOf(sel) : '') : items.length + ' object(s)';
 		$('.post_total .right').textContent = k ? fmtKB(k) : '';
 	}
 
@@ -323,24 +332,23 @@
 			const p = n.post;
 			return (p.xp.lead ? '<p class="ld"' + (hasTex(p.xp.lead) ? ' data-tex' : '') + '>' + esc(p.xp.lead) + '</p>' : '')
 				+ inside(p).map(f => '<div>' + esc(f) + '</div>').join('')
-				+ '<div class="k">Modified: ' + dmy(n.modified) + ' · Size: ' + n.size + '</div>';
+				+ '<div class="k">Created: ' + n.created + ' · Size: ' + n.size + '</div>';
 		}
 		if (n.kind === 'exe') {
 			return '<p class="ld">' + esc(n.exe.about) + '</p><div>For ' + esc(n.exe.note) + '</div>'
-				+ '<div class="k">Modified: ' + dmy(n.modified) + ' · Size: ' + n.size + '</div>';
+				+ '<div class="k">Created: ' + n.created + ' · Size: ' + n.size + '</div>';
 		}
-		const ls = leaves(n), ps = files(n);
-		if (!ls.length) return '<div>Empty.</div>';
-		// (D:) holds programs and no posts
-		const what = !ps.length ? many(ls.length, 'program') : n.kind === 'drive' ? many(ps.length, 'file') + ' in ' + many(n.kids.length, 'folder') : span(ps);
-		return '<div>' + esc(what) + '</div><div class="k">Modified: ' + dmy(modOf(n)) + '</div>';
+		// a folder; the drives have none
+		const ps = files(n);
+		if (!ps.length) return '<div>Empty.</div>';
+		return '<div>' + esc(span(ps)) + '</div><div class="k">Created: ' + madeOf(n) + '</div>';
 	}
 	pane.addEventListener('mousemove', e => {
 		if (phone()) return;
 		const it = e.target.closest('[data-id]'), id = it && it.dataset.id;
 		if (tip && tip.dataset.id === id) return;
 		hideTip();
-		if (!id) return;
+		if (!id || N[id].kind === 'drive') return;
 		const x = e.clientX, y = e.clientY;
 		tipTimer = setTimeout(() => {
 			tip = document.createElement('div');
@@ -370,11 +378,11 @@
 		});
 		const groups = tag && N[tag] ? [tag] : N.C.kids;
 		pane.innerHTML = groups.map(t => (tag ? '' : '<div class="xp-group">' + esc(N[t].addr) + ' · ' + N[t].kids.length + '</div>') + '<ul>'
-			+ N[t].kids.map(id => N[id].post).sort((a, b) => a.title.localeCompare(b.title, 'en', { numeric: true })).map(p => {
+			+ N[t].kids.map(id => N[id].post).map(p => {
 				const lead = p.xp.lead || (p.xp.about || []).join('. ') + '.';
 				return '<li><a href="' + p.url + '"><img src="/assets/img/' + p.icon + '" alt="" /><span class="tx"><span class="nm">' + esc(p.title) + '</span>'
 					+ '<span class="ld"' + (hasTex(p.xp.lead) ? ' data-tex' : '') + '>' + esc(lead) + '</span>'
-					+ '<span class="mt">' + p.type + ' · ' + p.size + ' · ' + dmy(p.xp.modified) + '</span></span></a></li>';
+					+ '<span class="mt">' + p.type + ' · ' + p.size + ' · ' + p.xp.created + '</span></span></a></li>';
 			}).join('') + '</ul>').join('');
 		pane.style.visibility = '';
 		// MathJax loads only once a row with TeX scrolls near

@@ -1,14 +1,18 @@
-// The programs on (D:) (_programs): quincunx.exe and lil.exe, each in a window
-// of its own (assets/js/quincunx.js, lil.js). A toolbar, the panes their
-// canvases fill, a row of readings and a note on what is drawn; the link to
-// the note each draws for moves into the status bar (assets/js/exe.js).
-// Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
+// The programs on (D:) (_programs): quincunx.exe, lil.exe and optimiser.exe,
+// each in a window of its own (assets/js/quincunx.js, lil.js, optimiser.js). A
+// toolbar, the panes their canvases fill, a row of readings and a note on what
+// is drawn; the link to the note each draws for moves into the status bar
+// (assets/js/exe.js). Toolbar, buttons and panes reuse the WinHelp chrome from
+// _literature.scss.
 @use "main";
 
 $exe-ui: "Helvetica Neue", Arial, sans-serif;
 $exe-mute: #55505a;
 $exe-mono: "Lucida Console", Menlo, Monaco, monospace;
 $exe-navy: #000080;
+$exe-face: #c0c0c0;
+$exe-shade: #7f787f;
+$exe-note: #ffffe1;
 
 .exe-win {
 	width: 780px;
@@ -139,6 +143,344 @@ $exe-navy: #000080;
 	line-height: 1.45;
 }
 
+// ---- optimiser.exe: the map down the left, the loss and the sweep stacked on
+// the right, the row of rates, schedule and noise, then a card an optimiser ----
+.opt-win {
+	width: 900px;
+
+	.post_content {
+		height: 650px;
+	}
+}
+.opt {
+	.exe-body {
+		grid-template-columns: 3fr 2fr;
+		grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+		grid-auto-flow: row;
+
+		> :first-child {
+			grid-row: 1 / 3;
+		}
+	}
+	.exe-lbl input[type="range"] {
+		width: 48px;
+	}
+	// the buttons in the row over the cards narrower than WinHelp's, so its three sliders fit
+	.opt-hyper .lit-btn {
+		padding: 0 4px;
+	}
+	// Run, the button the window is for, in bold as a default button was
+	[data-act="run"] {
+		font-weight: bold;
+	}
+	// the sliders as Windows 98's trackbars: a sunken groove, a raised thumb
+	input[type="range"] {
+		-webkit-appearance: none;
+		appearance: none;
+		height: 18px;
+		margin: 0;
+		background: none;
+		cursor: pointer;
+
+		&::-webkit-slider-runnable-track {
+			height: 2px;
+			background: #ffffff;
+			border: 1px solid;
+			border-color: $exe-shade #ffffff #ffffff $exe-shade;
+			box-shadow: inset 1px 1px 0 #404040;
+		}
+		&::-moz-range-track {
+			height: 2px;
+			background: #ffffff;
+			border: 1px solid;
+			border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		}
+		&::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			width: 9px;
+			height: 16px;
+			margin-top: -8px;
+			background: $exe-face;
+			@include main.bevel;
+		}
+		&::-moz-range-thumb {
+			box-sizing: border-box;
+			width: 9px;
+			height: 16px;
+			border-radius: 0;
+			background: $exe-face;
+			@include main.bevel;
+		}
+		&:focus-visible {
+			outline: 1px dotted #000000;
+			outline-offset: 1px;
+		}
+	}
+}
+
+// the map: a click on the contours starts the runs there, a drag turns the mesh
+.opt-map-pane {
+	position: relative;
+}
+.opt-map {
+	cursor: crosshair;
+
+	// the mesh turns under a drag, which on a touch screen is not a scroll
+	&.turn {
+		cursor: grab;
+		touch-action: none;
+	}
+}
+// Contours or 3D, in the map's top corner across from the palettes
+.opt-views {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	display: flex;
+	gap: 2px;
+
+	.lit-btn {
+		height: 20px;
+		padding: 0 6px;
+		font-size: 11px;
+	}
+}
+// the palettes, a chip each in the map's top corner
+.opt-palettes {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	display: flex;
+	gap: 3px;
+	padding: 3px;
+	background: $exe-face;
+	border: 1px solid;
+	border-color: #ffffff #000000 #000000 #ffffff;
+
+	button {
+		width: 24px;
+		height: 12px;
+		padding: 0;
+		border: 1px solid;
+		border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		cursor: pointer;
+	}
+	.on {
+		outline: 1px solid #000000;
+		outline-offset: 1px;
+	}
+}
+// the ? on the map, and its balloon, as Windows 98's tooltips were
+.opt-help {
+	position: absolute;
+	right: 6px;
+	bottom: 6px;
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border: 1px solid #000000;
+	border-radius: 50%;
+	font: bold 11px $exe-ui;
+	color: #000000;
+	background: $exe-note;
+	cursor: pointer;
+
+	&[aria-expanded="true"] {
+		color: $exe-note;
+		background: #000000;
+	}
+}
+.opt-balloon {
+	position: absolute;
+	right: 6px;
+	bottom: 30px;
+	width: min(560px, calc(100% - 12px));
+	max-height: calc(100% - 40px);
+	overflow: auto;
+	padding: 6px 2px 3px;
+	background: $exe-note;
+	border: 1px solid #000000;
+	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+
+	// the note for the surface on show
+	.exe-note[data-for]:not(.on) {
+		display: none;
+	}
+}
+
+// the rates, the schedule and the noise, on a row of their own over the cards they act on
+.opt .opt-hyper {
+	margin-top: 3px;
+	border-top: 1px solid #ffffff;
+	box-shadow: 0 -1px 0 $exe-shade, 0 1px 0 #ffffff;
+}
+// a card an optimiser: its name, its readings, its η and knobs, and its map at the foot
+.opt .opt-cards {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 1px 10px;
+}
+// The readings and knobs at 11px, the size of the panes' labels, under the
+// name at the toolbar's 12px
+.opt .opt-card {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0;
+	white-space: nowrap;
+	font-size: 11px;
+	line-height: 13px;
+
+	&.off {
+		opacity: 0.45;
+	}
+	dt {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	dd,
+	dd span {
+		font-size: 11px;
+		line-height: 13px;
+	}
+}
+// the name shows or hides its runs, by a checkbox as Windows 98 drew one
+.opt-name {
+	display: inline-flex;
+	align-items: center;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: 12px/13px $exe-ui;
+	color: #000000;
+	cursor: pointer;
+
+	&::before {
+		content: "\2713";
+		box-sizing: border-box;
+		width: 13px;
+		height: 13px;
+		margin-right: 5px;
+		font: bold 10px/9px $exe-ui;
+		text-align: center;
+		background: #ffffff;
+		@include main.bevel(false);
+		box-shadow: inset 1px 1px 0 #404040;
+	}
+	.opt-card.off &::before {
+		content: "";
+	}
+}
+// which of its knobs its map spans down
+.opt-axis {
+	height: 14px;
+	padding: 0 4px;
+	font: 11px $exe-ui;
+	color: $exe-navy;
+	background: $exe-face;
+	border: 1px solid;
+	border-color: #ffffff #000000 #000000 #ffffff;
+	cursor: pointer;
+
+	&:active {
+		border-color: #000000 #ffffff #ffffff #000000;
+	}
+}
+// a² − b² on ab = 1 and the steps a GradScaler skipped, a line kept for them
+// when neither shows so the cards keep their height
+.opt .opt-more {
+	min-height: 13px;
+
+	&.off {
+		visibility: hidden;
+	}
+}
+.opt .opt-knob {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	height: 16px;
+
+	> span:first-child {
+		width: 16px;
+	}
+	// the knob the map spans
+	> .opt-mapped {
+		color: $exe-navy;
+		font-weight: bold;
+	}
+	input[type="range"] {
+		position: relative;
+		z-index: 1;
+		display: block;
+		width: 100%;
+		height: 13px;
+
+		&::-webkit-slider-thumb {
+			width: 7px;
+			height: 11px;
+			margin-top: -5.5px;
+		}
+		&::-moz-range-thumb {
+			width: 7px;
+			height: 11px;
+		}
+	}
+	output {
+		min-width: 40px;
+		font-size: 11px;
+	}
+	output span {
+		font-size: 10px;
+	}
+}
+// a trackbar with a tick under it for each value, as Windows 98 drew them,
+// PyTorch's default the long one, like the unity mark on a mixer's fader;
+// each tick under the thumb's middle there, the thumb 7px wide
+.opt-track {
+	flex: 1;
+	min-width: 0;
+	position: relative;
+}
+.opt-ticks {
+	position: absolute;
+	left: 3px;
+	right: 3px;
+	bottom: -2px;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	height: 5px;
+	pointer-events: none;
+
+	i {
+		width: 1px;
+		height: 2px;
+		background: #000000;
+	}
+	.torch {
+		height: 5px;
+	}
+}
+.opt .opt-heat-cell {
+	margin-top: auto;
+	padding-top: 2px;
+}
+.opt-heat {
+	display: block;
+	width: 100%;
+	height: 56px;
+	cursor: pointer;
+}
+.opt .opt-caption {
+	padding: 0 6px;
+	margin-top: 2px;
+	line-height: 1.3;
+	color: $exe-mute;
+	font-size: 11px;
+}
+
 // On a phone the window is the page: the panes stack, each as tall as a share
 // of its width, and the note's link stays in the program, as its last line
 @media only screen and (max-width: 700px) {
@@ -157,6 +499,17 @@ $exe-navy: #000080;
 	}
 	.lil .exe-body .lit-pane {
 		aspect-ratio: 5 / 4;
+	}
+	.opt .exe-body {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: none;
+
+		> :first-child {
+			grid-row: auto;
+		}
+	}
+	.opt .opt-cards {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 	.exe .exe-for {
 		padding: 4px 6px 0;

@@ -5,7 +5,7 @@ drawings; the 48s are the same pictures drawn finer. PNG by hand, since there
 is no PIL here.
 
 Usage:
-  python3 _tools/icons.py              # writes the four PNGs
+  python3 _tools/icons.py              # writes the six PNGs
   python3 _tools/icons.py --x8 <dir>   # and copies eight times over, to look at
 """
 import math
@@ -17,7 +17,7 @@ import zlib
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "img")
 PAL = {
     ".": None, "k": (0, 0, 0), "w": (255, 255, 255), "g": (192, 192, 192), "d": (128, 128, 128),
-    "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "T": (0, 74, 74), "l": (223, 223, 223),
+    "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "T": (0, 74, 74), "l": (223, 223, 223), "v": (176, 166, 204),
 }
 
 
@@ -122,9 +122,49 @@ def lil48():
     return g
 
 
+# ---- optimiser: a zig-zag down a ravine's contours to the ball at its bottom ----
+def ellipse(g, cx, cy, rx, ry, c):
+    for k in range(360):
+        a = math.radians(k)
+        g[round(cy + ry * math.sin(a))][round(cx + rx * math.cos(a))] = c
+
+
+def line(g, x0, y0, x1, y1, c):
+    n = max(abs(x1 - x0), abs(y1 - y0))
+    for k in range(n + 1):
+        g[round(y0 + (y1 - y0) * k / n)][round(x0 + (x1 - x0) * k / n)] = c
+
+
+def optimiser16():
+    g = canvas(16)
+    box(g, 0, 1, 15, 14)
+    ellipse(g, 9, 8, 5, 3, "v")
+    ellipse(g, 9, 8, 2, 1, "v")
+    path = [(1, 4), (4, 11), (6, 6), (8, 9), (9, 8)]
+    for (x0, y0), (x1, y1) in zip(path, path[1:]):
+        line(g, x0, y0, x1, y1, "n")
+    rect(g, 9, 7, 2, 2, "r")
+    return g
+
+
+def optimiser48():
+    g = canvas(48)
+    box(g, 1, 4, 45, 43, shadow=True)
+    for rx, ry in [(18, 12), (13, 8), (8, 5), (3, 2)]:
+        ellipse(g, 27, 24, rx, ry, "v")
+    # SGD across the ravine and along it, each swing smaller than the last
+    path = [(4, 11), (10, 35), (15, 15), (19, 31), (22, 19), (25, 27), (27, 24)]
+    for (x0, y0), (x1, y1) in zip(path, path[1:]):
+        line(g, x0, y0, x1, y1, "n")
+        line(g, x0 + 1, y0, x1 + 1, y1, "n")
+    rect(g, 26, 22, 4, 4, "r")
+    rect(g, 26, 22, 1, 1, "w")
+    return g
+
 def main():
     x8 = sys.argv[2] if sys.argv[1:2] == ["--x8"] else None
-    for name, grid in [("quincunx-16", quincunx16()), ("quincunx-48", quincunx48()), ("lil-16", lil16()), ("lil-48", lil48())]:
+    for name, grid in [("quincunx-16", quincunx16()), ("quincunx-48", quincunx48()), ("lil-16", lil16()), ("lil-48", lil48()),
+                       ("optimiser-16", optimiser16()), ("optimiser-48", optimiser48())]:
         png(os.path.join(OUT, name + ".png"), grid)
         if x8:
             png(os.path.join(x8, name + "-x8.png"), [[c for c in row for _ in range(8)] for row in grid for _ in range(8)])

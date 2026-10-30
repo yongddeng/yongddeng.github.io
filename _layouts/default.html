@@ -80,7 +80,7 @@
 					<button type="button" class="tb-item" data-act="sort" data-k="name">Arrange by Name</button>
 					<button type="button" class="tb-item" data-act="sort" data-k="type">by Type</button>
 					<button type="button" class="tb-item" data-act="sort" data-k="size">by Size</button>
-					<button type="button" class="tb-item" data-act="sort" data-k="mod">by Modified</button>
+					<button type="button" class="tb-item" data-act="sort" data-k="made">by Created</button>
 				</div>
 			</li>
 			<li class="tb-menu"><span class="tb-label">Go</span>
@@ -245,7 +245,7 @@
 				url: {{ post.url | jsonify }},
 				icon: {{ post.icon | default: 'notepad-32.png' | jsonify }},
 				type: {{ site.data.types[post.icon] | default: 'Notepad' | jsonify }},
-				date: {{ post.date | date: "%-d/%-m/%y" | jsonify }},
+				date: {{ post.date | date: "%F" | jsonify }},
 				sortdate: {{ post.date | date: "%Y%m%d" | jsonify }},
 				size: {% capture psize %}{% include post-size.html post=post %}{% endcapture %}{{ psize | jsonify }},
 				tags: {{ post.tags | jsonify }},
@@ -264,7 +264,7 @@
 				about: {{ x.description | jsonify }},
 				note: {{ x.explorer.note.title | jsonify }},
 				size: {{ x.explorer.size | jsonify }},
-				modified: {{ x.explorer.modified | jsonify }}
+				created: {{ x.explorer.created | jsonify }}
 			}{% unless forloop.last %},{% endunless %}
 			{% endfor %}
 		];
