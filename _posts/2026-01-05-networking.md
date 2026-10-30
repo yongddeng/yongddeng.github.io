@@ -24,7 +24,7 @@ What if the physical link is unreliable? → checksums, retransmission -->
 
 <p style="margin-bottom: 12px;"> </p>
 
-Given a [network]() is a graph of nodes joined by [links]() (e.g. the copper pair, the fibre strand) that exchange data under shared protocols, many sources contending for finite link capacity poses two problems, i) path selection: the route by which data traverses intermediate nodes from source (src.) to destination (dst.); and ii) link sharing: how multiple transmissions divide a single physical link. [Switching]() answers the first and [multiplexing]() the second. How a link of capacity $C$ is partitioned among competing flows is what distinguishes the switching methods and governs the resulting throughput, latency, and loss.
+Given a [network]() is a graph of nodes joined by [links]() (e.g. the copper pair, the fibre strand) that exchange data under shared protocols, many sources contending for finite link capacity poses two problems, i) path selection: the route by which data traverses intermediate nodes from source (SRC) to destination (DST); and ii) link sharing: how multiple transmissions divide a single physical link. [Switching]() answers the first and [multiplexing]() the second. How a link of capacity $C$ is partitioned among competing flows is what distinguishes the switching methods and governs the resulting throughput, latency, and loss.
 
 Specifically, given that multiplexing admits i) [time-division multiplexing]() (TDM): each flow transmits in a fixed time slice; ii) [frequency-division multiplexing]() (FDM): each flow occupies a separate frequency band; and iii) [statistical multiplexing](): flows share capacity on-demand without pre-allocation; [circuit switching](https://en.wikipedia.org/wiki/Circuit_switching) leverages TDM/FDM and reserves resources (e.g. [bandwidth]()) for the connection's lifetime irrespective of utilisations. For example, the [public switched telephone network]() (PSTN), where each call reserves a dedicated circuit, suits steady voice calls though it reveals the approach's fundamental inefficiency for bursty, short-lived computer traffic. 
 <!-- This reserved capacity would yield poor utilisation under bursty traffic, despite of several benefits earned by pre-allocation. -->
@@ -33,23 +33,24 @@ Specifically, given that multiplexing admits i) [time-division multiplexing]() (
 
 [Packet switching]() instead adopts statistical multiplexing, partitioning data into [packets]() that share the link on-demand for near-maximum utilisation. Each packet carries its own destination address, and a [store-and-forward]() packet switch forwards it hop-by-hop by matching that address against a lookup table to select the next hop, a role realised at multiple layers. The per-packet [latency]() can be decomposed as $d_{\text{total}} = \sum_{i=1}^{N}(d_{\text{proc}} + d_{\text{queue}} + d_{\text{trans}} + d_{\text{prop}})\_i$, where $N$ is the number of hops, $d_{\text{trans}} = L/R$ (i.e. push $L$ bits onto the link at rate $R$), and $d_{\text{prop}} = d/s$ (i.e. signal traverses link of length $d$ at speed $s$), whilst $d_{\text{proc}}$ (e.g. header lookup, checksum) and $d_{\text{queue}}$ (e.g waiting behind other packets) are non-deterministic.
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/switching-networks.webp" width="375"> <a href="https://www.britannica.com/technology/packet-switched-network" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">A reserved circuit against per-packet routes over shared links.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/switching-networks.webp" width="350"> <a href="https://www.britannica.com/technology/packet-switched-network" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">A reserved circuit against per-packet routes over shared links.</div> </div>
 
 ### **1.2. Network Models**
 
 <p style="margin-bottom: 12px;"> </p>
 
-Networks are also classified by geographic scope, in increasing span [local area network]() (LAN), [metropolitan area network]() (MAN), and [wide area network]() (WAN). A LAN spans a building/campus at high bandwidth and sub-millisecond latency, predominantly over [Ethernet]() (1973, standardised as IEEE 802.3). <!-- (later redesigned with RJ-45 connectors on Steve Jobs' advice to be as easy to connect as a phone line).-->A MAN spans a city, a WAN spans countries or continents, interconnecting many LANs. Over WAN distances, $d_{\text{prop}} = d/s$ dominates, fixed by distance and signal speed, hence irreducible by bandwidth (a transatlantic round trip costs tens of ms), whereas LAN latency is transmission-bound. [ARPANET]() (1969), the first packet-switched WAN, grew into the foundation of the modern internet. 
+Networks are also classified by geographic scope, in increasing span [local area network]() (LAN), [metropolitan area network]() (MAN), and [wide area network]() (WAN). A LAN spans a building/campus at high bandwidth and sub-millisecond latency, predominantly over Ethernet. <!-- (later redesigned with RJ-45 connectors on Steve Jobs' advice to be as easy to connect as a phone line).-->A MAN spans a city, a WAN spans countries or continents, interconnecting many LANs. Over WAN distances, $d_{\text{prop}} = d/s$ dominates, fixed by distance and signal speed, hence irreducible by bandwidth (a transatlantic round trip costs tens of ms), whereas LAN latency is transmission-bound. [ARPANET]() (1969), the first packet-switched WAN, grew into the foundation of the modern internet. 
 
 The [open systems interconnection](https://spectrum.ieee.org/osi-the-internet-that-wasnt) (OSI) model, set by [international organisation for standardisation]() (ISO, 1977-84), has seven layers with strict separation of concerns. Designed by committee ahead of implementation, its protocol suites (e.g. X.400 for email, X.500 for directory services<!-- trim: X.25 for packet switching (CCITT 1976, adopted as OSI's lower layers rather than designed by the committee) -->) proved over-specified and costly to implement. TCP/IP however took the opposite approach: implement and standardise what works. As a consequence, the US government also abandoned its OSI mandate (GOSIP, 1990) by 1995. Though OSI lost as a protocol suite, its layer numbering persists as standard vocabulary.
 
-The [transmission control protocol](https://www.youtube.com/watch?v=3b_TAYtzuho) / [internet protocol]() (TCP/IP) model was developed through running implementations on ARPANET (NCP → TCP/IP on 1 January 1983, Flag Day), prevailing by shipping working code ahead of the specification. It stacks four layers: i) [link](): frame transmission over a physical medium; ii) [internet](): logical addressing and best-effort routing; iii) [transport](): end-to-end process-to-process communication; and iv) [application](): user-space service semantics. This embodies the [end-to-end principle](https://en.wikipedia.org/wiki/End-to-end_principle) (1984), which holds that application-specific functions should reside at the endpoints rather than in the network, with the two middle layers implemented in kernel space. 
-
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/arpanet.webp" width="390"> <a href="https://education.cfr.org/learn/timeline/origins-internet" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">Maps of Arpanet from December 1969 to March 1977.</div> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/arpanet.webp" width="300"> <a href="https://education.cfr.org/learn/timeline/origins-internet" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">Maps of Arpanet from December 1969 to March 1977.</div> </div>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/osi-tcpip.jpg" width="375"> <a href="https://notes.davidvarghese.net/computer-networks/network-models/tcp-ip-model" target="_blank" style="position: absolute; top: 4px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/network_models.png" width="400" height="315"> <a href="https://www.inetdaemon.com/tutorials/basic_concepts/network_models/comparison.shtml" target="_blank" style="position: absolute; top: 4px; right: 6px; font-size: 11px;">[src]</a> </div> -->
+
+
+The [transmission control protocol](https://www.youtube.com/watch?v=3b_TAYtzuho) / [internet protocol]() (TCP/IP) model was developed through running implementations on ARPANET (NCP → TCP/IP on 1 January 1983, Flag Day), prevailing by shipping working code ahead of the specification. It stacks four layers: i) [link](): frame transmission over a physical medium; ii) [internet](): logical addressing and best-effort routing; iii) [transport](): end-to-end process-to-process communication; and iv) [application](): user-space service semantics. This embodies the [end-to-end principle](https://en.wikipedia.org/wiki/End-to-end_principle) (1984), which holds that application-specific functions should reside at the endpoints rather than in the network, with $\text{L}2$ to $\text{L}4$ implemented in the kernel and $\text{L}1$ in the NIC. 
 
 Each layer encapsulates the unit above as opaque [payload]() and prepends only its own header, producing its [protocol data unit]() (PDU), e.g. { $\text{L}1$: [bits]() on the wire, $\text{L}2$: a [frame](), $\text{L}3$: a [packet](), $\text{L}4$: a [segment]() (TCP) or [datagram]() (UDP), $\text{L}7$: a [message]() or data}. The receiver decapsulates this in reverse by stripping headers layer-by-layer. The isolation lets each layer evolve independently, so Wi-Fi replaces Ethernet at $\text{L}2$, or IPv6 replaces IPv4 at $\text{L}3$ without disturbing the others. <!-- Consider a browser requesting a YouTube video. After DNS resolves the domain to an IP address, the application layer constructs an HTTP request as its message, the transport layer wraps it in a TCP segment (e.g. src port 52431, dst port 443), the internet layer prepends src and dst IP addresses to form a packet, and the link layer frames it with the local router's MAC as the next hop. At each hop, the router strips the frame, reads the dst IP, and forwards in a new frame. --> Encapsulation also fixes which addresses survive the journey. Delivery is addressed per link at $\text{L}2$ but end-to-end at $\text{L}3$, so a frame's MAC addresses are rewritten at every hop while the packet's IP addresses hold from source to destination, and the $\text{L}4$ port names the process the bytes are finally handed to.
 
@@ -73,7 +74,7 @@ Same journey as the addressing analogy (Section I → II):
    → port (suite # → the desk / process) → TCP·UDP (registered courier vs postcard)
 {% endcomment %}
 
-- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/tcp_ip_encapsulation.jpg" width="415"> <div style="position: absolute; top: 3px; left: 143px; width: 112px; height: 20px; background: #fff;"></div> <a href="https://x.com/alexxubyte/status/1592193892530589696" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">The L3 unit here is the formal <i>IP datagram</i> (RFC 791).</div> </div>
+- <div style="position: relative; display: inline-block;"> <img src="../assets/blog/tcp_ip_encapsulation.jpg" width="400"> <div style="position: absolute; top: 3px; left: 143px; width: 112px; height: 20px; background: #fff;"></div> <a href="https://x.com/alexxubyte/status/1592193892530589696" target="_blank" style="position: absolute; bottom: 8px; right: 4px; font-size: 11px;">[src]</a> <div style="font-size: 11px; color: #888; margin-top: 4px;">The L3 unit here is the formal <i>IP datagram</i> (RFC 791).</div> </div>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/tcp_ip.webp" width="400"> <a href="https://blog.reallabworkbook.com/p/what-is-tcpip-model" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
@@ -84,51 +85,87 @@ Same journey as the addressing analogy (Section I → II):
 
 <p style="margin-bottom: 12px;"> </p>
 
-{% comment %}
-§1.3 arc:
-- p1 (lower half) — how a frame physically comes to be and gets onto the wire: framing structure (MAC fields, CRC) and the PHY encoding it into signals. Hardware-facing.
-- p2 (upper half) — how that frame is logically delivered: MAC as a delivery address, broadcast-domain scope, switch vs router forwarding, and ARP closing the IP-known/MAC-needed gap. Network-facing.
-- p3 (details) — frame sizing: MTU and path MTU discovery.
-- p4 (bridge) — zoom out from one broadcast domain to network scope (LAN/MAN/WAN), where LANs interconnect via L3 routers into the internet. Transitions Section I (L1/L2) to Section II (IP/L3).
-{% endcomment %}
+Given IEEE 802 splits $\text{L}2$ into [logical link control]() (LLC, 802.2) and [media access control]() (MAC) sublayers to expose one interface to $\text{L}3$ over many media, [Ethernet]() (IEEE 802.3, 1983) spans the MAC sublayer, where it frames, and $\text{L}1$, where it encodes the bits into signals. A frame is the payload with SRC and DST MAC addresses prepended, each a 48-bit identifier assigned to a [network interface card]() (NIC), and a CRC-32 [checksum]() appended. At $\text{L}1$, the physical layer serialises this frame onto the medium through a line code that guarantees clock recovery. The name 'Ethernet' comes from Metcalfe's 1973 nod to the 'luminiferous ether' the medium once believed to carry light.
 
-Ethernet <!-- (named after the "ether," the hypothetical material once believed to carry light) --> spans the physical and link layers, partitioning the work between them. At $\text{L}2$, the [media access control]() (MAC) sublayer frames the payload by prepending src. and dst. MAC addresses and also appending a CRC-32 [checksum]() for error detection, where each MAC is a 48-bit identifier assigned to a [network interface card]() (NIC) on a host device. At $\text{L}1$, the physical layer (PHY) serialises this frame onto the medium (i.e. cable) through a line code that guarantees clock recovery<!-- trim: fixes voltage, clocking, and modulation (voltage and modulation belong to the PMD sublayer, e.g. MLT-3) --> (e.g. 100BASE-TX: 4B/5B, 1000BASE-X: 8b/10b). The frame is thus the $\text{L}2$ unit and the encoded bitstream the $\text{L}1$ unit, both governed by one standard.
+The [maximum transmission unit]() (MTU) denotes the largest L3 packet transmissible in a single frame on a link (i.e. one hop) exclusive of the L2 header and CRC. For example, Ethernet and Wi-Fi admit $1500\ \text{B}$ while a cellular link often admits less. As a packet includes its IP and $\text{L}4$ headers, the payload is bounded by $\text{payload}\_{\text{L4}} \leq \text{MTU} - H\_{\text{IP}} - H\_{\text{L4}}$ (e.g. $1460\ \text{B}$ for TCP over IPv4). Along a path however the smallest MTU governs. A larger packet is split or dropped on the way unless the sender determines its minimum by [path MTU discovery]().<!-- trim: probes that minimum (IPv4 DF bit plus an ICMP reply) --> Data centre and GPU-cluster fabrics raise the MTU to $9000\ \text{B}$ (jumbo frames) to cut header overhead on distributed-training transfers.
 
-{% comment %}
-A line code maps each block of data bits to a slightly larger symbol (4B/5B: 4→5 bits, used by 100BASE-TX i.e. 100 Mbit/s Ethernet over twisted pair; 8b/10b: 8→10 bits, used by 1000BASE-X i.e. gigabit Ethernet over fibre). The extra bits guarantee frequent signal transitions, so the receiver, which has no separate clock wire, can recover timing from the transitions themselves, and keep DC balance (roughly equal 0s and 1s to avoid baseline drift).
-{% endcomment %}
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <div style="display: flex; gap: 6px;"> <img src="../assets/blog/unicast.jpg" height="200" style="background: white;"> <img src="../assets/blog/multicast.jpg" height="200" style="background: white;"> </div> <a href="https://www.geeksforgeeks.org/computer-networks/mac-address-in-computer-network/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Unicast on the left names one NIC and multicast on the right a group with the I/G bit set, each frame crossing the switch.</div> </div>
 
-A MAC serves as a delivery address only within a single [broadcast domain]() (i.e. the nodes reachable by one $\text{L}2$ broadcast)<!--, not across the wider network.-->, so [link-layer switches]() forward frames within that domain by MAC (from a [forwarding table]() built by [self-learning](), IEEE 802.1D)<!-- while routers cross between domains at $\text{L}3$ -->. <!-- [Wi-Fi]() is a separate $\text{L}2$ technology, but it uses the same MAC addresses, and an access point bridges its devices into the same broadcast domain as wired Ethernet. --> The sender must frame to the next hop yet knows only its IP, a gap the [address resolution protocol]() (ARP) bridges by broadcasting a request to ff:ff:ff:ff:ff:ff that the owner answers and the sender caches. When the dst. IP falls outside the local subnet (determined by the subnet mask), the sender resolves the router's MAC instead and frames the packet to that gateway, which forwards it onward at $\text{L}3$. 
+A MAC address uses six hex octets (e.g. 00:07:E9:65:F5:43) and is globally unique. The first half is an [organisationally unique identifier]() (OUI) the IEEE assigns to a vendor and the rest are a serial number the vendor assigns to each NIC. Yet Wi-Fi MAC randomisation sets the 2nd-lowest bit of the first octet to mark the address as locally administered. While whom a frame names is its DST MAC address, the lowest bit of its first octet distinguishes the types, i) [unicast](): a clear bit, one NIC; ii) [multicast](): a set bit, the subscribers of a group; and iii) [broadcast](): all 48 bits set, every node. In these terms terrestrial TV is a broadcast, IPTV a multicast, and Netflix a unicast per viewer.
 
-A frame's payload is bounded by the [maximum transmission unit]() (MTU), the largest L3 packet a link carries (1500 bytes on Ethernet), exclusive of the L2 header and CRC, so the on-wire frame is larger still. Headers eat into this budget, leaving $\text{IP packet} \leq \text{MTU}$ and $\text{payload}\_{\text{L4}} \leq \text{MTU} - H\_{\text{IP}} - H\_{\text{L4}}$ (1460 bytes for TCP over IPv4). Across mixed-MTU links the smallest governs, so an oversized packet is fragmented or dropped unless [path MTU discovery]() probes that minimum (IPv4 DF bit plus an ICMP reply) and the sender pre-sizes to fit. Data-centre and GPU-cluster fabrics (§601#2.4) raise it to [jumbo frames]() (9000 bytes), amortising header overhead across distributed-training transfers.
+An [L2 switch]() is the device that joins the NICs of a network. Each frame leaves the switch through the physical port (i.e. jack) whose cable reaches its DST MAC.<!-- trim: packet-switches at $\text{L}2$ and --> Chained together such switches form a [broadcast domain](), the nodes one broadcast reaches, across which a frame passes unaltered as no switch reads past its header.<!-- trim: where a frame is invariant as a switch reads only its header --><!-- trim: until a router ends it --> For each frame the egress port comes from a [forwarding table]() each switch self-learns (IEEE 802.1D) from the SRC MAC and ingress port of frame. A host in practice holds only its next hop's IP,<!-- trim: a frame requires its MAC --> hence its kernel resolves the MAC by the [address resolution protocol]() (ARP), a request for that IP broadcast across the domain and answered by its holder.<!-- trim: resolves the MAC from that IP by a broadcast request, flooded via every switch as is any unknown DST MAC (out of every port), and the holder returns its MAC -->
 
 {% comment %}
-  IP  ──ARP──▶  MAC  ──is the address of──▶  NIC
- (L3, logical)  (L2, physical)            (the hardware)
-
-- Start with an IP (logical, what apps and routing use).
-- ARP resolves it to a MAC (the L2 address needed to build a frame).
-- That MAC is the identity of a specific NIC (the physical interface).
-
-Analogy:
-- NIC  = the person (the body), the real physical thing.
-- MAC  = that person's fingerprint / national ID; permanent, tied to the hardware,
-         globally unique by design but used to identify them only within the local
-         broadcast domain (the room they are standing in).
-- IP   = that person's mailing address; assigned by whatever network they join (not by
-         geography), so it changes on joining a new network but stays put while on the
-         same one. The address the internet actually sees is the network's public IP
-         (via NAT); the local one (e.g. 192.168.x.x) repeats across millions of
-         networks.
-
-A device with two interfaces (Wi-Fi + Ethernet) is like two people: two NICs, each with its own MAC and its own IP, which is why one machine can hold both at once.
+Switch: reads only the dst MAC, looks up the egress port in its forwarding table, forwards the frame untouched.
+        Unknown dst MAC → flood all ports but the ingress one, learn the port from the reply's src MAC.
 {% endcomment %}
-
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/router.svg" width="375" style="background: white;"> <a href="https://www.networkacademy.io/ccna/network-fundamentals/routers-layer3-switches" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Switches forward within a broadcast domain, the router between them.</div> </div>
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ethernet_switch.webp" width="325"> <a href="https://www.vsolcn.com/blog/layer-3-switch-routing-connection.html" target="_blank" style="position: absolute; top: 2px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
 <!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/l2_switch.webp" width="375"> <a href="https://www.howtonetwork.com/certifications/cisco-2/layer1234-switching/" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> -->
+
+Ethernet is one $\text{L}2$ protocol among many. Namely, their frames satisfy $F\_{\text{Ethernet}} \neq F\_{\text{Wi-Fi}} \neq F\_{\text{cellular}}$, where the first two share the 48-bit MAC. For instance, a home network is one broadcast domain in which an access point bridges Ethernet and Wi-Fi, whereby a laptop on Wi-Fi discovers a wired printer by broadcast whereas a phone on cellular cannot. Such a domain is bounded by its $\text{L}3$ router whose MAC is the destination of every leaving frame. A MAC though merely names a NIC on one link. An IP instead names a host across its network, hence it alone spans links that share neither frame nor address and is the lowest address a program holds.
+
+{% comment %}
+Ethernet is one L2 among many, with IP the one address space above them all.
+
+L4   TCP / UDP                one byte stream or datagram
+       │
+L3   IP                       one address space, one packet format,
+       │                      spans every network below
+   ┌───┴───────────┬──────────────┐
+L2   Ethernet        Wi-Fi          cellular       ← each is one L2
+     48-bit MAC      48-bit MAC     no MAC, IMSI    ← addressing A = B ≠ C
+     802.3 frame     802.11 frame   PDCP/RLC frame  ← frame format A ≠ B ≠ C
+       │               │              │
+L1   copper/fibre    2.4/5 GHz      licensed RF     ← physical networks
+
+A on 10.0.0.0/24 sends to Z on 10.0.2.0/24. Two broadcast domains, two routers.
+
+DOMAIN 1  (10.0.0.0/24)                                   DOMAIN 2  (10.0.2.0/24)
+═══════════════════════════════                          ═══════════════════════════════
+
+ A                                                                                 Z
+ IP  10.0.0.7                                                              IP  10.0.2.9
+ MAC aa                                                                    MAC zz
+ │                                                                                 ▲
+ │ dst IP off-subnet → ARP "who has 10.0.0.1?" → R1 answers "r1"                  │
+ │                                                                                 │
+ │ ┌─────────────────────┐                                       ┌─────────────────┴───┐
+ └▶│ frame  aa → r1      │                                       │ frame  r2b → zz     │
+   │ packet 10.0.0.7 →   │                                       │ packet 10.0.0.7 →   │
+   │        10.0.2.9     │                                       │        10.0.2.9     │
+   └──────────┬──────────┘                                       └─────────▲───────────┘
+              │                                                            │
+      ┌───────▼───────┐        ┌───────────────┐                  ┌────────┴──────┐
+      │  SWITCH S1    │        │  SWITCH S2    │                  │  SWITCH S3    │
+      │ table         │  p3    │ table         │                  │ table         │
+      │  aa → p1      ├───────▶│  aa → p1      │                  │  r2b → p1     │
+      │  r1 → p3      │        │  r1 → p4      │                  │  zz  → p6     │
+      └───────────────┘        └───────┬───────┘                  └────────▲──────┘
+        looks up dst MAC r1              │ p4                              │
+        → port p3, frame                 │                                 │ ARP "who has 10.0.2.9?"
+          passes UNCHANGED               ▼                                 │ Z answers "zz"
+                               ┌─────────────────┐   ┌─────────────────┐   │
+                               │  ROUTER R1      │   │  ROUTER R2      │   │
+                               │  10.0.0.1  r1   │──▶│  10.0.1.2  r2a  │───┘
+                               │  10.0.1.1  r1b  │   │  10.0.2.1  r2b  │
+                               └─────────────────┘   └─────────────────┘
+                                unwrap frame          unwrap frame
+                                keep packet           keep packet
+                                new frame r1b → r2a   new frame r2b → zz
+                                (routing table: 10.0.2.0/24 via 10.0.1.2)
+
+Frame headers seen on each link:        MAC src → dst        IP src → dst
+  A  → S1 → S2 → R1   (domain 1)        aa  → r1             10.0.0.7 → 10.0.2.9
+  R1 → R2             (transit link)    r1b → r2a            10.0.0.7 → 10.0.2.9
+  R2 → S3 → Z         (domain 2)        r2b → zz             10.0.0.7 → 10.0.2.9
+
+MAC rewritten once per L3 hop, IP unchanged end to end. Switches are invisible to both addresses.
+What a router does at each hop is drawn under the router paragraph.
+{% endcomment %}
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/router.svg" width="275" style="background: white;"> <a href="https://www.networkacademy.io/ccna/network-fundamentals/routers-layer3-switches" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The frame targets the gateway's MAC, the packet inside it targets Google.</div> </div>
 
 ## II
 ---
@@ -137,67 +174,109 @@ A device with two interfaces (Wi-Fi + Ethernet) is like two people: two NICs, ea
 
 <p style="margin-bottom: 12px;"> </p>
 
-{% comment %}
-Here's the section's spine:
+[Internet protocol]() (IP, RFC 791, 1981) is a standard at $\text{L}3$ that names every host in one address space.<!-- across any combination of underlying networks --> The SRC and DST [IP addresses]() sit in a packet header that routers read to forward it across any link. It is a fixed-length identifier of a host's network interface, standardised in [requests for comments]() (RFCs) under the [internet engineering task force]() (IETF), and represented as 32-bits in [IPv4]() or 128-bits in [IPv6]() (RFC 2460, 1998). IP guarantees neither arrival nor order, leaving both to $\text{L}4$, yet it suffices to join any set of networks by routers into an [internet]() (inter-network). Namely, the [Internet]() is the global instance grown from ARPANET, connecting 6 billion users (74%, ITU 2025). 
 
-┌─────┬─────────────────────────────────────────┬──────────────────────────────┐
-│  p  │                  topic                  │            needs             │
-├─────┼─────────────────────────────────────────┼──────────────────────────────┤
-│ p1  │ IP as the L3 address abstraction        │ —                            │
-├─────┼─────────────────────────────────────────┼──────────────────────────────┤
-│ p2  │ router — forwarding (data plane)        │ only "next hop"              │
-├─────┼─────────────────────────────────────────┼──────────────────────────────┤
-│ p3  │ prefix/host split, classful             │ motivated by "routing can't  │
-│     │                                         │ scale to $2^{32}$"           │
-├─────┼─────────────────────────────────────────┼──────────────────────────────┤
-│ p4  │ subnet mask, CIDR                       │ prefix                       │
-├─────┼─────────────────────────────────────────┼──────────────────────────────┤
-│ p5  │ NAT, scopes                             │ prefix                       │
-├─────┼─────────────────────────────────────────┼──────────────────────────────┤
-│ p6  │ routing — longest-prefix match +        │ prefix, CIDR                 │
-│     │ OSPF/RIP/BGP (control plane)            │                              │
-└─────┴─────────────────────────────────────────┴──────────────────────────────┘
-{% endcomment %}
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ipv4_vs_ipv6.png" width="400"> <a href="https://blog.servermania.com/ipv4-vs-ipv6" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-While a MAC delivers only within one broadcast domain, [internet protocol]() (IP) provides the $\text{L}3$ abstraction that spans heterogeneous physical networks (e.g. differ in frame format $A \neq B \neq C$ and addressing $A = B \neq C$, where $A$: Ethernet, $B$: Wi-Fi, $C$: cellular),<!-- Ethernet and Wi-Fi share the same 48-bit IEEE 802 MAC addressing, which is why an access point can bridge Wi-Fi into an Ethernet broadcast domain; cellular uses a different scheme. So addressing is A=B≠C even though the frame formats differ across all three. --> unifying them under a single logical address space with best-effort delivery.<!-- across any combination of underlying networks --> <!--IP itself guarantees nothing about ordering, reliability, or congestion, leaving those concerns to $\text{L}4$.--> An [IP address]() is a fixed-length identifier, either 32-bit [IPv4]() (RFC 791, 1981) or 128-bit [IPv6]() (RFC 2460, 1998), standardised in [requests for comments]() (RFCs), today by the [IETF](). Such networks joined by routers form an [internet]() (inter-network), and the [Internet]() denotes the global instance, grown from ARPANET, reaching 6 billion users (74%, ITU 2025).
+<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ip_versions.webp" width="350"> <a href="https://bytebytego.com/guides/ipv4-vs-ipv6/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
 
-Every packet leaving its subnet passes through a [router](), the $\text{L}3$ realisation of the packet switch, stitching heterogeneous $\text{L}2$ networks into one internet. A link-layer switch stays within one broadcast domain, whereas a router forwards between domains, so a host reaches anything off-subnet only through its [default gateway](). The router strips the incoming $\text{L}2$ frame, reads the destination IP, looks up the next hop, decrements the [time-to-live]() (TTL, whose expiry elicits the ICMP replies that *traceroute* exploits), and re-frames to that hop's MAC, the per-packet [data plane]() distinct from the [control plane]() that builds the table. A router thus forwards toward a destination network, not an individual host. 
+Formally put, a [router]() is the $\text{L}3$ realisation of the packet switch which stitches heterogeneous $\text{L}2$ networks into one internet. The former is itself a computer whose kernel forwards, as does a host's with forwarding enabled, whereas a switch is silicon that never runs one.<!-- trim: where an L2 switch reads only a frame's header and a packet bound for another broadcast domain passes through a router --> For instance, on every inbound packet, a router strips the frame, reads the DST IP, looks up the next hop, decrements the [time-to-live]() (TTL), and re-frames to that hop's MAC. The work is the [data plane]() and building the table the [control plane](). For every outbound packet, a host consults the kernel's [routing table](), whose *default* entry names its [default gateway]() (i.e. usually a single router) as the next hop off-subnet.<!-- trim: Its table in turn names the ISP's router and so forth, each hop knowing only the next IP. --> 
 
 {% comment %}
+A router is a node that runs L1 to L3 and stops there.
 
-                  ONE BROADCAST DOMAIN  (L2 / subnet 10.0.0.0/24)
-   ┌───────────────────────────────────────────────────────────────┐
-   │   Host A              Host B              Host C                 │
-   │   10.0.0.1            10.0.0.2            10.0.0.3               │
-   │   aa:..:01            bb:..:02            cc:..:03               │
-   │      │                   │                   │                  │
-   │      └─────────┬─────────┴─────────┬─────────┘                  │
-   │                │      SWITCH       │   (forwards by MAC,        │
-   │                │                   │    stays inside the domain)│
-   └────────────────┼────────────────────────────────────────────────┘
-                    │
-                 ROUTER  10.0.0.254  ── forwards by IP (L3) ──▶  other networks / Internet
-       (the gateway: crosses between domains)
+sender          switch          router                switch          receiver
+L4 TCP                                                                L4 TCP
+L3 IP  ──────────────────────▶  L3 IP  ──────────────────────────────▶  L3 IP
+L2 MAC ──▶  L2 MAC  ──▶  L2 MAC   L2 MAC  ──▶  L2 MAC  ──▶  L2 MAC
+L1     ──▶  L1      ──▶  L1       L1      ──▶  L1      ──▶  L1
+            │                     │
+            reads L2 only         reads up to L3, then wraps again
 
-   ARP — turning an IP into the MAC needed to build the frame
-   A wants to send to B (same subnet); A knows 10.0.0.2 but not its MAC:
-     A ──▶ ff:ff:ff:ff:ff:ff   "Who has 10.0.0.2?"        (broadcast to whole domain)
-     B ──▶ A                   "10.0.0.2 is at bb:..:02"  (unicast reply, A caches it)
-     A ──▶ bb:..:02            frame sent; SWITCH forwards by MAC
-   A wants to send outside (8.8.8.8): dst IP is off-subnet, so A ARPs for the
-   ROUTER's MAC and frames it to the gateway, which forwards onward at L3.
+Coming in, it unwraps L1 and L2 to reach the packet. Going out, it wraps L2 and
+L1 again for the new link. A switch stops at L2. A host goes all the way to L4.
 
+A router has a NIC per link, each in a different broadcast domain with its own MAC and IP.
+Switch: moves frames within one domain. Router: moves packets between domains.
+
+One host's decision: the routing table decides whose MAC goes on the frame. The frame meets the switch either way.
+
+ host consults its routing table
+   │
+   ├─ dst in my subnet  → ARP for the destination's MAC
+   │                      frame: me → destination
+   │                      switch forwards it straight to the destination
+   │
+   └─ dst elsewhere     → ARP for the gateway's MAC
+                          frame: me → router
+                          switch forwards it to the router, which routes it on
+
+In the local case the switch is the only device involved. Otherwise the frame is addressed to the router's MAC
+while the packet inside still carries the far destination's IP.
+
+The path view, one packet across four tables (draft for the figure):
+
+packet dst 142.250.1.1 (google), from laptop 192.168.1.7
+
+ laptop kernel            home router              ISP router               google edge
+ ─────────────            ───────────              ──────────               ───────────
+ routing table            routing table            routing table            routing table
+ 192.168.1.0/24 direct    192.168.1.0/24 direct    203.0.113.0/24 direct    142.250.0.0/15 direct
+ default → 192.168.1.1    default → 203.0.113.1    142.250.0.0/15 → 198.51.100.9
+                                                   default → 198.51.100.1
+        │                        │                        │                        │
+ dst not in 192.168.1.0/24  dst not local            longest match 142.250.0.0/15
+ → use default              → use default            → next hop 198.51.100.9        → deliver on link
+ → next hop 192.168.1.1     → next hop 203.0.113.1                                     to 142.250.1.1
+        │                        │                        │                        │
+        └── ARP ──▶ MAC ────────▶└── ARP ──▶ MAC ────────▶└── ARP ──▶ MAC ────────▶└──▶ host
+
+ frame  aa → r1            r1b → isp               isp2 → g                 g2 → host
+ packet 192.168.1.7 → 142.250.1.1  (unchanged at every hop)
+
+Each table answers "given this dst IP, which IP do I hand it to next", and ARP turns that next IP into a MAC.
+Nobody holds the full path. The laptop and home router know only "default", the ISP knows prefixes, the last router knows the host is local.
 {% endcomment %}
 
-Routing cannot scale to $2^{32}$ individual hosts, so IP splits each address into a network prefix and a host part, collapsing many hosts into one routable network, and only the destination network resolves the individual host. [Classful addressing]() (RFC 791, 1981) gave this split its first form, fixing the prefix length $n$ at 8, 16, or 24 by an address's leading bits, so Class A, B, and C networks held about 16M, 65k, and 254 hosts. The gaps were coarse, so an organisation needing 500 hosts overflowed a Class C and took a whole Class B (/16), stranding 65,000 addresses on one flat broadcast domain.
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <!-- img tbd: hop-by-hop routing tables, laptop → home router → ISP → edge (see comment above) --> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">A packet crossing four routing tables, each naming only the next hop.</div> </div>
 
-<!-- figure tbd: classful A/B/C split -->
-
-[Subnetting]() (RFC 950, 1985) freed the boundary to any bit through the [subnet mask](), $n$ leading ones a host ANDs with an address to recover its prefix, each added bit doubling the subnets and halving the hosts. The mask thus induces an equivalence relation, $x \sim y$ iff $x$ AND mask $=$ $y$ AND mask, and a [subnet]() is one of its classes, one broadcast domain of $2^{32-n} - 2$ usable addresses<!-- the all-zeros network and all-ones broadcast reserved-->, where two hosts reach each other directly at $\text{L}2$ if and only if they fall in the same class, else via an $\text{L}3$ router. [Classless inter-domain routing]() (CIDR, RFC 1519, 1993) then abolished classes internet-wide, so $n$ can take any length and adjacent prefixes aggregate into one route (i.e. two sibling /$n{+}1$ classes merging into their parent /$n$, coarsening the partition), curbing forwarding-table growth. <!-- which strips the L2 frame, reads the IP header, determines the next hop, and wraps it in a new frame --> The assignment itself is automated by [dynamic host configuration protocol]() (DHCP, RFC 2131), a UDP exchange in which a joining host broadcasts a request and a server leases it the network configuration for a renewable term.<!-- trim: an address, subnet mask, default gateway, and DNS resolver -->
+A table indexed by host would grow linearly in hosts, up to $2^{32}$ entries, with every router updating as any host moved. As a remedy, IPv4 partitions the address space by a [network prefix](), which splits each address into prefix and host (e.g. 192.168.1 and 7 in 192.168.1.7), so a table holds one entry per network.<!-- trim: collapsing many into one route, and only the destination network resolves the individual host --> Yet a uniform partition ill fits networks of unequal size. [Classful addressing]() (RFC 791, 1981) therefore read from an address's leading bits a prefix length $n \in \lbrace 8, 16, 24 \rbrace$, such that a Class A, B, or C network holds $2^{32-n} - 2$ hosts (16M, 65k, or 254). An organisation of 500 hosts still outgrew a Class C for a Class B that wasted addresses and kept all in one broadcast domain.<!-- trim: The gaps were coarse; addresses the Internet could ill spare -->
 
 {% comment %}
 A 32-bit IPv4 address splits at /n into [ network prefix | host ],  n + (32-n) = 32.
 
+Analogy: one phonebook = one routing table, and every router keeps its own.
+
+ ROUTING BY HOST                          ROUTING BY PREFIX
+ one row per phone, in every book         one row per area code
+
+ ┌───────── R1's book ─────────┐          ┌───── R1's book ─────┐
+ │ 02-555-0001  → hand to R2   │          │ 02-xxx   → R2       │
+ │ 02-555-0002  → hand to R2   │          │ 031-xxx  → R3       │
+ │ 02-555-0003  → hand to R2   │          │ others   → R2       │
+ │ 031-777-0001 → hand to R3   │          └─────────────────────┘
+ │ …  4.3 billion rows  …      │
+ └─────────────────────────────┘          ┌───── R2's book ─────┐
+ ┌───────── R2's book ─────────┐          │ 02-xxx   → local    │
+ │ …  4.3 billion rows  …      │          │ others   → R1       │
+ └─────────────────────────────┘          └─────────────────────┘
+
+ one phone moves                          one phone moves within 02
+ → every book in the world rewrites       → only the 02 exchange notices
+
+ phonebook           = routing table, one per router
+ row                 = entry mapping a destination to a next hop
+ area code           = network prefix
+ rest of the number  = host part
+ local exchange      = destination network, which finds the host by ARP
+
+Left side = "grows linearly in hosts, up to 2^32 entries" and "every router updating as any host moved".
+{% endcomment %}
+
+
+[Subnetting]() (RFC 950, 1985) further split a classful network into [subnet]()s, each its own broadcast domain, by using a [subnet mask]() $m$ of $n$ leading $1$s (e.g. /24 is 255.255.255.0) in which each bit doubles them and halves hosts. A subnet is then an equivalence class under $x \sim y$ iff $x \land m = y \land m$, while a host recovers each side by bitwise AND ($\land$) of an address with $m$. Hosts can exchange frames via $\text{L}2$ switches alone within a subnet yet need a router to leave it. [Classless inter-domain routing]() (CIDR, RFC 1519, 1993) retired the address classes<!-- trim: internet-wide --> and carries $n$ with every route instead. Consequently, any $n$ is allowed and two sibling /$n{+}1$ prefixes merge into their parent /$n$ as one route.<!-- trim: adjacent prefixes aggregate into one route --><!-- trim: , coarsening the partition --><!-- trim: , curbing routing-table growth -->
+
+{% comment %}
 masking: the network = address AND subnet mask  (mask 1-bits keep, 0-bits zero)
   addr  192.168.1.70    11000000.10101000.00000001.01000110
   mask  /26             11111111.11111111.11111111.11000000
@@ -206,34 +285,66 @@ masking: the network = address AND subnet mask  (mask 1-bits keep, 0-bits zero)
                         └────────── 26 network ───────┘└6 host┘
 
 same-subnet test: two addresses share a subnet iff they AND to the same network
-  .70 → .64 ,  .100 → .64   ⇒ same /26, so they reach each other directly at L2
-                              (8.8.8.8 → different network → send it to the L3 router)
+  .70 → .64 ,  .100 → .64   ⇒ same /26 → ARP for the destination, switches only
+  8.8.8.8 → different network → ARP for the gateway (flow drawn under the router paragraph)
 
 size see-saw (from a /24 = 256 addresses):  subnets × addresses-each = 256 (constant)
   /24 1×256   /25 2×128   /26 4×64   /27 8×32   /30 64×4
   +1 prefix bit  ⇒  ×2 subnets, ÷2 hosts ;   usable = 2^(32-n) - 2
   reserved in each: .0 network (host all 0) , .last broadcast (host all 1)
 
-terminology (prefix ≠ subnet ≠ address):
+prefix vs mask vs class: three different things that all concern the prefix.
 
-| Thing | What it is | Bits |
-|---|---|---|
-| **network prefix** | the shared leading bits, the identifier | the top *n* bits |
-| **subnet** | the network those bits name, the set of addresses sharing the prefix | a range of $2^{32-n}$ addresses |
-| **host address** | one interface inside the subnet | the full 32 bits |
+  network prefix      the leading bits of an address, a value              192.168.1
+  subnet mask         the tool that says how long the prefix is            /24, or 255.255.255.0
+                      and extracts it
+  class (equivalence) the set of all addresses sharing one prefix,         192.168.1.0 to 192.168.1.255
+                      which is a subnet
+
+  the mask is how you find the prefix, the prefix is the name, the class is everything that carries that name.
+  "Class A, B, C" is a fourth, older thing: a rule that fixed the prefix length at 8, 16, or 24.
+
+What "network" in "network prefix" means: a set of addresses reached the same way from where the router sits. It coincides with one L2 network (one broadcast domain) only at the router attached to it.
+
+ 203.0.0.0/16      a prefix, one row in a distant router      many L2 networks
+ └ 203.0.113.0/24  a subnet, one row in the last router       one L2 network
+   └ 203.0.113.7   a host, found by ARP                       one machine
+
+A subnet is the smallest case, a prefix that corresponds to exactly one L2 network where hosts reach each other directly. The larger blocks a distant router holds are not subnets, just prefixes (routes), each covering many subnets. Every subnet is a prefix, but only the prefixes matching a single link are subnets.
 {% endcomment %}
 
+Prefixes are delegated downward, from one central registry to five regional ones to ISPs to their customers, so a customer's prefix nests in its provider's. Since a /$n$ prefix is an aligned block of $2^{32-n}$ addresses, any two are disjoint or nested, hence the routing table entries matching a destination form a chain and the [longest-prefix match](), the chain's most specific element, is well defined, with a default route (0.0.0.0/0) as the coarsest fallback. Routers learn these entries by [open shortest path first]() (OSPF) within an [autonomous system]() (AS), one operator's network, and by [border gateway protocol]() (BGP) between ASes. Each delegation draws on one finite pool.<!-- trim: The prefix also drives delivery. The same prefix that decides locality --><!-- trim: Routing protocols build that table. Within an AS, [intradomain routing]() seeks shortest paths, OSPF running Dijkstra's algorithm on a link-state map and [routing information protocol]() (RIP) exchanging distance vectors by [Bellman-Ford](). Between ASes, [interdomain routing]() by BGP advertises prefix reachability and picks paths by operator policy and AS-path length rather than distance, knitting the autonomous systems into one Internet. -->
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ipv4_vs_ipv6.png" width="400"> <a href="https://blog.servermania.com/ipv4-vs-ipv6" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
+A pool of cardinality $2^{32}$ proved insufficient even under CIDR. The stopgap is the [private address]() (RFC 1918, 1996) in the reserved blocks {10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16}, which is local to its LAN as a [loopback address]() (127.0.0.0/8, RFC 1122, 1989) is to its host, and need not be unique across LANs.<!-- trim: three private blocks the Internet never routes and all LANs may reuse --> A router maps each outbound packet's source $($private IP, port$)$ injectively to $($public IP, port′$)$ via [network address translation]() (NAT) and [port address translation]() (PAT), then inverts the map on replies. By construction no external host can connect inward unless the router is told the target host. IPv6 now replaces the pool with one of $2^{128}$ since the stopgap ended in 2011. 
 
-<!-- - <div style="position: relative; display: inline-block;"> <img src="../assets/blog/ip_versions.webp" width="350"> <a href="https://bytebytego.com/guides/ipv4-vs-ipv6/" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> -->
+<!-- loopback: jekyll/jupyter bind here by default; Docker containers have their own loopback (127.0.0.1 = container, not host), so Docker apps bind to 0.0.0.0 (all interfaces) and use host.docker.internal to reach the host -->
 
-IPv4's $2^{32}$ addresses exhausted even under CIDR. [Address allocation for private internets (RFC 1918)]() reserves three non-routable ranges {10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16}, which [network address translation]() (NAT), specifically [port address translation]() (PAT), multiplexes behind one public IP by rewriting source ports, making them reusable across millions of networks but breaking end-to-end addressability. An address thus sits at one of three scopes, [loopback]() (127.0.0.0/8<!--, where 127 is the last Class A network reserved for self-referencing -->)<!-- jekyll/jupyter bind here by default; Docker containers have their own loopback (127.0.0.1 = container, not host), so Docker apps bind to 0.0.0.0 (all interfaces) and use host.docker.internal to reach the host --> $\to$ [private]() (a LAN) $\xrightarrow{\text{NAT}}$ public, and [IPv6]()'s $2^{128}$ space restores end-to-end reachability, largely retiring NAT as the dual-stack transition proceeds.
-<!-- PAT analogy: an apartment building (public IP) has one street address; the front desk (router) uses unit numbers (ports) to route mail to residents (hosts). Unlike real units, port numbers are assigned dynamically per connection. -->
+{% comment %}
+NAT and PAT are functions, not devices. The router at the edge of a private network performs them in its kernel. A home router does three jobs at once: it routes, it switches, and it translates.
 
-The same prefix that decides locality also drives delivery. Since a /$n$ prefix is an aligned block of $2^{32-n}$ addresses, any two prefixes are either disjoint or nested, so the [routing table]() entries containing a destination always form a chain and the [longest-prefix match](), the chain's most specific element, is well defined, with a default route (0.0.0.0/0) as the coarsest fallback. Routing protocols build that table. Within an [autonomous system]() (AS), one operator's network, [intradomain routing]() seeks shortest paths, [open shortest path first]() (OSPF) running [Dijkstra]() on a link-state map and [routing information protocol]() (RIP) exchanging distance vectors by [Bellman-Ford](). Between ASes, [interdomain routing]() by [border gateway protocol](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) (BGP) advertises prefix reachability and picks paths by operator policy and AS-path length rather than distance, knitting the autonomous systems into one Internet. 
+ NAT  the general technique: rewrite the addresses in a packet as it crosses the router
+ PAT  its usual form: many private addresses share one public address, told apart by port number
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/nat_pat.avif" width="450"> <a href="https://www.cisco.com/c/en/us/td/docs/ios/12_4t/ip_addr/configuration/guide/htaddrs.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">PAT multiplexing private hosts behind one public address by source port.</div> </div>
+The three RFC 1918 ranges are a pool anyone may draw from, not one thing behind one IP.
+A given network picks a piece of one (say 192.168.1.0/24 at home), and that ONE network is what its router presents as a single public IP. The neighbour's network does the same behind a different public IP, so every home can be 192.168.1.x at once. The ranges never appear on the public Internet, hence "non-routable".
+
+ inside (hidden)                          outside sees
+ 192.168.1.7:51000   laptop  ─┐
+ 192.168.1.9:51000   phone   ─┼─ router ─ 203.0.113.5   one address, many ports
+ 192.168.1.12        printer ─┘
+
+ translation table in the router
+   192.168.1.7:51000  ↔  203.0.113.5:40001
+   192.168.1.9:51000  ↔  203.0.113.5:40002
+
+ outbound  rewrite source to 203.0.113.5:4000x
+ inbound   look up the port, rewrite destination back to the private address
+
+An outside host sees only the public IP and a port. It cannot tell which machine inside it is talking to, or even that there is more than one. Only the router's table knows which port belongs to which private host. It also cannot start a conversation inward: it has no address for the laptop, and a port maps to the laptop only after the laptop has spoken first. That is the cost, end-to-end addressability.
+{% endcomment %}
+
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/nat_pat.avif" width="375"> <a href="https://www.cisco.com/c/en/us/td/docs/ios/12_4t/ip_addr/configuration/guide/htaddrs.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">PAT multiplexing private hosts behind one public address by source port.</div> </div>
+
 
 
 ### **2.2. TCP [L4]**
@@ -250,19 +361,19 @@ p6: the algorithms — slow start, AIMD, CUBIC, BBR
 p7: sockets — the API surface
 p8: server lifecycle — bind, listen, accept -->
 
-Given that IP is not responsible for reliability, [transmission control protocol](https://ieeexplore.ieee.org/document/1092259) (TCP, RFC 675 1974; RFC 793 1981, now RFC 9293 2022) provides reliable, ordered, [byte-stream]() delivery over an unreliable packet-switched network. A TCP connection is identified by a 4-tuple (src IP, src port, dst IP, dst port), denoted IP:port (e.g. 127.0.0.1:8080), where [ports]() are 16-bit integers (0-1023 reserved) that multiplex a single IP to distinct processes. <!-- segment header (20-60 bytes) carries src/dst ports, 32-bit sequence and acknowledgement numbers, control flags, 16-bit window size, checksum, and variable-length options. Reusing the same 4-tuple after closing is called an incarnation. --> Before any byte can be numbered both ends must agree where numbering starts, over a network that delays and duplicates, which is why connection establishment takes three messages and not two.
+Given that IP is not responsible for reliability, [transmission control protocol](https://ieeexplore.ieee.org/document/1092259) (TCP, RFC 675 1974; RFC 793 1981, now RFC 9293 2022) provides reliable, ordered, [byte-stream]() delivery over an unreliable packet-switched network. A TCP connection is identified by a 4-tuple (src IP, src port, dst IP, dst port), each endpoint denoted IP:port (e.g. 127.0.0.1:8080), where [ports]() are 16-bit integers (0-1023 reserved) that multiplex a single IP to distinct processes. A client, unlike a server, binds no port and takes an [ephemeral port]() the kernel assigns. <!-- segment header (20-60 bytes) carries src/dst ports, 32-bit sequence and acknowledgement numbers, control flags, 16-bit window size, checksum, and variable-length options. Reusing the same 4-tuple after closing is called an incarnation. --> Before any byte can be numbered both ends must agree where numbering starts, over a network that delays and duplicates, which is why connection establishment takes three messages and not two.
 
 In the [three-way handshake](https://en.wikipedia.org/wiki/Handshaking#TCP_three-way_handshake) (3WHS) the client sends [SYN]() with [initial sequence number]() (ISN) $x$, the server replies [SYN-ACK]() with ISN $y$ and ACK $x+1$, and the client completes with [ACK]() $y+1$, each side's ISN explicitly acknowledged, costing one [RTT](https://en.wikipedia.org/wiki/Round-trip_delay) before data transfer. Teardown uses a four-way FIN exchange. The same delayed-duplicate hazard outlives the connection, since a straggler segment from a closed connection could be taken for one from its successor on the same 4-tuple, so the closing side holds [TIME_WAIT]() for $2 \times$ [MSL]() (maximum segment lifetime).<!-- trim: 240s under RFC 793's 120s MSL though Linux caps it at 60s --> Each incarnation also begins from a distinct ISN, derived cryptographically (RFC 6528) to resist off-path sequence prediction.<!-- trim: originally a 32-bit counter ticking every ~4µs (RFC 793) -->
 
-A connection is not yet reliable delivery, as IP beneath it may drop or reorder packets, and TCP reconstructs the ordered stream from [sequence numbers]() and [acknowledgements](), numbering each byte in the [stream]() so the receiver can return cumulative ACKs naming the next byte it expects. The sender holds a [sliding window]() of unacknowledged data and retransmits segments not acknowledged within the [retransmission timeout]() (RTO), but the right timeout cannot be fixed in advance when RTT varies by path and by congestion, so Jacobson's algorithm estimates it from smoothed RTT and its variance.
+A connection is not yet reliable delivery, as IP beneath it may drop or reorder packets, and TCP reconstructs the ordered stream from [sequence numbers]() and [acknowledgements](), numbering each byte in the [stream]() so the receiver can return cumulative ACKs naming the next byte it expects. The stream carries no message boundaries, since a *send()* may arrive split or merged, so every application protocol frames its own messages. The sender holds a [sliding window]() of unacknowledged data and retransmits segments not acknowledged within the [retransmission timeout]() (RTO), but the right timeout cannot be fixed in advance when RTT varies by path and by congestion, so Jacobson's algorithm estimates it from smoothed RTT and its variance.
 
 Waiting out even a well-estimated timer is slow, and the stream itself signals loss earlier, since every out-of-order arrival makes the receiver repeat the ACK for the last in-order byte, so [fast retransmit]() resends on three such [duplicate ACKs](), cutting recovery from hundreds of milliseconds to roughly one RTT. A cumulative ACK still cannot say which later blocks arrived, forcing retransmission of data the receiver may already hold, and [selective acknowledgements]() (SACK, RFC 2018), negotiated as a header option in the handshake, close that last gap by reporting the received ranges so the sender resends only what is missing.
-
 - <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/3WHS.gif" width="400"> <a href="https://www.w3.org/People/Frystyk/thesis/TcpIp.html" target="_blank" style="position: absolute; bottom: -8px; right: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">SYN, SYN-ACK, ACK, each side's ISN explicitly acknowledged.</div> </div>
+
 
 Reliable delivery can still overwhelm its receiver or the network, two distinct problems with two distinct mechanisms. [Flow control](https://en.wikipedia.org/wiki/Flow_control_(data)) protects the *receiver* through a receiver-advertised window (rwnd), whereas [congestion control](https://en.wikipedia.org/wiki/TCP_congestion_control) protects the *network* through a congestion window (cwnd), and the sender transmits at $\min(\text{rwnd}, \text{cwnd})$, so the tighter constraint always governs throughput. The receiver can state its window outright, but the network cannot, so cwnd must be probed, a lesson learned from the 1986 internet congestion collapse and formalised by Van Jacobson in 1988.
 
-[Slow start]() initialises cwnd $= 1$ [maximum segment size]() (MSS)<!-- trim: modern stacks start at 10 per RFC 6928 --> and doubles it each RTT until threshold _ssthresh_, beyond which [congestion avoidance]() applies [additive increase/multiplicative decrease]() (AIMD), one MSS per RTT up and halving on loss. [CUBIC](https://en.wikipedia.org/wiki/CUBIC_TCP) (Linux default since 2006) replaces AIMD's linear increase with a cubic function $W(t) = C(t - K)^3 + W_{\max}$, recovering faster on high-bandwidth links, while [BBR](https://en.wikipedia.org/wiki/TCP_congestion_control#TCP_BBR) (Google, 2016) drops loss as the congestion signal altogether, since loss appears only after the bottleneck buffer has already filled and delay has already risen, instead estimating bottleneck bandwidth and minimum RTT and pacing packets to match capacity.
+[Slow start]() initialises cwnd $= 1$ [maximum segment size]() (MSS)<!-- trim: modern stacks start at 10 per RFC 6928 --> and doubles it each RTT until threshold _ssthresh_, beyond which [congestion avoidance]() applies [additive increase/multiplicative decrease]() (AIMD), one MSS per RTT up and halving on loss. [CUBIC](https://en.wikipedia.org/wiki/CUBIC_TCP) (Linux default since 2006) replaces AIMD's linear increase with a cubic function $W(t) = C(t - K)^3 + W_{\max}$, growing the window faster on high bandwidth-delay paths, while [BBR](https://en.wikipedia.org/wiki/TCP_congestion_control#TCP_BBR) (Google, 2016) drops loss as the congestion signal altogether, since loss appears only after the bottleneck buffer has already filled and delay has already risen, instead estimating bottleneck bandwidth and minimum RTT and pacing packets to match capacity.
 
 {% comment %}
 
@@ -289,7 +400,7 @@ sock.sendto(data, ("host", 53))
 
 A [socket](https://www.youtube.com/watch?v=K9L9YZhEjC0&t=951s) (BSD 4.2, 1983) is a communication endpoint exposed as a file descriptor, created with an [address family]() and a [socket type](). The address family determines what the socket is bound to, [AF_UNIX]() for a local filesystem path (§603#3.1, UDS) or [AF_INET]() for an (IP, port) pair, or [AF_INET6]() for IPv6, which on a [dual-stack]() kernel also accepts IPv4 clients as v4-mapped addresses (::ffff:a.b.c.d) unless *IPV6_V6ONLY* is set, and the socket type the delivery semantics, [SOCK_STREAM]() for reliable byte streams (TCP) or [SOCK_DGRAM]() for best-effort datagrams (UDP). This single API unified local and network IPC, extending the fd interface (§603#3.3) to network endpoints.<!-- trim: from pipes and files --><!-- trim: so the socket became the common gateway for both local IPC and network communication --><!-- trim: Sockets are a message-passing mechanism (§603#3.1) regardless of address family, as data is always copied through the kernel rather than shared directly. --><!-- trim: Only the address struct differs, and the network stack handles routing and reliability when the processes sit on different machines. transparently; The application code is nearly identical in both cases -->
 
-A TCP server creates a socket, calls _bind()_ to attach it to a local (IP, port), then _listen()_ to mark it as a passive socket that accepts incoming connections. The kernel then completes handshakes by itself, parking established connections in an [accept queue]() bounded by the listen [backlog](), and each _accept()_ call dequeues one (blocking while the queue is empty), returning a new connected fd for that client's 4-tuple, which is why §604#1.1's thread-per-connection model spawns one thread per _accept()_. Higher-level libraries (e.g. Python's _requests_) abstract this entirely, calling down through _urllib3_ → _socket_ module → [POSIX socket API]() → kernel TCP/IP stack.
+In [socket programming](https://recipes4dev.tistory.com/153) a TCP server creates a socket, calls _bind()_ to attach it to a local (IP, port), then _listen()_ to mark it as a passive socket that accepts incoming connections, whereas a client's _connect()_ sends the SYN that opens the handshake. The kernel then completes handshakes by itself, parking established connections in an [accept queue]() bounded by the listen [backlog](), and each _accept()_ call dequeues one (blocking while the queue is empty), returning a new connected fd for that client's 4-tuple, which is why §604#1.1's thread-per-connection model spawns one thread per _accept()_. Higher-level libraries (e.g. Python's _requests_) abstract this entirely, calling down through _urllib3_ → _socket_ module → [POSIX socket API]() → kernel TCP/IP stack.
 
 {% comment %}
 Sockets are a kernel abstraction (implemented in net/ on Linux). Both AF_UNIX
@@ -311,7 +422,7 @@ AF_UNIX (/var/run/docker.sock):
 Same API, different address family, vastly different data path.
 {% endcomment %}
 
-- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/socket.jpg" height="500" width="400"> <a href="https://www.cs.dartmouth.edu/~campbell/cs50/socketprogramming.html" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The server's bind-listen-accept against the client's connect.</div> </div>
+- <div style="display: inline-block;"> <div style="position: relative; display: inline-block;"> <img src="../assets/blog/socket.jpg" width="375"> <a href="https://www.cs.dartmouth.edu/~campbell/cs50/socketprogramming.html" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The server's bind-listen-accept against the client's connect.</div> </div>
 
 <!-- Network performance is characterised by [latency]() (single-packet traversal time) and [throughput]() (data volume per unit time). The [bandwidth-delay product](https://en.wikipedia.org/wiki/Bandwidth-delay_product) $\text{BDP} = \text{bandwidth} \times \text{RTT}$ represents the data in flight needed to fully utilise a link; for a 10 Gbps link with 10 ms RTT, $\text{BDP} = 12.5$ MB, meaning the TCP window must be at least this large. Socket buffer sizes (*SO_SNDBUF*, *SO_RCVBUF*) should match BDP for high-throughput transfers. Conversely, *TCP_NODELAY* disables [Nagle's algorithm](https://en.wikipedia.org/wiki/Nagle%27s_algorithm) (which coalesces small writes to amortise header overhead) and is essential for latency-sensitive protocols like SSH and RPC where each message should be sent immediately. -->
 
@@ -327,7 +438,7 @@ p4: what declining obliges — self-pacing; UDP as the substrate for user-space 
 
 Where TCP layers reliability, ordering, and flow control over IP, [user datagram protocol]() (RFC 768, 1980) keeps IP's best-effort, connectionless delivery and adds almost nothing but ports and a checksum. Its header is only 8 bytes (source port, destination port, length, checksum), compared to TCP's minimum 20-byte header, and there is no handshake, no acknowledgement, no retransmission, no ordering guarantee, and no flow or congestion control. The omission is the design, as TCP fixes one reliability policy for every application, whereas UDP delivers the kernel's minimum and leaves the policy to the process that knows its own tolerance for loss.<!-- trim: This simplicity is a deliberate design choice for applications where the overhead of reliability exceeds the cost of occasional data loss. --><!-- trim: Like TCP, UDP is accessed through the socket API, using SOCK_DGRAM instead of SOCK_STREAM (covered in 2.2). -->
 
-Each canonical UDP application declines reliability for a different reason. DNS fits the typical request-response exchange in a single datagram, and the one RTT saved by skipping the three-way handshake matters for a service invoked before every HTTP connection. Real-time voice and video drop rather than retransmit<!-- trim: VoIP, video conferencing -->, since an audio frame arriving 200 ms late is worse than a gap. Online games send state updates at 20-60 Hz<!-- trim: player positions, actions --> where each supersedes the last, so a lost packet is repaired by the next one rather than by retransmission. The application either tolerates loss, implements its own selective reliability, or treats the latest packet as the only one that matters.
+Each canonical UDP application declines reliability for a different reason. DNS fits the typical request-response exchange in a single datagram, and the one RTT saved by skipping the three-way handshake matters for a service invoked before every HTTP connection. Real-time voice and video drop rather than retransmit<!-- trim: VoIP, video conferencing -->, since an audio frame arriving 200 ms late is worse than a gap. <!-- trim: Online games send state updates at 20-60 Hz (player positions, actions) where each supersedes the last, so a lost packet is repaired by the next one rather than by retransmission. -->[Dynamic host configuration protocol]() (DHCP, RFC 2131) has no choice at all since a joining host holds no IP to open a connection from and so must broadcast a datagram.<!-- trim: The assignment itself is automated by DHCP (RFC 2131), a UDP exchange in which a joining host broadcasts a request and a server leases it the network configuration (an address, subnet mask, default gateway, and DNS resolver) for a renewable term. --> The application either tolerates loss, implements its own selective reliability, or treats the latest packet as the only one that matters.
 
 A datagram is bounded above at 65,535 bytes by UDP's 16-bit length field, though the operative bound is the path MTU. An IPv4 packet exceeding it is fragmented at the IP layer, and losing any one fragment forces retransmitting the whole datagram, while IPv6 routers never fragment, dropping the packet and signalling the source instead. A UDP application therefore keeps each message within the MTU, which is why DNS falls back to TCP when a UDP response is truncated, historically above 512 bytes though EDNS(0) permits up to 4096, with ~1232 the fragmentation-safe default since DNS Flag Day 2020.
 
@@ -640,7 +751,7 @@ Arc: one contract, its format half settled here, its style half handed to 4.2-4.
   p5: handoff — style graded by coupling, set by who the ends are, not by the calendar
 {% endcomment %}
 
-The [application programming interface]() (API) is the contract by which one program exposes its operations to another. Within a single process it is no more than a shared function signature<!-- locally a printf the linker binds into one address space, its binary-level counterpart the ABI, §602#2.1; no wire format needed -->. A networked service instead stretches the contract across a process or machine boundary, where the stack delivers the payload intact but never interprets it, leaving what its bytes mean for the two endpoint programs to settle. That agreement runs along two axes. i) format: the data's encoding, replaceable without redesign, hence interchangeable; and ii) style: the operations and their semantics, pinned in both ends in advance, and so architecturally decisive. <!-- trim: two axes graded by coupling, the prior agreement the two ends must share before they interact (coupling moved to the style handoff); which either side may swap unannounced -->
+The [application programming interface]() (API) is the contract by which one program exposes its operations to another. Within a single process it is no more than a shared function signature<!-- locally a printf the linker binds into one address space, its binary-level counterpart the ABI, §602#2.1; no wire format needed -->. A networked service instead stretches the contract across a process or machine boundary, where the stack <span style="color: red;">carries the payload as bytes, reliably at best (TCP, §2.2) and never interpreted, leaving what they mean</span> for the two endpoint programs to settle. That agreement runs along two axes. i) format: <span style="color: red;">how the data is represented, swappable while the operations hold</span>, hence interchangeable; and ii) style: the operations and their semantics, pinned in both ends in advance, and so architecturally decisive. <!-- trim: two axes graded by coupling, the prior agreement the two ends must share before they interact (coupling moved to the style handoff); which either side may swap unannounced -->
 
 {% comment %}
 "API" is any software-to-software contract, at ANY scale. Only the last row is networked — that is what §4.2 covers. "Agree on what the bytes denote" already scopes it, since bytes ⇒ serialised ⇒ a boundary was crossed.
@@ -656,22 +767,26 @@ The dividing line is SERIALISATION. Locally the two ends share memory, so the "s
 appear only here. gRPC's stub then tries to make the network call read as local again (marshals args, hides transport), i.e. the tightest coupling is the one that most impersonates a local library call.
 {% endcomment %}
 
-The format axis begins a step below the formats, at [serialisation](), the flattening of an object into self-contained bytes. It is needed because a heap object (e.g. a C struct, a Python dict) is a web of pointers, each a virtual address only its process's page tables translate (§603#3.2). No other host holds the mapping, nor does the channel carry a heap but only flat bytes. <!-- trim: a flat byte sequence, not a heap; the sender thus flattens its object --> Therefore, a text format flattens in two steps, ($\Rightarrow$) the sender serialising the object to text $\to$ [encoding]() it as [8-bit unicode transformation format]() (UTF-8) bytes, ($\Leftarrow$) the receiver [decoding]() $\to$ deserialising, whereas a binary format writes each field to bytes directly. <!-- trim: The bytes read identically whatever the two ends' language or [endianness]() (§601#1.2); canonical and platform-neutral --> This encoding, not delivery, is OSI's presentation layer ($\text{L}6$)<!-- trim: folded into the application by TCP/IP --><!-- each message is framed by a length prefix or delimiter marking its end, the byte stream having no boundaries of its own; meaning is fixed once at the top, then carried down by encapsulation (§1.2), each layer the opaque payload of the one below and unwrapped in reverse -->.
-
-The formats atop it trade legibility for density. Text formats such as [JavaScript object notation]() (JSON) and [extensible markup language](https://namu.wiki/w/XML) (XML) stay human-readable and self-describing but verbose and slow to parse. YAML, a superset of JSON, earns the config and spec role<!-- trim: OpenAPI included --> by comments and indentation, and loses the wire to significant whitespace and unsafe deserialisation. Binary formats such as protobuf<!--, Avro, and MessagePack--> are denser and faster yet opaque. A format may further carry a [schema](), one definition both ends hold and validate against. The trade is flexibility for machine-checked agreement, since a breaking message fails at the boundary, where schemaless ends would misread it. <!-- trim: REST's schemaless JSON against gRPC's schema-bound protobuf, moved into the styles table --><!-- trim: the coupling the styles trade on -->
+The format axis begins a step below the formats, at [serialisation](), the flattening of an object into <span style="color: red;">a self-contained representation another process can rebuild</span>. It is needed since a heap object (e.g. a C struct, a Python dict) is a web of pointers, each a virtual address only its process's page tables translate (§603#3.2), <span style="color: red;">laid out as its language and compiler chose</span>. No other host holds the mapping, nor does the channel carry a heap but only flat bytes. Therefore, a text format flattens in two steps, ($\Rightarrow$) the sender serialising the object to <span style="color: red;">text, structure and values, $\to$ [encoding]() that text as</span> [8-bit unicode transformation format]() (UTF-8) bytes, ($\Leftarrow$) the receiver [decoding]() $\to$ deserialising, whereas a binary format <span style="color: red;">serialises each field to bytes directly, no text between</span>. <!-- trim: The bytes read identically whatever the two ends' language or [endianness]() (§601#1.2); canonical and platform-neutral --> <span style="color: red;">This representation, not delivery, is what OSI's presentation layer ($\text{L}6$) names, a function TCP/IP folds into the application and its libraries</span><!-- each message is framed by a length prefix or delimiter marking its end, the byte stream having no boundaries of its own; meaning is fixed once at the top, then carried down by encapsulation (§1.2), each layer the opaque payload of the one below and unwrapped in reverse -->.
 
 {% comment %}
-Why the boundary forces serialisation (the cross-cutting lesson):
+in practice the framework serialises for you; json.dumps is called by hand only at the edges:
 
-- pointers are process-local — an object is a graph of ADDRESSES into this process's
-  virtual address space; another process or host cannot dereference them.
-- no shared memory across the boundary, so VALUES (not references) are copied out.
-- the channel (TCP, pipe, file) carries a flat byte STREAM, never a heap graph.
-- heterogeneous ends (language, endianness, word size, padding, float rep) need a
-  canonical, platform-neutral encoding + framing (length prefix / delimiter).
+  you write                                   | the library calls json.dumps / loads for you
+  return {"id": 1} in FastAPI                 | the response body
+  httpx.post(url, json=data) / requests.post  | the request body
+  response.json()                             | json.loads on the response
+  model.model_dump_json() (Pydantic)          | the model's JSON
+  model.invoke(...) in LangChain              | the request to Ollama or Claude
 
-Absent locally (shared memory); paid on every REST / gRPC / MCP exchange, stdio included. Cross-refs: §603#3.1 (IPC — UDS, pipes), §2.2 (sockets = fd + IP:port), §4.1 (format/style split, above).
-{% endcomment %}{% comment %}
+  by hand:
+  - caches and queues: Redis, Kafka, SQS store strings or bytes, so redis.set(key, json.dumps(data))
+  - structured logging: logger.info(json.dumps({"event": "login", "user": uid}))
+  - files: configs, results, fixtures via json.dump(data, f)
+  - JSON columns in databases, when the ORM does not handle them
+  - debugging: print(json.dumps(data, indent=2)), like jq in 602
+  - LLM work: tool-call arguments and structured outputs are JSON strings, sometimes parsed or built by hand
+
 Two steps, not one: json.dumps builds the TEXT document (structure + values),
 .encode("utf-8") turns that text into BYTES. Together = full serialisation.
 
@@ -687,6 +802,8 @@ UTF-8). Open "rb" and you handle bytes -> decode yourself again.
 Binary formats (protobuf) skip the whole-document text step: numbers written in
 binary (defined byte order), only string FIELDS UTF-8'd, one at a time.
 {% endcomment %}
+
+The formats atop it trade legibility for density. Text formats such as [JavaScript object notation]() (JSON) and [extensible markup language](https://namu.wiki/w/XML) (XML) stay human-readable and self-describing but verbose and slow to parse. YAML, <span style="color: red;">designed as a JSON superset (1.2)</span>, earns the config and spec role<!-- trim: OpenAPI included --> by <span style="color: red;">comments and concise syntax</span>, and loses the wire to <span style="color: red;">its richer type system, heavier parser, and unsafe deserialisation</span>. Binary formats such as protobuf<!--, Avro, and MessagePack--> are denser and faster yet opaque. A format may further carry a [schema](), one definition both ends hold and validate against. The trade is flexibility for machine-checked agreement, since a breaking message fails at the boundary, where schemaless ends would misread it. <!-- trim: REST's schemaless JSON against gRPC's schema-bound protobuf, moved into the styles table --><!-- trim: the coupling the styles trade on -->
 
 Note that the format fixes not just how bytes read, but also how they may change - the harder half once clients are live. They must stay backward-compatible (i.e. an old client understood by a new server) and forward-compatible (i.e. a new client tolerated by an old server), both kept by additive schema evolution, where an old field is never removed or repurposed. Only when a change cannot stay compatible is the API versioned, by URL (e.g. /v2/), header, or media type. For instance, [Stripe](https://stripe.com/blog/api-versioning) pins a version per account and threads old requests via compatibility shims, thus one code-base serves a decade of clients. [Google's AIP](https://google.aip.dev/) also forbids breaking change within a major version. 
 
@@ -904,7 +1021,11 @@ GraphQL also rarely fronts one service, its schema an [aggregation]() layer. [Fe
 
 <p style="margin-bottom: 12px;"> </p>
 
-REST addresses a resource and hands back a snapshot of its state, whereas RPC names a procedure for the server to run, a noun answered by state against a verb answered by a computation. Between co-deployed services REST and GraphQL's public-edge generality is dead weight, text over HTTP paying for reach no internal caller needs. [Remote procedure call]() (RPC, Birrell 1984) tightens here. The client invokes the procedure through a [stub](), a local proxy generated from an interface definition both ends compile in advance<!-- and share as a source dependency, a monorepo or schema registry rather than a loose file -->. The stub marshals the arguments and unmarshals the reply, and the call thus reads as local, an abstraction leaking where the network fails or stalls as a local call would not.
+REST addresses a resource and hands back a snapshot of its state, whereas RPC names a procedure for the server to run, a noun answered by state against a verb answered by a computation. Between co-deployed services REST and GraphQL's public-edge generality is dead weight, text over HTTP paying for reach no internal caller needs. [Remote procedure call](https://dl.acm.org/doi/10.1145/2080.357392) (RPC, Birrell <span style="color: red;">and Nelson, </span>1984) tightens here.
+
+<span style="color: red;">The tightening rests on the</span> [stub](), a local proxy generated from an interface definition both ends compile in advance<!-- and share as a source dependency, a monorepo or schema registry rather than a loose file -->, <span style="color: red;">through which the client invokes the procedure</span>. The stub marshals the arguments and unmarshals the reply, and the call thus reads as local, an abstraction leaking where the network fails or stalls as a local call would not.
+
+<span style="color: red;">Birrell and Nelson fixed both halves of what the stub hides. [Binding]() resolves a name to a server before the first call, as an exporter registers its interface with a name service (Grapevine) and the importer fetches its address and a unique instance identifier, so a restarted server invalidates every stale binding. The [call semantics]() are [at-most-once](), where a call that returns ran exactly once, a crashed or unreachable server raises an exception rather than a blind retry, and a live server that merely computes long is never timed out, so a hang reads as computation.</span>
 
 Tunnelled through HTTP by SOAP and XML-RPC, RPC lost to REST at the edge but returns on its own protocol, its implementations spread across coupling. [JSON-RPC](https://www.jsonrpc.org/specification) 2.0 (2010) sits at the loose end, a schemaless, transport-agnostic object of method, params, and id. [gRPC]() (Google, 2015), its internal Stubby opened up, holds the tight end, typed [protocol buffers]() (protobuf) over HTTP/2, whose multiplexing carries unary or streaming calls, fast but cache-opaque and unreachable from a browser without a [grpc-web]() proxy, a fit for intra-cluster links and ML serving<!-- both ends co-deploy so the pre-agreed contract costs nothing; Triton, TF Serving -->.
 
