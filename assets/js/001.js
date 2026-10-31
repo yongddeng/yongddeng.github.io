@@ -67,15 +67,20 @@
 
 	// The address bar tracks the front window: a post's permalink when a
 	// post is in front, "/" otherwise (explorer, folder windows). Replace,
-	// not push: focus clicks must not pile up history entries.
+	// not push: focus clicks must not pile up history entries. The tab
+	// title follows suit: the post's title, the site name otherwise.
 	document.addEventListener("window:focused", function (e) {
 		// Not on phones: there the page is the window, and keeps the
 		// address it was opened at
 		if (phone()) return;
-		var url = e.detail.el.dataset.url || "/";
+		var el = e.detail.el;
+		var url = el.dataset.url || "/";
 		if (location.pathname + location.search !== url) {
 			history.replaceState(null, "", url);
 		}
+		document.title = el.dataset.url
+			? el.querySelector(".post_title h1").textContent
+			: document.body.dataset.site;
 	});
 
 	function raisable (el) {

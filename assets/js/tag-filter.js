@@ -239,9 +239,14 @@
 		return hljsLoad;
 	}
 
-	// Opens a post as a window; at most five, a sixth is refused.
-	// opts.geom pins the position, opts.force waives the cap (session restore).
-	// Returns a promise so a restore can reopen windows in their saved order.
+	// Posts still on their way in, by URL: a double-click's second click
+	// lands before the first one's window exists, and must not open another
+	var loading = {};
+
+	// Opens a post as a window; at most five, counting any still loading, a
+	// sixth is refused. opts.geom pins the position, opts.force waives the
+	// cap (session restore). Returns a promise so a restore can reopen
+	// windows in their saved order.
 	function loadPost(url, opts) {
 		opts = opts || {};
 		// ?tag= variants of the same URL are the same post
@@ -251,12 +256,13 @@
 			dup.dispatchEvent(new MouseEvent('mousedown'));
 			return Promise.resolve();
 		}
-		if (!opts.force && openPosts().length >= 5) {
+		if (loading[key]) return loading[key];
+		if (!opts.force && openPosts().length + Object.keys(loading).length >= 5) {
 			showError('There is not enough memory to open another window. '
 				+ 'Close one of the open posts, and then try again.');
 			return Promise.resolve();
 		}
-		return fetch(url).then(function(res) { return res.text(); }).then(function(html) {
+		loading[key] = fetch(url).then(function(res) { return res.text(); }).then(function(html) {
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(html, 'text/html');
 			var newContent = doc.querySelector('.content');
@@ -303,7 +309,10 @@
 		}).catch(function() {
 			// a restore of a post since renamed must not navigate away
 			if (!opts.force) window.location.href = url;
+		}).then(function() {
+			delete loading[key];
 		});
+		return loading[key];
 	}
 
 	window.addEventListener('popstate', function() {
