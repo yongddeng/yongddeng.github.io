@@ -5,7 +5,7 @@ drawings; the 48s are the same pictures drawn finer. PNG by hand, since there
 is no PIL here.
 
 Usage:
-  python3 _tools/icons.py              # writes the six PNGs
+  python3 _tools/icons.py              # writes the four PNGs
   python3 _tools/icons.py --x8 <dir>   # and copies eight times over, to look at
 """
 import math
@@ -17,7 +17,7 @@ import zlib
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "img")
 PAL = {
     ".": None, "k": (0, 0, 0), "w": (255, 255, 255), "g": (192, 192, 192), "d": (128, 128, 128),
-    "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "T": (0, 74, 74), "l": (223, 223, 223), "v": (176, 166, 204),
+    "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "v": (176, 166, 204),
 }
 
 
@@ -48,39 +48,6 @@ def box(g, x0, y0, x1, y1, fill="w", shadow=False):
     if shadow:
         rect(g, x1 + 1, y0 + 1, 1, y1 - y0 + 1, "d")
         rect(g, x0 + 1, y1 + 1, x1 - x0 + 1, 1, "d")
-
-
-# ---- quincunx: pegs in a triangle, a ball on its way down, the bins below ----
-def quincunx16():
-    g = canvas(16)
-    box(g, 1, 0, 14, 15)
-    for x, y in [(7, 3), (5, 5), (9, 5), (3, 7), (7, 7), (11, 7)]:
-        rect(g, x, y, 2, 1, "n")
-    rect(g, 9, 9, 1, 1, "r")
-    for x, y, h in [(3, 14, 1), (5, 12, 3), (7, 11, 4), (9, 12, 3), (11, 14, 1)]:
-        rect(g, x, y, 2, h, "t")
-    return g
-
-
-def quincunx48():
-    g = canvas(48)
-    box(g, 4, 1, 42, 45, shadow=True)
-    rect(g, 5, 2, 37, 2, "l")
-    # five rows of pegs, 6 apart, the last row over the bins' walls
-    for r in range(5):
-        for k in range(r + 1):
-            x = round(23 + (k - r / 2) * 6)
-            rect(g, x, 7 + 5 * r, 2, 2, "n")
-    # the ball, between rows 2 and 3, right of centre
-    rect(g, 26, 19, 3, 3, "r")
-    # six bins of Bin(5, 1/2), 1 : 5 : 10 : 10 : 5 : 1, their walls under the last row's pegs
-    for k, h in enumerate([2, 7, 14, 14, 7, 2]):
-        x = 6 + 6 * k
-        rect(g, x, 44 - h, 5, h, "t")
-        rect(g, x + 4, 44 - h, 1, h, "T")
-    for k in range(1, 6):
-        rect(g, 5 + 6 * k, 36, 1, 8, "g")
-    return g
 
 
 # ---- lil: a walk between its two envelopes, about the axis ----
@@ -163,8 +130,8 @@ def optimiser48():
 
 def main():
     x8 = sys.argv[2] if sys.argv[1:2] == ["--x8"] else None
-    for name, grid in [("quincunx-16", quincunx16()), ("quincunx-48", quincunx48()), ("lil-16", lil16()), ("lil-48", lil48()),
-                       ("optimiser-16", optimiser16()), ("optimiser-48", optimiser48())]:
+    for name, grid in [("lil-16", lil16()), ("lil-48", lil48()), ("optimiser-16", optimiser16()),
+                       ("optimiser-48", optimiser48())]:
         png(os.path.join(OUT, name + ".png"), grid)
         if x8:
             png(os.path.join(x8, name + "-x8.png"), [[c for c in row for _ in range(8)] for row in grid for _ in range(8)])

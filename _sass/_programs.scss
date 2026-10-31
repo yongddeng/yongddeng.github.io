@@ -1,9 +1,8 @@
-// The programs on (D:) (_programs): quincunx.exe, lil.exe and optimiser.exe,
-// each in a window of its own (assets/js/quincunx.js, lil.js, optimiser.js). A
-// toolbar, the panes their canvases fill, a row of readings and a note on what
-// is drawn; the link to the note each draws for moves into the status bar
-// (assets/js/exe.js). Toolbar, buttons and panes reuse the WinHelp chrome from
-// _literature.scss.
+// The programs on (D:) (_programs): lil.exe and optimiser.exe, each in a window
+// of its own (assets/js/lil.js, optimiser.js). A toolbar, the panes their
+// canvases fill, a row of readings and a note on what is drawn; the link to the
+// note each draws for moves into the status bar (assets/js/exe.js). Toolbar,
+// buttons and panes reuse the WinHelp chrome from _literature.scss.
 @use "main";
 
 $exe-ui: "Helvetica Neue", Arial, sans-serif;
@@ -123,10 +122,6 @@ $exe-note: #ffffe1;
 		font: 12px $exe-ui;
 		color: $exe-mute;
 	}
-}
-// Drop and Pause take one width, so the toolbar stays put as they swap
-.qx [data-act="drop"] {
-	min-width: 72px;
 }
 // a walk's colour, beside its readings
 .exe-sw {
