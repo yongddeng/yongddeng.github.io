@@ -201,7 +201,7 @@ papers:
   - { id: luong, name: "Luong attention", year: 2015, venue: "EMNLP", shelf: arch, sub: seq, builds_on: [bahdanau],
       title: "Effective Approaches to Attention-based Neural Machine Translation",
       note: "Global vs local attention, and the dot-product score the Transformer later adopts." }
-  - { id: transformer, name: "Transformer", year: 2017, venue: "NeurIPS", shelf: arch, sub: block, builds_on: [luong],
+  - { id: transformer, name: "Transformer", year: 2017, venue: "NeurIPS", shelf: arch, sub: block, builds_on: [luong, resnet, ln, dropout],
       title: "Attention Is All You Need",
       note: "Drops recurrence for multi-head self-attention. The base class of nearly everything after it." }
   - { id: sparse, name: "Sparse Transformer", year: 2019, venue: "arXiv", shelf: arch, sub: attn, builds_on: [transformer],
@@ -381,7 +381,10 @@ papers:
   - { id: ttc, name: "Test-time compute", year: 2024, venue: "arXiv", shelf: tt, sub: tts, builds_on: [cot, chinchilla, selfcons],
       title: "Scaling LLM Test-Time Compute Optimally Can Be More Effective than Scaling Model Parameters",
       note: "Allocate inference compute (verifier search, revisions) per prompt difficulty; beats a 14× larger model on easy and medium prompts." }
-  - { id: flash, name: "FlashAttention", year: 2022, venue: "NeurIPS", shelf: sys, sub: serve, builds_on: [transformer],
+  - { id: online, name: "Online softmax", year: 2018, venue: "arXiv", shelf: sys, sub: serve, builds_on: [],
+      title: "Online normalizer calculation for softmax",
+      note: "Keep a running maximum and rescale the running sum whenever it grows, so the normaliser comes in the same pass as the maximum. Softmax in two passes over memory instead of three, and the rescaling FlashAttention tiles with." }
+  - { id: flash, name: "FlashAttention", year: 2022, venue: "NeurIPS", shelf: sys, sub: serve, builds_on: [transformer, online],
       title: "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
       note: "Tile attention to fit SRAM and recompute in the backward pass. Exact attention without the O(n²) memory." }
   - { id: gqa, name: "GQA", year: 2023, venue: "EMNLP", shelf: arch, sub: attn, builds_on: [mqa],
@@ -393,9 +396,9 @@ papers:
   - { id: nsa, name: "NSA", year: 2025, venue: "ACL", shelf: arch, sub: attn, builds_on: [flash, dsv3, sparse],
       title: "Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention",
       note: "Compressed, selected and sliding-window attention branches trained end to end, with kernels that make the sparsity pay off." }
-  - { id: orca, name: "Orca", year: 2022, venue: "OSDI", shelf: sys, sub: serve, builds_on: [],
+  - { id: orca, name: "Orca", year: 2022, venue: "OSDI", shelf: sys, sub: serve, builds_on: [transformer],
       title: "Orca: A Distributed Serving System for Transformer-Based Generative Models",
-      note: "Schedule at the iteration, not the request, so finished sequences leave and new ones join the batch: continuous batching." }
+      note: "Schedule at the iteration, not the request, so finished sequences leave and new ones join the batch; batch the linear layers across requests but split attention per request. Later called continuous batching." }
   - { id: paged, name: "PagedAttention", year: 2023, venue: "SOSP", shelf: sys, sub: serve, builds_on: [orca],
       title: "Efficient Memory Management for Large Language Model Serving with PagedAttention",
       note: "Virtual-memory-style paging for the KV cache (vLLM). Near-zero waste, 2 to 4× throughput." }
