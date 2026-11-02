@@ -17,7 +17,7 @@ $lit-link: #008000;
 	.post_content {
 		display: flex;
 		flex-direction: column;
-		height: 645px;
+		height: 620px;
 		overflow: hidden;
 		background: #bfb8bf;
 		border: 0;
@@ -200,6 +200,9 @@ $lit-link: #008000;
 	width: 235px;
 	flex: none;
 	padding: 4px 2px;
+}
+.lit-shut .lit-tree {
+	display: none;
 }
 .lit .lit-tree {
 	ul {

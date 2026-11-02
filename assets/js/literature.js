@@ -67,6 +67,13 @@
 		root() { go(null, null); },
 		prev() { step(-1); },
 		next() { step(1); },
+		// the Contents pane folds away, as HTML Help's Hide does, and the page takes its width;
+		// a selection made while it was away is scrolled to when it comes back
+		contents() {
+			const shut = root.classList.toggle('lit-shut');
+			$('[data-act=contents]').classList.toggle('on', !shut);
+			if (!shut) reveal();
+		},
 		// view controls
 		oldest() { timeline.scrollTo(0); },
 		newest() { timeline.scrollTo(1); },
@@ -97,8 +104,7 @@
 		$$('.lit-row').forEach(r => r.classList.toggle('on', p ? r.dataset.paper === p : (!!b && r.dataset.group === b)));
 		if (parent) setBook($('li[data-book="' + parent + '"]'), true);
 		if (lead) setBook($('li[data-book="' + lead + '"]'), true);
-		const on = $('.lit-tree .lit-row.on');
-		if (on) on.scrollIntoView({ block: 'nearest' });
+		reveal();
 		// breadcrumb: every segment but the last is a link, so it does Up's job
 		const path = [['papers', 'data-act="root"']];
 		if (parent) path.push([books[parent].label, 'data-group="' + esc(parent) + '"']);
@@ -108,6 +114,10 @@
 		if (state.view === 'page') renderPage();
 		if (timeline) timeline.scope();
 		if (state.view === 'g') graph.show();
+	}
+	function reveal() {
+		const on = $('.lit-tree .lit-row.on');
+		if (on) on.scrollIntoView({ block: 'nearest' });
 	}
 	function setBook(li, open) {
 		if (!li) return;
