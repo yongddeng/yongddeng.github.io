@@ -11,13 +11,13 @@ $lit-link: #008000;
 
 .help-win {
 	// two panes side by side want more than the 750px of a reading window
-	width: 860px;
+	width: 900px;
 
 	// the pane is window chrome here; the Contents and page panes inside carry the paper
 	.post_content {
 		display: flex;
 		flex-direction: column;
-		height: 620px;
+		height: 550px;
 		overflow: hidden;
 		background: #bfb8bf;
 		border: 0;
