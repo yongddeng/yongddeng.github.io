@@ -10,17 +10,16 @@
 	}
 
 	// Maximize: fill the desktop above the taskbar. Sizes are content-box,
-	// so the window's own frame (bevel + padding) is subtracted; the width
-	// comes from clientWidth, read once the height is set, so the page
-	// scrollbar the window itself caused is gone. The pre-maximize spot is
-	// kept for Restore.
+	// so the window's own frame (bevel + padding) is subtracted. The window
+	// is placed and given its height before data-premax lifts the screen-fit
+	// caps, so that a tall one (optimiser, train) never stands at its full
+	// height and lends the page a scrollbar that clientWidth would be read
+	// short by. The pre-maximize spot is kept for Restore.
 	function maximize (content) {
 		var cont = content.querySelector(".post_content");
 		if (getWidth() <= 900) return;
-		if (!content.dataset.premax) {
-			var st = content.style;
-			content.dataset.premax = JSON.stringify({ position: st.position, margin: st.margin, left: st.left, top: st.top });
-		}
+		var st = content.style;
+		var pre = content.dataset.premax || JSON.stringify({ position: st.position, margin: st.margin, left: st.left, top: st.top });
 		var cs = getComputedStyle(content);
 		var frameW = content.offsetWidth - parseFloat(cs.width);
 		var frameH = content.offsetHeight - parseFloat(cs.height);
@@ -32,6 +31,7 @@
 		content.style.left = "0";
 		content.style.top = "0";
 		content.style.height = (window.innerHeight - barH - frameH) + "px";
+		content.dataset.premax = pre;
 		content.style.width = (document.documentElement.clientWidth - frameW) + "px";
 		cont.style.width = "99.4%";
 	}
