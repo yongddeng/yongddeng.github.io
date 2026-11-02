@@ -1016,10 +1016,12 @@
 		spot(dt);
 		const moved = !camera.position.equals(drawn.at) || !camera.quaternion.equals(drawn.turn) || camera.aspect !== drawn.aspect;
 		const live = (!REDUCED && on.size > 0) || (focus !== 0 && focus !== 1);
-		if (view.clientWidth && (moved || dirty || live)) {
+		if (ready && view.clientWidth && (moved || dirty || live)) {
 			renderer.shadowMap.needsUpdate = stale = moved || dirty;
 			flow(clock);
 			composer.render(dt);
+			// the first frame takes the poster's place
+			if (!drawn.aspect) canvas.style.visibility = 'visible';
 			// the tags move only with the camera or the line
 			if (stale) place();
 			drawn.at.copy(camera.position);
@@ -1035,6 +1037,15 @@
 			renderer.forceContextLoss();
 		}
 	}
+	// the shaders compiled first, in the background and at once where the
+	// browser can (KHR_parallel_shader_compile): a first visit's can take
+	// seconds, through which the window and the program's side stay alive and
+	// the poster behind the canvas stands in for the render. They are compiled
+	// for the composer's buffer, which the scene is drawn into, untoned
+	let ready = false;
+	renderer.setRenderTarget(composer.readBuffer);
+	renderer.compileAsync(scene, camera).then(() => { ready = true; });
+	renderer.setRenderTarget(null);
 	requestAnimationFrame(frame);
 
 	// ---- the models in /data, from their config.json: Llama 3.2's 1B and 3B,
