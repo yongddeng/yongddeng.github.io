@@ -5,7 +5,7 @@ drawings; the 48s are the same pictures drawn finer. PNG by hand, since there
 is no PIL here.
 
 Usage:
-  python3 _tools/icons.py              # writes the four PNGs
+  python3 _tools/icons.py              # writes the six PNGs
   python3 _tools/icons.py --x8 <dir>   # and copies eight times over, to look at
 """
 import math
@@ -18,6 +18,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "
 PAL = {
     ".": None, "k": (0, 0, 0), "w": (255, 255, 255), "g": (192, 192, 192), "d": (128, 128, 128),
     "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "v": (176, 166, 204),
+    "y": (184, 134, 11), "e": (30, 30, 30), "b": (24, 64, 45),
 }
 
 
@@ -128,10 +129,52 @@ def optimiser48():
     rect(g, 26, 22, 1, 1, "w")
     return g
 
+# ---- train: the editor's dark half, its lines in Dark+'s colours and the
+# debugger's arrow at the one in play, beside the board, two GPUs over the
+# CPU, a bus lit between ----
+def code(g, x, rows, height):
+    for y, indent, length, c in rows:
+        rect(g, x + indent, y, length, height, c)
+
+
+def train16():
+    g = canvas(16)
+    box(g, 0, 1, 15, 14)
+    rect(g, 1, 2, 7, 12, "e")
+    code(g, 2, [(4, 0, 4, "v"), (6, 1, 3, "t"), (8, 1, 4, "y"), (10, 0, 3, "v"), (12, 1, 4, "t")], 1)
+    rect(g, 8, 2, 7, 12, "b")
+    rect(g, 9, 3, 2, 3, "g")
+    rect(g, 12, 3, 2, 3, "g")
+    rect(g, 10, 9, 3, 3, "d")
+    line(g, 11, 8, 11, 6, "t")
+    return g
+
+
+def train48():
+    g = canvas(48)
+    box(g, 1, 4, 45, 43, shadow=True)
+    rect(g, 2, 5, 21, 38, "e")
+    code(g, 6, [(9, 0, 9, "v"), (13, 3, 12, "t"), (17, 3, 8, "y"), (21, 0, 10, "v"), (25, 3, 12, "w"), (29, 3, 7, "t"), (33, 6, 10, "y"), (37, 3, 9, "v")], 2)
+    for i in range(3):
+        rect(g, 3 + i, 24 + i, 1, 4 - 2 * i, "y")
+    rect(g, 23, 5, 22, 38, "b")
+    for x in (26, 35):
+        rect(g, x, 9, 7, 10, "g")
+        for f in range(x + 1, x + 7, 2):
+            rect(g, f, 10, 1, 8, "d")
+    rect(g, 30, 29, 8, 8, "w")
+    rect(g, 31, 30, 6, 6, "d")
+    for y in (27, 38):
+        rect(g, 28, y, 12, 1, "k")
+    line(g, 34, 28, 29, 19, "t")
+    line(g, 35, 28, 30, 19, "t")
+    return g
+
+
 def main():
     x8 = sys.argv[2] if sys.argv[1:2] == ["--x8"] else None
-    for name, grid in [("lil-16", lil16()), ("lil-48", lil48()), ("optimiser-16", optimiser16()),
-                       ("optimiser-48", optimiser48())]:
+    for name, grid in [("lil-16", lil16()), ("lil-48", lil48()), ("optimiser-16", optimiser16()), ("optimiser-48", optimiser48()),
+                       ("train-16", train16()), ("train-48", train48())]:
         png(os.path.join(OUT, name + ".png"), grid)
         if x8:
             png(os.path.join(x8, name + "-x8.png"), [[c for c in row for _ in range(8)] for row in grid for _ in range(8)])

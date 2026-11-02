@@ -1,0 +1,70 @@
+---
+title: train.exe
+date: 2026-11-02
+note: "601"
+icon: train-16.png
+large: train-48.png
+winclass: exe-win trn-win
+description: A Llama trained a line at a time in a debugger beside the H100 server it runs on, drawn in 3D from the board down to one SM; train.py on one device, the GPU or the CPU, fed by a DataLoader or by GPUDirect Storage, and train_dist.py on both GPUs by DDP or FSDP; the model, the device, the strategy, the batch size and checkpointing set in the code as it runs, each line's copies lit on the render, timed on a timeline that shows the CPU running ahead of the GPU, and charted in memory, to the line where PyTorch would run out of it.
+---
+
+<div class="exe trn" tabindex="0" aria-label="train.exe: Space or F5 runs on through the lines and pauses, the right arrow or F10 runs the next line, the left arrow steps back, F11 steps into the forward pass and Shift+F11 out of it, Home and End go to the first and last line, T hides the timeline, M the Memory panel, the question mark explains the line">
+<div class="lit-tool">
+<button type="button" class="lit-btn trn-run" data-act="run" title="Run on through the lines, as the debugger’s Continue does, to the last or to an error (Space or F5); again to pause">&#9654; Run</button>
+<span class="trn-buttons">
+<button type="button" data-act="start" title="Go to the first line (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
+<button type="button" data-act="back" title="Step back (←)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
+<button type="button" data-act="next" title="Step over, the next line (→ or F10)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
+<button type="button" data-act="end" title="Go to the last line (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
+</span>
+<span class="trn-buttons">
+<button type="button" data-act="into" title="Step into the forward pass, a line of the model at a time (F11)" disabled><svg viewBox="0 0 12 12"><path d="M5.25 1h1.5v3.5H9L6 7.75 3 4.5h2.25z"/><circle cx="6" cy="10" r="1.5"/></svg></button>
+<button type="button" data-act="out" title="Step out, back to train.py (Shift+F11)" disabled><svg viewBox="0 0 12 12"><path d="M6 1l3 3.25H6.75V7.5h-1.5V4.25H3z"/><circle cx="6" cy="10" r="1.5"/></svg></button>
+</span>
+<span class="trn-at" data-out="at" title="The line in play; drag across to run back and forth through the lines"></span>
+<span class="lit-sep"></span>
+<span class="exe-lbl">data</span>
+<button type="button" class="lit-btn on" data-path="loader" title="A DataLoader: worker processes read the file into DRAM, a thread pins each batch, and the GPU copies it over PCIe every step">DataLoader</button>
+<button type="button" class="lit-btn" data-path="gds" title="GPUDirect Storage: the whole token file read once from the SSD straight into HBM, never through DRAM; each step slices it there">GPUDirect Storage</button>
+</div>
+<div class="trn-body">
+<section class="trn-ide" aria-label="The editor, the line about to run highlighted as a debugger highlights it, and what is in memory after it">
+<nav class="trn-tabs"><span class="on" data-tab="train" title="One device, run with python">train.py</span><span data-tab="dist" title="Both GPUs, run with torchrun --nproc_per_node=2">train_dist.py</span><span data-tab="model" hidden>modeling_llama.py</span></nav>
+<p class="trn-path" data-out="path"></p>
+<div class="trn-text"><ol class="trn-code"></ol></div>
+<section class="trn-panel shut">
+<header><button type="button" class="trn-fold" data-act="fold" aria-expanded="false" title="Show or hide the Memory panel (M)"><i></i><span>Memory</span></button><small>after this line, estimated</small></header>
+<div class="trn-mem">
+<p class="trn-read"><b data-out="hbm-now"></b><span data-out="hbm-of"></span></p>
+<div class="trn-plot"><canvas class="trn-area" role="img" aria-label="The device’s memory in use after every line of the run, stacked by kind"></canvas></div>
+<ul class="trn-key"></ul>
+<ul class="trn-rest"></ul>
+<div class="trn-mtip" hidden></div>
+</div>
+</section>
+<footer class="trn-status"><span data-out="where"></span><span data-out="lncol"></span></footer>
+</section>
+<div class="trn-right">
+<div class="trn-view">
+<canvas class="trn-gl" role="img" aria-label="The machine in 3D: an H100 server from the board down to one SM, the bytes the line moves lit on their way"></canvas>
+<div class="trn-tags" aria-hidden="true"></div>
+<nav class="trn-crumbs" aria-label="Scale"></nav>
+<section class="trn-hud">
+<p class="trn-what"><i data-out="swatch"></i><b data-out="short"></b><span data-out="time"></span><button type="button" class="trn-more" data-act="explain" aria-expanded="false" aria-label="What this line does" title="What this line does (?)">?</button></p>
+<div class="trn-why">
+<p class="trn-cpu" data-out="cpu"></p>
+<p class="trn-held" data-out="held"></p>
+<div class="trn-meter" style="--role: var(--lit-tc)"><span>tensor cores</span><b><i data-out="tc"></i></b><output data-out="tcp"></output></div>
+<div class="trn-meter" style="--role: var(--lit-hbm)"><span>HBM</span><b><i data-out="hbm"></i></b><output data-out="hbmp"></output></div>
+<p class="trn-note" data-out="text"></p>
+</div>
+</section>
+<p class="trn-hint">drag to turn · scroll to zoom</p>
+<section class="trn-time"><canvas class="trn-lanes" role="img" aria-label="When each line runs on the CPU, the SSD, PCIe and the GPU, from the program's start"></canvas><div class="trn-tip" hidden></div></section>
+</div>
+</div>
+</div>
+<a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/train.js" defer></script>

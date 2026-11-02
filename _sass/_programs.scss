@@ -1,8 +1,9 @@
-// The programs on (D:) (_programs): lil.exe and optimiser.exe, each in a window
-// of its own (assets/js/lil.js, optimiser.js). A toolbar, the panes their
-// canvases fill, a row of readings and a note on what is drawn; the link to the
-// note each draws for moves into the status bar (assets/js/exe.js). Toolbar,
-// buttons and panes reuse the WinHelp chrome from _literature.scss.
+// The programs on (D:) (_programs): lil.exe, optimiser.exe and train.exe, each
+// in a window of its own (assets/js/lil.js, optimiser.js, train.js). A toolbar,
+// the panes their canvases fill, a row of readings and a note on what is drawn;
+// the link to the note each draws for moves into the status bar
+// (assets/js/exe.js). Toolbar, buttons and panes reuse the WinHelp chrome from
+// _literature.scss, and train.exe draws VS Code's.
 @use "main";
 
 $exe-ui: "Helvetica Neue", Arial, sans-serif;
@@ -478,6 +479,864 @@ $exe-note: #ffffe1;
 
 // On a phone the window is the page: the panes stack, each as tall as a share
 // of its width, and the note's link stays in the program, as its last line
+// ---- train.exe: the code and what is where on the left, the machine in 3D on
+// the right with the timeline floating over its foot. Windows 98 is the frame;
+// inside it the editor is VS Code's Dark+ as a debugger shows it, the device's
+// memory is charted through the run in its panel, and the render goes as far as
+// the renderer goes. ----
+.trn-win {
+	width: 1040px;
+
+	.post_content {
+		height: 720px;
+		padding: 0 4px 2px;
+	}
+}
+.trn {
+	// the tensor cores and HBM as the render lights them
+	--lit-hbm: #5a7cff;
+	--lit-tc: #e060c8;
+	// Dark+, as VS Code ships it
+	--vs-bg: #1e1e1e;
+	--vs-bar: #252526;
+	--vs-tab: #2d2d2d;
+	--vs-ink: #d4d4d4;
+	--vs-dim: #858585;
+	--vs-rule: rgba(128, 128, 128, 0.35);
+	--vs-debug: #cc6633;
+	--ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	--mono: Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-size: 11px;
+	line-height: 1.4;
+	outline: none;
+}
+.trn-body {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 4px;
+}
+.trn-right {
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+// the transport, as Windows 98 raised a toolbar's buttons, of 12-pixel glyphs
+.trn-buttons {
+	display: flex;
+	gap: 2px;
+	margin-right: 6px;
+
+	button {
+		width: 24px;
+		height: 22px;
+		padding: 0;
+		background: #c0c0c0;
+		border: 1px solid;
+		border-color: #dfdfdf #404040 #404040 #dfdfdf;
+		box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
+		cursor: pointer;
+
+		&:active:not(:disabled) {
+			border-color: #404040 #ffffff #ffffff #404040;
+			box-shadow: inset 1px 1px 0 #808080;
+		}
+		&:disabled {
+			cursor: default;
+		}
+		&:disabled svg {
+			fill: #808080;
+			filter: drop-shadow(1px 1px 0 #ffffff);
+		}
+	}
+	svg {
+		display: block;
+		width: 11px;
+		height: 11px;
+		margin: auto;
+		fill: #000000;
+	}
+}
+
+// sunken, as Windows 98 sinks a field or a pane
+.trn-at,
+.trn-ide,
+.trn-view {
+	border: 1px solid;
+	border-color: #808080 #ffffff #ffffff #808080;
+	box-shadow: inset 1px 1px 0 #404040;
+}
+// where the run is, in a field as a player keeps its timecode, wide enough for
+// the longest, so that it never pushes the buttons along: drag across it to run
+// back and forth
+.trn-at {
+	min-width: 36ch;
+	margin-right: 6px;
+	padding: 2px 6px;
+	background: #ffffff;
+	color: #000000;
+	font: 11px var(--mono);
+	white-space: nowrap;
+	cursor: ew-resize;
+	user-select: none;
+	touch-action: none;
+}
+// Run as wide as Pause, its label while it runs
+.trn .trn-run {
+	min-width: 62px;
+}
+
+// ---- the editor: tabs, breadcrumbs, the code, the panel, the status bar ----
+.trn-ide {
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--vs-bg);
+	color: var(--vs-ink);
+	font: 12px/1.4 var(--ui);
+}
+.trn-tabs {
+	flex: none;
+	display: flex;
+	height: 30px;
+	background: var(--vs-bar);
+
+	span {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 0 12px;
+		background: var(--vs-tab);
+		border-right: 1px solid var(--vs-bar);
+		color: rgba(255, 255, 255, 0.5);
+		white-space: nowrap;
+	}
+	span::before {
+		content: "";
+		width: 9px;
+		height: 9px;
+		border-radius: 2px;
+		background: linear-gradient(135deg, #3b77a8 50%, #f5d04b 50%);
+	}
+	span[data-tab="train"],
+	span[data-tab="dist"] {
+		cursor: pointer;
+	}
+	span.on {
+		background: var(--vs-bg);
+		color: #ffffff;
+	}
+	span[hidden] {
+		display: none;
+	}
+}
+.trn .trn-path {
+	flex: none;
+	padding: 0 14px;
+	height: 22px;
+	line-height: 22px;
+	color: rgba(204, 204, 204, 0.8);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+
+	i {
+		font-style: normal;
+		padding: 0 5px;
+		color: var(--vs-dim);
+	}
+}
+.trn-text {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	scrollbar-color: rgba(121, 121, 121, 0.4) transparent;
+}
+
+// room past the last line, as VS Code scrolls beyond it, so that a line near the
+// end can still come to the middle
+.trn ol.trn-code {
+	min-width: max-content;
+	list-style: none;
+	margin: 0;
+	padding: 2px 0 240px;
+	font: 11px/16px var(--mono);
+
+	// a line: the glyph margin with the debugger's arrow, the number, a bar the
+	// colour of the part that holds it, and the code; the statement in play
+	// shaded as Dark+ shades the top stack frame
+	li {
+		display: grid;
+		grid-template-columns: 18px 26px 12px minmax(0, 1fr);
+		margin: 0;
+		padding: 0 10px 0 0;
+	}
+	li[data-stop],
+	li.trn-switch {
+		cursor: pointer;
+	}
+	li[data-stop]:not(.on):hover,
+	li.trn-switch:not(.on):hover {
+		background: rgba(255, 255, 255, 0.04);
+	}
+	li.on {
+		background: rgba(255, 255, 0, 0.2);
+	}
+	li.head::before {
+		content: "";
+		align-self: center;
+		justify-self: center;
+		width: 11px;
+		height: 10px;
+		background: #ffcc00;
+		clip-path: polygon(0 25%, 50% 25%, 50% 0, 100% 50%, 50% 100%, 50% 75%, 0 75%);
+	}
+	li:not(.head)::before {
+		content: "";
+	}
+	li > span {
+		color: var(--vs-dim);
+		text-align: right;
+	}
+	li.on > span {
+		color: #c6c6c6;
+	}
+	li > i {
+		justify-self: center;
+		width: 3px;
+	}
+	code {
+		white-space: pre;
+		padding: 0;
+		font: inherit;
+		background: none;
+		color: #9cdcfe;
+	}
+}
+// Dark+'s tokens, with Pylance's semantic colours, and its bracket pairs
+.trn {
+	.k { color: #c586c0; }
+	.s { color: #569cd6; }
+	.f { color: #dcdcaa; }
+	.c { color: #4ec9b0; }
+	.v { color: #9cdcfe; }
+	.u { color: #4fc1ff; }
+	.q { color: #ce9178; }
+	.n { color: #b5cea8; }
+	.m { color: #6a9955; }
+	.o { color: #d4d4d4; }
+	.b0 { color: #ffd700; }
+	.b1 { color: #da70d6; }
+	.b2 { color: #179fff; }
+}
+// what the script lets you change: the batch size a handle to drag, the
+// checkpointing line a comment to click; beside the handle the run's peak as the
+// debugger writes an inline value, in Dark+'s colours for one
+.trn ol.trn-code {
+	.trn-knob {
+		margin: 0 -2px;
+		padding: 0 2px;
+		border-bottom: 1px dashed #b5cea8;
+		border-radius: 2px;
+		cursor: ew-resize;
+		outline: none;
+		touch-action: none;
+	}
+	.trn-knob:focus-visible,
+	.trn-knob.drag {
+		background: rgba(181, 206, 168, 0.2);
+	}
+	.trn-pick {
+		border-bottom: 1px dashed #ce9178;
+		cursor: pointer;
+		outline: none;
+	}
+	.trn-pick:focus-visible {
+		background: rgba(206, 145, 120, 0.2);
+	}
+	.trn-inline {
+		margin-left: 3ch;
+		padding: 0 4px;
+		background: rgba(255, 200, 0, 0.2);
+		color: rgba(255, 255, 255, 0.5);
+		font-style: normal;
+	}
+	// the CodeLens, as Dark+ draws one: grey in the UI's face a size down, no
+	// number of its own, a link lit as the pointer comes to it
+	li.trn-lens {
+		color: #999999;
+		font: 10px/16px var(--ui);
+		cursor: default;
+
+		code {
+			font: inherit;
+			color: inherit;
+		}
+		a {
+			color: inherit;
+			text-decoration: none;
+			cursor: pointer;
+		}
+		a:hover {
+			color: #4e94ce;
+			text-decoration: underline;
+		}
+	}
+	// the exception widget, as Dark+ draws it under the line that raised
+	// as wide as the editor, never widening it as its message would
+	li.trn-exc {
+		display: block;
+		width: 0;
+		min-width: 100%;
+		box-sizing: border-box;
+		position: relative;
+		margin: 2px 0 4px;
+		padding: 5px 30px 7px 56px;
+		background: #420b0d;
+		border-top: 2px solid #a31515;
+		border-bottom: 2px solid #a31515;
+		color: var(--vs-ink);
+		font: 12px/1.45 var(--ui);
+		cursor: default;
+
+		p {
+			margin: 0 0 4px;
+		}
+		b {
+			font-weight: 600;
+		}
+		button {
+			position: absolute;
+			top: 3px;
+			right: 8px;
+			padding: 0 4px;
+			background: none;
+			border: 0;
+			color: var(--vs-ink);
+			font: 16px/1 var(--ui);
+			cursor: pointer;
+		}
+		pre {
+			margin: 0;
+			white-space: pre-wrap;
+			word-break: break-all;
+			font: 11px/15px var(--mono);
+			color: #cccccc;
+		}
+	}
+}
+
+// VS Code's widgets: the suggest list and the hover
+.trn-suggest,
+.trn-mtip {
+	position: absolute;
+	background: var(--vs-bar);
+	border: 1px solid #454545;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.36);
+	color: #cccccc;
+}
+// the model's folders, as VS Code's suggest widget lists a completion
+.trn-suggest {
+	min-width: 280px;
+	padding: 1px 0;
+	font: 12px/22px var(--mono);
+
+	div {
+		display: grid;
+		grid-template-columns: 16px minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 6px;
+		padding: 0 8px 0 6px;
+		cursor: pointer;
+	}
+	div.on {
+		background: #04395e;
+		outline: 1px solid #007fd4;
+		outline-offset: -1px;
+	}
+	div:hover:not(.on) {
+		background: #2a2d2e;
+	}
+	svg {
+		width: 14px;
+		height: 14px;
+		fill: #c09553;
+	}
+	small {
+		color: #9d9d9d;
+		font: 11px var(--ui);
+	}
+}
+
+// the panel under the editor: HBM through the whole run, a column a line stacked
+// by kind against what CUDA reports, the line in play outlined and the lines to
+// come faint; the host's memory and the SSD beneath it
+.trn-panel {
+	flex: none;
+	height: 252px;
+	display: flex;
+	flex-direction: column;
+	border-top: 1px solid var(--vs-rule);
+
+	header {
+		flex: none;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		height: 30px;
+		padding: 0 10px;
+	}
+	// the panel's title folds it, as a VS Code view's does
+	.trn-fold {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 0;
+		background: none;
+		border: 0;
+		color: #e7e7e7;
+		font: inherit;
+		cursor: pointer;
+	}
+	.trn-fold i {
+		width: 0;
+		height: 0;
+		border-left: 4px solid transparent;
+		border-right: 4px solid transparent;
+		border-top: 5px solid #c5c5c5;
+	}
+	.trn-fold[aria-expanded="false"] i {
+		transform: rotate(-90deg);
+	}
+	header span {
+		padding: 4px 0 3px;
+		border-bottom: 1px solid #e7e7e7;
+		color: #e7e7e7;
+		font-size: 11px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+	&.shut {
+		height: 30px;
+	}
+	&.shut .trn-mem {
+		display: none;
+	}
+	&.shut header span {
+		border-bottom-color: transparent;
+	}
+	header small {
+		color: var(--vs-dim);
+		font-size: 11px;
+	}
+}
+.trn-mem {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 0 12px 10px;
+	color: #c9ced6;
+	font: 11px/1.4 var(--ui);
+	font-variant-numeric: tabular-nums;
+}
+.trn .trn-read {
+	flex: none;
+	display: flex;
+	align-items: baseline;
+	gap: 7px;
+
+	b {
+		color: #ffffff;
+		font: 600 20px/1 var(--ui);
+	}
+	span {
+		color: var(--vs-dim);
+	}
+	&.err b {
+		color: #f48771;
+	}
+}
+.trn-plot {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	cursor: pointer;
+
+	canvas {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+}
+// the site sets off a post's lists and pads their items; these are a chart's
+.trn .trn-key,
+.trn .trn-rest {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.trn .trn-key li,
+.trn .trn-rest li {
+	padding: 0;
+}
+// the key under the chart, a row that wraps
+.trn-key {
+	flex: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 14px;
+
+	li {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+		line-height: 16px;
+		white-space: nowrap;
+	}
+	i {
+		width: 9px;
+		height: 9px;
+		border-radius: 2px;
+	}
+	output {
+		color: #e8eaed;
+		font: 10.5px var(--mono);
+	}
+	.err {
+		color: #f48771;
+	}
+}
+.trn-rest {
+	flex: none;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 14px;
+
+	li {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 3px 6px;
+		align-items: center;
+		line-height: 15px;
+	}
+	span {
+		color: var(--vs-dim);
+		font: 10px var(--mono);
+	}
+	output {
+		justify-self: end;
+		font: 10.5px var(--mono);
+	}
+	b {
+		grid-column: 1 / -1;
+		height: 3px;
+		background: #333333;
+	}
+	b i {
+		display: block;
+		height: 100%;
+		background: #b9bec6;
+	}
+}
+// a column's lines, as VS Code shows a hover
+.trn-mtip {
+	min-width: 200px;
+	padding: 5px 8px 6px;
+	font: 11px/1.45 var(--ui);
+	pointer-events: none;
+
+	b {
+		display: block;
+		margin-bottom: 3px;
+		color: #ffffff;
+		font-weight: 600;
+	}
+	p {
+		display: flex;
+		justify-content: space-between;
+		gap: 14px;
+	}
+	output {
+		color: #b5cea8;
+		font: 10.5px var(--mono);
+	}
+}
+
+// VS Code's status bar, orange as it turns while a debugger runs
+.trn-status {
+	flex: none;
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	height: 22px;
+	padding: 0 10px;
+	background: var(--vs-debug);
+	color: #ffffff;
+	line-height: 22px;
+	white-space: pre;
+	overflow: hidden;
+	font-variant-numeric: tabular-nums;
+
+	span:first-child {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	span:last-child {
+		flex: none;
+	}
+}
+
+// ---- the render: the machine on a dark stage, sunken as a pane ----
+.trn-view {
+	// the band the timeline floats in
+	--foot: 150px;
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	background: #08090b;
+	cursor: grab;
+	touch-action: none;
+
+	&.drag {
+		cursor: grabbing;
+	}
+}
+.trn-gl {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.trn-tags {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+.trn-tag {
+	position: absolute;
+	transform: translate(-50%, calc(-100% - 10px - var(--rise, 0px)));
+	padding: 2px 7px 3px;
+	background: rgba(9, 11, 13, 0.78);
+	border: 1px solid rgba(232, 235, 231, 0.18);
+	border-radius: 2px;
+	color: #e8ebe7;
+	white-space: nowrap;
+	font: 500 11.5px/1.25 "Helvetica Neue", Arial, sans-serif;
+
+	span {
+		display: block;
+		color: #8e9792;
+		font: 10px/1.4 var(--mono);
+	}
+	&::after {
+		content: "";
+		position: absolute;
+		left: calc(50% + var(--shift, 0px));
+		top: 100%;
+		width: 1px;
+		height: calc(10px + var(--rise, 0px));
+		background: rgba(232, 235, 231, 0.18);
+	}
+	&.lit {
+		border-color: var(--role);
+	}
+	&.lit::after {
+		background: var(--role);
+	}
+}
+.trn-crumbs {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: flex;
+	gap: 2px;
+
+	button {
+		height: 20px;
+		padding: 0 7px;
+		background: rgba(9, 11, 13, 0.72);
+		border: 1px solid rgba(232, 235, 231, 0.18);
+		border-radius: 2px;
+		color: #8e9792;
+		font: 11px "Helvetica Neue", Arial, sans-serif;
+		cursor: pointer;
+	}
+	button.on {
+		color: #e8ebe7;
+		border-color: rgba(232, 235, 231, 0.5);
+	}
+}
+
+// the line in play, on the render: its name and how long it takes, and on ?
+// whether the CPU waits, what holds it, how busy the tensor cores and HBM are
+// when the GPU works, and what the line does
+.trn-hud {
+	position: absolute;
+	left: 8px;
+	bottom: calc(var(--foot) + 8px);
+	box-sizing: border-box;
+	min-width: 190px;
+	max-width: 300px;
+	padding: 7px 9px 8px;
+	background: rgba(9, 11, 13, 0.8);
+	border: 1px solid rgba(232, 235, 231, 0.18);
+	border-radius: 2px;
+	color: #e8ebe7;
+}
+.trn-what {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	font-size: 12.5px;
+
+	i {
+		flex: none;
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+	}
+	b {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-weight: 600;
+	}
+	span {
+		flex: none;
+		margin-left: auto;
+		padding-left: 10px;
+		font: 11px var(--mono);
+		white-space: nowrap;
+	}
+}
+.trn-more {
+	flex: none;
+	align-self: center;
+	width: 17px;
+	height: 17px;
+	padding: 0;
+	background: none;
+	border: 1px solid rgba(232, 235, 231, 0.35);
+	border-radius: 50%;
+	color: #e8ebe7;
+	font: 600 10.5px/15px "Helvetica Neue", Arial, sans-serif;
+	cursor: pointer;
+
+	&:hover {
+		border-color: rgba(232, 235, 231, 0.7);
+	}
+	&[aria-expanded="true"] {
+		background: #e8ebe7;
+		border-color: #e8ebe7;
+		color: #090b0d;
+	}
+}
+.trn-why {
+	display: none;
+}
+.trn-hud.open {
+	width: 300px;
+
+	.trn-why {
+		display: block;
+	}
+}
+// the meters only while the GPU works
+.trn-hud.idle .trn-meter {
+	display: none;
+}
+.trn .trn-cpu, .trn .trn-held {
+	color: #b9c0bc;
+}
+.trn .trn-cpu {
+	margin-top: 2px;
+}
+.trn-meter {
+	display: grid;
+	grid-template-columns: 74px minmax(0, 1fr) 34px;
+	align-items: center;
+	gap: 8px;
+	margin-top: 3px;
+
+	span {
+		color: #8e9792;
+	}
+	b {
+		height: 5px;
+		background: rgba(232, 235, 231, 0.14);
+		overflow: hidden;
+	}
+	b i {
+		display: block;
+		height: 100%;
+		width: 0;
+		background: var(--role);
+	}
+	output {
+		text-align: right;
+		font: 10.5px var(--mono);
+		min-width: 0;
+	}
+}
+.trn .trn-note {
+	margin-top: 5px;
+	padding-top: 5px;
+	border-top: 1px solid rgba(232, 235, 231, 0.14);
+	color: #b9c0bc;
+}
+.trn .trn-hint {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	color: rgba(232, 235, 231, 0.4);
+	pointer-events: none;
+}
+// the timeline, floating over the render's foot in the stage's colours, the
+// board faint through it; T takes it away
+.trn-time {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: var(--foot);
+	background: rgba(8, 9, 11, 0.8);
+	border-top: 1px solid rgba(232, 235, 231, 0.12);
+	backdrop-filter: blur(3px);
+	cursor: default;
+}
+.trn.bare .trn-view {
+	--foot: 0px;
+}
+.trn.bare .trn-time {
+	display: none;
+}
+.trn-lanes {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.trn-tip {
+	position: absolute;
+	max-width: 260px;
+	padding: 3px 7px 4px;
+	background: rgba(9, 11, 13, 0.94);
+	border: 1px solid rgba(232, 235, 231, 0.22);
+	border-radius: 2px;
+	font: 11px/1.35 "Helvetica Neue", Arial, sans-serif;
+	color: #e8ebe7;
+	pointer-events: none;
+}
+
 @media only screen and (max-width: 700px) {
 	.exe-win .post_content {
 		display: block;
