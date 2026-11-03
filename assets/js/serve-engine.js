@@ -1,12 +1,13 @@
-// serve.exe's engine, shared by serve.exe (assets/js/serve.js) and train.exe's
-// serve.py tab (assets/js/train.js): chat requests to Llama 3.1 70B over two
-// H100s, a small rewrite of vLLM's v1 scheduler as it was in vLLM 0.11, each
-// step timed by the roofline. ServeEngine.simulate(at) serves a run to its
-// end and keeps it step by step; at is HOME with any setting changed. Nothing
-// here draws: the colours at the end are the two programs' shared words for
-// a request, its colour, two tones in turn, and which of its states are
-// brief. Declared with var, and kept if already there: the desktop runs a
-// window's scripts each time it opens one, and both programs load this.
+// scheduler.exe's engine, shared by scheduler.exe (assets/js/scheduler.js) and
+// device.exe's serve.py tab (assets/js/device.js): chat requests to
+// Llama 3.1 70B over two H100s, a small rewrite of vLLM's v1 scheduler as it
+// was in vLLM 0.11, each step timed by the roofline. ServeEngine.simulate(at)
+// serves a run to its end and keeps it step by step; at is HOME with any
+// setting changed. Nothing here draws: the colours at the end are the two
+// programs' shared words for a request, its colour, two tones in turn, and
+// which of its states are brief. Declared with var, and kept if already there:
+// the desktop runs a window's scripts each time it opens one, and both
+// programs load this.
 var ServeEngine = ServeEngine || (function () {
 
 	// ---- the hardware, and what a pass costs ----
@@ -122,7 +123,7 @@ var ServeEngine = ServeEngine || (function () {
 	//   prefix  prefix caching: a full block is kept, keyed by the tokens up
 	//           to its end, after its requests finish, for the next to reuse
 	//   trace   keep every change to a block in S.trace, for a picture of
-	//           the cache, for serve.exe's map (it changes nothing served)
+	//           the cache, for scheduler.exe's map (it changes nothing served)
 	function engine(kv, list, opt) {
 		const N = opt.blocks;
 		const owner = new Int32Array(N).fill(-1), ref = new Int32Array(N), key = new Array(N).fill(null);

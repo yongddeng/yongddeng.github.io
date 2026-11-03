@@ -1,10 +1,10 @@
-// The programs on (D:) (_programs): lil.exe, optimiser.exe, serve.exe and
-// train.exe, each in a window of its own (assets/js/lil.js, optimiser.js,
-// serve.js, train.js). A toolbar, the panes their canvases fill, a row of
-// readings and a note on what is drawn; the link to the note each draws for
+// The programs on (D:) (_programs): device.exe, lil.exe, optimiser.exe and
+// scheduler.exe, each in a window of its own (assets/js/device.js, lil.js,
+// optimiser.js, scheduler.js). A toolbar, the panes their canvases fill, a row
+// of readings and a note on what is drawn; the link to the note each draws for
 // moves into the status bar (assets/js/exe.js). Toolbar, buttons and panes
-// reuse the WinHelp chrome from _literature.scss; serve.exe draws chat
-// clients and a Disk Defragmenter's map, and train.exe draws VS Code's.
+// reuse the WinHelp chrome from _literature.scss; scheduler.exe draws chat
+// clients and a Disk Defragmenter's map, and device.exe draws VS Code's.
 @use "main";
 
 $exe-ui: "Helvetica Neue", Arial, sans-serif;
@@ -479,15 +479,15 @@ $exe-note: #ffffe1;
 	font-size: 11px;
 }
 
-// ---- serve.exe: one run seen from the users' side and from the KV cache. Three
-// rows of toolbar: the clock, a second server to compare and the views; the
-// workload; the server's settings. Under them one of two views. Users: the
-// wall of the chats, or two walls a line a chat when two servers are
-// compared, over a strip of the steps, the cache and the latencies, two by
-// two. Memory: the chats a line each, over the map of the cache's blocks,
-// over the river, the cache through the run. Windows 98 is the frame and the
-// chrome; a chat is drawn as a chat client draws one, the map as the Disk
-// Defragmenter drew a disk. ----
+// ---- scheduler.exe: one run seen from the users' side and from the KV cache.
+// Three rows of toolbar: the clock, a second server to compare and the views;
+// the workload; the server's settings. Under them one of two views. Users: the
+// wall of the chats, or two walls a line a chat when two servers are compared,
+// over a strip of the steps, the cache and the latencies, two by two. Memory:
+// the chats a line each, over the map of the cache's blocks, over the river,
+// the cache through the run. Windows 98 is the frame and the chrome; a chat is
+// drawn as a chat client draws one, the map as the Disk Defragmenter drew a
+// disk. ----
 .sv-win {
 	width: 831px;
 
@@ -496,10 +496,10 @@ $exe-note: #ffffe1;
 	}
 }
 // the programs' own type and colours, as _programs.scss names them ($exe-ui,
-// $exe-mono, $exe-mute, $exe-note, $exe-navy, $exe-face), and serve.js's
+// $exe-mono, $exe-mute, $exe-note, $exe-navy, $exe-face), and scheduler.js's
 // purple, gold and faint grey; one gap between panes, down the window and
 // across it; and the walls' rows at their least, which a window made smaller
-// keeps (serve.js reads Memory's): three of a tile's in Users, twelve of a
+// keeps (scheduler.js reads Memory's): three of a tile's in Users, twelve of a
 // line's with two servers compared, six over the cache
 .sv {
 	--ui: #{$exe-ui};
@@ -602,7 +602,7 @@ $exe-note: #ffffe1;
 	padding: 2px 5px;
 	--at: 0px;
 	// a seek bar: filled to the clock, a navy line at its foot, and red ticks
-	// where a server preempts (--ticks, serve.js's)
+	// where a server preempts (--ticks, scheduler.js's)
 	background: var(--ticks,) linear-gradient(var(--navy), var(--navy)) 0 100% / var(--at) 2px no-repeat,
 		linear-gradient(#dcdff0, #dcdff0) 0 0 / var(--at) 100% no-repeat, #ffffff;
 	font: 11px var(--mono);
@@ -639,9 +639,9 @@ $exe-note: #ffffe1;
 // The window's own column already spaces its children by 3px, so a pane that
 // follows another in it adds the rest of --gap. A window made smaller than
 // the panes want keeps the chats' rows at their least: in Users the strip
-// under them gives way, its boxes shorter; in Memory the map, which serve.js
-// sizes to what the rows leave, and the rows below their least are cut off
-// rather than laid over it
+// under them gives way, its boxes shorter; in Memory the map, which
+// scheduler.js sizes to what the rows leave, and the rows below their least
+// are cut off rather than laid over it
 .sv-body {
 	position: relative;
 	flex: 1;
@@ -1076,7 +1076,7 @@ $exe-note: #ffffe1;
 	gap: 2px;
 	line-height: 1.3;
 }
-// as wide as serve.js lets the tooltip be, at most half the window
+// as wide as scheduler.js lets the tooltip be, at most half the window
 .sv-tip .sv-card.sv-blocks {
 	width: auto;
 }
@@ -1328,8 +1328,8 @@ $exe-note: #ffffe1;
 	touch-action: none;
 }
 
-// a tooltip, as Windows 98 showed one, its width with its border, as serve.js
-// sets Memory's card's
+// a tooltip, as Windows 98 showed one, its width with its border, as
+// scheduler.js sets Memory's card's
 .sv-tip {
 	position: absolute;
 	z-index: 5;
@@ -1351,11 +1351,11 @@ $exe-note: #ffffe1;
 	margin-top: 3px;
 }
 
-// ---- train.exe: the code and what is where on the left, the machine in 3D on
-// the right with the timeline floating over its foot. Windows 98 is the frame;
-// inside it the editor is VS Code's Dark+ as a debugger shows it, the device's
-// memory is charted through the run in its panel, and the render goes as far as
-// the renderer goes. ----
+// ---- device.exe: the code and what is where on the left, the machine in 3D
+// on the right with the timeline floating over its foot. Windows 98 is the
+// frame; inside it the editor is VS Code's Dark+ as a debugger shows it, the
+// device's memory is charted through the run in its panel, and the render goes
+// as far as the renderer goes. ----
 .trn-win {
 	width: 1040px;
 
@@ -1977,7 +1977,7 @@ $exe-note: #ffffe1;
 	overflow: hidden;
 	// a still of the render as it opens, standing in while its shaders compile
 	// (_tools/poster.py)
-	background: #08090b url("/assets/img/train-poster.webp") center / contain no-repeat;
+	background: #08090b url("/assets/img/device-poster.webp") center / contain no-repeat;
 	cursor: grab;
 	touch-action: none;
 
@@ -2213,8 +2213,8 @@ $exe-note: #ffffe1;
 	pointer-events: none;
 }
 
-// ---- serve.py, train.exe's third tab: what it adds to train.exe's own styles.
-// The data buttons give way to Run's speed, and the editor takes the
+// ---- serve.py, device.exe's third tab: what it adds to device.exe's own
+// styles. The data buttons give way to Run's speed, and the editor takes the
 // debugger's ways of showing a step: a line the step skips dimmed, the stop's
 // value in a hover under it, and the settings as values to drag, pick or
 // switch. The timeline keeps train.py's height, its lanes a row for each

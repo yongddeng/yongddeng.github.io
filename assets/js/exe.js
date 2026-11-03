@@ -1,7 +1,7 @@
-// What the programs on (D:) share (lil.js, optimiser.js, serve.js, train.js):
-// a place in their window's status bar beside the note they draw for,
-// canvases drawn at the screen's density, a key to what they draw, and the
-// hatching for room set aside that nothing fills.
+// What the programs on (D:) share (device.js, lil.js, optimiser.js,
+// scheduler.js): a place in their window's status bar beside the note they
+// draw for, canvases drawn at the screen's density, a key to what they draw,
+// and the hatching for room set aside that nothing fills.
 
 // The note's link moves into the status bar and opens the note in a window of
 // its own, as My Computer does. Returns a setter for the bar's first cell, which

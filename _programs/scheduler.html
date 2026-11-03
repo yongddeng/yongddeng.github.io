@@ -1,14 +1,14 @@
 ---
-title: serve.exe
+title: scheduler.exe
 date: 2026-10-31
 note: "301"
-icon: serve-16.png
-large: serve-48.png
+icon: scheduler-16.png
+large: scheduler-48.png
 winclass: exe-win sv-win
 description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by a small rewrite of vLLM's scheduler, each step timed by the roofline. In Users, the chats as the people who sent them see them, in English, Korean and other languages, each answer coming in as the engine makes its tokens, the steps, the cache and the latencies under them, and a second server beside the first serving the same chats; in Memory, the chats a line each over the KV cache, block by block, and the cache through the run. From static batches, through prefill first, to chunked prefill, the cache contiguous or paged, prefix caching, bf16 or fp8, and the load.
 ---
 
-<div class="exe sv view-users" tabindex="0" role="region" aria-label="serve.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it">
+<div class="exe sv view-users" tabindex="0" role="region" aria-label="scheduler.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it">
 <div class="lit-tool">
 <button type="button" class="lit-btn sv-run" data-act="run" title="Play the run at the speed beside it (Space); again to pause">&#9654; Run</button>
 <span class="sv-buttons">
@@ -94,9 +94,9 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 <canvas class="sv-river" role="img" aria-label="The cache over the run, in blocks, stacked by kind, with the playhead; drag across it to move through the run"></canvas>
 </section>
 <div class="sv-tip" hidden></div>
-<script type="application/json" class="sv-chats">{{ site.data.serve_chats | jsonify }}</script>
+<script type="application/json" class="sv-chats">{{ site.data.scheduler_chats | jsonify }}</script>
 <a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
 </div>
 <script src="/assets/js/exe.js" defer></script>
 <script src="/assets/js/serve-engine.js" defer></script>
-<script src="/assets/js/serve.js" defer></script>
+<script src="/assets/js/scheduler.js" defer></script>

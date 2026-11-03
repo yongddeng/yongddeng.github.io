@@ -1,11 +1,11 @@
-// train.exe (_programs/train.html): a training script run a line at a time
+// device.exe (_programs/device.html): a training script run a line at a time
 // in a debugger, VS Code's Dark+ on the left, and on the right the H100
 // server it runs on, drawn in 3D, with a timeline floating over its foot.
 // Three parts: the machine's links and how long a copy takes on them,
 // after copy.exe's engine; the render, which lights the copies a line makes;
 // and the program, which runs the scripts and steps through them. A third
 // script, serve.py, runs vLLM's engine on the same machine an engine step at
-// a time, on serve.exe's engine (ServeEngine, loaded before this), in
+// a time, on scheduler.exe's engine (ServeEngine, loaded before this), in
 // sections of its own that the editor, the panels and the timeline ask
 // where serve.py differs. All of it runs inside a function, so that a
 // window opened again runs it again; three.js 0.160 comes from jsDelivr, its
@@ -2354,14 +2354,14 @@
 	const hudPanel = $('.trn-hud');
 	let explaining = false;
 	try {
-		explaining = localStorage.getItem('train.exe:explain') === 'open';
+		explaining = localStorage.getItem('device.exe:explain') === 'open';
 	} catch (e) {}
 	function explain(on = !explaining) {
 		explaining = on;
 		hudPanel.classList.toggle('open', on);
 		$('[data-act="explain"]').setAttribute('aria-expanded', String(on));
 		try {
-			localStorage.setItem('train.exe:explain', on ? 'open' : 'shut');
+			localStorage.setItem('device.exe:explain', on ? 'open' : 'shut');
 		} catch (e) {}
 	}
 	function hud() {
@@ -2573,13 +2573,14 @@
 	});
 
 	// ---- serve.py, the third script: vLLM's engine fed thirty chats and run
-	// an engine step at a time. Its run is ServeEngine's, serve.exe's engine:
-	// Llama 3.1 70B over both H100s, tensor parallel, each step timed by the
-	// roofline; served to its end at once and its blocks traced, so that what a
-	// step took and freed can be read off it. The machine, the editor, the
-	// panels and the timeline are train.exe's own; where serve.py differs they
-	// ask these sections. The code for static batches is transformers', whose
-	// cache is bf16 here, so static batches run at bf16 whatever the dtype set ----
+	// an engine step at a time. Its run is ServeEngine's, scheduler.exe's
+	// engine: Llama 3.1 70B over both H100s, tensor parallel, each step timed
+	// by the roofline; served to its end at once and its blocks traced, so
+	// that what a step took and freed can be read off it. The machine, the
+	// editor, the panels and the timeline are device.exe's own; where serve.py
+	// differs they ask these sections. The code for static batches is
+	// transformers', whose cache is bf16 here, so static batches run at bf16
+	// whatever the dtype set ----
 	const SE = ServeEngine, BLOCK = SE.BLOCK;
 	// thirty chats, two a second, served first as static batches, the oldest
 	// way, so that each newer scheduler picked shows what it makes better; a
@@ -2596,8 +2597,8 @@
 		FACTS.clear();
 		SV.rows = null;
 	}
-	// requests are named as serve.exe names them, from 1; the one picked on the
-	// timeline, or under the pointer there, is lit wherever it is named
+	// requests are named as scheduler.exe names them, from 1; the one picked
+	// on the timeline, or under the pointer there, is lit wherever it is named
 	const lit = () => (SV.hover >= 0 ? SV.hover : SV.pick);
 	const ids = list => list.map(id => '<b data-id="' + id + '">#' + (id + 1) + '</b>').join(', ');
 	const plural = (n, one, many = one + 's') => int(n) + ' ' + (n === 1 ? one : many);
@@ -3325,7 +3326,8 @@
 	// the lanes' own margins: the left for the requests' numbers, the top for
 	// the key as the lanes name their steps there, the foot for the time
 	const RQ = { left: LEFT, top: TOP, foot: 30 };
-	// serve.exe's kinds, lit for the stage; an answer is its request's colour
+	// scheduler.exe's kinds, lit for the stage; an answer is its request's
+	// colour
 	const STAGE = { wait: '#3b3f47', prefill: '#c77dce', stall: '#6c717b',
 		pad: '#5d5672', preempted: '#7d3b3b', recompute: '#ff6464', refused: '#ffffff' };
 	// the key, the kinds a scheduler can have: a static batch neither stalls
@@ -3954,7 +3956,7 @@
 		$('.trn-panel').classList.toggle('shut', !open);
 		$('[data-act="fold"]').setAttribute('aria-expanded', String(open));
 		try {
-			localStorage.setItem('train.exe:memory', open ? 'open' : 'shut');
+			localStorage.setItem('device.exe:memory', open ? 'open' : 'shut');
 		} catch (e) {}
 		if (open) memory();
 	}
@@ -4045,7 +4047,7 @@
 	// folded until a reader opens it
 	let memoryOpen = false;
 	try {
-		memoryOpen = localStorage.getItem('train.exe:memory') === 'open';
+		memoryOpen = localStorage.getItem('device.exe:memory') === 'open';
 	} catch (e) {}
 	fold(memoryOpen);
 	reset();

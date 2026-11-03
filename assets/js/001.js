@@ -12,7 +12,7 @@
 	// Maximize: fill the desktop above the taskbar. Sizes are content-box,
 	// so the window's own frame (bevel + padding) is subtracted. The window
 	// is placed and given its height before data-premax lifts the screen-fit
-	// caps, so that a tall one (optimiser, train) never stands at its full
+	// caps, so that a tall one (optimiser, device) never stands at its full
 	// height and lends the page a scrollbar that clientWidth would be read
 	// short by. The pre-maximize spot is kept for Restore.
 	function maximize (content) {

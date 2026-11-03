@@ -1,5 +1,5 @@
-// serve.exe: chat requests served to Llama 3.1 70B over two H100s by
-// serve.exe's engine (ServeEngine), seen from both ends at once: by the
+// scheduler.exe: chat requests served to Llama 3.1 70B over two H100s by
+// scheduler.exe's engine (ServeEngine), seen from both ends at once: by the
 // people who sent them, a wall of chat clients each answer streaming in when
 // the engine makes its tokens; and in the KV cache that holds them, every
 // block vLLM numbers a cell of a map, as Windows 98's Disk Defragmenter drew
@@ -128,11 +128,11 @@
 	}
 
 	// ---- the chats ----
-	// What the users send and what comes back, written for serve.exe in
-	// _data/serve_chats.yml, whose head says how a chat is written; the page
-	// carries them as JSON, and the site's build checks them
-	// (_plugins/check_serve.rb). How long each is and when each token comes
-	// are the engine's. Mostly English, some Korean, the rest a spread
+	// What the users send and what comes back, written for scheduler.exe in
+	// _data/scheduler_chats.yml, whose head says how a chat is written; the
+	// page carries them as JSON, and the site's build checks them
+	// (_plugins/check_scheduler.rb). How long each is and when each token
+	// comes are the engine's. Mostly English, some Korean, the rest a spread
 	const CHATS = JSON.parse($('.sv-chats').textContent);
 	// The shares of the languages: two thirds English, a sixth Korean, the
 	// rest spread evenly
@@ -696,7 +696,7 @@
 		const k = Math.min(made - 1, 8);
 		return k > 0 ? k / (r.times[made - 1] - r.times[made - 1 - k]) : 0;
 	}
-	// A chat's title bar: what it waits on, in the colours serve.exe gives
+	// A chat's title bar: what it waits on, in the colours scheduler.exe gives
 	// each state; a request's own colour, faintly, while its answer comes
 	function bar(v, u, c, t) {
 		switch (c.st) {
@@ -989,8 +989,8 @@
 	// be made very small. A pane wider than WIDE has room for longer words
 	const MOST_CELL = 24, LEAST_CELL = 2, WIDE = 640;
 	// The map as tall as its cells: the largest that leave the chats' rows
-	// their least (as serve.css sets them: --rows of --row and their gaps),
-	// of the height the rows and the map share, the body's less the gap
+	// their least (as _programs.scss sets them: --rows of --row and their
+	// gaps), of the height the rows and the map share, the body's less the gap
 	// between the panes, the chats' lines over their rows and the key under
 	// the map. The rows take the rest. A window too small for the least of
 	// both keeps the rows and lets the map go, from its foot
@@ -2040,7 +2040,7 @@
 		}
 		showTip(e,
 			head + chatHTML(f)
-				+ '<p><i>The messages and answers are written for serve.exe; how long each is and when each token comes are the engine’s.</i></p>');
+				+ '<p><i>The messages and answers are written for scheduler.exe; how long each is and when each token comes are the engine’s.</i></p>');
 	}
 	// the first server's request under the pointer, lit on the map and on
 	// its chat; only beside the map, the walls lighting nothing else

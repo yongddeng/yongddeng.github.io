@@ -1,14 +1,14 @@
-# serve.exe's chats (assets/js/serve.js): what its users send and what comes
-# back. A chat is a lang (one of serve.js's LANGS), an ask, and its answer in
-# pieces: a piece is said at any length, a piece in a list of its own
-# (["…"]) only when the answer's length wants it, and words in ⟨…⟩ may be
-# left out of either, so that an answer comes to the engine's count in its
-# own words. A chat with make (a key of serve.js's MAKERS) names its own size
+# scheduler.exe's chats (assets/js/scheduler.js): what its users send and what
+# comes back. A chat is a lang (one of scheduler.js's LANGS), an ask, and its
+# answer in pieces: a piece is said at any length, a piece in a list of its own
+# (["…"]) only when the answer's length wants it, and words in ⟨…⟩ may be left
+# out of either, so that an answer comes to the engine's count in its own
+# words. A chat with make (a key of scheduler.js's MAKERS) names its own size
 # in its ask, in the sizes its rule gives ({n}, its count, unless the rule
 # gives others, as leap's {a} and {b}), and has "{items}" among its pieces,
 # where as many items go as fit, each made by the rule. paste names what a
 # prompt longer than its ask carried, else the rest is the chat so far.
-# Checked as the site builds by _plugins/check_serve.rb
+# Checked as the site builds by _plugins/check_scheduler.rb
 
 # English, answered in prose
 - lang: en

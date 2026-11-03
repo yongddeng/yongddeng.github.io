@@ -406,7 +406,7 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 }
 .xp-icons {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, 78px);
+	grid-template-columns: repeat(auto-fill, 86px);
 	gap: 6px 4px;
 	padding: 8px 6px;
 	align-content: start;
@@ -433,7 +433,7 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 		}
 	}
 	.nm {
-		max-width: 76px;
+		max-width: 84px;
 		padding: 0 2px;
 		border: 1px dotted transparent;
 		overflow-wrap: anywhere;

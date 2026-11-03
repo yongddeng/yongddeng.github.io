@@ -129,8 +129,9 @@ def optimiser48():
     rect(g, 26, 22, 1, 1, "w")
     return g
 
-# ---- serve: a batch, a bar a sequence, the shared system prompt in gold at
-# its head, an answer's next token a black tick at its end, one a prompt chunk ----
+# ---- scheduler: a batch, a bar a sequence, the shared system prompt in gold
+# at its head, an answer's next token a black tick at its end, one a prompt
+# chunk ----
 def batch(g, x, rows, height, head, tick):
     for y, length, c in rows:
         rect(g, x, y, head, height, "y")
@@ -139,21 +140,21 @@ def batch(g, x, rows, height, head, tick):
             rect(g, x + head + length, y, tick, height, "k")
 
 
-def serve16():
+def scheduler16():
     g = canvas(16)
     box(g, 0, 1, 15, 14)
     batch(g, 2, [(3, 5, "n"), (6, 2, "t"), (9, 9, "p"), (12, 4, "n")], 2, 2, 1)
     return g
 
 
-def serve48():
+def scheduler48():
     g = canvas(48)
     box(g, 1, 4, 45, 43, shadow=True)
     batch(g, 4, [(8, 17, "n"), (14, 9, "t"), (20, 28, "p"), (26, 22, "n"), (32, 6, "t"), (38, 13, "n")], 4, 7, 2)
     return g
 
 
-# ---- train: the editor's dark half, its lines in Dark+'s colours and the
+# ---- device: the editor's dark half, its lines in Dark+'s colours and the
 # debugger's arrow at the one in play, beside the board, two GPUs over the
 # CPU, a bus lit between ----
 def code(g, x, rows, height):
@@ -161,7 +162,7 @@ def code(g, x, rows, height):
         rect(g, x + indent, y, length, height, c)
 
 
-def train16():
+def device16():
     g = canvas(16)
     box(g, 0, 1, 15, 14)
     rect(g, 1, 2, 7, 12, "e")
@@ -174,7 +175,7 @@ def train16():
     return g
 
 
-def train48():
+def device48():
     g = canvas(48)
     box(g, 1, 4, 45, 43, shadow=True)
     rect(g, 2, 5, 21, 38, "e")
@@ -198,7 +199,7 @@ def train48():
 def main():
     x8 = sys.argv[2] if sys.argv[1:2] == ["--x8"] else None
     for name, grid in [("lil-16", lil16()), ("lil-48", lil48()), ("optimiser-16", optimiser16()), ("optimiser-48", optimiser48()),
-                       ("serve-16", serve16()), ("serve-48", serve48()), ("train-16", train16()), ("train-48", train48())]:
+                       ("scheduler-16", scheduler16()), ("scheduler-48", scheduler48()), ("device-16", device16()), ("device-48", device48())]:
         png(os.path.join(OUT, name + ".png"), grid)
         if x8:
             png(os.path.join(x8, name + "-x8.png"), [[c for c in row for _ in range(8)] for row in grid for _ in range(8)])
