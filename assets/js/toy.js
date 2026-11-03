@@ -189,34 +189,36 @@
 	const tokHtml = j => `<i>${WORDS[j]}</i><sub>${j}</sub>`;
 	const ease = k => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
 	const lerp3 = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+	const dist3 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
 	// ---- the twenty steps -------------------------------------------------------
-	// One row a step: its name in the code, the walls lit (the others fade back), and where the
-	// camera looks, in units down the page. _plugins/check_toy.rb counts these rows against toy.yml.
+	// One row a step: its name in the code, the walls lit (the others fade back), where the camera
+	// looks, in units down the page, and, if not 1, how many steps of scroll the move into it takes.
+	// _plugins/check_toy.rb counts these rows against toy.yml.
 	const STEPS = [
 		['arrive', ['x'], 0],
 		['norm', ['x'], 0],
-		['qkv', ['x', 'q', 'k', 'v'], 26],
+		['qkv', ['x', 'q', 'k', 'v'], 26, 2],
 		['rope', ['q', 'k'], 27],
 		['cache', ['k', 'v'], 28],
 		['repeat', ['k', 'v', 'kc', 'vc'], 29],
 		['scores', ['q', 'k', 'kc', 'a'], 34.4],
 		['softmax', ['a'], 35.4],
 		['blend', ['a', 'v', 'vc', 'o'], 35.4],
-		['wo', ['o', 'h'], 40],
+		['wo', ['o', 'h'], 40, 2],
 		['add', ['x', 'h'], 40],
 		['norm2', ['h'], 47],
-		['route', ['h'], 60],
-		['gateUp', [], 65],
-		['swiglu', [], 68],
-		['down', [], 73],
-		['add2', ['h', 'y'], 79],
-		['finalNorm', ['y'], 91],
-		['logits', [], 99],
-		['pick', [], 103],
+		['route', ['h'], 61],
+		['gateUp', [], 66],
+		['swiglu', [], 69],
+		['down', [], 74],
+		['add2', ['h', 'y'], 80],
+		['finalNorm', ['y'], 92],
+		['logits', [], 100],
+		['pick', [], 104],
 	];
 	const ST = Object.fromEntries(STEPS.map(([name], s) => [name, s]));
-	const FOCUS = STEPS.map(r => r[1]), FOCUS_Y = STEPS.map(r => r[2]), NST = STEPS.length;
+	const FOCUS = STEPS.map(r => r[1]), FOCUS_Y = STEPS.map(r => r[2]), MOVE = STEPS.map(r => r[3] ?? 1), NST = STEPS.length;
 
 	// ---- geometry -----------------------------------------------------------------
 	// Scene units: a cube of the residual stream is one unit; x runs right, y runs down
@@ -227,7 +229,7 @@
 	// layer of its group's first query head; the group's other layers hold, empty, the
 	// heads multi-head attention would keep. Attention's walls are drawn at u of a
 	// unit, smaller than the stream's and with air between them.
-	const HS = 0.42, HZ = 2.2, SX = 1.1, SMALL = 0.85, HOLD = 0.18, PEND = 3.4, RAILX = -1.7;
+	const HS = 0.42, HZ = 2.2, SX = 1.1, SMALL = 0.85, HOLD = 0.18, PEND = HZ / 2, RAILX = -1.7;
 	const SUM_X = -0.85; // the two ⊕, between the rail and the walls
 	const FX = 2, NETW = 22; // the networks' left edge and width: the experts', and the LM head's
 	const PANEL = { x0: 0.8, x1: FX + NETW + 7.2, z: -HZ - 0.7 }; // the boards: one column, behind the front walls
@@ -239,7 +241,7 @@
 		a: { x: 4, top: 33.8, w: T, u: SMALL },
 		o: { x: 20.5, top: 33.8, w: DH, u: SMALL },
 		h: { x: 0, top: 45.8, w: 8, u: 1 },
-		y: { x: 0, top: 81, w: 8, u: 1 },
+		y: { x: 0, top: 82, w: 8, u: 1 },
 	};
 	// the copies of a key or value head, kc and vc, go in the layer of its group's second query head; until Repeat
 	// and after the blend that layer holds kd and vd, empty cubes for the head multi-head attention would keep there
@@ -248,10 +250,47 @@
 	const layerOf = (b, h) => b in LAYER ? h * GRP + LAYER[b] : h;
 	const wallOf = b => WALLS[COPY[b] ?? b];
 	const cellPos = (b, h, t, i) => { const { x, top, u } = wallOf(b), n = layerOf(b, h); return [x + (i + 0.5 + n * SX) * u, -(top + (t + 0.5) * u), -n * HZ]; };
+	// x̂ → q, k, v in two beats, as q_proj(x̂).view(H, dh) has it. First the projection: the sweep crosses each
+	// weight's columns in SWEEP of the move, and a column's edges land on its cube in the weight's one flat row,
+	// q's 16 with k's 8 and v's 8 beside it. The rows then hold, so that the projection is over well before the
+	// split. Then the split: each head's d_h cubes fold back into its layer in FOLD, and the layers drop into the
+	// token's row in DROP. Attention ends the other way round: o's layers unfold into one flat row of 16 in UNFOLD,
+	// the row holds, and Wo's sweep reads it in MIX. A column lights for COL_LIT
+	const SWEEP = [0.04, 0.32], FOLD = [0.68, 0.88], DROP = [0.9, 1], UNFOLD = [0.04, 0.24], MIX = [0.48, 0.86], COL_LIT = 0.05;
+	// the flat rows in the front plane, side by side with a gap of RGAP cubes between two, so that each reads as a
+	// row of its own. o's is 1.6 under its wall, inside the board, and starts a cube past a's front layer, nearer h
+	// than o's own place, so that Wo's edges fan down to h as Wq's fan down from x; its heads drop out of their wall,
+	// then slide left. Turned, q, k and v's are 1.8 above their walls. Seen head-on, the walls' labels sit right on
+	// the walls, where those rows would cover them, so they go under their walls as o's does, and the cubes rise into
+	// their row
+	const RGAP = 2;
+	const under = b => -(WALLS[b].top + T * WALLS[b].u + 1.6);
+	const FLAT = {
+		q: { x: WALLS.q.x, y: -(WALLS.q.top - 1.8) },
+		k: { x: WALLS.q.x + (NH * DH + RGAP) * SMALL, y: -(WALLS.k.top - 1.8) },
+		v: { x: WALLS.q.x + (NH * DH + NKV * DH + 2 * RGAP) * SMALL, y: -(WALLS.v.top - 1.8) },
+		o: { x: WALLS.a.x + T * WALLS.a.u + 1, y: under('o') },
+	};
+	let headOn = false; // whether the view is nearer the front than turned; draw keeps it, and the scenes, up to date
+	const flatPos = (b, c) => [FLAT[b].x + (c + 0.5) * WALLS[b].u, headOn ? under(b) : FLAT[b].y, 0];
+	const colWin = (c, n, [a, b]) => { const k = a + (b - a) * c / n; return [k, k + COL_LIT]; }; // column c of n, in window [a, b]
+	const sweepWin = (c, n) => colWin(c, n, SWEEP);
+	const mixWin = f => colWin(f, D, MIX);
+	// a projected cube's way in to `end`, its place: it shows on its flat row once its column's sweep is past, folds
+	// over `end` (turned, into its layer), then drops (head-on, rises) to it
+	const foldPath = (b, c, n, end) => {
+		const flat = flatPos(b, c), over = [end[0], flat[1], end[2]], shown = sweepWin(c, n)[1];
+		return { path: [[shown, flat], [FOLD[0], flat], [FOLD[1], over], [DROP[0], over], [1, end]] };
+	};
+	// RoPE as R_t's edges. A copy of each q and k row in its values before the turn steps ROPE_DROP below the row in
+	// EMERGE; then pair 0's edges light in TURN[0] and pair 1's in TURN[1], and each pair's two cubes take their
+	// turned values as their edges light. R_t is block-diagonal, so an entry has edges from its own pair only. The
+	// copies are ghosts: they fade once the turn is done, so the step itself holds only the turned rows
+	const EMERGE = [0, 0.2], TURN = [[0.25, 0.55], [0.55, 0.85]], ROPE_DROP = 3 * SMALL;
 	// the experts as networks: 8 inputs, the router's score for each expert, each expert's 3 neurons in a box of its
 	// own (a gate node fed by W1, a value node fed by W3, their product), 8 outputs. Neuron n is neuron n mod 3 of
 	// expert ⌊n/3⌋
-	const NY = { in: 58.2, r: 61.8, g: 66.0, u: 67.8, m: 70.6, out: 76.4 };
+	const NY = { in: 59.2, r: 62.8, g: 67.0, u: 68.8, m: 71.6, out: 77.4 };
 	const SLOT = 0.75, EW = FE * SLOT, EGAP = (NETW - NE * EW) / (NE - 1); // a neuron's width, an expert's, the gap between two
 	const EX0 = e => FX + e * (EW + EGAP); // expert e's left edge
 	const nx = (n, at) => EX0(Math.floor(n / FE)) + (n % FE + at) * SLOT;
@@ -259,7 +298,7 @@
 	const NR = { in: 0.42, out: 0.42, r: 0.36, g: 0.24, u: 0.24, m: 0.27 }; // node radii, in units
 	const netPos = (kind, i) => [NX[kind](i), -NY[kind], 0];
 	// the LM head: z, a node per vocabulary token, then the probability bars and their labels
-	const HY = { in: 95.4, voc: 101.0, bar: 102.2, lab: 108.8 };
+	const HY = { in: 96.4, voc: 102.0, bar: 103.2, lab: 109.8 };
 	const HXv = j => FX + (j + 0.5) * NETW / NV;
 	const headPos = (kind, i) => kind === 'in' ? [NX.in(i), -HY.in, 0] : [HXv(i), -HY.voc, 0];
 	// the components: a board each, lit while the token is inside it, on a plane at depth z; attention's sits behind
@@ -267,9 +306,9 @@
 	// y0 and y1 for the view. tint fills the board; accent draws its spine, its edge and its heading's square; ink sets
 	// its heading
 	const CASES = [
-		{ name: 'Attention', sub: '4 query heads on 2 key-value heads here; 32 on 8, 42 M weights in Mixtral', top: 15.0, bottom: 40.5, z: -(NH - 1) * HZ - 0.7, wide: 3, tint: [221, 232, 255], accent: [47, 85, 180], ink: '#22407f', steps: [ST.norm, ST.wo] },
-		{ name: 'Mixture of experts · SwiGLU', sub: '8 experts of 3, 2 run a token; 8 of 14,336 in Mixtral, 1.4 B weights', top: 55.8, bottom: 78.0, z: PANEL.z, wide: 0, tint: [227, 242, 218], accent: [46, 125, 58], ink: '#235f2d', steps: [ST.norm2, ST.down] },
-		{ name: 'LM head · next token', sub: '16 tokens here; 32,000 in Mixtral, 131 M weights', top: 92.0, bottom: 112.6, z: PANEL.z, wide: 0, tint: [236, 228, 248], accent: [122, 79, 179], ink: '#5a3790', steps: [ST.finalNorm, ST.pick] },
+		{ name: 'Attention', sub: '4 query heads on 2 key-value heads here; 32 on 8, 42 M weights in Mixtral', top: 15.0, bottom: 41.5, z: -(NH - 1) * HZ - 0.7, wide: 3, tint: [221, 232, 255], accent: [47, 85, 180], ink: '#22407f', steps: [ST.norm, ST.wo] },
+		{ name: 'Mixture of experts · SwiGLU', sub: '8 experts of 3, 2 run a token; 8 of 14,336 in Mixtral, 1.4 B weights', top: 56.8, bottom: 79.0, z: PANEL.z, wide: 0, tint: [227, 242, 218], accent: [46, 125, 58], ink: '#235f2d', steps: [ST.norm2, ST.down] },
+		{ name: 'LM head · next token', sub: '16 tokens here; 32,000 in Mixtral, 131 M weights', top: 93.0, bottom: 113.6, z: PANEL.z, wide: 0, tint: [236, 228, 248], accent: [122, 79, 179], ink: '#5a3790', steps: [ST.finalNorm, ST.pick] },
 	];
 	const LAST = CASES[CASES.length - 1], MOE = CASES[1];
 	// a board sits under what it holds. The view pushes a plane at depth z sideways by push(z) and lifts it by lift(z),
@@ -288,7 +327,7 @@
 		});
 	}
 	const backAt = y => (CASES.find(c => -y >= c.y0 && -y <= c.y1) || PANEL).z; // the plane behind a point
-	const AFTER_Y = 87.5; // where the rail ends and "then 31 more layers" begins
+	const AFTER_Y = 88.5; // where the rail ends and "then 31 more layers" begins
 	const caseOn = (c, s) => s >= c.steps[0] && s <= c.steps[1];
 	// two layers: the residual stream's walls (and its copies riding the rail) in front, the boards and everything on
 	// them behind, a step paler
@@ -307,7 +346,10 @@
 		const cells = new Map(), lit = FOCUS[s];
 		const put = (b, h, t, i, val, colour, extra = {}) => {
 			const [x, y, z] = cellPos(b, h, t, i), live = t === p;
-			const back = live ? (lit.includes(b) ? 0 : 0.45) : (b === 'k' || b === 'v' || b in COPY) ? (lit.includes(b) ? 0 : 0.5) : 0.86;
+			// the cache's earlier rows stay strong while k and v are lit, except at q, k and v: that step makes only this
+			// token's rows, and turned, their flat rows cross the cache's back layers
+			const cached = lit.includes(b) && s !== ST.qkv ? 0 : 0.5;
+			const back = live ? (lit.includes(b) ? 0 : 0.45) : (b === 'k' || b === 'v' || b in COPY) ? cached : 0.86;
 			cells.set(`${b}|${h}|${t}|${i}`, { b, h, t, i, val, st: s, x, y, z, u: wallOf(b).u, base: colour, fade: back, op: 1, sc: 1, ...extra }); // st: the step whose value it holds
 		};
 		const ghost = (id, from, to, colour, extra = {}) => {
@@ -320,16 +362,30 @@
 				put('x', 0, t, f, v, valueColour(v));
 			}
 			if (!reached(ST.qkv)) continue;
+			const turn = i => live && s === ST.rope ? { tint: TURN[i >> 1] } : {}; // RoPE recolours entry i with its pair's edges
 			for (let f = 0; f < NH * DH; f++) {
-				const qv = live && s === ST.qkv ? r.q[f] : r.qr[f];
-				put('q', Math.floor(f / DH), t, f % DH, qv, valueColour(qv), live ? { from: cellPos('x', 0, t, Math.floor(f * D / (NH * DH))) } : {});
+				const n = Math.floor(f / DH), i = f % DH, qv = live && s === ST.qkv ? r.q[f] : r.qr[f];
+				put('q', n, t, i, qv, valueColour(qv), { ...(live ? foldPath('q', f, NH * DH, cellPos('q', n, t, i)) : {}), ...turn(i) });
 			}
 			for (let f = 0; f < NKV * DH; f++) {
-				const h = Math.floor(f / DH), from = live ? { from: cellPos('x', 0, t, f) } : {};
-				const waiting = live && s < ST.cache ? { z: -layerOf('k', h) * HZ + PEND } : {}; // k and v wait in front of the cache
-				const kv = live && s === ST.qkv ? r.k[f] : r.kr[f];
-				put('k', h, t, f % DH, kv, valueColour(kv), { ...from, ...waiting });
-				put('v', h, t, f % DH, r.v[f], valueColour(r.v[f]), { ...from, ...waiting });
+				const h = Math.floor(f / DH), i = f % DH, kv = live && s === ST.qkv ? r.k[f] : r.kr[f];
+				// k and v wait in front of the cache until it takes them, PEND in front of their layer, half the way to
+				// the next one so as not to sit at its depth. They fold over that spot and drop to it
+				const enter = b => {
+					const [x, y, z] = cellPos(b, h, t, i), end = [x, y, live && s < ST.cache ? z + PEND : z];
+					return { z: end[2], ...(live ? foldPath(b, f, NKV * DH, end) : {}) };
+				};
+				put('k', h, t, i, kv, valueColour(kv), { ...enter('k'), ...turn(i) });
+				put('v', h, t, i, r.v[f], valueColour(r.v[f]), enter('v'));
+			}
+			// RoPE's move: under each q and k row, its copy before the turn steps out of it, for R_t's edges (drawTurns)
+			if (live && s === ST.rope) {
+				const before = (b, h, i, val, dz) => {
+					const [x, y, z] = cellPos(b, h, t, i), at = [x, y, z + dz];
+					ghost(`${b}b|${h}|${t}|${i}`, at, [x, y - ROPE_DROP, at[2]], valueColour(val), { win: EMERGE, life: TURN[1][1], peak: 0.8, sz: 1, u: SMALL });
+				};
+				for (let f = 0; f < NH * DH; f++) before('q', Math.floor(f / DH), f % DH, r.q[f], 0);
+				for (let f = 0; f < NKV * DH; f++) before('k', Math.floor(f / DH), f % DH, r.k[f], PEND); // k waits in front of the cache
 			}
 			// the layer of each group's second query head, for every cached row: from Repeat to the blend, the row's
 			// copy; otherwise empty cubes
@@ -362,12 +418,16 @@
 			if (!reached(ST.wo)) continue;
 			for (let f = 0; f < D; f++) {
 				const v = live && s === ST.wo ? r.att[f] : live && s === ST.norm2 ? r.hn[f] : r.out[f];
-				const c = f * NH * DH / D; // the column of o above it: o is twice as wide as h
-				put('h', 0, t, f, v, valueColour(v), live ? { from: cellPos('o', Math.floor(c / DH), t, c % DH) } : {});
+				put('h', 0, t, f, v, valueColour(v), live ? { grow: true, win: mixWin(f) } : {});
 			}
 			if (!live) for (let f = 0; f < D; f++) put('y', 0, t, f, r.y[f], valueColour(r.y[f])); // earlier tokens' outputs
 		}
 		const r = TOK[p];
+		if (s === ST.wo) for (let c = 0; c < NH * DH; c++) {
+			const n = Math.floor(c / DH), i = c % DH, v = r.cat[c];
+			const at = cellPos('o', n, p, i), to = flatPos('o', c);
+			ghost(`go|${c}`, at, to, valueColour(v), { via: [at[0], to[1], at[2]], win: UNFOLD, life: MIX[1], peak: 1, sz: 1, u: SMALL });
+		}
 		// the experts and the LM head are drawn as networks; the cubes only enter and leave them
 		if (s === ST.route) for (let f = 0; f < D; f++) ghost(`gi|${f}`, cellPos('h', 0, p, f), netPos('in', f), valueColour(r.hn[f]), { win: [0, 0.3] });
 		if (s === ST.finalNorm) for (let f = 0; f < D; f++) ghost(`gz|${f}`, cellPos('y', 0, p, f), headPos('in', f), valueColour(r.y[f]), { win: [0, 0.4] });
@@ -417,7 +477,9 @@
 	// `life` keeps it at full strength until then; rail ghosts go out to the rail and back
 	function ghostAt(g, k) {
 		if (g.win) {
-			const kg = clamp((k - g.win[0]) / (g.win[1] - g.win[0])), q = lerp3(g.from, [g.x, g.y, g.z], kg);
+			// with `via`, the flight turns there, as far into the window as it is into the way
+			const kg = clamp((k - g.win[0]) / (g.win[1] - g.win[0])), end = [g.x, g.y, g.z], v = g.via;
+			const q = v ? along([[0, g.from], [dist3(g.from, v) / (dist3(g.from, v) + dist3(v, end)), v], [1, end]], kg) : lerp3(g.from, end, kg);
 			const op = g.life ? g.peak * (k < g.life ? 1 : clamp(1 - (k - g.life) / 0.14)) : g.peak * Math.sin(Math.PI * kg);
 			return { ...g, x: q[0], y: q[1], z: q[2], op, sc: g.life ? g.sz : (g.sz ?? 0.8) * (1 - 0.5 * kg) };
 		}
@@ -431,17 +493,34 @@
 		return { ...g, x: q[0], y: q[1], z: q[2], op: g.peak * Math.sin(Math.PI * k) };
 	}
 
+	// a point along a path of [k, position] stops, held before the first and after the last
+	function along(stops, k) {
+		if (k <= stops[0][0]) return stops[0][1];
+		const j = stops.findIndex(([kj]) => kj >= k);
+		if (j < 0) return stops[stops.length - 1][1];
+		const [k0, a] = stops[j - 1], [k1, b] = stops[j];
+		return lerp3(a, b, k1 > k0 ? (k - k0) / (k1 - k0) : 1);
+	}
+
 	// the cubes at a scroll position: scene s held for a while, then eased into scene s + 1
 	function stateAt(p, tau) {
 		const s = Math.min(NST - 1, Math.floor(tau)), f = tau - s, A = scene(p, s);
-		// held, the scene as it is: its ghosts wait at op 0, which drawCubes passes by
-		if (s === NST - 1 || f <= HOLD) return { cells: A, s, k: 0 };
-		const k = ease(clamp((f - HOLD) / (1 - 2 * HOLD))), B = scene(p, s + 1), L = (u, v) => u + (v - u) * k, out = new Map();
+		// held, the scene as it is: its ghosts wait at op 0, which drawCubes passes by. A long move rests as long
+		// as any other at each end, so its hold is a smaller part of it
+		if (s === NST - 1) return { cells: A, s, k: 0 };
+		const hold = HOLD / MOVE[s + 1];
+		if (f <= hold) return { cells: A, s, k: 0 };
+		const k = ease(clamp((f - hold) / (1 - 2 * hold))), B = scene(p, s + 1), L = (u, v) => u + (v - u) * k, out = new Map();
 		B.forEach((to, id) => {
 			if (to.ghost) { out.set(id, ghostAt(to, k)); return; }
 			const from = A.get(id), kk = to.win ? clamp((k - to.win[0]) / (to.win[1] - to.win[0])) : k;
 			if (from && !from.ghost) {
-				out.set(id, { ...to, x: L(from.x, to.x), y: L(from.y, to.y), z: L(from.z, to.z), col: from.col.map((c, i) => Math.round(L(c, to.col[i]))), op: 1, sc: 1 });
+				// `tint`, if any, is the part of the move its colour changes in
+				const kc = to.tint ? clamp((k - to.tint[0]) / (to.tint[1] - to.tint[0])) : k;
+				out.set(id, { ...to, x: L(from.x, to.x), y: L(from.y, to.y), z: L(from.z, to.z), col: from.col.map((c, i) => Math.round(c + (to.col[i] - c) * kc)), op: 1, sc: 1 });
+			} else if (to.path) {
+				const q = along(to.path, k);
+				out.set(id, { ...to, x: q[0], y: q[1], z: q[2], op: k < to.path[0][0] ? 0 : 1 });
 			} else if (to.from) {
 				const q = lerp3(to.from, [to.x, to.y, to.z], kk);
 				out.set(id, { ...to, x: q[0], y: q[1], z: q[2], op: to.win && kk <= 0 ? 0 : 1 });
@@ -595,6 +674,8 @@
 	function draw() {
 		if (!W) return;
 		placeBoards();
+		const on = Math.abs(pitch - VIEWS.front[1]) < Math.abs(pitch - VIEWS.turned[1]);
+		if (on !== headOn) { headOn = on; sceneCache.clear(); } // the flat rows move (see FLAT)
 		const { cells, s, k } = stateAt(cur, tau);
 		placeCamera(s, k);
 		const SL = k > 0.5 && s < NST - 1 ? s + 1 : s; // the step the labels follow: the nearer one
@@ -606,6 +687,7 @@
 		drawShadows(cells);
 		drawNet(s, k, SL);
 		drawProjections(s, k, SL);
+		drawTurns(cells, s, k);
 		drawMask(SL);
 		drawAfterLayer();
 		drawHead(s, k, SL);
@@ -966,24 +1048,24 @@
 	// attention's weights, drawn as the experts' are: every entry of Wq, Wk, Wv and Wo an edge between the walls
 	function drawProjections(s, k, SL) {
 		const t = TOK[cur], { at, live } = sweep(s, k);
-		const bundleLabel = (x, y, name, sub, on, atY) => {
-			const p = project(x, y, 0), py = atY ?? p[1];
-			write(name, p[0], py, `bold 11px ${SERIF}`, on ? C.ink : C.dim, 'center');
-			write(sub, p[0], py + 11, `9.5px ${UI}`, on ? C.mute : C.faint, 'center');
+		const bundleLabel = (x, y, name, sub, on) => {
+			const p = project(x, y, 0);
+			write(name, p[0], p[1], `bold 11px ${SERIF}`, on ? C.ink : C.dim, 'center');
+			write(sub, p[0], p[1] + 11, `9.5px ${UI}`, on ? C.mute : C.faint, 'center');
 		};
 		const mid = b => { const w = WALLS[b]; return w.x + w.w * w.u / 2; }; // the middle of a wall's front layer
-		// x̂ → q, k, v: from the token's row of x to the top of each wall's columns; the row itself then drops into the wall
+		// x̂ → q, k, v: from the token's row of x to each weight's flat row, which then folds into heads
 		{
 			const yt = -(WALLS.x.top + T), yb = -WALLS.q.top;
 			if (project(0, yb, 0)[1] > -30 && project(0, yt, 0)[1] < H + 30) {
-				const fm = SL === ST.qkv ? 1 : SL < ST.qkv ? 0 : 0.35, done = at(ST.qkv, 0.1, 0.9);
+				const fm = SL === ST.qkv ? 1 : SL < ST.qkv ? 0 : 0.35, done = at(ST.qkv, ...SWEEP);
 				const cm = Math.max(brightest(t.xn, model.Wq), brightest(t.xn, model.Wk), brightest(t.xn, model.Wv));
 				const src = range(D).map(f => project(WALLS.x.x + f + 0.5, -(WALLS.x.top + cur + 1), 0));
-				// each column of q lands over its query head's block; k and v have half as many
+				// each column lands on its cube of the weight's one flat row, before the row folds into heads
 				[['q', model.Wq], ['k', model.Wk], ['v', model.Wv]].forEach(([b, Wm]) => {
 					const n = Wm[0].length;
 					for (let c = 0; c < n; c++) {
-						const [cx, , cz] = cellPos(b, Math.floor(c / DH), 0, c % DH), dst = project(cx, yb + 3.6, cz), a0 = 0.1 + 0.7 * c / n, lit = live(ST.qkv, a0, a0 + 0.08);
+						const [fx, fy, fz] = flatPos(b, c), dst = project(fx, fy + WALLS[b].u / 2, fz), lit = live(ST.qkv, ...sweepWin(c, n));
 						for (let f = 0; f < D; f++) {
 							const w = Wm[f][c];
 							edge(src[f], dst, sign(w), lit ? LIT : 0.04 + done * fm * 0.45 * Math.abs(t.xn[f] * w) / cm, lit ? 2 : 0.8, lit);
@@ -991,28 +1073,52 @@
 					}
 				});
 				flushEdges();
-				// one screen line for the three, at Wq's height: turned, the scene drops to the right and Wv would land on the Attention heading
-				const atY = project(mid('q'), yt - 0.75, 0)[1];
-				[['Wq', 'q', '8 × 16 edges'], ['Wk', 'k', '8 × 8 edges'], ['Wv', 'v', '8 × 8 edges']].forEach(([name, b, sub]) => bundleLabel(mid(b), yt - 0.75, name, sub, SL === ST.qkv, atY));
+				// each over its wall, so turned the three step down to the right as the walls' labels do
+				[['Wq', 'q', '8 × 16 edges'], ['Wk', 'k', '8 × 8 edges'], ['Wv', 'v', '8 × 8 edges']].forEach(([name, b, sub]) => bundleLabel(mid(b), yt - 0.75, name, sub, SL === ST.qkv));
 			}
 		}
-		// o → o Wo: from the bottom of o's columns to the top of h's
+		// o → o Wo: from o's flat row to the top of h's columns
 		{
 			const yt = -(WALLS.o.top + T * WALLS.o.u), yb = -WALLS.h.top;
 			if (project(0, yb, 0)[1] > -30 && project(0, yt, 0)[1] < H + 30) {
-				const fm = SL === ST.wo ? 1 : SL < ST.wo ? 0 : 0.35, done = at(ST.wo, 0.1, 0.9), cm = brightest(t.cat, model.Wo);
-				const src = range(NH * DH).map(c => { const [cx, , cz] = cellPos('o', Math.floor(c / DH), 0, c % DH); return project(cx, yt - 0.05, cz); });
+				const fm = SL === ST.wo ? 1 : SL < ST.wo ? 0 : 0.35, done = at(ST.wo, ...MIX), cm = brightest(t.cat, model.Wo);
+				// from o's flat row, the heads unfolded into one row of 16
+				const src = range(NH * DH).map(c => { const [fx, fy, fz] = flatPos('o', c); return project(fx, fy - WALLS.o.u / 2, fz); });
 				for (let f = 0; f < D; f++) {
-					const dst = project(WALLS.h.x + f + 0.5, yb + 0.05, 0), a0 = 0.1 + 0.7 * f / D, lit = live(ST.wo, a0, a0 + 0.08);
+					const dst = project(WALLS.h.x + f + 0.5, yb + 0.05, 0), lit = live(ST.wo, ...mixWin(f));
 					for (let c = 0; c < NH * DH; c++) {
 						const w = model.Wo[c][f];
 						edge(src[c], dst, sign(w), lit ? LIT : 0.04 + done * fm * 0.45 * Math.abs(t.cat[c] * w) / cm, lit ? 2 : 0.8, lit);
 					}
 				}
 				flushEdges();
-				bundleLabel(mid('o'), (yt + yb) / 2, 'Wo', '16 × 8 edges · the heads mix', SL === ST.wo);
+				// under the flat row's right end, clear of the edges, which all run down and left from it to h
+				bundleLabel(FLAT.o.x + NH * DH * WALLS.o.u + 1.5, FLAT.o.y - 1.4, 'Wo', '16 × 8 edges · the heads mix', SL === ST.wo);
 			}
 		}
+	}
+
+	// RoPE as R_t's edges, in the move into RoPE, from each pair of the copies before the turn (qb, kb) up to the same
+	// pair of q and k: old entry e to new entry e2 with weight R[e][e2], so the straight edges are cos tθⱼ and the
+	// crossing ones ±sin tθⱼ. An edge is as strong as its weight, so at position 0 only the straight ones show, and
+	// pair 1 hardly crosses
+	function drawTurns(cells, s, k) {
+		if (s !== ST.qkv) return;
+		const { at, live } = sweep(s, k), top = c => project(c.x, c.y + c.u / 2, c.z), bottom = c => project(c.x, c.y - c.u / 2, c.z);
+		[['q', NH], ['k', NKV]].forEach(([b, nh]) => {
+			for (let h = 0; h < nh; h++) for (let j = 0; j < DH / 2; j++) {
+				const pair = id => [0, 1].map(e => cells.get(`${id}|${h}|${cur}|${2 * j + e}`)), before = pair(b + 'b'), after = pair(b);
+				if (before.some(c => !c || !c.op) || after.some(c => !c)) continue;
+				const ang = cur * THETA[j], cs = Math.cos(ang), sn = Math.sin(ang), R = [[cs, sn], [-sn, cs]];
+				const lit = live(ST.rope, ...TURN[j]), done = at(ST.rope, ...TURN[j]) >= 1;
+				if (!lit && !done) continue;
+				before.forEach((o, e) => after.forEach((n, e2) => {
+					const w = R[e][e2];
+					edge(top(o), bottom(n), sign(w), (lit ? LIT : 0.35) * Math.abs(w) * o.op, lit ? 2 : 1, lit);
+				}));
+			}
+		});
+		flushEdges();
 	}
 
 	// the mask: the cells of a that no token reads, hatched, so the staircase of weights and the grey make the full
@@ -1199,7 +1305,7 @@
 			[ST.qkv]: () => {
 				const c = argabs(t.q);
 				return mx(aligned(sumRows(`q_{${p},${c}}`, R`\textstyle\sum_i \hat x_{${p},i}\,(W_q)_{i,${c}}`, prods(t.xn, model.Wq.map(r => r[c])), 3, t.q[c])))
-					+ note(`Entry ${c} of ${tex(`q_{${p}}`)}, its largest. Every entry of ${tex('q')}, ${tex('k')} and ${tex('v')} is such a sum of 8 products, 32 sums in all.`);
+					+ note(`Entry ${c} of ${tex(`q_{${p}}`)}, its largest. Every entry of ${tex('q')}, ${tex('k')} and ${tex('v')} is such a sum over all 8 entries of ${tex(R`\hat x`)}, 32 sums in all. The fold then puts entry ${c} in head ${Math.floor(c / DH)}, as its entry ${c % DH}.`);
 			},
 			[ST.rope]: () => {
 				const c = Math.cos(p), sn = Math.sin(p), [a, b] = t.q, [a2, b2] = t.qr, slow = p * THETA[1];
@@ -1319,7 +1425,7 @@
 		const by = {
 			[ST.arrive]: () => `${w} arrives at position ${p}, and its row of x lights up.${p ? ' The pale rows above are earlier tokens; this layer kept only their keys and values.' : ''}`,
 			[ST.norm]: () => `RMSNorm divides the row by its root mean square, ${fmt(t.rms, 2)}, so the branch works at unit scale.`,
-			[ST.qkv]: () => 'Wq, Wk and Wv make q, k and v. q folds into four heads, a layer each; k and v into two, in the layers of heads 0 and 2, and the layers of heads 1 and 3 stay empty.',
+			[ST.qkv]: () => 'Wq, Wk and Wv each make one row from all of x̂, q of 16 and k and v of 8. Then each row folds into heads, which changes no number. q folds into four, a layer each, and k and v into two, in the layers of heads 0 and 2. The layers of heads 1 and 3 stay empty.',
 			[ST.rope]: () => `RoPE turns q and k pair by pair: pair 0 by ${p} rad, pair 1 by ${(p * THETA[1]).toFixed(3)}. Dashed is before, solid after, red the turn.`,
 			[ST.cache]: () => `k′ and v drop into row ${p} of the cache. The empty grids are the heads multi-head attention would also keep.`,
 			[ST.repeat]: () => 'Each key and value head is copied for the second query head of its group, filling the empty layers for this pass only.',
@@ -1700,7 +1806,7 @@
 	side.addEventListener('click', e => {
 		const b = e.target.closest('button');
 		if (!b) return;
-		if (b.dataset.step != null) { stopPlay(); scrollToTau(+b.dataset.step, true); }
+		if (b.dataset.step != null) { stopPlay(); stopGlide(); scrollToTau(+b.dataset.step, true); }
 		else if (b.dataset.pre) { const el = $(`.toy-pre[data-pre="${b.dataset.pre}"]`, secs); el.open = true; sideTo(el); flash(el); }
 		else if (b.dataset.go) sideTo($(`.toy-cp[data-cp="${b.dataset.go}"]`, secs));
 		else if (b.dataset.act === 'nexttok') { setTok(cur < T - 1 ? cur + 1 : 0); scrollToTau(0, false); }
@@ -1709,20 +1815,27 @@
 		const b = e.target.closest('button');
 		if (!b) return;
 		stopPlay();
+		stopGlide();
 		scrollToTau($$('button', map).indexOf(b), true);
 	});
 
 	// ---- scroll --------------------------------------------------------------------------
-	// the scroll lives inside the pane: a sticky stage over a spacer as long as the nineteen moves
+	// the scroll lives inside the pane: a sticky stage over a spacer as long as the nineteen moves, each STEP of
+	// scroll times its MOVE. MARK[s] is where step s's scene is reached, in STEPs
 	let STEP = 400, ticking = false;
+	const MARK = MOVE.map((_, s) => MOVE.slice(1, s + 1).reduce((a, m) => a + m, 0));
 	function layout() {
 		const h = scroller.clientHeight;
 		stage.style.height = h + 'px';
 		STEP = Math.max(160, Math.round(h * 0.6));
-		spacer.style.height = ((NST - 1) * STEP) + 'px';
+		spacer.style.height = (MARK[NST - 1] * STEP) + 'px';
 	}
-	const readTau = () => { tau = clamp(scroller.scrollTop / STEP, 0, NST - 1); };
-	const scrollToTau = (t, smooth) => scroller.scrollTo({ top: t * STEP, behavior: smooth && !REDUCED ? 'smooth' : 'auto' });
+	const readTau = () => {
+		const y = clamp(scroller.scrollTop / STEP, 0, MARK[NST - 1]), s = MARK.findLastIndex(m => m <= y); // an overscroll can read below 0
+		tau = s < NST - 1 ? s + (y - MARK[s]) / MOVE[s + 1] : NST - 1;
+	};
+	const topOf = t => { const s = Math.floor(t); return (MARK[s] + (s < NST - 1 ? (t - s) * MOVE[s + 1] : 0)) * STEP; };
+	const scrollToTau = (t, smooth) => scroller.scrollTo({ top: topOf(t), behavior: smooth && !REDUCED ? 'smooth' : 'auto' });
 	scroller.addEventListener('scroll', () => {
 		if (ticking) return;
 		ticking = true;
@@ -1749,6 +1862,7 @@
 	}
 	// play: scroll the pane at a steady pace, pause at the end, then run the next token
 	function startPlay() {
+		stopGlide();
 		readTau();
 		if (tau >= NST - 1.001) scrollToTau(0, false);
 		playing = true;
@@ -1776,20 +1890,36 @@
 		};
 		rafPlay = requestAnimationFrame(tick);
 	}
-	// step buttons: each click scrolls to the next whole step, so the motion plays on the way
-	let navTarget = null, navTimer = 0;
-	const navTo = t => { navTarget = t; clearTimeout(navTimer); navTimer = setTimeout(() => { navTarget = null; }, 700); scrollToTau(t, true); };
+	// step buttons: each click glides to the next whole step at GLIDE ms a STEP of scroll, so the motion plays on the
+	// way at a pace to follow, and a long move takes as long as its scroll. A smooth scroll would cross any move in
+	// about the same short time. A wheel or a touch takes over
+	const GLIDE = 1000;
+	let navTarget = null, glideRaf = 0;
+	const stopGlide = () => { cancelAnimationFrame(glideRaf); navTarget = null; };
+	function navTo(t) {
+		cancelAnimationFrame(glideRaf);
+		if (REDUCED) { navTarget = null; scrollToTau(t, false); return; }
+		navTarget = t;
+		const from = scroller.scrollTop, to = topOf(t), ms = Math.max(1, Math.abs(to - from) / STEP * GLIDE), t0 = performance.now();
+		const tick = now => {
+			const u = clamp((now - t0) / ms);
+			scroller.scrollTop = from + (to - from) * u;
+			if (u < 1 && root.isConnected) glideRaf = requestAnimationFrame(tick);
+			else navTarget = null;
+		};
+		glideRaf = requestAnimationFrame(tick);
+	}
 	const ACTS = {
-		first() { setTok(0); navTarget = null; scrollToTau(0, false); },
+		first() { setTok(0); stopGlide(); scrollToTau(0, false); },
 		prev() {
 			const base = navTarget ?? Math.ceil(tau - 0.02);
 			if (base > 0) navTo(base - 1);
-			else if (cur > 0) { setTok(cur - 1); navTarget = null; scrollToTau(NST - 1, false); }
+			else if (cur > 0) { setTok(cur - 1); stopGlide(); scrollToTau(NST - 1, false); }
 		},
 		next() {
 			const base = navTarget ?? Math.floor(tau + 0.02);
 			if (base < NST - 1) navTo(base + 1);
-			else if (cur < T - 1) { setTok(cur + 1); navTarget = null; scrollToTau(0, false); }
+			else if (cur < T - 1) { setTok(cur + 1); stopGlide(); scrollToTau(0, false); }
 		},
 		play() { if (playing) stopPlay(); else startPlay(); },
 		maths() {
@@ -1813,7 +1943,7 @@
 			ACTS[b.dataset.act]();
 		}
 	});
-	['wheel', 'touchstart', 'keydown'].forEach(ev => scroller.addEventListener(ev, () => { if (playing) stopPlay(); }, { passive: true }));
+	['wheel', 'touchstart', 'keydown'].forEach(ev => scroller.addEventListener(ev, () => { if (playing) stopPlay(); stopGlide(); }, { passive: true }));
 
 	// ---- hover, both ways ----------------------------------------------------------------
 	function markPanel(k) {
