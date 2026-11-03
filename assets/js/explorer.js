@@ -34,8 +34,9 @@
 	});
 	programs.forEach(x => add(x.url, { name: x.name, kind: 'exe', up: 'D', exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, created: x.created }));
 	// Each place's own order, which its list keeps until Arrange picks another:
-	// a folder's posts by name, as (C:)'s folders are; (D:)'s programs as they
-	// were made, the newest last
+	// a folder's posts by name, as (C:)'s folders are; (D:)'s programs by their
+	// dates, which, as the posts' do, place each in the series of the note it
+	// draws for
 	const byName = (a, b) => a.localeCompare(b, 'en', { numeric: true });
 	tags.forEach(t => N[t].kids.sort((a, b) => byName(N[a].name, N[b].name)));
 	const isBox = n => n.kind !== 'file' && n.kind !== 'exe';
@@ -313,7 +314,8 @@
 		e.preventDefault();
 		const i = items.findIndex(n => n.id === S.sel), grid = !listsPosts(N[S.at]);
 		const first = pane.querySelector('[data-id]');
-		const cols = grid && first ? Math.max(1, Math.floor(pane.clientWidth / first.offsetWidth)) : 1;
+		// a row of icons, as many as the first row holds
+		const cols = grid && first ? [...pane.querySelectorAll('[data-id]')].filter(el => el.offsetTop === first.offsetTop).length : 1;
 		const step = { ArrowDown: cols, ArrowUp: -cols, ArrowRight: grid ? 1 : 0, ArrowLeft: grid ? -1 : 0 }[e.key];
 		const j = e.key === 'Home' ? 0 : e.key === 'End' ? items.length - 1 : i < 0 ? 0 : i + step;
 		select(items[Math.max(0, Math.min(items.length - 1, j))].id);

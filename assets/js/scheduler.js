@@ -2124,7 +2124,7 @@
 	function tick(t) {
 		if (!root.isConnected) return;
 		if (clock.playing) {
-			clock.t = Math.min(endOf(), clock.t + Math.min(0.1, (t - clock.last) / 1000) * speed);
+			clock.t = Math.min(endOf(), clock.t + Math.max(0, Math.min(0.1, (t - clock.last) / 1000)) * speed);
 			clock.last = t;
 			if (clock.t >= endOf()) clock.playing = false;
 			draw();

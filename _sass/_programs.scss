@@ -1,10 +1,12 @@
-// The programs on (D:) (_programs): device.exe, lil.exe, optimiser.exe and
-// scheduler.exe, each in a window of its own (assets/js/device.js, lil.js,
-// optimiser.js, scheduler.js). A toolbar, the panes their canvases fill, a row
-// of readings and a note on what is drawn; the link to the note each draws for
-// moves into the status bar (assets/js/exe.js). Toolbar, buttons and panes
-// reuse the WinHelp chrome from _literature.scss; scheduler.exe draws chat
-// clients and a Disk Defragmenter's map, and device.exe draws VS Code's.
+// The programs on (D:) (_programs), in its order: lil.exe, optimiser.exe,
+// sampler.exe, scheduler.exe and device.exe, each in a window of its own
+// (assets/js/lil.js, optimiser.js, sampler.js, scheduler.js, device.js). A
+// toolbar, the panes their canvases fill, a row of readings and a note on
+// what is drawn; the link to the note each draws for moves into the status bar
+// (assets/js/exe.js). Toolbar, buttons and panes reuse the WinHelp chrome from
+// _literature.scss, and scheduler.exe and sampler.exe play a run with one
+// player's controls (.exe-player); scheduler.exe draws chat clients and a Disk
+// Defragmenter's map, and device.exe draws VS Code's.
 @use "main";
 
 $exe-ui: "Helvetica Neue", Arial, sans-serif;
@@ -77,9 +79,49 @@ $exe-note: #ffffe1;
 	padding-left: 4px;
 	color: $exe-mute;
 
+	// a slider as Windows 98's trackbar: a sunken groove, a raised thumb
 	input[type="range"] {
+		-webkit-appearance: none;
+		appearance: none;
 		width: 110px;
-		accent-color: $exe-navy;
+		height: 18px;
+		margin: 0;
+		background: none;
+		cursor: pointer;
+
+		&::-webkit-slider-runnable-track {
+			height: 2px;
+			background: #ffffff;
+			border: 1px solid;
+			border-color: $exe-shade #ffffff #ffffff $exe-shade;
+			box-shadow: inset 1px 1px 0 #404040;
+		}
+		&::-moz-range-track {
+			height: 2px;
+			background: #ffffff;
+			border: 1px solid;
+			border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		}
+		&::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			width: 9px;
+			height: 16px;
+			margin-top: -8px;
+			background: $exe-face;
+			@include main.bevel;
+		}
+		&::-moz-range-thumb {
+			box-sizing: border-box;
+			width: 9px;
+			height: 16px;
+			border-radius: 0;
+			background: $exe-face;
+			@include main.bevel;
+		}
+		&:focus-visible {
+			outline: 1px dotted #000000;
+			outline-offset: 1px;
+		}
 	}
 }
 
@@ -141,6 +183,116 @@ $exe-note: #ffffe1;
 	line-height: 1.45;
 }
 
+// ---- a run played on a clock (.exe-player), scheduler.exe's and
+// sampler.exe's: the toolbar small, its selects sunken, Run the default
+// button, a player's four buttons, the time field a seek bar, and what is
+// compared at the right ----
+.exe-player {
+	position: relative;
+	outline: none;
+	font-size: 11px;
+	line-height: 1.4;
+
+	button, select {
+		font: inherit;
+		color: inherit;
+	}
+	// the window takes the keys, Space and the arrows, so it shows when it
+	// has them from the keyboard
+	&:focus-visible {
+		outline: 1px dotted #000000;
+		outline-offset: -1px;
+	}
+	// a row of the toolbar wraps only in a window made narrower than it
+	.lit-tool {
+		gap: 3px;
+		padding: 2px 3px;
+		white-space: nowrap;
+
+		> * {
+			flex: none;
+		}
+	}
+	.exe-lbl {
+		gap: 4px;
+		padding-left: 2px;
+	}
+	.lit-btn {
+		height: 22px;
+		padding: 0 7px;
+		font-size: 11px;
+	}
+	// sunken, as Windows 98 sinks a field
+	select, .exe-at {
+		border: 1px solid;
+		border-color: #808080 #ffffff #ffffff #808080;
+		box-shadow: inset 1px 1px 0 #404040;
+	}
+	select {
+		height: 20px;
+		padding: 0 1px;
+		background: #ffffff;
+		border-radius: 0;
+	}
+	select:disabled, .lit-btn:disabled {
+		opacity: 0.5;
+	}
+	// Run, the button the window is for, in bold as a default button was
+	.exe-run {
+		min-width: 64px;
+		font-weight: bold;
+	}
+}
+.exe-buttons {
+	display: flex;
+	gap: 2px;
+
+	button {
+		width: 22px;
+		height: 22px;
+		padding: 0;
+		background: $exe-face;
+		border: 1px solid;
+		border-color: #dfdfdf #404040 #404040 #dfdfdf;
+		box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
+		cursor: pointer;
+
+		&:active {
+			border-color: #404040 #ffffff #ffffff #404040;
+			box-shadow: inset 1px 1px 0 #808080;
+		}
+	}
+	svg {
+		display: block;
+		width: 12px;
+		height: 12px;
+		margin: auto;
+	}
+}
+// where the run is, in a sunken field as a player keeps its timecode: a seek
+// bar, filled to the clock with a navy line at its foot, ticked where the
+// program marks a moment (--ticks, its script's); each program sets it as
+// wide as its longest time, so that it never pushes the controls along
+.exe-at {
+	padding: 2px 5px;
+	--at: 0px;
+	background: var(--ticks,) linear-gradient($exe-navy, $exe-navy) 0 100% / var(--at) 2px no-repeat,
+		linear-gradient(#dcdff0, #dcdff0) 0 0 / var(--at) 100% no-repeat, #ffffff;
+	font: 11px $exe-mono;
+	white-space: nowrap;
+	cursor: ew-resize;
+	user-select: none;
+	touch-action: none;
+}
+// what is compared, at the right of the clock's row
+.exe-versus {
+	margin-left: auto;
+
+	select {
+		width: 150px;
+	}
+}
+
 // ---- optimiser.exe: the map down the left, the loss and the sweep stacked on
 // the right, the row of rates, schedule and noise, then a card an optimiser ----
 .opt-win {
@@ -170,49 +322,6 @@ $exe-note: #ffffe1;
 	// Run, the button the window is for, in bold as a default button was
 	[data-act="run"] {
 		font-weight: bold;
-	}
-	// the sliders as Windows 98's trackbars: a sunken groove, a raised thumb
-	input[type="range"] {
-		-webkit-appearance: none;
-		appearance: none;
-		height: 18px;
-		margin: 0;
-		background: none;
-		cursor: pointer;
-
-		&::-webkit-slider-runnable-track {
-			height: 2px;
-			background: #ffffff;
-			border: 1px solid;
-			border-color: $exe-shade #ffffff #ffffff $exe-shade;
-			box-shadow: inset 1px 1px 0 #404040;
-		}
-		&::-moz-range-track {
-			height: 2px;
-			background: #ffffff;
-			border: 1px solid;
-			border-color: $exe-shade #ffffff #ffffff $exe-shade;
-		}
-		&::-webkit-slider-thumb {
-			-webkit-appearance: none;
-			width: 9px;
-			height: 16px;
-			margin-top: -8px;
-			background: $exe-face;
-			@include main.bevel;
-		}
-		&::-moz-range-thumb {
-			box-sizing: border-box;
-			width: 9px;
-			height: 16px;
-			border-radius: 0;
-			background: $exe-face;
-			@include main.bevel;
-		}
-		&:focus-visible {
-			outline: 1px dotted #000000;
-			outline-offset: 1px;
-		}
 	}
 }
 
@@ -515,110 +624,18 @@ $exe-note: #ffffe1;
 	--rows: 3;
 	--row: 15px;
 	--row-gap: 3px;
-	position: relative;
-	outline: none;
-	font-size: 11px;
-	line-height: 1.4;
 }
-.sv button, .sv select {
-	font: inherit;
-	color: inherit;
-}
-// the window takes the keys, Space and the arrows, so it shows when it has
-// them from the keyboard
-.sv:focus-visible {
-	outline: 1px dotted #000000;
-	outline-offset: -1px;
-}
-// sunken, as Windows 98 sinks a field or a pane
-.sv select, .sv-at, .sv-pane {
+// sunken, as Windows 98 sinks a pane
+.sv-pane {
 	border: 1px solid;
 	border-color: #808080 #ffffff #ffffff #808080;
 	box-shadow: inset 1px 1px 0 #404040;
 }
-.sv select {
-	height: 20px;
-	padding: 0 1px;
-	background: #ffffff;
-	border-radius: 0;
-}
-.sv select:disabled, .sv .lit-btn:disabled {
-	opacity: 0.5;
-}
-// a row of the toolbar wraps only in a window made narrower than it
-.sv .lit-tool {
-	flex-wrap: wrap;
-	gap: 3px;
-	padding: 2px 3px;
-	white-space: nowrap;
-
-	> * {
-		flex: none;
-	}
-}
-.sv .exe-lbl {
-	gap: 4px;
-	padding-left: 2px;
-	white-space: nowrap;
-}
-.sv .lit-btn {
-	height: 22px;
-	padding: 0 7px;
-	font-size: 11px;
-}
-.sv .sv-run {
-	min-width: 64px;
-	font-weight: bold;
-}
-.sv-buttons {
-	display: flex;
-	gap: 2px;
-}
-.sv-buttons button {
-	width: 22px;
-	height: 22px;
-	padding: 0;
-	background: var(--face);
-	border: 1px solid;
-	border-color: #dfdfdf #404040 #404040 #dfdfdf;
-	box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
-	cursor: pointer;
-}
-.sv-buttons button:active {
-	border-color: #404040 #ffffff #ffffff #404040;
-	box-shadow: inset 1px 1px 0 #808080;
-}
-.sv-buttons svg {
-	display: block;
-	width: 12px;
-	height: 12px;
-	margin: auto;
-}
-// where the run is, in a sunken field as a player keeps its timecode, wide
-// enough for the longest run's, “349.92 s of 349.92 s · step 15,889”, so it
-// doesn't push the controls along
-.sv-at {
+// the clock as wide as the longest run's, “349.92 s of 349.92 s · step
+// 15,889”; red ticks where a server preempts. A second server and the views
+// at the right of its row: compare applies to Users alone
+.sv .exe-at {
 	min-width: 34ch;
-	padding: 2px 5px;
-	--at: 0px;
-	// a seek bar: filled to the clock, a navy line at its foot, and red ticks
-	// where a server preempts (--ticks, scheduler.js's)
-	background: var(--ticks,) linear-gradient(var(--navy), var(--navy)) 0 100% / var(--at) 2px no-repeat,
-		linear-gradient(#dcdff0, #dcdff0) 0 0 / var(--at) 100% no-repeat, #ffffff;
-	font: 11px var(--mono);
-	white-space: nowrap;
-	cursor: ew-resize;
-	user-select: none;
-	touch-action: none;
-}
-// a second server and the views, at the right of the clock's row: compare
-// applies to Users alone
-.sv-versus {
-	margin-left: auto;
-
-	select {
-		width: 150px;
-	}
 }
 // the views, as the papers' window has its Page, Timeline and Lineage
 .sv-views {
@@ -2304,6 +2321,378 @@ $exe-note: #ffffe1;
 	}
 	.trn-inline.here {
 		display: none;
+	}
+}
+
+// ---- sampler.exe: two of generate()'s decoders on one prompt, as
+// scheduler.exe sets a second server beside the first. Two rows of toolbar:
+// the clock, as scheduler.exe's, and the prompt, the seed and what a draft
+// pass costs. Under them the two lanes, each its text, its rounds and its
+// passes, with the race said between them; the key; the pair's figures; the
+// note. A token's card is a Windows 98 tooltip. ----
+.smp-win {
+	width: 960px;
+
+	.post_content {
+		height: 600px;
+	}
+}
+// the programs' own type and colours, as _programs.scss names them, a faint
+// grey for what is cut or to come, and the marks the text and the key share:
+// a refusal's red (sampler.js's REFUSED), a proposal waiting, prompt lookup's
+// gold (ORIGIN.copy) and what it copied, what beam search rewrote
+.smp {
+	--mono: #{$exe-mono};
+	--mute: #{$exe-mute};
+	--faint: #9a949a;
+	--refused: #b00000;
+	--pending: #7a757d;
+	--gold: #b8860b;
+	--copied: #f6ecc9;
+	--rewritten: #fff1a0;
+
+	output {
+		min-width: 5ch;
+		font-size: 11px;
+	}
+	.exe-lbl input[type="range"] {
+		width: 84px;
+	}
+	// the clock as wide as its longest, “19.38 of 19.38 passes · step 104”;
+	// each lane's finish ticked. The pair at the right of its row
+	.exe-at {
+		min-width: 32ch;
+	}
+	.exe-versus + .exe-lbl select {
+		width: 150px;
+	}
+	.exe-body .smp-strip {
+		height: 20px;
+	}
+}
+.smp-prompts {
+	display: flex;
+	gap: 2px;
+}
+
+// ---- the lanes: the pair, the race said between them ----
+.smp-lanes {
+	display: flex;
+	flex-direction: column;
+	background: #ffffff;
+}
+// a lane: its name and call, the text as long as it is (at most half the
+// lane, then scrolled), the rounds filling the rest and wrapping, the newest
+// last, and the strip of its passes at its foot
+.smp-lane {
+	flex: 1 1 0;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 4px 6px;
+
+	> * {
+		flex: none;
+	}
+}
+.smp-who {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	white-space: nowrap;
+}
+.smp-name {
+	font-size: 12px;
+}
+.smp-call {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--mute);
+	font: 10px var(--mono);
+}
+.smp-flag {
+	margin-left: auto;
+	color: var(--mute);
+	font-variant-numeric: tabular-nums;
+}
+.smp-gap {
+	flex: none;
+	padding: 3px 8px;
+	border-block: 1px solid #dcd9dc;
+	background: #f3f2f6;
+	font-size: 11.5px;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+// the text: the prompt faint, the answer in ink, a token marked underneath by
+// where it came from (--m)
+.smp-text {
+	max-height: 50%;
+	overflow-y: auto;
+	font-size: 13px;
+	line-height: 20px;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+
+	span {
+		padding-bottom: 1px;
+	}
+	.smp-p {
+		color: #8a858d;
+	}
+	[style*="--m"] {
+		background: linear-gradient(var(--m), var(--m)) 0 100% / 100% 3px no-repeat;
+	}
+	// beam search's best beam, not yet its answer: dotted under
+	&.smp-prov .smp-t {
+		text-decoration: underline dotted var(--faint);
+		text-underline-offset: 3px;
+	}
+	[tabindex]:focus-visible {
+		outline: 1px dotted #000000;
+		outline-offset: 0;
+	}
+}
+// the text's marks, which the key shows on its own sample: a proposal
+// waiting, one refused or discarded, prompt lookup's n-gram boxed where it is
+// and where it matched and what it copied lit, what beam search's last step
+// rewrote washed yellow
+.smp-pend {
+	color: var(--pending);
+	font-style: italic;
+	outline: 1px dashed #b9b4bc;
+	outline-offset: -1px;
+}
+.smp-x {
+	color: var(--refused);
+	text-decoration: line-through;
+}
+.smp-src {
+	background-color: var(--copied);
+}
+.smp-gram {
+	outline: 1px solid var(--gold);
+	outline-offset: -1px;
+}
+.smp-rw {
+	background-color: var(--rewritten);
+}
+
+// the rounds, the newest last: a chip a proposal, its check marked
+.smp-lane > .smp-rounds {
+	flex: 1 1 0;
+	min-height: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: 4px 6px;
+	overflow-y: auto;
+	padding-top: 4px;
+	border-top: 1px solid #ecebee;
+}
+.smp-round {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	padding-left: 6px;
+	border-left: 1px solid #dcd9dc;
+
+	&:first-child {
+		padding-left: 0;
+		border-left: 0;
+	}
+	> b {
+		margin-right: 2px;
+		color: var(--faint);
+		font-weight: normal;
+		font-size: 9px;
+	}
+	&.smp-now {
+		background: #f3f2f6;
+	}
+}
+.smp-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 0 3px;
+	border: 1px solid #c9c5cb;
+	background: #ffffff;
+	font: 11px/16px var(--mono);
+	white-space: pre;
+
+	i {
+		font: normal 10px $exe-ui;
+	}
+	&[style*="--m"] {
+		box-shadow: inset 0 -3px 0 var(--m);
+	}
+	&.smp-refused {
+		color: var(--refused);
+		text-decoration: line-through;
+		border-color: var(--refused);
+	}
+	&.smp-discarded, &.smp-unused, &.smp-dead {
+		color: var(--faint);
+		text-decoration: line-through;
+	}
+	&.smp-pending {
+		color: var(--pending);
+		font-style: italic;
+		border-style: dashed;
+	}
+	&.smp-best {
+		font-weight: bold;
+		border-color: #000000;
+	}
+	&:focus-visible {
+		outline: 1px dotted #000000;
+	}
+}
+.smp-arrow, .smp-wait {
+	color: var(--mute);
+}
+
+// ---- the key, a row under the lanes ----
+.smp-key {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1px 14px;
+	padding: 0 6px;
+	color: var(--mute);
+
+	> span {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+	}
+}
+.smp-sw {
+	display: inline-block;
+	width: 14px;
+	height: 9px;
+}
+.smp-sw-tok {
+	height: 3px;
+}
+.smp-sw-draft {
+	height: 5px;
+}
+
+// ---- the pair's figures ----
+// the post's own tables are blocks with ruled cells; these are neither
+.post_content .smp .smp-table, .post_content .smp .smp-dist {
+	display: table;
+	max-width: none;
+	overflow: visible;
+	border: 0;
+
+	th, td {
+		border: 0;
+	}
+}
+.smp-table {
+	margin: 0 6px;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+
+	th, td {
+		padding: 0 0 0 16px;
+		text-align: right;
+		white-space: nowrap;
+	}
+	th:first-child {
+		min-width: 130px;
+		padding-left: 0;
+	}
+	thead th {
+		color: var(--mute);
+		font-weight: normal;
+		border-bottom: 1px solid var(--faint);
+	}
+	tbody th {
+		color: var(--mute);
+		font-weight: normal;
+		text-align: left;
+	}
+	td {
+		font: 700 12px var(--mono);
+	}
+}
+
+// ---- the card: a token's distribution, as a Windows 98 tooltip ----
+.smp-card {
+	position: absolute;
+	z-index: 5;
+	width: 320px;
+	padding: 4px 6px 5px;
+	background: $exe-note;
+	border: 1px solid #000000;
+	font-size: 11px;
+	line-height: 1.35;
+	pointer-events: none;
+
+	p + p, p + table, table + p {
+		margin-top: 4px;
+	}
+	.smp-sub {
+		color: var(--mute);
+	}
+}
+.smp-dist {
+	width: 100%;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+
+	th {
+		padding: 0 4px 1px 0;
+		color: var(--mute);
+		font-weight: normal;
+		text-align: left;
+		white-space: nowrap;
+	}
+	td {
+		padding: 0 4px 0 0;
+		white-space: nowrap;
+	}
+	th:nth-child(n+3), td:nth-child(n+3) {
+		text-align: right;
+	}
+	td:nth-child(n+3) {
+		font: 10px var(--mono);
+	}
+	.smp-w {
+		max-width: 80px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		font: 10px var(--mono);
+		white-space: pre;
+	}
+	.smp-bar {
+		width: 100%;
+
+		i {
+			display: block;
+			height: 7px;
+			background: #5c5760;
+		}
+	}
+	.smp-pick td {
+		font-weight: bold;
+	}
+	.smp-pick .smp-bar i {
+		background: #000000;
+	}
+	.smp-cut td {
+		color: var(--faint);
+	}
+	.smp-cut .smp-bar i {
+		background: repeating-linear-gradient(135deg, #b9b4bc 0 2px, transparent 2px 4px);
 	}
 }
 

@@ -1,6 +1,6 @@
 ---
 title: scheduler.exe
-date: 2026-10-31
+date: 2023-01-03
 note: "301"
 icon: scheduler-16.png
 large: scheduler-48.png
@@ -8,18 +8,18 @@ winclass: exe-win sv-win
 description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by a small rewrite of vLLM's scheduler, each step timed by the roofline. In Users, the chats as the people who sent them see them, in English, Korean and other languages, each answer coming in as the engine makes its tokens, the steps, the cache and the latencies under them, and a second server beside the first serving the same chats; in Memory, the chats a line each over the KV cache, block by block, and the cache through the run. From static batches, through prefill first, to chunked prefill, the cache contiguous or paged, prefix caching, bf16 or fp8, and the load.
 ---
 
-<div class="exe sv view-users" tabindex="0" role="region" aria-label="scheduler.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it">
+<div class="exe exe-player sv view-users" tabindex="0" role="region" aria-label="scheduler.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it">
 <div class="lit-tool">
-<button type="button" class="lit-btn sv-run" data-act="run" title="Play the run at the speed beside it (Space); again to pause">&#9654; Run</button>
-<span class="sv-buttons">
+<button type="button" class="lit-btn exe-run" data-act="run" title="Play the run at the speed beside it (Space); again to pause">&#9654; Run</button>
+<span class="exe-buttons">
 <button type="button" data-act="start" title="Go to the run’s start (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
 <button type="button" data-act="back" title="Back a step (←, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
 <button type="button" data-act="next" title="On a step (→, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
 <button type="button" data-act="end" title="Go to the run’s end (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
 </span>
-<span class="sv-at" data-out="at" title="Where the run is, its clock and its step, filled as far as the clock has come, red ticks where a request is preempted: press or drag to go to a moment, or scroll over it"></span>
+<span class="exe-at" data-out="at" title="Where the run is, its clock and its step, filled as far as the clock has come, red ticks where a request is preempted: press or drag to go to a moment, or scroll over it"></span>
 <label class="exe-lbl">speed <select data-in="speed" title="Seconds of the run a second; at ×1 an answer streams as fast as its user would see it"></select></label>
-<label class="exe-lbl sv-versus">compare with <select data-in="versus"></select></label>
+<label class="exe-lbl exe-versus">compare with <select data-in="versus"></select></label>
 <span class="lit-sep"></span>
 <span class="sv-views">
 <button type="button" class="lit-btn on" data-view="users" aria-pressed="true" title="Users: the chats as the people who sent them see them, over the server’s steps, its cache and the latencies"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1.5" y="2.5" width="6" height="5" fill="#fff" stroke="#000"/><rect x="8.5" y="2.5" width="6" height="5" fill="#fff" stroke="#000"/><rect x="1.5" y="8.5" width="6" height="5" fill="#fff" stroke="#000"/><rect x="8.5" y="8.5" width="6" height="5" fill="#fff" stroke="#000"/><path d="M2 3h5v1H2zM9 3h5v1H9zM2 9h5v1H2zM9 9h5v1H9z" fill="#000080"/></svg></button>

@@ -404,14 +404,17 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 		border-color: #ffff00;
 	}
 }
+// the icons in rows, as many as fit, each as wide as its name, the gaps
+// between the names even
 .xp-icons {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, 86px);
-	gap: 6px 4px;
-	padding: 8px 6px;
-	align-content: start;
+	display: flex;
+	flex-wrap: wrap;
+	align-content: flex-start;
+	gap: 8px 22px;
+	padding: 8px 12px;
 
 	a {
+		flex: none;
 		display: grid;
 		justify-items: center;
 		gap: 3px;
