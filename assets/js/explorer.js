@@ -172,7 +172,7 @@
 		const a = (n, inner) => '<a href="' + hrefOf(n) + '" data-id="' + n.id + '"' + (n.id === S.sel ? ' class="sel"' : '') + '>' + inner + '</a>';
 		if (!listsPosts(N[S.at])) {
 			const tab = tabFor();
-			pane.innerHTML = '<div class="xp-icons">' + items.map(n => a(n, '<span class="xi"><img src="' + icon(n, true) + '" alt="" /></span><span class="nm">' + esc(n.name) + '</span>')).join('') + '</div>'
+			pane.innerHTML = '<div class="xp-icons" data-at="' + S.at + '">' + items.map(n => a(n, '<span class="xi"><img src="' + icon(n, true) + '" alt="" /></span><span class="nm">' + esc(n.name) + '</span>')).join('') + '</div>'
 				+ (tab ? props(tab) : '');
 			return;
 		}

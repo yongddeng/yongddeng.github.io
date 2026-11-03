@@ -410,7 +410,7 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 	display: flex;
 	flex-wrap: wrap;
 	align-content: flex-start;
-	gap: 8px 22px;
+	gap: 8px 18px;
 	padding: 8px 12px;
 
 	a {
@@ -445,6 +445,13 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 	a.sel img {
 		filter: sepia(1) saturate(5) hue-rotate(190deg) brightness(0.6);
 	}
+}
+// My Computer's drives and C:\'s folders, whose names are short, in cells of one width, evenly spaced
+.xp-icons[data-at="mc"] a {
+	min-width: 57px;
+}
+.xp-icons[data-at="C"] a {
+	min-width: 58px;
 }
 // a drive's General tab, under its icons: each folder's files and size, and the pie
 .dp {
