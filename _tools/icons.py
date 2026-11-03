@@ -5,7 +5,7 @@ drawings; the 48s are the same pictures drawn finer. PNG by hand, since there
 is no PIL here.
 
 Usage:
-  python3 _tools/icons.py              # writes the six PNGs
+  python3 _tools/icons.py              # writes the eight PNGs
   python3 _tools/icons.py --x8 <dir>   # and copies eight times over, to look at
 """
 import math
@@ -18,7 +18,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "
 PAL = {
     ".": None, "k": (0, 0, 0), "w": (255, 255, 255), "g": (192, 192, 192), "d": (128, 128, 128),
     "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "v": (176, 166, 204),
-    "y": (184, 134, 11), "e": (30, 30, 30), "b": (24, 64, 45),
+    "y": (184, 134, 11), "p": (128, 0, 128), "e": (30, 30, 30), "b": (24, 64, 45),
 }
 
 
@@ -129,6 +129,30 @@ def optimiser48():
     rect(g, 26, 22, 1, 1, "w")
     return g
 
+# ---- serve: a batch, a bar a sequence, the shared system prompt in gold at
+# its head, an answer's next token a black tick at its end, one a prompt chunk ----
+def batch(g, x, rows, height, head, tick):
+    for y, length, c in rows:
+        rect(g, x, y, head, height, "y")
+        rect(g, x + head, y, length, height, c)
+        if c != "p":
+            rect(g, x + head + length, y, tick, height, "k")
+
+
+def serve16():
+    g = canvas(16)
+    box(g, 0, 1, 15, 14)
+    batch(g, 2, [(3, 5, "n"), (6, 2, "t"), (9, 9, "p"), (12, 4, "n")], 2, 2, 1)
+    return g
+
+
+def serve48():
+    g = canvas(48)
+    box(g, 1, 4, 45, 43, shadow=True)
+    batch(g, 4, [(8, 17, "n"), (14, 9, "t"), (20, 28, "p"), (26, 22, "n"), (32, 6, "t"), (38, 13, "n")], 4, 7, 2)
+    return g
+
+
 # ---- train: the editor's dark half, its lines in Dark+'s colours and the
 # debugger's arrow at the one in play, beside the board, two GPUs over the
 # CPU, a bus lit between ----
@@ -174,7 +198,7 @@ def train48():
 def main():
     x8 = sys.argv[2] if sys.argv[1:2] == ["--x8"] else None
     for name, grid in [("lil-16", lil16()), ("lil-48", lil48()), ("optimiser-16", optimiser16()), ("optimiser-48", optimiser48()),
-                       ("train-16", train16()), ("train-48", train48())]:
+                       ("serve-16", serve16()), ("serve-48", serve48()), ("train-16", train16()), ("train-48", train48())]:
         png(os.path.join(OUT, name + ".png"), grid)
         if x8:
             png(os.path.join(x8, name + "-x8.png"), [[c for c in row for _ in range(8)] for row in grid for _ in range(8)])

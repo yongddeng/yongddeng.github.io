@@ -1,0 +1,102 @@
+---
+title: serve.exe
+date: 2026-10-31
+note: "301"
+icon: serve-16.png
+large: serve-48.png
+winclass: exe-win sv-win
+description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by a small rewrite of vLLM's scheduler, each step timed by the roofline. In Users, the chats as the people who sent them see them, in English, Korean and other languages, each answer coming in as the engine makes its tokens, the steps, the cache and the latencies under them, and a second server beside the first serving the same chats; in Memory, the chats a line each over the KV cache, block by block, and the cache through the run. From static batches, through prefill first, to chunked prefill, the cache contiguous or paged, prefix caching, bf16 or fp8, and the load.
+---
+
+<div class="exe sv view-users" tabindex="0" role="region" aria-label="serve.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it">
+<div class="lit-tool">
+<button type="button" class="lit-btn sv-run" data-act="run" title="Play the run at the speed beside it (Space); again to pause">&#9654; Run</button>
+<span class="sv-buttons">
+<button type="button" data-act="start" title="Go to the run’s start (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
+<button type="button" data-act="back" title="Back a step (←, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
+<button type="button" data-act="next" title="On a step (→, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
+<button type="button" data-act="end" title="Go to the run’s end (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
+</span>
+<span class="sv-at" data-out="at" title="Where the run is, its clock and its step, filled as far as the clock has come, red ticks where a request is preempted: press or drag to go to a moment, or scroll over it"></span>
+<label class="exe-lbl">speed <select data-in="speed" title="Seconds of the run a second; at ×1 an answer streams as fast as its user would see it"></select></label>
+<label class="exe-lbl sv-versus">compare with <select data-in="versus"></select></label>
+<span class="lit-sep"></span>
+<span class="sv-views">
+<button type="button" class="lit-btn on" data-view="users" aria-pressed="true" title="Users: the chats as the people who sent them see them, over the server’s steps, its cache and the latencies"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1.5" y="2.5" width="6" height="5" fill="#fff" stroke="#000"/><rect x="8.5" y="2.5" width="6" height="5" fill="#fff" stroke="#000"/><rect x="1.5" y="8.5" width="6" height="5" fill="#fff" stroke="#000"/><rect x="8.5" y="8.5" width="6" height="5" fill="#fff" stroke="#000"/><path d="M2 3h5v1H2zM9 3h5v1H9zM2 9h5v1H2zM9 9h5v1H9z" fill="#000080"/></svg></button>
+<button type="button" class="lit-btn" data-view="memory" aria-pressed="false" title="Memory: the chats a line each, over the KV cache that holds them, block by block, and the cache through the run"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1.5" y="1.5" width="13" height="5" fill="#fff" stroke="#000"/><path d="M3 3h4v1H3zM9 3h4v1H9zM3 5h4v1H3zM9 5h4v1H9z" fill="#808080"/><rect x="1.5" y="7.5" width="13" height="7" fill="#fff" stroke="#000"/><path d="M3 9h2v2H3zM9 9h2v2H9zM6 12h2v2H6zM12 12h1v2h-1z" fill="#008080"/><path d="M6 9h2v2H6z" fill="#b8860b"/><path d="M12 9h1v2h-1zM3 12h2v2H3z" fill="#efdfae"/></svg></button>
+</span>
+</div>
+<div class="lit-tool">
+<label class="exe-lbl" title="Requests a second, arriving as a Poisson process, as vllm bench serve’s --request-rate; inf sends them all at once, its default">request_rate <select data-in="rate"></select></label>
+<label class="exe-lbl" title="Tokens every prompt starts with, the same for all">system prompt <select data-in="system"></select></label>
+<label class="exe-lbl" title="The most an answer may run to; a contiguous cache sets it aside up front">max_tokens <select data-in="reserve"></select></label>
+<label class="exe-lbl" title="Another draw of the same workload: other arrivals, other lengths">seed <select data-in="seed"></select></label>
+</div>
+<div class="lit-tool">
+<label class="exe-lbl" title="How the engine fills a step: a static batch at a time, the oldest way; whole prompts first, the decodes waiting, as vLLM v0 with chunked prefill off, its default for a context under 32K; or chunks of prompts beside the decodes within a token budget, vLLM’s v1 scheduler as of 0.11, where chunked prefill is always on">scheduler <select data-in="sched"></select></label>
+<label class="exe-lbl" title="Contiguous: a run of blocks a request, set aside for its prompt and max_tokens, as servers before vLLM did; paged: blocks as tokens need them, from anywhere (PagedAttention). A static batch is always contiguous">KV cache <select data-in="alloc"></select></label>
+<button type="button" class="lit-btn" data-in="prefix" aria-pressed="false" title="enable_prefix_caching: a full block kept, keyed by the tokens up to its end, for the next request that starts the same; a paged cache’s only">prefix caching</button>
+<label class="exe-lbl" title="kv_cache_dtype: the cache’s values in the model’s own bf16 (auto), or in fp8, half the bytes, so twice the blocks">kv_cache_dtype <select data-in="kv"></select></label>
+<label class="exe-lbl" title="The blocks of the cache: all that 92% of each GPU holds past its half of the weights, or fewer, as --num-gpu-blocks-override sets. A real server holds fewer still, its profiling setting aside activations and memory outside PyTorch">num_gpu_blocks <select data-in="cache"></select></label>
+<label class="exe-lbl" title="The most requests a step runs; a static batch’s size">max_num_seqs <select data-in="seqs"></select></label>
+</div>
+<div class="sv-body">
+<div class="sv-users">
+<div class="sv-sides">
+<section class="sv-side" data-side="0">
+<header class="sv-head"><b data-out="name"></b><span data-out="count"></span></header>
+<p class="sv-event" data-out="event"></p>
+<p class="sv-why-line" data-out="why"></p>
+<div class="sv-wall"></div>
+</section>
+<section class="sv-side" data-side="1" hidden>
+<header class="sv-head"><b data-out="name"></b><span data-out="count"></span></header>
+<p class="sv-event" data-out="event"></p>
+<div class="sv-wall"></div>
+</section>
+</div>
+<section class="sv-pin" role="dialog" hidden>
+<header class="sv-pin-bar"><b data-out="pin-title"></b><button type="button" data-act="unpick" aria-label="Close" title="Close (Esc)">&#215;</button></header>
+<div class="sv-pin-body">
+<div class="sv-card" data-out="pin-card"></div>
+<canvas class="sv-pin-time" role="img" aria-label="What the request did, from its arrival to its last token, with the clock marked"></canvas>
+</div>
+</section>
+</div>
+<section class="lit-pane sv-cache" aria-label="The KV cache, a cell a block">
+<canvas class="sv-map" role="img" aria-label="The KV cache’s blocks in the order vLLM numbers them, each filled as its sixteen slots hold tokens, under a bar of one GPU’s memory"></canvas>
+<p class="sv-key" data-out="key"></p>
+</section>
+<canvas class="sv-wires" aria-hidden="true"></canvas>
+</div>
+<section class="sv-box">
+<span class="sv-box-title" role="heading" aria-level="2">The server</span>
+<div class="sv-strip">
+<section class="sv-pane">
+<header title="Each step a column as wide as it took, as tall as its tokens on a log scale, split by what they were: answers’ next tokens, prompts going through, prompts and answers computed again after a preemption, a static batch’s padding">The steps, last <span data-out="window"></span> s <i>tokens, log</i></header>
+<canvas class="sv-steps" role="img" aria-label="The steps of the last two seconds, each as wide as its time and as tall as its tokens"></canvas>
+</section>
+<section class="sv-pane">
+<header title="The blocks of the KV cache in use, as vLLM’s kv_cache_usage counts them, of those a request can be given, the null block not among them; a free block still holding a prefix counts as free">KV cache usage</header>
+<canvas class="sv-usage" role="img" aria-label="How much of the KV cache is in use, and the run’s figures so far"></canvas>
+</section>
+<section class="sv-pane">
+<header title="Each request’s time to first token, against when it arrived: a dot as its first token reaches its user, for a static batch with its last; the median and the 99th percentile of those so far, as vllm bench serve reports them">Time to first token</header>
+<canvas class="sv-ttft" role="img" aria-label="Each request’s time to its first token against its arrival"></canvas>
+</section>
+<section class="sv-pane">
+<header title="The gaps between an answer’s tokens as they reach its user, every answer’s, on a log scale: vllm bench serve’s inter-token latency, with its median and 99th percentile">Between tokens</header>
+<canvas class="sv-itl" role="img" aria-label="How the gaps between tokens are spread"></canvas>
+</section>
+</div>
+</section>
+<section class="lit-pane sv-time">
+<canvas class="sv-river" role="img" aria-label="The cache over the run, in blocks, stacked by kind, with the playhead; drag across it to move through the run"></canvas>
+</section>
+<div class="sv-tip" hidden></div>
+<script type="application/json" class="sv-chats">{{ site.data.serve_chats | jsonify }}</script>
+<a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/serve-engine.js" defer></script>
+<script src="/assets/js/serve.js" defer></script>

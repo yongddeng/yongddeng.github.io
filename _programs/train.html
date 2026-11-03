@@ -5,10 +5,10 @@ note: "601"
 icon: train-16.png
 large: train-48.png
 winclass: exe-win trn-win
-description: A Llama trained a line at a time in a debugger beside the H100 server it runs on, drawn in 3D from the board down to one SM; train.py on one device, the GPU or the CPU, fed by a DataLoader or by GPUDirect Storage, and train_dist.py on both GPUs by DDP or FSDP; the model, the device, the strategy, the batch size and checkpointing set in the code as it runs, each line's copies lit on the render, timed on a timeline that shows the CPU running ahead of the GPU, and charted in memory, to the line where PyTorch would run out of it.
+description: A Llama trained a line at a time in a debugger beside the H100 server it runs on, drawn in 3D from the board down to one SM; train.py on one device, the GPU or the CPU, fed by a DataLoader or by GPUDirect Storage, and train_dist.py on both GPUs by DDP or FSDP; the model, the device, the strategy, the batch size and checkpointing set in the code as it runs, each line's copies lit on the render, timed on a timeline that shows the CPU running ahead of the GPU, and charted in memory, to the line where PyTorch would run out of it. A third script, serve.py, serves thirty chats to Llama 3.1 70B over both GPUs with vLLM's engine, from static batches to chunked prefill, stepped into its scheduler, its KV cache charted in the same panel.
 ---
 
-<div class="exe trn" tabindex="0" aria-label="train.exe: Space or F5 runs on through the lines and pauses, the right arrow or F10 runs the next line, the left arrow steps back, F11 steps into the forward pass and Shift+F11 out of it, Home and End go to the first and last line, T hides the timeline, M the Memory panel, the question mark explains the line">
+<div class="exe trn" tabindex="0" aria-label="train.exe: Space or F5 runs on through the lines and pauses, the right arrow or F10 runs the next line, the left arrow steps back, F11 steps into the forward pass and Shift+F11 out of it, Home and End go to the first and last line; in serve.py the arrows step through the engine’s steps and F11 steps into engine.step() and the scheduler; T hides the timeline, M the Memory panel, the question mark explains the line">
 <div class="lit-tool">
 <button type="button" class="lit-btn trn-run" data-act="run" title="Run on through the lines, as the debugger’s Continue does, to the last or to an error (Space or F5); again to pause">&#9654; Run</button>
 <span class="trn-buttons">
@@ -23,13 +23,14 @@ description: A Llama trained a line at a time in a debugger beside the H100 serv
 </span>
 <span class="trn-at" data-out="at" title="The line in play; drag across to run back and forth through the lines"></span>
 <span class="lit-sep"></span>
-<span class="exe-lbl">data</span>
+<span class="trn-data"><span class="exe-lbl">data</span>
 <button type="button" class="lit-btn on" data-path="loader" title="A DataLoader: worker processes read the file into DRAM, a thread pins each batch, and the GPU copies it over PCIe every step">DataLoader</button>
-<button type="button" class="lit-btn" data-path="gds" title="GPUDirect Storage: the whole token file read once from the SSD straight into HBM, never through DRAM; each step slices it there">GPUDirect Storage</button>
+<button type="button" class="lit-btn" data-path="gds" title="GPUDirect Storage: the whole token file read once from the SSD straight into HBM, never through DRAM; each step slices it there">GPUDirect Storage</button></span>
+<label class="exe-lbl trn-speed">speed <select data-in="speed" title="How fast Run plays serve.py’s run, on its own clock"></select></label>
 </div>
 <div class="trn-body">
 <section class="trn-ide" aria-label="The editor, the line about to run highlighted as a debugger highlights it, and what is in memory after it">
-<nav class="trn-tabs"><span class="on" data-tab="train" title="One device, run with python">train.py</span><span data-tab="dist" title="Both GPUs, run with torchrun --nproc_per_node=2">train_dist.py</span><span data-tab="model" hidden>modeling_llama.py</span></nav>
+<nav class="trn-tabs"><span class="on" data-tab="train" title="One device, run with python">train.py</span><span data-tab="dist" title="Both GPUs, run with torchrun --nproc_per_node=2">train_dist.py</span><span data-tab="serve" title="Thirty chats served on both GPUs: static batches to begin with, then vLLM’s engine as a newer scheduler is picked">serve.py</span><span data-tab="in1" hidden></span><span data-tab="in2" hidden></span></nav>
 <p class="trn-path" data-out="path"></p>
 <div class="trn-text"><ol class="trn-code"></ol></div>
 <section class="trn-panel shut">
@@ -67,4 +68,5 @@ description: A Llama trained a line at a time in a debugger beside the H100 serv
 <a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
 </div>
 <script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/serve-engine.js" defer></script>
 <script src="/assets/js/train.js" defer></script>

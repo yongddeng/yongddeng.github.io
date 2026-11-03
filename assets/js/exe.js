@@ -1,6 +1,7 @@
-// What the programs on (D:) share (lil.js, optimiser.js, train.js): a place in
-// their window's status bar beside the note they draw for, canvases drawn at
-// the screen's density, and a key to what they draw.
+// What the programs on (D:) share (lil.js, optimiser.js, serve.js, train.js):
+// a place in their window's status bar beside the note they draw for,
+// canvases drawn at the screen's density, a key to what they draw, and the
+// hatching for room set aside that nothing fills.
 
 // The note's link moves into the status bar and opens the note in a window of
 // its own, as My Computer does. Returns a setter for the bar's first cell, which
@@ -44,4 +45,27 @@ function legend(cx, x, y, items) {
 		cx.fillRect(x, y + i * 14, 9, 9);
 		cx.fillText(item[1], x + 14, y + 8 + i * 14);
 	});
+}
+
+// A fill for a canvas: colour faintly, crossed by a pixel's diagonal every
+// six as Windows 98 hatched, drawn at the screen's own pixels so the lines
+// stay sharp; back, the other diagonal. Made once a colour and density,
+// kept on the function, as the desktop runs this file again for each window
+function hatch(colour, back) {
+	const dpr = window.devicePixelRatio || 1, key = colour + !!back + dpr;
+	const made = hatch.made || (hatch.made = new Map());
+	if (!made.has(key)) {
+		const tile = document.createElement('canvas'), t = tile.getContext('2d');
+		tile.width = tile.height = Math.round(6 * dpr);
+		t.scale(dpr, dpr);
+		t.fillStyle = colour;
+		t.globalAlpha = 0.12;
+		t.fillRect(0, 0, 6, 6);
+		t.globalAlpha = 0.8;
+		for (let i = 0; i < 6; i++) t.fillRect(i, back ? i : 5 - i, 1, 1);
+		const pattern = t.createPattern(tile, 'repeat');
+		pattern.setTransform(new DOMMatrix().scale(1 / dpr));
+		made.set(key, pattern);
+	}
+	return made.get(key);
 }

@@ -1,0 +1,510 @@
+# serve.exe's chats (assets/js/serve.js): what its users send and what comes
+# back. A chat is a lang (one of serve.js's LANGS), an ask, and its answer in
+# pieces: a piece is said at any length, a piece in a list of its own
+# (["…"]) only when the answer's length wants it, and words in ⟨…⟩ may be
+# left out of either, so that an answer comes to the engine's count in its
+# own words. A chat with make (a key of serve.js's MAKERS) names its own size
+# in its ask, in the sizes its rule gives ({n}, its count, unless the rule
+# gives others, as leap's {a} and {b}), and has "{items}" among its pieces,
+# where as many items go as fit, each made by the rule. paste names what a
+# prompt longer than its ask carried, else the rest is the chat so far.
+# Checked as the site builds by _plugins/check_serve.rb
+
+# English, answered in prose
+- lang: en
+  ask: "What’s the difference between a list and a tuple in Python?"
+  answer:
+    - "The⟨ main⟩ difference is that lists are mutable and tuples are immutable."
+    - " You can append to, remove from or reassign items in a list⟨ at any time⟩, but once a tuple is created its contents can’t⟨ ever⟩ change."
+    - [" Because tuples are immutable, they can be used as dictionary keys or stored in a set, as long as everything inside them is hashable too. Lists can’t, since their hash would change whenever they did."]
+    - "\n\nIn practice, use a list for a collection of similar items that grows or shrinks, like the lines of a file⟨ or the rows of a query⟩, and a tuple for a fixed record whose positions mean something, like⟨ a point’s⟩ (latitude, longitude)."
+    - [" Tuples are also⟨ slightly⟩ smaller in memory and a little faster to create, though that rarely matters."]
+    - ["\n\nOne gotcha: a tuple with a single item needs a trailing comma, so (5,) is a tuple while (5) is just the integer 5."]
+    - ["\n\nNote that a tuple holding a list can still have that list changed, since the tuple only fixes which objects it holds, not what’s inside them."]
+- lang: en
+  ask: "How do I make a simple tomato pasta sauce from scratch?"
+  answer:
+    - "Here’s a simple sauce for⟨ about⟩ four servings."
+    - "\n\nIngredients: 2 tablespoons⟨ of⟩ olive oil, 1 onion⟨,⟩ finely chopped, 3 cloves⟨ of⟩ garlic⟨ thinly⟩ sliced, an 800 g tin of whole peeled tomatoes, 1 teaspoon⟨ of⟩ salt, a pinch of sugar if the tomatoes are sharp, and a handful of fresh basil⟨ leaves⟩."
+    - "\n\n1. Warm the olive oil in a wide pan over medium-low heat and cook the onion with a pinch of the salt for 8 to 10 minutes, until soft and⟨ lightly⟩ golden."
+    - "\n2. Add the garlic and cook for⟨ about⟩ another minute, without letting it brown."
+    - "\n3. Pour in the tomatoes, crush them with a wooden spoon, and add the rest of the salt."
+    - "\n4. Simmer uncovered for 20 to 25 minutes, stirring now and then, until the sauce thickens and the oil starts to separate at the edges."
+    - "\n5. Taste, add the sugar if it needs it, then tear in the basil off the heat."
+    - ["\n\nToss it with about 400 g of cooked pasta and a splash of the pasta water, which helps the sauce cling."]
+    - ["\n\nIt keeps in the fridge for four days or in the freezer for three months."]
+    - ["\n\nEnjoy your pasta!"]
+- lang: en
+  ask: "Can you explain what a hash table is, simply?"
+  answer:
+    - "A hash table stores key–value pairs so that you can⟨ quickly⟩ find a value by its key in roughly constant time⟨, however many pairs it holds⟩."
+    - " It keeps an⟨ internal⟩ array of slots, often called buckets."
+    - " To store a pair, it runs the key through a hash function, which turns the key into a⟨ fixed-size⟩ number, and uses that number, modulo the array’s size, to pick a bucket."
+    - " To look a key up, it hashes the key again and goes straight to the same bucket instead of searching⟨ through⟩ the whole collection."
+    - "\n\nTwo different keys can⟨ sometimes⟩ land in the same bucket, which is called a collision."
+    - " Hash tables handle collisions either by keeping a short list in each bucket, called chaining, or by probing for the next free slot⟨ in the array⟩, called open addressing."
+    - ["\n\nAs the table fills up, collisions become more common, so most implementations grow the array, usually doubling it, and rehash everything once it passes a load factor such as 0.75⟨, the share of slots in use⟩. That occasional resize costs O(n), but averaged over many insertions each one is still O(1)."]
+    - ["\n\nPython’s dict and Java’s HashMap are both hash tables⟨ under the hood⟩."]
+- lang: en
+  ask: "Plan me a 3-day trip to Kyoto in autumn."
+  answer:
+    - "Here’s a⟨ fairly⟩ relaxed three-day plan for Kyoto in autumn, when the maples turn, usually from mid-November to early December."
+    - "\n\nDay 1, Higashiyama: start early at Kiyomizu-dera before the crowds arrive, then walk down⟨ the old lanes of⟩ Sannenzaka and Ninenzaka to Yasaka Shrine."
+    - " In the afternoon, visit Kodai-ji and stroll through Maruyama Park, and finish in Gion, where the lanes around Hanamikoji are at their best⟨ just⟩ after dark."
+    - "\n\nDay 2, Arashiyama: take the JR Sagano Line to Saga-Arashiyama, walk through the bamboo grove early⟨ in the morning⟩, then visit Tenryu-ji and its garden."
+    - [" Cross the Togetsukyo Bridge for the view of the hills, and if you have the energy, climb to the Iwatayama monkey park."]
+    - " Head back by way of Kinkaku-ji, the Golden Pavilion, in the late afternoon."
+    - "\n\nDay 3, south and east: go to Fushimi Inari Taisha at sunrise and walk part of the way up the torii-lined trail, then spend the afternoon at Tofuku-ji, one of the city’s⟨ very⟩ best spots for autumn leaves."
+    - [" End at Nishiki Market for snacks before dinner."]
+    - ["\n\nGet an ICOCA card for the buses and trains, and expect queues at the leaf-viewing spots at weekends."]
+    - ["\n\nHave a lovely trip!"]
+- lang: en
+  ask: "Summarise this for me in a few bullet points."
+  paste: "the abstract and introduction of “Attention Is All You Need” (Vaswani et al., 2017)"
+  answer:
+    - "Here’s a⟨ short⟩ summary:"
+    - "\n\n• The paper introduces the Transformer, a sequence-to-sequence model built entirely on attention⟨ mechanisms⟩, with no recurrence or convolution."
+    - ["\n• Recurrent models process tokens one after another, which limits parallelism in training, whereas attention lets every position attend to every other in one step."]
+    - "\n• The Transformer uses multi-head self-attention in both an encoder and a decoder, with positional encodings⟨ added to the inputs⟩ to give the model⟨ information about⟩ the order of the words."
+    - "\n• On WMT 2014 English-to-German translation it reached 28.4 BLEU, more than 2 BLEU better than the previous best results⟨ at the time⟩, including ensembles."
+    - ["\n• On English-to-French it set a new single-model state of the art of 41.8 BLEU after training for 3.5 days on eight GPUs."]
+    - ["\n• It also worked well for English constituency parsing, showing the architecture is useful beyond translation."]
+- lang: en
+  ask: "Why am I getting this error and how do I fix it?"
+  paste: "a Python traceback ending in KeyError: 'user_id'"
+  answer:
+    - "The traceback ends in KeyError: 'user_id', which means the code looked up the key 'user_id' in a dictionary that doesn’t contain it."
+    - " The line just above the error in the traceback shows⟨ you⟩ where, something like row['user_id'] or data['user_id']."
+    - "\n\nA few⟨ common⟩ causes⟨ to check⟩:"
+    - "\n1. The data comes from an API or a file where the field is⟨ named or⟩ spelt differently, such as 'userId' or 'user-id'."
+    - "\n2. Some records simply don’t have that field, so the first few⟨ rows⟩ work and a later one fails."
+    - ["\n3. The key has stray whitespace or different capitalisation, for example 'user_id ' read from a CSV header."]
+    - "\n\nTo find out which⟨ one it is⟩, print the dictionary’s keys just before the failing line: print(row.keys())."
+    - " If the field is genuinely optional, use row.get('user_id'), which returns None instead of raising⟨ an error⟩, or row.get('user_id', default) to supply a fallback."
+    - [" If it should always be there, it’s better to let the error surface and fix the data at its source."]
+- lang: en
+  ask: "Is it “affect” or “effect” here: “The new policy will ___ everyone”?"
+  answer:
+    - "It’s “affect”: the new policy will affect everyone."
+    - " “Affect” is usually the verb, meaning to influence⟨ or change⟩ something, and “effect” is usually the noun, meaning the result⟨ of that influence⟩."
+    - " So the policy affects everyone, and the change has an effect on everyone⟨ it touches⟩."
+    - ["\n\nThere are exceptions: “effect” as a verb means to bring something about, as in “to effect change”, and “affect” as a noun is a psychology term for displayed emotion."]
+    - ["\n\nA quick way to remember it: affect is the action, effect is the end result."]
+- lang: en
+  ask: "What’s a good way to start learning Korean?"
+  answer:
+    - "Start with Hangul, the Korean alphabet."
+    - " It has 14 basic consonants and 10 basic vowels, and most people can read it, slowly, after⟨ about⟩ a week of short daily practice."
+    - [" Learning it first pays off at once, because romanised Korean hides the real sounds."]
+    - "\n\nNext, learn the basic word order, subject–object–verb, and the particles that mark each word’s role⟨ in a sentence⟩, like 이/가 and 은/는 for subjects and topics and 을/를 for objects."
+    - " Then pick up the polite -요 endings, which are what you’ll use with most⟨ of the⟩ people you meet."
+    - "\n\nFor vocabulary, a spaced-repetition app with the most common few hundred words goes a⟨ very⟩ long way."
+    - [" Pair it with something you enjoy listening to, such as a drama with Korean subtitles or a podcast for learners, and start speaking early, even if it’s only reading sentences aloud."]
+    - ["\n\nGood luck with it!"]
+- lang: en
+  ask: "What does this function do, and is there a bug?"
+  paste: "a Python function, binary_search(items, target)"
+  answer:
+    - "This is a binary search."
+    - " It looks for target in a sorted list by keeping two indices, low and high, checking the middle element⟨ between them⟩, and throwing away the half that can’t contain the target, so it needs at most about log₂(n) comparisons."
+    - "\n\nThe⟨ most⟩ common bug in this pattern is in the loop condition or the⟨ index⟩ updates."
+    - " If high starts at len(items) - 1, the loop has to be while low <= high⟨, not low < high⟩, or the last remaining element is never checked."
+    - " Likewise the updates must be low = mid + 1 and high = mid - 1, because setting low = mid can loop forever once low and high are next to each other."
+    - ["\n\nAlso make sure the list is sorted⟨ in ascending order⟩ before calling it, because binary search silently gives wrong answers on unsorted input."]
+    - ["\n\nIn Python you could use the standard bisect module instead: bisect.bisect_left(items, target) gives the insertion point, and the target is present if that index is in range and items[index] == target."]
+- lang: en
+  ask: "How many minutes should I boil an egg for a jammy yolk?"
+  answer:
+    - "For a jammy yolk, lower large eggs⟨ gently⟩ straight from the fridge into water that’s already boiling and cook them for⟨ about⟩ 6½ to 7 minutes."
+    - " Then move them⟨ straight⟩ into iced water for a few minutes to stop the cooking and make them easier to peel."
+    - "\n\nAt 6 minutes the yolk is still runny in the centre, at 7 it’s set at the edges and soft⟨ and fudgy⟩ in the middle, and by 9 or 10 minutes it’s⟨ fully⟩ hard."
+    - [" Medium eggs need about 30 seconds less, and eggs at room temperature cook a little faster."]
+- lang: en
+  ask: "What’s the difference between TCP and UDP?"
+  answer:
+    - "Both are transport protocols⟨ that run⟩ on top of IP, but they make different promises."
+    - "\n\nTCP is connection-oriented: it sets up a connection with a⟨ three-way⟩ handshake, numbers every byte, retransmits anything that’s lost, delivers data in order, and slows down when the network is congested."
+    - " That makes it reliable but adds⟨ some⟩ latency, which is why it’s used for the web, email and file transfers."
+    - "\n\nUDP just sends individual datagrams⟨ to an address⟩, with no connection, no retransmission and no guarantee of order."
+    - [" Packets can arrive out of order, twice or not at all, and it’s up to the application to cope."]
+    - " In exchange it has very little overhead, so it suits real-time traffic like voice calls, video and games⟨, as well as short exchanges like DNS lookups⟩."
+    - ["\n\nQUIC, which HTTP/3 uses, is built on UDP and adds its own reliability and encryption on top."]
+- lang: en
+  ask: "Summarise this article in three sentences."
+  paste: "the Wikipedia article on the Great Barrier Reef"
+  answer:
+    - "The Great Barrier Reef, off the coast of Queensland in north-eastern Australia, is the world’s largest coral reef system, made up of nearly 3,000 individual reefs and about 900 islands stretching over 2,300 kilometres."
+    - " It supports a huge diversity of⟨ marine⟩ life, including many species of coral, fish, turtles and seabirds⟨ as well as whales and dolphins⟩, was made a World Heritage Site in 1981, and is largely protected as a marine park."
+    - " Its main threats are climate change, which has caused repeated mass coral bleaching⟨ events⟩, along with pollution, outbreaks of⟨ the coral-eating⟩ crown-of-thorns starfish and cyclones."
+- lang: en
+  ask: "Write a short, friendly out-of-office reply."
+  answer:
+    - "Here’s one you can adapt:"
+    - "\n\nHi, thanks⟨ very much⟩ for your email."
+    - " I’m out of the office until Monday 14 April with⟨ only⟩ limited access to email."
+    - " I’ll reply⟨ properly⟩ as soon as I can when I’m back."
+    - [" If it’s urgent, please contact Sam Lee at sam.lee@example.com, who’s covering for me."]
+    - "\n\nBest wishes,\nAlex"
+- lang: en
+  ask: "What’s the capital of Australia?"
+  answer:
+    - "The capital of Australia is Canberra, not Sydney⟨ or Melbourne⟩ as many people⟨ often⟩ assume."
+    - [" Canberra was built as a planned capital⟨ in the early twentieth century⟩, a compromise between Sydney and Melbourne, which both wanted the title, and Parliament first sat there in 1927."]
+- lang: en
+  ask: "How do I undo the last git commit but keep my changes?"
+  answer:
+    - "Run git reset --soft HEAD~1."
+    - " That moves the branch back⟨ by⟩ one commit and leaves your changes staged⟨ in the index⟩, ready to commit again."
+    - [" If you’d rather have them unstaged, use git reset HEAD~1, which is the same as --mixed."]
+    - ["\n\nIf you’ve already pushed the commit, use git revert HEAD instead, which adds a new commit that undoes it, so you don’t rewrite history other people may have⟨ already⟩ pulled."]
+- lang: en
+  ask: "What’s 18% of 2,450?"
+  answer:
+    - "18% of 2,450 is 441."
+    - [" You can work it out as 2,450 × 0.18⟨ directly⟩, or as 10% (245) plus 8% (196), which⟨ also⟩ gives 441."]
+- lang: en
+  ask: "Can you suggest a name for a small coffee shop next to a library?"
+  answer:
+    - "A few⟨ name⟩ ideas that play on the library:"
+    - "\n\n• Chapter One"
+    - ["\n• The Reading Room"]
+    - "\n• Bookmark Coffee"
+    - ["\n• Footnote"]
+    - ["\n• Shelf Life"]
+    - ["\n• Second Edition"]
+    - ["\n\nIf you want something simpler, naming it after the street, like Elm Street Coffee, is easy to remember and helps people find you."]
+- lang: en
+  ask: "Explain compound interest like I’m 12."
+  answer:
+    - "Imagine you put £100 in a savings account that pays⟨ you⟩ 10% interest a year."
+    - " After one year you get £10 of interest, so you⟨ now⟩ have £110."
+    - "\n\nIn the second year you earn 10% on the whole £110, not just the original £100, so you get £11 and end up with £121⟨ in total⟩."
+    - " That’s compound interest: you earn interest on your interest too⟨, not just on your money⟩."
+    - ["\n\nEach year the amount grows a little faster than the year before, which is why money left alone for a long time can grow a lot."]
+    - ["\n\nAfter 10 years at 10%, your £100 would be about £259."]
+- lang: en
+  ask: "When do I use “who” and when “whom”?"
+  answer:
+    - "Use “who” for the subject of a verb and “whom” for the object⟨ of a verb or preposition⟩."
+    - " A quick test is to answer the question⟨ yourself⟩ with he or him: if the answer is “he”, use who, and if it’s “him”, use whom."
+    - "\n\nSo it’s “Who called?” (he called), but “Whom did you call?” (you called him)."
+    - [" After a preposition it’s always whom: “To whom it may concern”."]
+    - ["\n\nIn everyday speech most people use “who” everywhere, and that’s widely accepted outside formal writing."]
+- lang: en
+  ask: "Why is the sky blue?"
+  answer:
+    - "Sunlight contains all the colours⟨ of the rainbow⟩, and as it passes through the atmosphere it scatters off the⟨ gas⟩ molecules in the air."
+    - " This Rayleigh scattering is much stronger for short wavelengths⟨ of light⟩, so blue light is scattered several times more than red⟨ light⟩."
+    - " The scattered blue light reaches your eyes from every direction, which makes the whole sky look blue⟨ during the day⟩."
+    - ["\n\nViolet is scattered even more, but sunlight has less of it and our eyes are less sensitive to it, so the sky looks blue rather than violet."]
+    - ["\n\nAt sunrise and sunset the light passes through much more air before it reaches you, so most of the blue is scattered away and the reds and oranges are left."]
+- lang: en
+  ask: "Give me a 20-minute bodyweight workout I can do at home."
+  answer:
+    - "Here’s a simple⟨ full-body⟩ circuit."
+    - " Do each exercise for 40 seconds with 20 seconds’ rest⟨ in between⟩, and go round four times:"
+    - "\n\n1. Squats\n2. Push-ups, on your knees if you need to\n3. Reverse lunges, alternating legs\n4. Plank\n5. Glute bridges"
+    - "\n\nThat’s five minutes a round, so four rounds take⟨ exactly⟩ 20 minutes."
+    - [" Warm up first with a couple of minutes of marching on the spot and arm circles, and stop if anything hurts."]
+    - ["\n\nHave a good workout!"]
+- lang: en
+  ask: "Write me a short story about a lighthouse keeper who finds a message in a bottle."
+  answer:
+    - "Every evening for thirty-one years, Maren climbed the hundred and twelve steps of the Skerry Point light, wound the clockwork that turned the⟨ great⟩ lens, and wrote the weather in a ledger⟨ that⟩ nobody read."
+    - [" The supply boat came on the first Monday of each month, and in between, the only voices she heard were the gulls and the radio."]
+    - "\n\nThe bottle washed up in March, wedged between two⟨ black⟩ rocks below the landing."
+    - " It was green glass, the kind they stopped making⟨ long⟩ before she was born, and inside was a single sheet of paper, folded small and tied with⟨ cotton⟩ thread."
+    - "\n\nThe note was in a child’s careful handwriting."
+    - " “My name is Tomas. I am nine. I am throwing this from the ferry to Bremerhaven. If you find it, please tell me where it went.”"
+    - " At the bottom was an address and a date: 14 August 1987."
+    - "\n\nMaren read it three times⟨ over⟩."
+    - " Thirty-six years in the sea, and the paper had barely yellowed."
+    - [" She thought of the currents, how a bottle might circle the North Sea for decades, nudged north and south by storms, before a spring tide finally let it go."]
+    - "\n\nThat night she wrote back⟨ by lamplight⟩."
+    - " She told Tomas about the light, the steps, the ledger, and the⟨ grey⟩ seal that slept on the landing every afternoon in June."
+    - " She did not expect an answer⟨ at all⟩, since the address was old, and the boy would be a man of forty-five now, if he was anything."
+    - "\n\nThe reply came with the supply boat in May⟨, in a stiff white envelope⟩."
+    - " It was typed, and it began, “Dear keeper, my mother kept this house for thirty years, and I still live in it.”"
+    - " Tomas had become a ferry captain⟨ on the same route⟩."
+    - [" He wrote that he had thrown a dozen bottles as a boy and had long ago stopped wondering where they went, and that her letter had made him sit down on the kitchen floor and laugh until his daughter came to see what was wrong."]
+    - "\n\nIn July his ferry changed its route for one crossing, close enough to the point that Maren could see the people on deck⟨ through her binoculars⟩."
+    - " She stood on the gallery and flashed the light twice, though it was daytime and nobody had told her to, and on the bridge of the ship someone flashed back."
+- lang: en
+  ask: "Explain how HTTPS works, step by step."
+  answer:
+    - "HTTPS is ordinary HTTP sent through an encrypted TLS connection, so that nobody between you and the server can read or alter what you send⟨ or receive⟩."
+    - " Here’s what happens when you open an https:// address, using TLS 1.3, the current version."
+    - "\n\n1. Your browser opens a TCP connection to the server, on port 443⟨ by default⟩."
+    - "\n\n2. It sends a ClientHello⟨ message⟩: the TLS versions and cipher suites it supports, a random value, and a key share, which is its half of a Diffie–Hellman key exchange."
+    - "\n\n3. The server replies with a ServerHello⟨ message⟩ containing its own key share⟨ and its choice of cipher suite⟩."
+    - " From the two key shares both sides can now compute the same shared secret, which an eavesdropper who saw only the shares cannot."
+    - [" Everything after this point is encrypted."]
+    - "\n\n4. The server sends its certificate, which binds its domain name to a public key and is signed by a⟨ trusted⟩ certificate authority, along with a signature over the handshake made with the matching private key."
+    - "\n\n5. Your browser checks the certificate: that it was issued for this domain, that it hasn’t expired, and that its chain of signatures leads to a root certificate the browser or operating system already trusts."
+    - " It then checks the server’s signature, which proves the server really holds the private key."
+    - "\n\n6. Both sides exchange Finished messages, confirming that neither⟨ side⟩ saw a tampered handshake."
+    - "\n\n7. From then on, HTTP requests and responses travel inside the encrypted connection, protected by symmetric encryption such as AES-GCM or ChaCha20-Poly1305, which is fast enough for bulk data⟨ like pages and video⟩."
+    - ["\n\nThe Diffie–Hellman exchange also gives forward secrecy: even if the server’s private key is stolen later, recorded past sessions can’t be decrypted, because their keys were never sent over the network."]
+- lang: en
+  ask: "Can you write a cover letter for a junior data analyst job? I’ve done a statistics degree and an internship at a retailer."
+  answer:
+    - "Here’s a⟨ first⟩ draft you can adapt:"
+    - "\n\nDear Hiring Manager,"
+    - "\n\nI’m writing to apply for the Junior Data Analyst role⟨ advertised on your website⟩."
+    - " I recently graduated with a degree in statistics, and I’ve spent the last six months as a data intern at a national retailer, where I learned how much a well-asked question and a clean dataset can change a business decision."
+    - "\n\nDuring my internship I built a weekly sales dashboard in SQL and Power BI that replaced a manual spreadsheet process, saving the merchandising team several hours⟨ of work⟩ a week."
+    - [" I also analysed two years of promotion data to estimate which discounts actually lifted sales rather than just shifting them between weeks, and presented the results to the category managers."]
+    - "\n\nAt university I focused on regression, experimental design and time series, and for my dissertation I modelled footfall at city-centre shops using public transport data⟨ and weather records⟩ in R."
+    - [" I’m comfortable in Python and pandas, and I enjoy the less glamorous parts of the job too: checking where the numbers came from and writing documentation the next person can follow."]
+    - "\n\nI’d welcome the chance to bring that care and curiosity to your team, and to keep learning from⟨ more⟩ experienced analysts."
+    - " Thank you for considering my application⟨, and I’d be glad to talk about how I could help⟩."
+    - "\n\nYours faithfully,\n[Your name]"
+
+# English, answered at any length: the ask names how much
+- lang: en
+  ask: "List the first {n} prime numbers."
+  make: primes
+  answer:
+    - "Here are the first {n} primes⟨, in order⟩:\n\n"
+    - "{items}"
+- lang: en
+  ask: "Write pytest asserts checking is_leap_year for every year from {a} to {b}."
+  make: leap
+  answer:
+    - "Here they are, following the⟨ usual⟩ Gregorian rule: a year divisible by 4 is a leap year, except⟨ for⟩ century years, unless they’re⟨ also⟩ divisible by 400.\n"
+    - "{items}"
+- lang: en
+  ask: "Generate {n} rows of fake customer data as CSV so I can test an import."
+  make: customers
+  answer:
+    - "Here’s⟨ some⟩ sample data⟨ for your import⟩ with made-up names:\n\nid,name,city,plan,joined"
+    - "{items}"
+    - ["\n\nThe dates are in ISO format, so they import cleanly."]
+- lang: en
+  ask: "Can you write out the Sino-Korean numbers from 1 to {n}, one per line?"
+  make: sino
+  answer:
+    - "Here they⟨ all⟩ are. These are the numbers used for dates, money, minutes and phone numbers:\n"
+    - "{items}"
+- lang: en
+  ask: "Write {n} INSERT statements for a products table so I can test my shop’s search."
+  make: inserts
+  answer:
+    - "Here you go, assuming a⟨ simple⟩ table products(id, name, price)⟨ with id as its primary key⟩:\n"
+    - ["\n-- sample products⟨ for testing search⟩"]
+    - "{items}"
+    - ["\n\nThe prices are made up, so adjust them to suit your tests."]
+- lang: en
+  ask: "Make me a list of {n} unique test email addresses at example.com."
+  make: emails
+  answer:
+    - "Here are {n}⟨ unique⟩ addresses. example.com is reserved for examples, so none of them can reach a real inbox:\n"
+    - "{items}"
+
+# Korean
+- lang: ko
+  ask: "김치찌개 맛있게 끓이는 법 알려줘"
+  answer:
+    - "2인분 기준으로 알려 드릴게요."
+    - "\n\n재료: 잘 익은 김치 2컵, 돼지고기 앞다리살 200g, 두부 반 모, 양파 반 개, 대파 1대, 고춧가루 1큰술, 다진 마늘 1큰술, 김칫국물 반 컵, 물 2컵."
+    - "\n\n1. 냄비에 식용유를 조금 두르고 돼지고기를⟨ 중불에서⟩ 먼저 볶다가, 겉면이 익으면 김치를 넣고 5분 정도 더 볶아 주세요."
+    - "\n2. 고춧가루와 다진 마늘을 넣고 한 번 더⟨ 살짝⟩ 볶은 뒤 물과 김칫국물을 붓습니다."
+    - "\n3. 끓어오르면 중약불로 줄여 15분쯤 끓이고, 양파와 두부를⟨ 먹기 좋게 썰어⟩ 넣어 5분 더 끓여 주세요."
+    - "\n4. 마지막에 대파를⟨ 송송 썰어⟩ 넣고 간을 봐서 싱거우면 국간장이나 소금으로 맞추면 됩니다."
+    - ["\n\n김치가 덜 익어 신맛이 약하면 식초를 몇 방울 넣어 보세요."]
+    - ["\n\n맛있게 드세요!"]
+- lang: ko
+  ask: "파이썬에서 리스트 정렬하는 방법 알려줘"
+  answer:
+    - "두 가지 방법이 있어요."
+    - "\n\n리스트 자체를 정렬하려면 sort() 메서드를 쓰면 됩니다: numbers.sort()."
+    - " 원래 리스트가⟨ 직접⟩ 바뀌고, 반환값은 None이에요."
+    - "\n\n원래 리스트는 그대로 두고 정렬된 새 리스트가 필요하면 sorted() 함수를 쓰세요: result = sorted(numbers)."
+    - [" sorted()는 리스트뿐 아니라 튜플이나 문자열 같은 다른 반복 가능한 객체에도 쓸 수 있습니다."]
+    - "\n\n두 방법 모두 reverse=True를 넘기면 내림차순으로 정렬되고, key 인자로 기준을⟨ 원하는 대로⟩ 바꿀 수 있어요."
+    - [" 예를 들어 sorted(words, key=len)은 문자열을 길이순으로 정렬합니다."]
+- lang: ko
+  ask: "제주도 2박 3일 여행 코스 추천해 줘"
+  answer:
+    - "처음 가는 제주라면 이렇게⟨ 섬을 한 바퀴 도는⟩ 동선을 짜 보세요."
+    - "\n\n1일차(제주 시내와 서쪽): 공항에 도착해 용두암과 동문시장을 둘러보고, 오후에는 애월 해안도로를 따라 카페에⟨ 잠시⟩ 들르거나 협재해수욕장에서 노을을 보세요."
+    - "\n\n2일차(남쪽): 오설록 티뮤지엄에 들렀다가 서귀포로 내려가 천지연폭포와 정방폭포를 보고, 저녁에는 서귀포매일올레시장에서 먹거리를 즐기면 좋아요."
+    - "\n\n3일차(동쪽): 아침 일찍 성산일출봉에 올라 일출을 보고, 섭지코지를⟨ 천천히⟩ 산책한 뒤 공항으로 돌아가면 됩니다."
+    - ["\n\n제주는 대중교통으로 다니기 불편한 곳이 많아서 렌터카를 예약하는 걸 추천해요."]
+    - ["\n\n즐거운 여행 되세요!"]
+- lang: ko
+  ask: "이 문서 세 줄로 요약해 줘"
+  paste: "위키백과 ‘세종’ 문서"
+  answer:
+    - "세종은 조선의 제4대 왕으로, 1418년부터 1450년까지 재위했습니다."
+    - "\n1443년에 훈민정음을 창제하고 1446년에 반포해 백성이⟨ 누구나⟩ 쉽게 글을 익힐 수 있게 했습니다."
+    - "\n집현전을 중심으로 학문을⟨ 적극적으로⟩ 장려했고, 측우기와 해시계 같은 과학 기구의 제작과 농업·의학 서적의 편찬도 지원했습니다."
+- lang: ko
+  ask: "영어 이메일에서 Best regards 말고 쓸 수 있는 맺음말 있어?"
+  answer:
+    - "상황에 따라 이렇게⟨ 골라서⟩ 바꿔 쓸 수 있어요."
+    - "\n\n격식을 갖출 때는 Kind regards나 Yours sincerely를 쓰고, 동료처럼⟨ 아주⟩ 가까운 사이라면 Best나 Cheers도 자연스럽습니다."
+    - "\n감사를 전하고 싶을 때는 Many thanks나 Thanks again으로 마무리해도⟨ 충분히⟩ 좋아요."
+    - ["\n답장을 기다린다면 맺음말 앞에 I look forward to hearing from you를 한 줄 넣어도 좋습니다."]
+    - ["\n\n참고로 Yours sincerely는 영국식 표현으로 상대의 이름을 알 때 쓰고, 미국에서는 Sincerely가 더 흔합니다."]
+- lang: ko
+  ask: "엑셀 연습용 가상 매출 데이터 {n}줄 만들어 줘. CSV로"
+  make: sales
+  answer:
+    - "연습용⟨ 가상⟩ 데이터입니다.⟨ 금액은 원 단위예요.⟩ 매출은 단가와 수량을 곱한 값이에요.⟨ 날짜는 2024년 1월 2일부터 하루씩 늘어납니다.⟩\n\n날짜,지역,상품,단가,수량,매출"
+    - "{items}"
+    - ["\n\n상품은 7가지예요."]
+    - ["\n\n피벗 테이블로 지역별 매출 합계를 내 보는 연습에 쓰기 좋아요."]
+- lang: ko
+  ask: "영어 숫자 표기 1부터 {n}까지 써 줘. 단어 시험 준비 중이야"
+  make: english
+  answer:
+    - "1부터 {n}까지⟨ 숫자를⟩ 영어로 쓴 표기예요.⟨ 21부터 99까지는 하이픈을 넣어요.⟩\n"
+    - "{items}"
+    - ["\n\n100 이상은 hundred 뒤에 and를 넣는 영국식으로 썼어요."]
+    - ["\n\n소리 내어 읽어 보면 외우기 쉬워요."]
+- lang: ko
+  ask: "1부터 {n}까지 제곱수 표 만들어 줘"
+  make: squaresKo
+  answer:
+    - "1부터 {n}까지⟨ 정수⟩의 제곱수를⟨ 순서대로⟩ 정리했어요.\n"
+    - "{items}"
+
+# the spread
+- lang: ja
+  ask: "東京で雨の日におすすめの過ごし方は？"
+  answer:
+    - "雨の日なら、屋内で楽しめる場所がおすすめです。"
+    - "\n\n⟨たとえば、⟩上野には東京国立博物館や国立西洋美術館があり、一日かけてゆっくり回れます。"
+    - ["\n豊洲のチームラボプラネッツのような体験型の展示も人気です。"]
+    - ["\n買い物が好きなら、銀座や新宿の百貨店をめぐるのもいいでしょう。"]
+    - ["\n\n夜は展望台から、雨にぬれた街の夜景を眺めてみてください。"]
+    - ["\n\n楽しい一日になりますように。"]
+- lang: ja
+  ask: "「よろしくお願いします」は英語で何て言えばいい？"
+  answer:
+    - "⟨「よろしくお願いします」は、⟩場面によって言い方が変わります。"
+    - "\n\n初めて会う人には “Nice to meet you.” が自然です。"
+    - "\n仕事を頼むときは “Thank you in advance.” や “I appreciate your help.” が⟨よく⟩使われます。"
+    - ["\nメールの最後なら “I look forward to working with you.” と書くと丁寧です。"]
+    - ["\n\n日本語のように一言でどの場面にも使える表現はないので、伝えたい気持ちに合わせて選んでください。"]
+- lang: ja
+  ask: "1から{n}までの数字を漢数字で書いてください。"
+  make: kanji
+  answer:
+    - "⟨はい、どうぞ。⟩1から{n}までの漢数字です。⟨位取りは十、百、千で表します。⟩\n"
+    - "{items}"
+    - ["\n\n「一十」「一百」とは書かず、「十」「百」と書きます。"]
+    - ["\n\n千は「一千」と書くこともあります。"]
+- lang: zh
+  ask: "怎么用 Python 读取一个 CSV 文件？"
+  answer:
+    - "最简单的方法是用标准库里的 csv 模块："
+    - "\n\nimport csv\nwith open('data.csv', newline='', encoding='utf-8') as f:\n    for row in csv.DictReader(f):\n        print(row['name'])"
+    - "\n\nDictReader 会把第一行当作表头，把每一行读成一个⟨以列名为键的⟩字典。"
+    - ["\n如果要做数据分析，用 pandas 更方便：df = pd.read_csv('data.csv')。"]
+    - ["\n\n记得指定 encoding，不然遇到中文可能会出现乱码。"]
+- lang: zh
+  ask: "北京三天怎么玩比较好？"
+  answer:
+    - "⟨可以这样安排：\n\n⟩第一天可以去天安门广场和故宫，下午登景山公园俯瞰故宫全景。"
+    - "\n第二天早点出发去八达岭或慕田峪长城，慕田峪的人⟨通常⟩相对少一些。"
+    - "\n第三天上午去颐和园，下午逛南锣鼓巷和什刹海一带的胡同。"
+    - ["\n\n故宫需要提前在网上实名预约门票，而且周一闭馆，记得错开。"]
+    - ["\n\n祝你玩得开心！"]
+- lang: zh
+  ask: "帮我生成{n}个测试用的中文姓名，每行一个。"
+  make: names
+  answer:
+    - "⟨好的，⟩下面是{n}个虚构的姓名⟨（每个都不重复）⟩：\n"
+    - "{items}"
+    - ["\n\n这些姓名都是随机组合的，如有雷同纯属巧合。"]
+- lang: zh
+  ask: "请列出前{n}个质数。"
+  make: primes
+  answer:
+    - "⟨好的，⟩以下是前{n}个质数⟨（从小到大排列）⟩：\n\n"
+    - "{items}"
+- lang: es
+  ask: "¿Cuál es la diferencia entre ser y estar?"
+  answer:
+    - "Los dos significan “to be”, pero se usan de forma⟨ bastante⟩ distinta."
+    - "\n\n“Ser” se usa para características esenciales o⟨ más o menos⟩ permanentes: la identidad, el origen, la profesión o la hora, como en “Soy de Madrid” o “Son las tres”."
+    - "\n“Estar” se usa para estados⟨ temporales⟩ y ubicaciones: “Estoy cansado”, “El libro está en la mesa”."
+    - ["\n\nAlgunos adjetivos cambian de sentido según el verbo: “Es aburrido” significa que es una persona aburrida, mientras que “Está aburrido” significa que se aburre en ese momento."]
+- lang: es
+  ask: "Hazme una tabla de conversión de millas a kilómetros, del 1 al {n}."
+  make: miles
+  answer:
+    - "Aquí tienes la tabla⟨ completa⟩⟨, redondeada a dos decimales⟩ (1 milla = 1,609344 km):\n"
+    - "{items}"
+    - ["\n\nPara pasar de kilómetros a millas, divide entre 1,609."]
+- lang: fr
+  ask: "Comment dire « I miss you » en français ?"
+  answer:
+    - "On dit « Tu me manques »."
+    - "\n\nAttention à l’ordre⟨ des mots⟩ : en français, c’est la personne qui manque qui est le sujet."
+    - " « Tu me manques » veut donc dire, mot à mot⟨ et un peu maladroitement⟩, « tu es absent pour moi »."
+    - ["\nPour « I miss them », on dit « Ils me manquent », et « You miss me » se dit « Je te manque »."]
+- lang: fr
+  ask: "Fais-moi une table de conversion des degrés Celsius en Fahrenheit, de −40 °C à {b} °C."
+  make: celsius
+  answer:
+    - "Voici la table⟨, degré par degré⟩⟨, arrondie au dixième⟩ (°F = °C × 9/5 + 32) :\n"
+    - "{items}"
+    - ["\n\nÀ −40, les deux échelles se rejoignent."]
+    - ["\n\nL’eau gèle à 0 °C, soit 32 °F."]
+- lang: de
+  ask: "Was ist der Unterschied zwischen „seit“ und „seid“?"
+  answer:
+    - "„Seit“ ist eine Präposition für einen Zeitpunkt oder⟨ einen⟩ Zeitraum: „Ich wohne seit 2019 in Berlin.“"
+    - "\n„Seid“ ist eine Form des Verbs „sein“, nämlich die zweite Person Plural⟨ im Präsens⟩: „Ihr seid spät dran.“"
+    - ["\n\nEine Eselsbrücke: Wenn man „seid“ durch „wart“ ersetzen kann, ist es das Verb."]
+- lang: de
+  ask: "Erstelle mir {n} Zeilen Testdaten als CSV mit Kundennummer, Name, Stadt und Tarif."
+  make: kunden
+  answer:
+    - "Hier sind⟨ frei⟩ erfundene Testdaten⟨, fortlaufend nummeriert⟩, mit Semikolon getrennt, wie es Excel in Deutschland⟨ standardmäßig⟩ erwartet:\n\nKundennr;Name;Stadt;Tarif"
+    - "{items}"
+- lang: pt
+  ask: "Qual é a diferença entre “mas” e “mais”?"
+  answer:
+    - "“Mas” é uma conjunção⟨ adversativa⟩ que indica oposição, com o mesmo sentido de “porém”: “Eu queria ir, mas estava chovendo.”"
+    - "\n“Mais” indica quantidade ou intensidade, o contrário de “menos”: “Quero mais café⟨, por favor⟩.”"
+    - ["\n\nUma dica: se der para trocar a palavra por “porém”, o certo é “mas”."]
+- lang: pt
+  ask: "Faça uma tabela de conversão de quilos para libras, de 1 a {n} kg."
+  make: pounds
+  answer:
+    - "Aqui está a tabela⟨ completa⟩ (1 kg ≈ 2,2046 lb⟨, arredondado a duas casas⟩):\n"
+    - "{items}"
+    - ["\n\nPara o caminho inverso, divida as libras por 2,2046."]
+- lang: vi
+  ask: "Làm sao để học từ vựng tiếng Anh hiệu quả?"
+  answer:
+    - "Bạn có thể thử mấy cách sau⟨ đây⟩."
+    - "\n\nHọc từ theo cụm và theo ngữ cảnh thay vì học từng từ riêng lẻ, ví dụ học cả cụm “make a decision” chứ không chỉ học “decision”."
+    - "\nDùng ứng dụng lặp lại ngắt quãng như Anki⟨ trên điện thoại⟩ để ôn⟨ lại⟩ đúng lúc sắp quên."
+    - ["\nMỗi ngày đọc hoặc nghe một chút nội dung tiếng Anh mà bạn thích, rồi thử dùng từ mới trong câu của chính mình."]
+    - ["\n\nChúc bạn học tốt!"]
+- lang: vi
+  ask: "Liệt kê {n} số nguyên tố đầu tiên."
+  make: primes
+  answer:
+    - "Đây là {n} số nguyên tố đầu tiên⟨, theo thứ tự tăng dần⟩:\n\n"
+    - "{items}"
+- lang: hi
+  ask: "चाय कैसे बनाते हैं?"
+  answer:
+    - "दो कप चाय के लिए एक कप पानी उबालें और उसमें थोड़ा⟨ सा⟩ कुटा हुआ अदरक और दो इलायची डालें।"
+    - "\nफिर दो छोटे चम्मच चाय पत्ती डालकर दो मिनट⟨ तक⟩ उबालें।"
+    - "\nअब एक कप दूध और स्वाद के अनुसार चीनी मिलाएँ और एक बार⟨ अच्छी तरह⟩ उबाल आने दें।"
+    - "\nछानकर गरम-गरम परोसें।"
+    - ["\n\nसर्दियों में इसमें एक-दो लौंग या थोड़ी काली मिर्च भी डाल सकते हैं।"]
+- lang: hi
+  ask: "1 से {n} तक की संख्याओं के वर्ग लिखो।"
+  make: squaresHi
+  answer:
+    - "ये रहे 1 से {n} तक के⟨ सभी⟩ वर्ग⟨, क्रम से⟩:\n"
+    - "{items}"
+    - ["\n\nकिसी संख्या का वर्ग उसे उसी से गुणा करने पर मिलता है।"]
