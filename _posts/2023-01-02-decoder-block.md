@@ -13,7 +13,7 @@ no_comment: true
 <div class="lit-tool">
 <div class="wb-menus"></div>
 <span class="lit-views"><button type="button" class="lit-btn on" data-view="block">Block</button><button type="button" class="lit-btn" data-view="diff">Diff</button></span>
-<span class="wb-see">see also <a href="https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison" title="Sebastian Raschka, The Big LLM Architecture Comparison">Raschka</a> &middot; <a href="https://jalammar.github.io/illustrated-transformer/" title="Jay Alammar, The Illustrated Transformer">Alammar</a></span>
+<span class="wb-see">see also <a href="https://jalammar.github.io/illustrated-transformer/" title="Jay Alammar, The Illustrated Transformer">Alammar</a> &middot; <a href="https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison" title="Sebastian Raschka, The Big LLM Architecture Comparison">Raschka</a> &middot; <a href="https://www.youtube.com/@umarjamilai" title="Umar Jamil’s YouTube channel">Jamil</a></span>
 </div>
 <div class="wb-drop" hidden></div>
 <div class="wb-body">

@@ -586,9 +586,9 @@
 	// The window's View menu normally lists headings (menubar.js); filled here, it lists the two views, as 303's does
 	const viewMenu = $('.tb-outline', win);
 	if (viewMenu) viewMenu.innerHTML = '<button type="button" class="tb-item cur" data-view="block">Block</button><button type="button" class="tb-item" data-view="diff">Diff</button>';
-	// The two references take a cell of the window's status bar, which leaves the toolbar to the menus and the views.
-	// The layout draws the bar after the post, so the post defers this script
-	const status = $('.post_total', win);
-	if (status) status.append($('.wb-see'));
+	// The references take the status bar's first cell, where a post that is read says Ready, which leaves the toolbar
+	// to the menus and the views. The layout draws the bar after the post, so the post defers this script
+	const status = $('.post_total .left', win);
+	if (status) status.replaceChildren($('.wb-see'));
 	go('llama');
 })();
