@@ -11,7 +11,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
   # serve.js shares the chats out by its LANGS and makes their items by its
   # MAKERS, each rule naming the sizes its vars give, its count {n} if none
   js = File.read(File.join(site.source, "assets/js/serve.js"))
-  langs = js[/^\tconst LANGS = (.*)$/, 1]&.scan(/'([a-z]{2})'/)&.flatten
+  langs = js[/^\tconst LANGS = (.*?\]);$/m, 1]&.scan(/'([a-z]{2})'/)&.flatten
   raise "check_serve.rb: no LANGS in serve.js" if langs.nil? || langs.empty?
   table = js[/^\tconst MAKERS = \{\n(.*?)^\t\};/m, 1]
   raise "check_serve.rb: no MAKERS table in serve.js" if table.nil?
