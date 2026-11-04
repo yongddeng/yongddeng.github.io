@@ -5,6 +5,7 @@ note: "301"
 icon: sampler-16.png
 large: sampler-48.png
 winclass: exe-win smp-win
+local: true
 description: Two of generate()'s decoders, as Hugging Face's transformers runs them, continue one prompt side by side on one clock counted in passes of the model, Pythia-1.4B, every run recorded from the real models. Greedy, beam search and sampling make a token a pass; a draft model, Pythia-160M, proposes four for the target to check in one pass, and prompt lookup copies up to ten from earlier in the text, both writing greedy's text in fewer passes. Every round shows what was proposed, kept or refused, and any token the distribution it came from.
 ---
 
