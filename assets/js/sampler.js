@@ -216,7 +216,7 @@
 
 	// ---- the lanes ----
 	const lanesEl = $('.smp-lanes'), card = $('.smp-card'), tbody = $('.smp-table tbody');
-	const atField = $('[data-out="at"]'), runBtn = $('[data-act="run"]');
+	const atField = $('[data-out="at"]'), runBtn = $('[data-act="run"]'), ends = exeEnds(root);
 	// each lane's parts, and what its text and rounds were last written for
 	const views = [0, 1].map(side => {
 		const el = document.createElement('div');
@@ -423,9 +423,10 @@
 	function draw() {
 		const t = clock.t, end = endOf(), states = lanes.map(L => stateAt(L, t));
 		const k = steps.filter(v => v <= t + EPS).length;
-		setText(atField, `${+t.toFixed(2)} of ${+end.toFixed(2)} passes · step ${k}`);
+		setText(atField, `${t.toFixed(1)} of ${end.toFixed(1)} passes · step ${k}`);
 		paintAt(t);
 		setText(runBtn, clock.playing ? '❚❚ Pause' : '▶ Run');
+		ends(t <= 0, t >= end);
 		// the token or chip with the focus, found again once its lane is
 		// written anew, so that the keys and its card stay with it; gone, the
 		// window keeps the keys
@@ -507,23 +508,9 @@
 	}
 	// the time field, a seek bar: pressed or dragged, the clock goes to that
 	// share of the run; the wheel moves it a thousandth of the run a pixel
-	const shareAt = e => {
-		const box = atField.getBoundingClientRect();
-		return Math.max(0, Math.min(1, (e.clientX - box.left) / box.width));
-	};
-	atField.addEventListener('pointerdown', e => {
-		atField.setPointerCapture(e.pointerId);
-		const move = ev => seek(shareAt(ev) * endOf());
-		move(e);
-		atField.addEventListener('pointermove', move);
-		atField.addEventListener('pointerup', () => atField.removeEventListener('pointermove', move), { once: true });
-	});
-	const SCROLL = 1 / 1000, LINE = 16;
-	atField.addEventListener('wheel', e => {
-		e.preventDefault();
-		const across = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-		seek(clock.t + (across ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? LINE : 1) * SCROLL * endOf());
-	}, { passive: false });
+	const SCROLL = 1 / 1000;
+	exeSeekBar(atField, share => seek(share * endOf()));
+	atField.addEventListener('wheel', e => seek(clock.t + exeWheel(e) * SCROLL * endOf()), { passive: false });
 
 	// ---- the controls ----
 	// a select's options, the one chosen selected and the one barred disabled
@@ -559,7 +546,7 @@
 			setText(views[side].call, L.d.call);
 			views[side].call.title = L.d.call;
 		});
-		root.querySelectorAll('[data-prompt]').forEach(b => b.classList.toggle('on', b.dataset.prompt === at.prompt));
+		root.querySelectorAll('[data-prompt]').forEach(b => exePress(b, b.dataset.prompt === at.prompt));
 		$('[data-in="seed"]').disabled = !lanes.some(L => L.d.seeded);
 		$('[data-in="c"]').value = vOf(at.c);
 		setText($('[data-out="c"]'), fmt(at.c, 3));
@@ -576,8 +563,9 @@
 			at.c = DRAFT_COST;
 			retime();
 		},
+		help: () => help(),
 	};
-	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end' };
+	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end', '?': 'help' };
 	root.addEventListener('click', e => {
 		const b = e.target.closest('button');
 		if (b && b.dataset.prompt) {
@@ -585,6 +573,8 @@
 			retime(0);
 		} else if (b && b.dataset.act) ACTS[b.dataset.act](1);
 	});
+	// the note, in a balloon from the ? at the second row's end
+	const help = exeHelp(root);
 	// the keys wherever the focus is in the window but on a control, whose
 	// keys are its own
 	root.addEventListener('keydown', e => {

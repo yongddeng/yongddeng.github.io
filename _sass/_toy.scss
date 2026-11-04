@@ -22,7 +22,7 @@ $toy-green: #006400;
 }
 
 .toy-win {
-	width: 1080px;
+	width: 960px;
 
 	.post_content {
 		display: flex;
@@ -185,12 +185,12 @@ $toy-green: #006400;
 	gap: 3px;
 
 	button {
-		font: 11.5px $toy-ui;
+		font: 11px $toy-ui;
 		color: #000000;
 		background: #c0c0c0;
 		border: 1px solid;
 		border-color: #ffffff #808080 #808080 #ffffff;
-		padding: 1px 8px;
+		padding: 1px 6px;
 		cursor: pointer;
 
 		span { color: $toy-navy; }
@@ -217,14 +217,14 @@ $toy-green: #006400;
 		align-items: baseline;
 		gap: 2px 8px;
 		margin: 18px 0 2px;
-		@include reading(17px, 1.3);
+		@include reading(16px, 1.3);
 		font-weight: bold;
 
 		.num { color: $toy-navy; min-width: 14px; }
 		small {
 			flex-basis: 100%;
 			padding-left: 22px;
-			font: 11.5px $toy-ui;
+			font: 11px $toy-ui;
 			color: $toy-mute;
 		}
 	}
@@ -237,7 +237,7 @@ $toy-green: #006400;
 }
 .toy .toy-intro {
 	margin: 8px 0 4px 22px;
-	@include reading(13px, 1.55);
+	@include reading(12px, 1.55);
 	color: #2b2830;
 }
 .toy-cpeq {
@@ -254,17 +254,17 @@ $toy-green: #006400;
 }
 .toy-tok {
 	margin-left: 4px;
-	font: normal 13px $toy-ui;
+	font: normal 12px $toy-ui;
 	text-transform: none;
 	letter-spacing: 0;
 	color: $toy-mute;
 
-	i { font: italic bold 14px $toy-serif; color: $toy-navy; }
+	i { font: italic bold 13px $toy-serif; color: $toy-navy; }
 	sub { font-size: 9px; }
 }
 .toy .toy-also {
 	margin: 4px 0 0;
-	font: 11.5px/1.5 $toy-ui;
+	font: 11px/1.5 $toy-ui;
 	color: $toy-mute;
 }
 // a prerequisite folds to its title and defining line, behind Win98's tree-view box;
@@ -291,7 +291,7 @@ $toy-green: #006400;
 		&:hover .toy-preh { color: $toy-navy; }
 		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
 		.toy-mx { padding-left: 19px; }
-		.katex { font-size: 1.02em; }
+		.katex { font-size: 0.96em; }
 	}
 	&[open] > summary { margin-bottom: 4px; }
 	> :not(summary) { margin-left: 19px; }
@@ -301,7 +301,7 @@ $toy-green: #006400;
 		align-items: baseline;
 		gap: 2px 8px;
 		margin: 0;
-		font: bold 13px $toy-ui;
+		font: bold 12px $toy-ui;
 
 		&::before {
 			content: "+";
@@ -318,12 +318,12 @@ $toy-green: #006400;
 			color: #000000;
 		}
 		.num { color: $toy-navy; font-weight: normal; }
-		em { font: italic 11.5px $toy-serif; color: $toy-mute; }
+		em { font: italic 11px $toy-serif; color: $toy-mute; }
 	}
 	&[open] .toy-preh::before { content: "−"; }
 	p {
 		margin: 4px 0;
-		@include reading(13px, 1.55);
+		@include reading(12px, 1.55);
 	}
 }
 // a prerequisite's points, and a step's notes: a bold lead, then a sentence or two
@@ -332,12 +332,12 @@ $toy-green: #006400;
 	display: grid;
 	gap: 3px;
 	padding-left: 13px;
-	@include reading(12.5px, 1.5);
+	@include reading(11.5px, 1.5);
 
 	li { list-style: disc; }
 	b { font-weight: bold; }
 	code {
-		font: 10.5px $toy-mono;
+		font: 10px $toy-mono;
 		background: #efedf1;
 		padding: 0 3px;
 	}
@@ -369,7 +369,7 @@ $toy-green: #006400;
 }
 .toy-dims {
 	border-collapse: collapse;
-	font: 12px $toy-ui;
+	font: 11px $toy-ui;
 	font-variant-numeric: tabular-nums;
 	margin: 2px 0;
 
@@ -403,7 +403,7 @@ $toy-green: #006400;
 		border-left-color: $toy-navy;
 		background: #f6f6fb;
 
-		.toy-fph b { color: $toy-navy; font-size: calc(var(--text, 12px) + 3px); }
+		.toy-fph b { color: $toy-navy; font-size: calc(var(--text, 12px) + 2px); }
 		.toy-fph .n { color: $toy-navy; font-weight: bold; }
 	}
 }
@@ -422,14 +422,14 @@ $toy-green: #006400;
 	cursor: pointer;
 
 	.n { font: 11px/1.6 $toy-ui; color: $toy-mute; font-variant-numeric: tabular-nums; }
-	b { @include reading(13px, 1.5); font-weight: bold; }
+	b { @include reading(12px, 1.5); font-weight: bold; }
 	.eq {
 		grid-column: 2;
 		overflow-x: auto;
 		overflow-y: hidden;
 		padding: 1px 0 2px;
 
-		.katex { font-size: 1.12em; }
+		.katex { font-size: 1.04em; }
 	}
 	&:hover b { color: $toy-navy; }
 	&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
@@ -468,7 +468,7 @@ $toy-green: #006400;
 	margin: 2px 0;
 }
 .toy-cap {
-	@include reading(13.5px, 1.5);
+	@include reading(12.5px, 1.5);
 
 	i { font-style: normal; font-weight: bold; color: $toy-navy; }
 }
@@ -537,12 +537,12 @@ $toy-green: #006400;
 
 	.katex-display { margin: 4px 0; }
 	.katex-display.fleqn > .katex { padding-left: 0; }
-	.katex { font-size: 1.1em; }
+	.katex { font-size: 1.02em; }
 	&.tight .arraycolsep { width: 0.24em !important; }
 }
 .toy .toy-mnote {
 	margin: 2px 0 6px;
-	@include reading(12.5px, 1.5);
+	@include reading(11.5px, 1.5);
 	color: #2b2830;
 
 	i { font-style: normal; font-weight: bold; color: $toy-navy; }

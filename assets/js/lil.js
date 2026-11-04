@@ -138,21 +138,28 @@
 			: [[INK.env, '±1, the envelope'], [INK.clt, '±1/√(2 log log n), the CLT’s scale']]);
 	}
 
-	// ---- the toolbar: new walks, how far they go, and which view ----
+	// ---- the toolbar: new walks, how far they go, which view, and the note ----
+	// the toggles pressed as the walks' length and the view are
+	function pressed() {
+		$$('[data-n]').forEach(b => exePress(b, +b.dataset.n === N));
+		$$('[data-view]').forEach(b => exePress(b, b.dataset.view === view));
+	}
 	$('[data-act="walk"]').addEventListener('click', walk);
 	$$('[data-n]').forEach(b => b.addEventListener('click', () => {
 		N = +b.dataset.n;
-		$$('[data-n]').forEach(o => o.classList.toggle('on', o === b));
+		pressed();
 		say('Walking…');
 		// a frame for the status bar to show it before a million steps
 		setTimeout(walk, 20);
 	}));
 	$$('[data-view]').forEach(b => b.addEventListener('click', () => {
 		view = b.dataset.view;
-		$$('[data-view]').forEach(o => o.classList.toggle('on', o === b));
+		pressed();
 		draw();
 	}));
+	exeHelp(root);
 	// a grip-resize or a maximise redraws the pane at its new size
 	new ResizeObserver(() => { if (walks.length) draw(); }).observe($('.exe-body'));
+	pressed();
 	walk();
 })();

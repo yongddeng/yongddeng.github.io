@@ -18,6 +18,13 @@ $exe-face: #c0c0c0;
 $exe-shade: #7f787f;
 $exe-note: #ffffe1;
 
+// sunken, as Windows 98 sinks a field or a pane
+@mixin exe-sunken {
+	border: 1px solid;
+	border-color: #808080 #ffffff #ffffff #808080;
+	box-shadow: inset 1px 1px 0 #404040;
+}
+
 .exe-win {
 	width: 780px;
 
@@ -60,12 +67,49 @@ $exe-note: #ffffe1;
 		font-size: 75%;
 		vertical-align: -0.25em;
 	}
+	// the toolbar small, every program's: 11px, its rows close; a row wraps
+	// only in a window made narrower than it
 	.lit-tool {
 		flex-wrap: wrap;
+		gap: 3px;
+		min-height: 22px;
 		margin-bottom: 0;
+		padding: 2px 3px;
+		font-size: 11px;
+		white-space: nowrap;
+
+		> * {
+			flex: none;
+		}
+		output {
+			font-size: 11px;
+		}
+	}
+	.lit-btn {
+		padding: 0 7px;
+		font-size: 11px;
 	}
 	.lit-btn.on {
 		background: #d4d0d4;
+	}
+	// Run, the button the window is for, in bold as a default button was
+	.exe-run {
+		min-width: 64px;
+		font-weight: bold;
+	}
+	select {
+		height: 20px;
+		padding: 0 1px;
+		background: #ffffff;
+		@include exe-sunken;
+		border-radius: 0;
+		font: inherit;
+		color: #000000;
+	}
+	// greyed, as a disabled button's words are
+	select:disabled {
+		background: $exe-face;
+		color: #808080;
 	}
 	output {
 		min-width: 3ch;
@@ -75,58 +119,58 @@ $exe-note: #ffffe1;
 .exe-lbl {
 	display: inline-flex;
 	align-items: center;
-	gap: 5px;
-	padding-left: 4px;
+	gap: 4px;
+	padding-left: 2px;
 	color: $exe-mute;
+}
+// every slider as Windows 98's trackbar: a sunken groove, a raised thumb
+.exe input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 110px;
+	height: 18px;
+	margin: 0;
+	background: none;
+	cursor: pointer;
 
-	// a slider as Windows 98's trackbar: a sunken groove, a raised thumb
-	input[type="range"] {
+	&::-webkit-slider-runnable-track {
+		height: 2px;
+		background: #ffffff;
+		border: 1px solid;
+		border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		box-shadow: inset 1px 1px 0 #404040;
+	}
+	&::-moz-range-track {
+		height: 2px;
+		background: #ffffff;
+		border: 1px solid;
+		border-color: $exe-shade #ffffff #ffffff $exe-shade;
+	}
+	&::-webkit-slider-thumb {
 		-webkit-appearance: none;
-		appearance: none;
-		width: 110px;
-		height: 18px;
-		margin: 0;
-		background: none;
-		cursor: pointer;
-
-		&::-webkit-slider-runnable-track {
-			height: 2px;
-			background: #ffffff;
-			border: 1px solid;
-			border-color: $exe-shade #ffffff #ffffff $exe-shade;
-			box-shadow: inset 1px 1px 0 #404040;
-		}
-		&::-moz-range-track {
-			height: 2px;
-			background: #ffffff;
-			border: 1px solid;
-			border-color: $exe-shade #ffffff #ffffff $exe-shade;
-		}
-		&::-webkit-slider-thumb {
-			-webkit-appearance: none;
-			width: 9px;
-			height: 16px;
-			margin-top: -8px;
-			background: $exe-face;
-			@include main.bevel;
-		}
-		&::-moz-range-thumb {
-			box-sizing: border-box;
-			width: 9px;
-			height: 16px;
-			border-radius: 0;
-			background: $exe-face;
-			@include main.bevel;
-		}
-		&:focus-visible {
-			outline: 1px dotted #000000;
-			outline-offset: 1px;
-		}
+		width: 9px;
+		height: 16px;
+		margin-top: -8px;
+		background: $exe-face;
+		@include main.bevel;
+	}
+	&::-moz-range-thumb {
+		box-sizing: border-box;
+		width: 9px;
+		height: 16px;
+		border-radius: 0;
+		background: $exe-face;
+		@include main.bevel;
+	}
+	&:focus-visible {
+		outline: 1px dotted #000000;
+		outline-offset: 1px;
 	}
 }
 
 // the panes side by side, each canvas filling its own
 .exe-body {
+	position: relative;
 	flex: 1;
 	min-height: 0;
 	display: grid;
@@ -182,91 +226,91 @@ $exe-note: #ffffe1;
 	font-size: 11.5px;
 	line-height: 1.45;
 }
+// the notes in a balloon from a ?, as Windows 98's tooltips were
+.exe .exe-help {
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border: 1px solid #000000;
+	border-radius: 50%;
+	font: bold 11px $exe-ui;
+	color: #000000;
+	background: $exe-note;
+	cursor: pointer;
 
-// ---- a run played on a clock (.exe-player), scheduler.exe's and
-// sampler.exe's: the toolbar small, its selects sunken, Run the default
-// button, a player's four buttons, the time field a seek bar, and what is
-// compared at the right ----
-.exe-player {
-	position: relative;
-	outline: none;
-	font-size: 11px;
-	line-height: 1.4;
-
-	button, select {
-		font: inherit;
-		color: inherit;
+	&[aria-expanded="true"] {
+		color: $exe-note;
+		background: #000000;
 	}
-	// the window takes the keys, Space and the arrows, so it shows when it
-	// has them from the keyboard
+}
+.exe-balloon {
+	position: absolute;
+	z-index: 4;
+	overflow: auto;
+	padding: 6px 2px 3px;
+	background: $exe-note;
+	border: 1px solid #000000;
+	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+// the ? at the end of a toolbar's row, its balloon over the top right of the
+// panes under it, unless the program places them elsewhere
+.exe .lit-tool > .exe-help {
+	margin-left: auto;
+}
+.exe-body > .exe-balloon {
+	top: 4px;
+	right: 4px;
+	width: min(480px, calc(100% - 8px));
+	max-height: calc(100% - 8px);
+}
+
+// a window that takes the keys, Space and the arrows, shows when it has them
+// from the keyboard
+.exe[tabindex] {
+	outline: none;
+
 	&:focus-visible {
 		outline: 1px dotted #000000;
 		outline-offset: -1px;
 	}
-	// a row of the toolbar wraps only in a window made narrower than it
-	.lit-tool {
-		gap: 3px;
-		padding: 2px 3px;
-		white-space: nowrap;
+}
 
-		> * {
-			flex: none;
-		}
-	}
-	.exe-lbl {
-		gap: 4px;
-		padding-left: 2px;
-	}
-	.lit-btn {
-		height: 22px;
-		padding: 0 7px;
-		font-size: 11px;
-	}
-	// sunken, as Windows 98 sinks a field
-	select, .exe-at {
-		border: 1px solid;
-		border-color: #808080 #ffffff #ffffff #808080;
-		box-shadow: inset 1px 1px 0 #404040;
-	}
-	select {
-		height: 20px;
-		padding: 0 1px;
-		background: #ffffff;
-		border-radius: 0;
-	}
-	select:disabled, .lit-btn:disabled {
-		opacity: 0.5;
-	}
-	// Run, the button the window is for, in bold as a default button was
-	.exe-run {
-		min-width: 64px;
-		font-weight: bold;
+// ---- a run played on a clock (.exe-player), scheduler.exe's and
+// sampler.exe's; its transport and seek bar optimiser.exe's and device.exe's
+// too: a player's four buttons, the time field a seek bar, and what is
+// compared at the right ----
+.exe-player {
+	position: relative;
+	font-size: 11px;
+	line-height: 1.4;
+
+	button {
+		font: inherit;
+		color: inherit;
 	}
 }
+// the transport: the toolbar's buttons, square, a 12-pixel glyph each, greyed
+// and embossed where it cannot go; a second set, as device.exe's stepping into
+// and out of the forward pass, a little apart
 .exe-buttons {
 	display: flex;
 	gap: 2px;
 
-	button {
+	.lit-btn {
 		width: 22px;
-		height: 22px;
 		padding: 0;
-		background: $exe-face;
-		border: 1px solid;
-		border-color: #dfdfdf #404040 #404040 #dfdfdf;
-		box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
-		cursor: pointer;
-
-		&:active {
-			border-color: #404040 #ffffff #ffffff #404040;
-			box-shadow: inset 1px 1px 0 #808080;
-		}
 	}
 	svg {
 		display: block;
 		width: 12px;
 		height: 12px;
-		margin: auto;
+		fill: currentColor;
+	}
+	.lit-btn:disabled svg {
+		filter: drop-shadow(1px 1px 0 #ffffff);
+	}
+	& + & {
+		margin-left: 3px;
 	}
 }
 // where the run is, in a sunken field as a player keeps its timecode: a seek
@@ -275,6 +319,7 @@ $exe-note: #ffffe1;
 // wide as its longest time, so that it never pushes the controls along
 .exe-at {
 	padding: 2px 5px;
+	@include exe-sunken;
 	--at: 0px;
 	background: var(--ticks,) linear-gradient($exe-navy, $exe-navy) 0 100% / var(--at) 2px no-repeat,
 		linear-gradient(#dcdff0, #dcdff0) 0 0 / var(--at) 100% no-repeat, #ffffff;
@@ -293,13 +338,22 @@ $exe-note: #ffffe1;
 	}
 }
 
+// ---- lil.exe: the walks in one pane, each walk's records under it ----
+.lil-win {
+	width: 660px;
+
+	.post_content {
+		height: 420px;
+	}
+}
+
 // ---- optimiser.exe: the map down the left, the loss and the sweep stacked on
 // the right, the row of rates, schedule and noise, then a card an optimiser ----
 .opt-win {
-	width: 900px;
+	width: 780px;
 
 	.post_content {
-		height: 650px;
+		height: 600px;
 	}
 }
 .opt {
@@ -315,13 +369,10 @@ $exe-note: #ffffe1;
 	.exe-lbl input[type="range"] {
 		width: 48px;
 	}
-	// the buttons in the row over the cards narrower than WinHelp's, so its three sliders fit
-	.opt-hyper .lit-btn {
+	// the words' buttons narrower than the players', so that two rows hold
+	// them all
+	.lit-tool > .lit-btn {
 		padding: 0 4px;
-	}
-	// Run, the button the window is for, in bold as a default button was
-	[data-act="run"] {
-		font-weight: bold;
 	}
 }
 
@@ -349,7 +400,6 @@ $exe-note: #ffffe1;
 	.lit-btn {
 		height: 20px;
 		padding: 0 6px;
-		font-size: 11px;
 	}
 }
 // the palettes, a chip each in the map's top corner
@@ -377,37 +427,17 @@ $exe-note: #ffffe1;
 		outline-offset: 1px;
 	}
 }
-// the ? on the map, and its balloon, as Windows 98's tooltips were
-.opt-help {
+// the ? in the map's corner, its balloon over the map
+.opt .exe-help {
 	position: absolute;
 	right: 6px;
 	bottom: 6px;
-	width: 18px;
-	height: 18px;
-	padding: 0;
-	border: 1px solid #000000;
-	border-radius: 50%;
-	font: bold 11px $exe-ui;
-	color: #000000;
-	background: $exe-note;
-	cursor: pointer;
-
-	&[aria-expanded="true"] {
-		color: $exe-note;
-		background: #000000;
-	}
 }
-.opt-balloon {
-	position: absolute;
+.opt .exe-balloon {
 	right: 6px;
 	bottom: 30px;
 	width: min(560px, calc(100% - 12px));
 	max-height: calc(100% - 40px);
-	overflow: auto;
-	padding: 6px 2px 3px;
-	background: $exe-note;
-	border: 1px solid #000000;
-	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
 
 	// the note for the surface on show
 	.exe-note[data-for]:not(.on) {
@@ -427,8 +457,8 @@ $exe-note: #ffffe1;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 1px 10px;
 }
-// The readings and knobs at 11px, the size of the panes' labels, under the
-// name at the toolbar's 12px
+// The name, readings and knobs at 11px, the size of the toolbar and the panes'
+// labels
 .opt .opt-card {
 	display: flex;
 	flex-direction: column;
@@ -459,7 +489,7 @@ $exe-note: #ffffe1;
 	padding: 0;
 	border: 0;
 	background: none;
-	font: 12px/13px $exe-ui;
+	font: 11px/13px $exe-ui;
 	color: #000000;
 	cursor: pointer;
 
@@ -507,7 +537,7 @@ $exe-note: #ffffe1;
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	height: 16px;
+	height: 15px;
 
 	> span:first-child {
 		width: 16px;
@@ -577,7 +607,7 @@ $exe-note: #ffffe1;
 .opt-heat {
 	display: block;
 	width: 100%;
-	height: 56px;
+	height: 50px;
 	cursor: pointer;
 }
 .opt .opt-caption {
@@ -625,17 +655,14 @@ $exe-note: #ffffe1;
 	--row: 15px;
 	--row-gap: 3px;
 }
-// sunken, as Windows 98 sinks a pane
 .sv-pane {
-	border: 1px solid;
-	border-color: #808080 #ffffff #ffffff #808080;
-	box-shadow: inset 1px 1px 0 #404040;
+	@include exe-sunken;
 }
-// the clock as wide as the longest run's, “349.92 s of 349.92 s · step
+// the clock as wide as the longest run's, “349.9 s of 349.9 s · step
 // 15,889”; red ticks where a server preempts. A second server and the views
 // at the right of its row: compare applies to Users alone
 .sv .exe-at {
-	min-width: 34ch;
+	min-width: 32ch;
 }
 // the views, as the papers' window has its Page, Timeline and Lineage
 .sv-views {
@@ -975,7 +1002,8 @@ $exe-note: #ffffe1;
 // their type the larger for it
 .sv.view-memory {
 	--rows: 6;
-	--row: 16px;
+	--row: 15px;
+	--row-gap: 1px;
 }
 .sv.view-memory .sv-wall {
 	grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1377,7 +1405,7 @@ $exe-note: #ffffe1;
 	width: 1040px;
 
 	.post_content {
-		height: 720px;
+		height: 640px;
 		padding: 0 4px 2px;
 	}
 }
@@ -1397,7 +1425,6 @@ $exe-note: #ffffe1;
 	--mono: Menlo, Monaco, Consolas, "Courier New", monospace;
 	font-size: 11px;
 	line-height: 1.4;
-	outline: none;
 }
 .trn-body {
 	flex: 1;
@@ -1413,69 +1440,14 @@ $exe-note: #ffffe1;
 	gap: 4px;
 }
 
-// the transport, as Windows 98 raised a toolbar's buttons, of 12-pixel glyphs
-.trn-buttons {
-	display: flex;
-	gap: 2px;
-	margin-right: 6px;
-
-	button {
-		width: 24px;
-		height: 22px;
-		padding: 0;
-		background: #c0c0c0;
-		border: 1px solid;
-		border-color: #dfdfdf #404040 #404040 #dfdfdf;
-		box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
-		cursor: pointer;
-
-		&:active:not(:disabled) {
-			border-color: #404040 #ffffff #ffffff #404040;
-			box-shadow: inset 1px 1px 0 #808080;
-		}
-		&:disabled {
-			cursor: default;
-		}
-		&:disabled svg {
-			fill: #808080;
-			filter: drop-shadow(1px 1px 0 #ffffff);
-		}
-	}
-	svg {
-		display: block;
-		width: 11px;
-		height: 11px;
-		margin: auto;
-		fill: #000000;
-	}
-}
-
-// sunken, as Windows 98 sinks a field or a pane
-.trn-at,
 .trn-ide,
 .trn-view {
-	border: 1px solid;
-	border-color: #808080 #ffffff #ffffff #808080;
-	box-shadow: inset 1px 1px 0 #404040;
+	@include exe-sunken;
 }
-// where the run is, in a field as a player keeps its timecode, wide enough for
-// the longest, so that it never pushes the buttons along: drag across it to run
-// back and forth
-.trn-at {
+// where the run is, as wide as the longest, train.py's “forward line 12 · step
+// 1 · 30 of 32”; serve.py's, “step 15,889 of 15,889 · 349.9 s”, is shorter
+.trn .exe-at {
 	min-width: 36ch;
-	margin-right: 6px;
-	padding: 2px 6px;
-	background: #ffffff;
-	color: #000000;
-	font: 11px var(--mono);
-	white-space: nowrap;
-	cursor: ew-resize;
-	user-select: none;
-	touch-action: none;
-}
-// Run as wide as Pause, its label while it runs
-.trn .trn-run {
-	min-width: 62px;
 }
 
 // ---- the editor: tabs, breadcrumbs, the code, the panel, the status bar ----
@@ -2046,12 +2018,29 @@ $exe-note: #ffffe1;
 		background: var(--role);
 	}
 }
-.trn-crumbs {
+// along the render's foot, over the timeline: the line in play at the left,
+// the scales at the right, the line's panel, opened, narrower when they would
+// meet; a view too narrow for both puts the scales over the panel
+.trn-over {
 	position: absolute;
-	top: 8px;
+	left: 8px;
 	right: 8px;
+	bottom: calc(var(--foot) + 8px);
+	display: flex;
+	flex-wrap: wrap-reverse;
+	align-items: flex-end;
+	gap: 8px;
+	pointer-events: none;
+
+	> * {
+		pointer-events: auto;
+	}
+}
+.trn-crumbs {
+	flex: none;
 	display: flex;
 	gap: 2px;
+	margin-left: auto;
 
 	button {
 		height: 20px;
@@ -2073,9 +2062,6 @@ $exe-note: #ffffe1;
 // whether the CPU waits, what holds it, how busy the tensor cores and HBM are
 // when the GPU works, and what the line does
 .trn-hud {
-	position: absolute;
-	left: 8px;
-	bottom: calc(var(--foot) + 8px);
 	box-sizing: border-box;
 	min-width: 190px;
 	max-width: 300px;
@@ -2138,7 +2124,7 @@ $exe-note: #ffffe1;
 	display: none;
 }
 .trn-hud.open {
-	width: 300px;
+	flex: 1 1 190px;
 
 	.trn-why {
 		display: block;
@@ -2243,17 +2229,6 @@ $exe-note: #ffffe1;
 .trn:not(.serving) .trn-speed {
 	display: none;
 }
-// the speed, a drop-down as Windows 98 sank one
-.trn .trn-speed select {
-	padding: 0 1px;
-	background: #ffffff;
-	border: 1px solid;
-	border-color: #808080 #ffffff #ffffff #808080;
-	border-radius: 0;
-	box-shadow: inset 1px 1px 0 #404040;
-	font: inherit;
-	color: #000000;
-}
 .trn-tabs span[data-tab="serve"] {
 	cursor: pointer;
 }
@@ -2329,12 +2304,13 @@ $exe-note: #ffffe1;
 // the clock, as scheduler.exe's, and the prompt, the seed and what a draft
 // pass costs. Under them the two lanes, each its text, its rounds and its
 // passes, with the race said between them; the key; the pair's figures; the
-// note. A token's card is a Windows 98 tooltip. ----
+// note in a balloon from the ? at the second row's end. A token's card is a
+// Windows 98 tooltip. ----
 .smp-win {
-	width: 960px;
+	width: 800px;
 
 	.post_content {
-		height: 600px;
+		height: 550px;
 	}
 }
 // the programs' own type and colours, as _programs.scss names them, a faint
@@ -2353,18 +2329,19 @@ $exe-note: #ffffe1;
 
 	output {
 		min-width: 5ch;
-		font-size: 11px;
 	}
 	.exe-lbl input[type="range"] {
 		width: 84px;
 	}
-	// the clock as wide as its longest, “19.38 of 19.38 passes · step 104”;
-	// each lane's finish ticked. The pair at the right of its row
+	// the clock as wide as its longest: the slowest run, a draft at c = 1,
+	// ends at 77.0 passes, and a step runs to three digits; each lane's finish
+	// ticked. The pair at the right of its row, as narrow as its longest,
+	// “draft model, sampled”
 	.exe-at {
-		min-width: 32ch;
+		min-width: 30ch;
 	}
-	.exe-versus + .exe-lbl select {
-		width: 150px;
+	.exe-versus select, .exe-versus + .exe-lbl select {
+		width: 130px;
 	}
 	.exe-body .smp-strip {
 		height: 20px;
@@ -2434,8 +2411,8 @@ $exe-note: #ffffe1;
 .smp-text {
 	max-height: 50%;
 	overflow-y: auto;
-	font-size: 13px;
-	line-height: 20px;
+	font-size: 12px;
+	line-height: 18px;
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 

@@ -1,7 +1,9 @@
 // What the programs on (D:) share (lil.js, optimiser.js, sampler.js,
 // scheduler.js, device.js): a place in their window's status bar beside the
 // note they draw for, canvases drawn at the screen's density, a key to what
-// they draw, and the hatching for room set aside that nothing fills.
+// they draw, the hatching for room set aside that nothing fills, toggles
+// pressed, the notes in a balloon from a ?, and a player's seek bar and
+// transport.
 
 // The note's link moves into the status bar and opens the note in a window of
 // its own, as My Computer does. Returns a setter for the bar's first cell, which
@@ -68,4 +70,72 @@ function hatch(colour, back) {
 		made.set(key, pattern);
 	}
 	return made.get(key);
+}
+
+// A time field as a seek bar: pressed or dragged, `to` is told the share of the
+// field under the pointer, from 0 at its left to 1 at its right
+function exeSeekBar(field, to) {
+	function shareAt(e) {
+		const box = field.getBoundingClientRect();
+		return Math.max(0, Math.min(1, (e.clientX - box.left) / box.width));
+	}
+	function move(e) {
+		to(shareAt(e));
+	}
+	function up() {
+		field.removeEventListener('pointermove', move);
+	}
+	field.addEventListener('pointerdown', function (e) {
+		field.setPointerCapture(e.pointerId);
+		move(e);
+		field.addEventListener('pointermove', move);
+		field.addEventListener('pointerup', up, { once: true });
+		field.addEventListener('pointercancel', up, { once: true });
+	});
+}
+
+// The pixels a wheel, or two fingers on a trackpad, moved, down or right on, a
+// line counted as 16; with sideways, only a move across counts, so that the page
+// still scrolls past. A move that counts is the program's, not the page's
+function exeWheel(e, sideways) {
+	const across = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+	if (sideways && !across) return 0;
+	e.preventDefault();
+	return (across ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? 16 : 1);
+}
+
+// The transport's buttons greyed where they cannot go: back at the run's start,
+// on at its end. Returns a setter of the two
+function exeEnds(root) {
+	const buttons = root.querySelectorAll('.exe-buttons [data-act]');
+	return function (first, last) {
+		buttons.forEach(function (b) {
+			b.disabled = b.dataset.act === 'start' || b.dataset.act === 'back' ? first : last;
+		});
+	};
+}
+
+// A toggle pressed or not: its look, and its state as a screen reader hears it
+function exePress(button, on) {
+	button.classList.toggle('on', on);
+	button.setAttribute('aria-pressed', on);
+}
+
+// The notes in a balloon from the window's ?, which opens and shuts them;
+// Escape shuts them. Returns the same, the balloon opened as given or else the
+// other way from how it is, for a program that gives the ? a key
+function exeHelp(root) {
+	const button = root.querySelector('.exe-help'), balloon = root.querySelector('.exe-balloon');
+	function help(open) {
+		if (open === undefined) open = balloon.hidden;
+		balloon.hidden = !open;
+		button.setAttribute('aria-expanded', open);
+	}
+	button.addEventListener('click', function () {
+		help();
+	});
+	root.addEventListener('keydown', function (e) {
+		if (e.key === 'Escape') help(false);
+	});
+	return help;
 }

@@ -4,27 +4,31 @@ date: 2022-01-09
 note: "209"
 icon: lil-16.png
 large: lil-48.png
+winclass: exe-win lil-win
 description: Five random walks against ±√(2n log log n), the envelope their records trace, and ±√n, where the CLT keeps them at any one n.
 ---
 
 <div class="exe lil">
 <div class="lit-tool">
-<button type="button" class="lit-btn" data-act="walk">New walks</button>
+<button type="button" class="lit-btn" data-act="walk" title="Five walks drawn afresh, every step ±1 with equal chance">New walks</button>
 <span class="lit-sep"></span>
-<span class="exe-lbl">up to <i>n</i> =</span>
-<button type="button" class="lit-btn" data-n="1000">10&sup3;</button>
-<button type="button" class="lit-btn" data-n="10000">10&#8308;</button>
-<button type="button" class="lit-btn on" data-n="100000">10&#8309;</button>
-<button type="button" class="lit-btn" data-n="1000000">10&#8310;</button>
+<span class="exe-lbl" title="How far the walks go">up to <i>n</i> =</span>
+<button type="button" class="lit-btn" data-n="1000" title="To n = 1,000">10&sup3;</button>
+<button type="button" class="lit-btn" data-n="10000" title="To n = 10,000">10&#8308;</button>
+<button type="button" class="lit-btn on" data-n="100000" title="To n = 100,000">10&#8309;</button>
+<button type="button" class="lit-btn" data-n="1000000" title="To n = 1,000,000, a million steps a walk">10&#8310;</button>
 <span class="lit-sep"></span>
-<button type="button" class="lit-btn on" data-view="raw"><span><i>S<sub>n</sub></i></span></button>
-<button type="button" class="lit-btn" data-view="norm"><span><i>S<sub>n</sub></i> / √(2<i>n</i> log log <i>n</i>)</span></button>
+<button type="button" class="lit-btn on" data-view="raw" title="The walks as they are, against ±√n and ±√(2n log log n)"><span><i>S<sub>n</sub></i></span></button>
+<button type="button" class="lit-btn" data-view="norm" title="The walks divided by the envelope, on a log axis from n = 100: the envelope becomes ±1, and the CLT’s scale closes in on 0"><span><i>S<sub>n</sub></i> / √(2<i>n</i> log log <i>n</i>)</span></button>
+<button type="button" class="exe-help" aria-expanded="false" title="About the walks">?</button>
 </div>
 <div class="exe-body">
 <div class="lit-pane"><canvas class="lil-plot" aria-label="Five random walks against the iterated-logarithm envelope"></canvas></div>
+<div class="exe-balloon" hidden>
+<p class="exe-note">Each walk steps ±1 with equal chance, so <i>σ</i> = 1. Grey dashes are ±√<i>n</i>, the scale the CLT gives <i>S<sub>n</sub></i> at any one <i>n</i>; red is ±√(2<i>n</i> log log <i>n</i>), which a walk exceeds by a factor 1 + <i>ε</i> only finitely often but reaches 1 − <i>ε</i> of infinitely often (#2). The readings are each walk’s record ratios past <i>n</i> = 100. One past ±1 is no contradiction: the excursions beyond 1 + <i>ε</i> are finitely many, not none, and about a third of walks make one before <i>n</i> = 10&#8310;. The typical record climbs towards 1 on the scale of log log <i>n</i>, which is only 2.6 at <i>n</i> = 10&#8310;: its median is about 0.6 at <i>n</i> = 10&sup3; and 0.9 at 10&#8310;.</p>
+</div>
 </div>
 <dl class="exe-read" data-out="records"></dl>
-<p class="exe-note">Each walk steps ±1 with equal chance, so <i>σ</i> = 1. Grey dashes are ±√<i>n</i>, the scale the CLT gives <i>S<sub>n</sub></i> at any one <i>n</i>; red is ±√(2<i>n</i> log log <i>n</i>), which a walk exceeds by a factor 1 + <i>ε</i> only finitely often but reaches 1 − <i>ε</i> of infinitely often (#2). The readings are each walk’s record ratios past <i>n</i> = 100. One past ±1 is no contradiction: the excursions beyond 1 + <i>ε</i> are finitely many, not none, and about a third of walks make one before <i>n</i> = 10&#8310;. The typical record climbs towards 1 on the scale of log log <i>n</i>, which is only 2.6 at <i>n</i> = 10&#8310;: its median is about 0.6 at <i>n</i> = 10&sup3; and 0.9 at 10&#8310;.</p>
 <a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
 </div>
 <script src="/assets/js/exe.js" defer></script>

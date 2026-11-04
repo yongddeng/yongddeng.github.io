@@ -307,8 +307,8 @@
 	// its heading
 	const CASES = [
 		{ name: 'Attention', sub: '4 query heads on 2 key-value heads here; 32 on 8, 42 M weights in Mixtral', top: 15.0, bottom: 41.5, z: -(NH - 1) * HZ - 0.7, wide: 3, tint: [221, 232, 255], accent: [47, 85, 180], ink: '#22407f', steps: [ST.norm, ST.wo] },
-		{ name: 'Mixture of experts · SwiGLU', sub: '8 experts of 3, 2 run a token; 8 of 14,336 in Mixtral, 1.4 B weights', top: 56.8, bottom: 79.0, z: PANEL.z, wide: 0, tint: [227, 242, 218], accent: [46, 125, 58], ink: '#235f2d', steps: [ST.norm2, ST.down] },
-		{ name: 'LM head · next token', sub: '16 tokens here; 32,000 in Mixtral, 131 M weights', top: 93.0, bottom: 113.6, z: PANEL.z, wide: 0, tint: [236, 228, 248], accent: [122, 79, 179], ink: '#5a3790', steps: [ST.finalNorm, ST.pick] },
+		{ name: 'Mixture of experts · SwiGLU', sub: '8 experts of 3, 2 run a token; 8 of 14,336 in Mixtral, 1.4 B weights', top: 56.8, bottom: 79.0, z: PANEL.z, wide: 1.8, tint: [227, 242, 218], accent: [46, 125, 58], ink: '#235f2d', steps: [ST.norm2, ST.down] },
+		{ name: 'LM head · next token', sub: '16 tokens here; 32,000 in Mixtral, 131 M weights', top: 93.0, bottom: 113.6, z: PANEL.z, wide: 1.8, tint: [236, 228, 248], accent: [122, 79, 179], ink: '#5a3790', steps: [ST.finalNorm, ST.pick] },
 	];
 	const LAST = CASES[CASES.length - 1], MOE = CASES[1];
 	// a board sits under what it holds. The view pushes a plane at depth z sideways by push(z) and lifts it by lift(z),
@@ -535,7 +535,7 @@
 	}
 
 	// ---- the camera -----------------------------------------------------------------
-	const VIEWS = { front: [0, 0.02], turned: [-0.55, 0.5] }; // yaw and pitch, radians: looked down on enough that four layers open up
+	const VIEWS = { front: [0, 0.02], turned: [-0.6, 0.3] }; // yaw and pitch, radians: turned enough that four layers open up sideways, from a little above
 	const CX = 10.5; // the scene turns about this x
 	let yaw = VIEWS.turned[0], pitch = VIEWS.turned[1];
 	let W = 0, H = 0, S = 18, OX = 0, OY = 0, camY = -15; // canvas size, pixels a unit, origin, camera height
@@ -764,6 +764,11 @@
 		fn(v => v * S);
 		ctx.restore();
 	}
+	// text on the board behind the scene point (x, y), in the board's own plane, so it turns with the board as its
+	// heading does; lines is [str, dy in the plane's pixels, font, colour], each from the point
+	function onBoard(x, y, lines) {
+		onPlane(backAt(y), u => lines.forEach(([str, dy, font, colour]) => write(str, u(x), u(-y) + dy, font, colour)));
+	}
 	// a board's outline, on its plane (u turns scene units into the plane's pixels), and whether it is on screen
 	const board = (c, u) => roundRect(u(c.x0), u(c.y0), u(c.x1 - c.x0), u(c.y1 - c.y0), u(0.7));
 	const boardOnScreen = c => project(c.x1, -c.y1, c.z)[1] >= -20 && project(c.x0, -c.y0, c.z)[1] <= H + 40;
@@ -918,11 +923,10 @@
 		});
 		liftedNodes = [];
 	}
-	// a label to the right of the experts or the LM head: a name over its Mixtral size
+	// a label to the right of the experts or the LM head, on its board: a name over its Mixtral size
 	function sideLabel(y, name, sub, on) {
-		const p = project(FX + NETW + 0.9, -y, 0);
-		write(name, p[0], p[1] - (sub ? 7 : 0), `bold 12.5px ${SERIF}`, on ? C.ink : C.dim);
-		if (sub) write(sub, p[0], p[1] + 7, `10px ${UI}`, on ? C.mute : C.faint);
+		onBoard(FX + NETW + 0.9, -y, [[name, sub ? -7 : 0, `bold 12.5px ${SERIF}`, on ? C.ink : C.dim],
+			...(sub ? [[sub, 7, `10px ${UI}`, on ? C.mute : C.faint]] : [])]);
 	}
 	// the largest |input × weight| over a bundle, so brightness is relative
 	const brightest = (u, Wm) => { let m = 1e-9; u.forEach((ui, i) => Wm[i].forEach(w => { m = Math.max(m, Math.abs(ui * w)); })); return m; };
@@ -1134,10 +1138,8 @@
 				ctx.beginPath(); ctx.moveTo(q[0][0], q[0][1]); ctx.lineTo(q[2][0], q[2][1]); ctx.stroke();
 			}
 		}
-		const p = project(x0 + (n + 0.6) * u, -(top + u), z);
-		write('mask', p[0], p[1], `bold 10px ${UI}`, on ? C.ink : C.dim);
-		write('row t reads keys ≤ t', p[0], p[1] + 11, `9px ${UI}`, on ? C.mute : C.faint);
-		write('grey is never read', p[0], p[1] + 21, `9px ${UI}`, on ? C.mute : C.faint);
+		onBoard(x0 + (n + 0.6) * u, -(top + u), [['mask', 0, `bold 10px ${UI}`, on ? C.ink : C.dim],
+			['row t reads keys ≤ t', 11, `9px ${UI}`, on ? C.mute : C.faint], ['grey is never read', 21, `9px ${UI}`, on ? C.mute : C.faint]]);
 	}
 
 	// the LM head: z → logits → probabilities → one token
@@ -1167,21 +1169,24 @@
 		flushNodes();
 		// the probability bars, then the pick
 		const grow = at(ST.pick, 0.05, 0.55), pick = at(ST.pick, 0.6, 0.78), pmax = Math.max(...t.probs);
-		let realAt = null;
+		// a word over its p, every other one a line lower, so that neighbours never run into each other
+		const ROW = 22;
 		for (let j = 0; j < NV; j++) {
 			const hgt = Math.max(0.04, 5.2 * t.probs[j] / pmax * grow), x = HXv(j);
 			const q = [project(x - 0.32, -HY.bar, 0), project(x + 0.32, -HY.bar, 0), project(x + 0.32, -HY.bar - hgt, 0), project(x - 0.32, -HY.bar - hgt, 0)];
-			const chosen = j === t.pick && pick > 0, real = j === t.nextReal;
+			const chosen = j === t.pick && pick > 0;
 			poly(q, chosen ? C.navy : `rgba(0,0,128,${0.25 + 0.45 * fm})`, chosen ? `rgba(200,160,0,${pick})` : null, 2.4);
 			const lp = project(x, -HY.lab, 0);
+			lp[1] += (j % 2) * ROW;
 			write(VOCAB[j], lp[0], lp[1], `${chosen ? 'bold ' : ''}10px ${SERIF}`, chosen ? C.navy : on ? C.ink : C.dim, 'center');
 			if (grow > 0.6) write(t.probs[j] >= 0.005 ? t.probs[j].toFixed(2) : '0', lp[0], lp[1] + 11, `8.5px ${UI}`, C.mute, 'center');
-			if (real) realAt = lp;
 			const bc = project(x, -HY.bar - Math.max(0.5, hgt) / 2, 0);
 			nodeHits.push({ id: `lg|0|${cur}|${j}`, kind: 'bar', i: j, val: t.probs[j], fill: grow, x: bc[0], y: bc[1], r: Math.max(6, 0.32 * S) });
 		}
-		// the word that really comes next, marked last and running left from it: turned, the labels sit higher there
-		if (realAt && grow > 0) write('next in the sentence ▲', realAt[0] + 4, realAt[1] + 22, `8.5px ${UI}`, C.red, 'right');
+		// the word that really comes next, marked under both lines of words, running right from it along their slope
+		if (t.nextReal >= 0 && grow > 0) {
+			onPlane(0, u => write('▲ next in the sentence', u(HXv(t.nextReal)) - 4, u(HY.lab) + 2 * ROW + 2, `8.5px ${UI}`, C.red));
+		}
 		if (pick > 0) {
 			const p = project(FX + NETW + 0.9, -(HY.bar + 2.4), 0);
 			ctx.globalAlpha = pick;
@@ -1224,17 +1229,20 @@
 		h: s === ST.wo ? ['o Wo', 'concat(o) Wo, leaving attention', '4,096'] : s === ST.norm2 ? ['ĥ', 'RMSNorm(h), this step', '4,096'] : ['h · intermediate', 'x + attention', '4,096'],
 		y: ['y · output', 'h + f, to layer 2', '4,096'],
 	}[b]);
+	// the residual stream's walls (in front) have their names facing the reader; the walls on the attention board
+	// have theirs on the board, turned with it
 	function drawWallLabels(SL) {
 		Object.keys(WALLS).forEach(b => {
-			const [name, formula, size] = wallLabel(b, SL), on = FOCUS[SL].includes(b), w = WALLS[b];
-			const back = FRONT.includes(b) ? 0 : NH - 1, p = project(w.x + back * SX * w.u, -w.top + 0.3, HS * w.u - back * HZ);
+			const [name, formula, size] = wallLabel(b, SL), on = FOCUS[SL].includes(b), w = WALLS[b], front = FRONT.includes(b);
+			const back = front ? 0 : NH - 1, x = w.x + back * SX * w.u, y = -w.top + 0.3, p = project(x, y, HS * w.u - back * HZ);
 			if (p[1] < -10 || p[1] > H + 60) return;
 			// k and v count the heads GQA keeps against multi-head attention's, whose empty layers show the rest
 			const heads = b === 'k' || b === 'v' ? `${NKV} of MHA’s ${NH} heads` : '', up = heads ? 12 : 0;
-			write(name, p[0], p[1] - 26 - up, `bold 13px ${SERIF}`, on ? C.ink : C.dim, 'left', 'bottom');
-			write(formula, p[0], p[1] - 13 - up, `10.5px ${UI}`, on ? C.ink : C.dim, 'left', 'bottom');
-			write('Mixtral ' + size, p[0], p[1] - up, `10.5px ${UI}`, on ? C.mute : C.faint, 'left', 'bottom');
-			if (heads) write(heads, p[0], p[1], `9px ${UI}`, on ? C.mute : C.faint, 'left', 'bottom');
+			const lines = [[name, -32 - up, `bold 13px ${SERIF}`, on ? C.ink : C.dim], [formula, -18 - up, `10.5px ${UI}`, on ? C.ink : C.dim],
+				['Mixtral ' + size, -5 - up, `10.5px ${UI}`, on ? C.mute : C.faint], ...(heads ? [[heads, -5, `9px ${UI}`, on ? C.mute : C.faint]] : [])];
+			// on the board, from over the front layer's left end, so that the names stay clear of its right edge
+			if (front) lines.forEach(([str, dy, font, colour]) => write(str, p[0], p[1] + dy, font, colour));
+			else onBoard(w.x, y, lines);
 		});
 	}
 

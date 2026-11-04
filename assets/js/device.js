@@ -722,10 +722,10 @@
 	let d = PLACES[0].d, turn = { az: 0, el: 0 }, flight = null;
 	// in a pane near square or taller than wide the stage stands upright, the
 	// board's long side up the pane, and the server is seen from low off its
-	// corner, swung round, the board raised a little and to the right, clear of
-	// the panel over its corner; in a wide one it lies across. The server is
-	// framed to fill the pane either way
-	const UPRIGHT = { az: -(Math.PI / 2 - 0.6), swing: 0.45, el: -0.19, at: new THREE.Vector3(-0.035, 0, -0.045) };
+	// corner, swung round, the board a little low and to the right, under the
+	// stack of its tags; in a wide one it lies across. The server is framed to
+	// fill the pane either way
+	const UPRIGHT = { az: -(Math.PI / 2 - 0.6), swing: 0.45, el: -0.19, at: new THREE.Vector3(0.01, 0, -0.067) };
 	let upright = 1, uprightTo = 1;
 	function frameServer(aspect) {
 		uprightTo = aspect < 1.3 ? 1 : 0;
@@ -900,7 +900,7 @@
 		}
 		// the scale nearest, pressed
 		const level = levelOf(d);
-		for (const b of crumbs.children) b.classList.toggle('on', b.dataset.level === level);
+		for (const b of crumbs.children) exePress(b, b.dataset.level === level);
 	}
 
 	// ---- what is shown: the line's copies, each hop lit with the places at
@@ -2586,7 +2586,7 @@
 	// way, so that each newer scheduler picked shows what it makes better; a
 	// light load, which keeps the timeline's rows within train.py's lanes;
 	// played at two seconds of the run a second
-	const SV = { at: { ...SE.HOME, sched: 'static', count: 30, speed: 2 }, run: null, k: 0,
+	const SV = { at: { ...SE.HOME, sched: 'static', count: 30, speed: 1 }, run: null, k: 0,
 		frames: [{ file: 'serve', at: 0 }], stops: [], file: null,
 		spans: [], pick: -1, hover: -1, playing: false, clock: 0, wall: 0 };
 	const serving = () => kind === 'serve';
@@ -3535,8 +3535,7 @@
 		const first = SV.frames.length === 1 && SV.k === 0, final = SV.frames.length === 1 && SV.k === lastServed();
 		return { off: { start: first, back: first, next: final, end: final, run: final && !SV.playing,
 			into: !STOPS[serveStop().key].into, out: SV.frames.length === 1 },
-			at: 'step ' + int(SV.k + 1) + ' of ' + int(SV.run.steps.length) + ' · ' + E.time(SV.run.steps[SV.k].t0)
-				+ (SV.frames.length > 1 ? ' · ' + SV.file.tab + ' ' + (serveStop().line + 1) : '') };
+			at: 'step ' + int(SV.k + 1) + ' of ' + int(SV.run.steps.length) + ' · ' + SV.run.steps[SV.k].t0.toFixed(1) + ' s' };
 	}
 	function servePlay(on) {
 		SV.playing = on && SV.k < lastServed();
@@ -3887,11 +3886,16 @@
 	});
 
 	// each button of the transport, disabled where it cannot go, and where the
-	// run is: the line, the step, and the stop of all of them
+	// run is: the line, the step, and the stop of all of them, the field filled
+	// as far as the stop
+	const at = $('[data-out="at"]');
+	// the stop the run is at and the last, of train.py's lines or serve.py's steps
+	const position = () => (serving() ? [SV.k, lastServed()] : [k, lastStop()]);
 	function transport() {
-		const t = serving() ? serveTransport() : trainTransport();
+		const t = serving() ? serveTransport() : trainTransport(), [now, last] = position();
 		for (const b of $$('[data-act]')) if (b.dataset.act in t.off) b.disabled = t.off[b.dataset.act];
-		$('[data-out="at"]').textContent = t.at;
+		at.textContent = t.at;
+		at.style.setProperty('--at', (last ? now / last * 100 : 0).toFixed(2) + '%');
 	}
 	function trainTransport() {
 		const first = inside < 0 && k === 0, final = inside < 0 && k === lastStop(), s = cur(), f = R.stops[k];
@@ -3926,30 +3930,29 @@
 	}
 	// Run, or Pause while it runs
 	function runButton(on) {
-		const b = $('[data-act="run"]');
-		b.classList.toggle('on', on);
-		b.innerHTML = on ? '&#10074;&#10074; Pause' : '&#9654; Run';
+		$('[data-act="run"]').innerHTML = on ? '&#10074;&#10074; Pause' : '&#9654; Run';
 		transport();
 	}
-	// the field dragged across: a stop every eight pixels
-	let scrub = null;
-	const at = $('[data-out="at"]');
-	at.addEventListener('pointerdown', e => {
+	// the field a seek bar, as the players' are: pressed or dragged, the run
+	// goes to the stop under the pointer; the wheel moves it a thousandth of
+	// the stops a pixel
+	function seekTo(to) {
+		const [now, last] = position();
 		play(false);
-		scrub = { x: e.clientX, k: serving() ? SV.k : k };
-		at.setPointerCapture(e.pointerId);
-		e.preventDefault();
-	});
-	at.addEventListener('pointermove', e => {
-		if (!scrub) return;
-		// a stop every eight pixels; of serve.py's steps, which are many, one every four
-		const [now, last, px] = serving() ? [SV.k, lastServed(), 4] : [k, lastStop(), 8];
-		const to = Math.max(0, Math.min(last, scrub.k + Math.round((e.clientX - scrub.x) / px)));
+		to = Math.max(0, Math.min(last, to));
 		if (to === now) return;
 		leave();
 		go(to);
-	});
-	for (const type of ['pointerup', 'pointercancel']) at.addEventListener(type, () => { scrub = null; });
+	}
+	exeSeekBar(at, share => seekTo(Math.round(share * position()[1])));
+	let wheeled = 0;
+	at.addEventListener('wheel', e => {
+		const [now, last] = position();
+		wheeled += exeWheel(e) * last / 1000;
+		const n = Math.trunc(wheeled);
+		wheeled -= n;
+		if (n) seekTo(now + n);
+	}, { passive: false });
 	// the Memory panel folded or opened, the editor taking back its room; it
 	// stays as the reader left it
 	function fold(open = $('.trn-panel').classList.contains('shut')) {
@@ -3998,7 +4001,7 @@
 	// Storage reads only into a GPU
 	function dataPath(to) {
 		kind = to;
-		for (const c of $$('[data-path]')) c.classList.toggle('on', c.dataset.path === to);
+		for (const c of $$('[data-path]')) exePress(c, c.dataset.path === to);
 	}
 	function dataButtons() {
 		for (const b of $$('[data-path]')) {

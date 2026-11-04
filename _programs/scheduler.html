@@ -12,13 +12,13 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 <div class="lit-tool">
 <button type="button" class="lit-btn exe-run" data-act="run" title="Play the run at the speed beside it (Space); again to pause">&#9654; Run</button>
 <span class="exe-buttons">
-<button type="button" data-act="start" title="Go to the run’s start (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
-<button type="button" data-act="back" title="Back a step (←, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
-<button type="button" data-act="next" title="On a step (→, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
-<button type="button" data-act="end" title="Go to the run’s end (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
+<button type="button" class="lit-btn" data-act="start" title="Go to the run’s start (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
+<button type="button" class="lit-btn" data-act="back" title="Back a step (←, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
+<button type="button" class="lit-btn" data-act="next" title="On a step (→, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
+<button type="button" class="lit-btn" data-act="end" title="Go to the run’s end (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
 </span>
 <span class="exe-at" data-out="at" title="Where the run is, its clock and its step, filled as far as the clock has come, red ticks where a request is preempted: press or drag to go to a moment, or scroll over it"></span>
-<label class="exe-lbl">speed <select data-in="speed" title="Seconds of the run a second; at ×1 an answer streams as fast as its user would see it"></select></label>
+<label class="exe-lbl" title="Seconds of the run a second; at ×1 an answer streams as fast as its user would see it">speed <select data-in="speed"></select></label>
 <label class="exe-lbl exe-versus">compare with <select data-in="versus"></select></label>
 <span class="lit-sep"></span>
 <span class="sv-views">
@@ -28,16 +28,23 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 </div>
 <div class="lit-tool">
 <label class="exe-lbl" title="Requests a second, arriving as a Poisson process, as vllm bench serve’s --request-rate; inf sends them all at once, its default">request_rate <select data-in="rate"></select></label>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="Tokens every prompt starts with, the same for all">system prompt <select data-in="system"></select></label>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="The most an answer may run to; a contiguous cache sets it aside up front">max_tokens <select data-in="reserve"></select></label>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="Another draw of the same workload: other arrivals, other lengths">seed <select data-in="seed"></select></label>
 </div>
 <div class="lit-tool">
 <label class="exe-lbl" title="How the engine fills a step: a static batch at a time, the oldest way; whole prompts first, the decodes waiting, as vLLM v0 with chunked prefill off, its default for a context under 32K; or chunks of prompts beside the decodes within a token budget, vLLM’s v1 scheduler as of 0.11, where chunked prefill is always on">scheduler <select data-in="sched"></select></label>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="Contiguous: a run of blocks a request, set aside for its prompt and max_tokens, as servers before vLLM did; paged: blocks as tokens need them, from anywhere (PagedAttention). A static batch is always contiguous">KV cache <select data-in="alloc"></select></label>
 <button type="button" class="lit-btn" data-in="prefix" aria-pressed="false" title="enable_prefix_caching: a full block kept, keyed by the tokens up to its end, for the next request that starts the same; a paged cache’s only">prefix caching</button>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="kv_cache_dtype: the cache’s values in the model’s own bf16 (auto), or in fp8, half the bytes, so twice the blocks">kv_cache_dtype <select data-in="kv"></select></label>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="The blocks of the cache: all that 92% of each GPU holds past its half of the weights, or fewer, as --num-gpu-blocks-override sets. A real server holds fewer still, its profiling setting aside activations and memory outside PyTorch">num_gpu_blocks <select data-in="cache"></select></label>
+<span class="lit-sep"></span>
 <label class="exe-lbl" title="The most requests a step runs; a static batch’s size">max_num_seqs <select data-in="seqs"></select></label>
 </div>
 <div class="sv-body">

@@ -66,7 +66,7 @@
 	const stepsCv = $('.sv-steps'), usageCv = $('.sv-usage'), ttftCv = $('.sv-ttft'), itlCv = $('.sv-itl');
 	const pin = $('.sv-pin'), pinTitle = $('[data-out="pin-title"]'),
 		pinCard = $('[data-out="pin-card"]'), pinTime = $('.sv-pin-time'), tip = $('.sv-tip');
-	const atField = $('[data-out="at"]'), runBtn = $('[data-act="run"]');
+	const atField = $('[data-out="at"]'), runBtn = $('[data-act="run"]'), ends = exeEnds(root);
 	const sel = name => $('[data-in="' + name + '"]');
 	// the pinned chat's window named by its title bar, an id for this window's
 	pinTitle.id = 'sv-pin-title-' + document.querySelectorAll('.sv[data-ready]').length;
@@ -988,12 +988,14 @@
 	// cells from as large as this to no smaller than this, should the window
 	// be made very small. A pane wider than WIDE has room for longer words
 	const MOST_CELL = 24, LEAST_CELL = 2, WIDE = 640;
-	// The map as tall as its cells: the largest that leave the chats' rows
-	// their least (as _programs.scss sets them: --rows of --row and their
-	// gaps), of the height the rows and the map share, the body's less the gap
-	// between the panes, the chats' lines over their rows and the key under
-	// the map. The rows take the rest. A window too small for the least of
-	// both keeps the rows and lets the map go, from its foot
+	// The cells the largest that leave the chats' rows their least (as
+	// _programs.scss sets them: --rows of --row and their gaps), of the height
+	// the rows and the map share, the body's less the gap between the panes,
+	// the chats' lines over their rows and the key under the map. The rows
+	// keep their least and the map takes the rest, the cells in the middle of
+	// what they leave, the zoom from the bar opening out the further. A window
+	// too small for the least of both keeps the rows and lets the map go, from
+	// its foot
 	function measure() {
 		const W = mapCv.clientWidth, dpr = window.devicePixelRatio || 1;
 		if (!W) return false;
@@ -1006,13 +1008,13 @@
 		const w = W - 2 * EDGE, tall = p => Math.ceil(run.N / Math.floor(w / p)) * p;
 		let p = MOST_CELL;
 		while (p > LEAST_CELL && tall(p) + TOP + FOOT > shared - least) p--;
-		const H = Math.max(0, Math.min(tall(p) + TOP + FOOT, shared - least)), cols = Math.floor(w / p);
+		const H = Math.max(0, shared - least), cols = Math.floor(w / p), spare = Math.max(0, H - tall(p) - TOP - FOOT);
 		mapCv.style.height = H + 'px';
 		mapCv.width = Math.round(W * dpr);
 		mapCv.height = Math.round(H * dpr);
 		const gap = p >= 12 ? 2 : 1;
 		geo = { W, H, dpr, p, gap, c: p - gap, cols, rows: Math.ceil(run.N / cols),
-			x0: EDGE + Math.floor((w - cols * p) / 2), y0: TOP };
+			x0: EDGE + Math.floor((w - cols * p) / 2), y0: TOP + Math.floor(spare / 2) };
 		drawn = null;
 		return true;
 	}
@@ -2065,8 +2067,7 @@
 		for (const each of ['users', 'memory']) root.classList.toggle('view-' + each, each === name);
 		root.classList.toggle('compact', compact());
 		$$('[data-view]').forEach(b => {
-			b.classList.toggle('on', b.dataset.view === name);
-			b.setAttribute('aria-pressed', b.dataset.view === name);
+			exePress(b, b.dataset.view === name);
 		});
 		const vs = sel('versus');
 		vs.disabled = name !== 'users';
@@ -2090,10 +2091,11 @@
 		const t = clock.t, states = statesAt(t);
 		settle(t, clock.playing);
 		setText(atField,
-			stamp(t) + ' of ' + stamp(endOf()) + ' · step '
+			tenths(t) + ' of ' + tenths(endOf()) + ' · step '
 				+ fmt(Math.max(0, Math.min(E.stepAt(run, t) + 1, run.steps.length))));
 		paintAt(t);
 		setText(runBtn, clock.playing ? '❚❚ Pause' : '▶ Run');
+		ends(t <= 0, t >= endOf());
 		drawWalls(t, states);
 		if (view === 'users') {
 			drawPin(t);
@@ -2156,28 +2158,15 @@
 		seek(k < 0 ? 0 : k >= ts.length ? endOf() : ts[k]);
 	}
 	// the time field, a seek bar: pressed or dragged, the clock goes to that
-	// share of the run
-	const shareAt = e => {
-		const box = atField.getBoundingClientRect();
-		return Math.max(0, Math.min(1, (e.clientX - box.left) / box.width));
+	// share of the run. The wheel, or two fingers on a trackpad, moves the
+	// clock a thousandth of the run a pixel: over the time field either way,
+	// over the river only sideways
+	const SCROLL = 1 / 1000;
+	exeSeekBar(atField, share => seek(share * endOf()));
+	const wheel = (e, sideways) => {
+		const px = exeWheel(e, sideways);
+		if (px) seek(clock.t + px * SCROLL * endOf());
 	};
-	atField.addEventListener('pointerdown', e => {
-		atField.setPointerCapture(e.pointerId);
-		const move = ev => seek(shareAt(ev) * endOf());
-		move(e);
-		atField.addEventListener('pointermove', move);
-		atField.addEventListener('pointerup', () => atField.removeEventListener('pointermove', move), { once: true });
-	});
-	// The wheel, or two fingers on a trackpad, moves the clock a thousandth
-	// of the run a pixel, down or right on: over the time field either way,
-	// over the river only sideways, so that the page still scrolls past it
-	const SCROLL = 1 / 1000, LINE = 16;
-	function wheel(e, sideways) {
-		const across = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-		if (sideways && !across) return;
-		e.preventDefault();
-		seek(clock.t + (across ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? LINE : 1) * SCROLL * endOf());
-	}
 	atField.addEventListener('wheel', e => wheel(e, false), { passive: false });
 	riverCv.addEventListener('wheel', e => wheel(e, true), { passive: false });
 	// the field filled to where the clock is, a pixel at a time, and the
@@ -2222,8 +2211,7 @@
 		sel('alloc').value = a.alloc;
 		sel('alloc').disabled = a.sched === 'static';
 		sel('kv').value = String(a.kv);
-		prefix.classList.toggle('on', a.prefix);
-		prefix.setAttribute('aria-pressed', a.prefix);
+		exePress(prefix, a.prefix);
 		prefix.disabled = a.alloc !== 'paged';
 		if (versus && !changeOf(versus).applies(at)) versus = '';
 		const groups = [...new Set(CHANGES.map(c => c.group))].map(g => [g,

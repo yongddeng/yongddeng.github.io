@@ -562,7 +562,7 @@
 	// ---- the race on screen: each optimiser's runs a step at a time, at its own η ----
 	const RUN = 900; // frames a race takes, 15 s at 60 a second
 	let runs, twins, t, due, playing = false;
-	const runBtn = $('[data-act="run"]');
+	const runBtn = $('[data-act="run"]'), ends = exeEnds(root);
 	function reset() {
 		runs = OPTIMISERS.map(() => starts.map((s0, n) => fresh(s0, n, true)));
 		// under AMP, the same runs in fp32, to draw beside them
@@ -592,10 +592,19 @@
 		const was = playing;
 		playing = on;
 		runBtn.innerHTML = on ? '&#10074;&#10074; Pause' : '&#9654; Run';
-		runBtn.classList.toggle('on', on);
 		if (!on || was) return;
 		preview = null;
 		requestAnimationFrame(tick);
+	}
+	// to a step, paused: on from here, or from step 0 again to go back. A step
+	// cannot wait on the sweep, so a tuned η is found now
+	function goTo(to) {
+		to = Math.max(0, Math.min(surf.steps, to));
+		if (tuning()) sweeper.finish();
+		play(false);
+		if (to < t) reset();
+		while (t < to) advance();
+		drawRace();
 	}
 	// back to step 0, to wait there for Run, with no other settings' runs on show
 	function rewind() {
@@ -1326,7 +1335,7 @@
 		});
 		// dotted, the rate the pointer is over
 		if (preview) dashed(cx, X(ETAS[preview.e]), T, H - B, [2, 3]);
-		title(cx, 'L − L* at step ' + fmt(surf.steps) + ' by η · dots: each one’s η, filled at its best');
+		title(cx, 'L − L* at step ' + fmt(surf.steps) + ' by η · dot: its η, filled at its best');
 	}
 
 	// ---- the cards: an optimiser each ----
@@ -1454,7 +1463,7 @@
 	// ---- the status bar, the readings and the buttons pressed, as things stand ----
 	const rateIn = $('[data-in="rate"]'), noiseIn = $('[data-in="noise"]'), torchBtn = $('[data-act="torch"]'), tuneBtn = $('[data-act="tune"]');
 	const seedsBtn = $('[data-act="seeds"]'), scaleIn = $('[data-in="scale"]'), clipBtn = $('[data-act="clip"]'), chips = $('.opt-palettes');
-	const press = (group, key, value) => group.forEach(b => b.classList.toggle('on', b.dataset[key] === value));
+	const press = (group, key, value) => group.forEach(b => exePress(b, b.dataset[key] === value));
 	const buttons = { surface: $$('[data-surface]'), view: $$('[data-view]'), init: $$('[data-init]'), amp: $$('[data-amp]'), schedule: $$('[data-schedule]') };
 	function readout() {
 		updateCards(results());
@@ -1465,18 +1474,19 @@
 		press(buttons.amp, 'amp', amp);
 		press(buttons.schedule, 'schedule', schedule);
 		press([...chips.children], 'palette', palette.key);
-		seedsBtn.classList.toggle('on', many && !!init);
+		exePress(seedsBtn, many && !!init);
 		seedsBtn.disabled = !init;
-		clipBtn.classList.toggle('on', clip);
-		torchBtn.classList.toggle('on', OPTIMISERS.every((o, i) => asTorch(i)));
-		tuneBtn.classList.toggle('on', settings.every(s => s.tuned));
+		exePress(clipBtn, clip);
+		exePress(torchBtn, OPTIMISERS.every((o, i) => asTorch(i)));
+		exePress(tuneBtn, settings.every(s => s.tuned));
 		// the slider for all at its rate, when all share one
 		const same = settings.every(s => s.eta === settings[0].eta);
 		if (same) rateIn.value = settings[0].eta;
 		$('[data-out="rate"]').textContent = same ? ETAS[settings[0].eta] : '—';
 		say(tip ?? (hover !== null ? torchCall(hover) : preview ? 'All at η = ' + ETAS[preview.e] + ', run to the end · click to keep it'
-			: scrub !== null ? 'At step ' + fmt(scrub) : playing && tuning() ? 'Tuning η…' : playing ? 'Step ' + fmt(t) + ' of ' + fmt(surf.steps)
-			: !t ? 'Ready' : t < surf.steps ? 'Paused at step ' + fmt(t) : fmt(t) + ' steps'));
+			: scrub !== null ? 'At step ' + fmt(scrub) : playing && tuning() ? 'Tuning η…'
+			: (playing ? 'Playing' : t >= surf.steps ? 'The run’s end' : 'Paused') + ' · step ' + fmt(t) + ' of ' + fmt(surf.steps)));
+		ends(t <= 0, t >= surf.steps);
 	}
 	function draw() {
 		drawRace();
@@ -1505,21 +1515,34 @@
 		lows = surf.lows && Array.from({ length: 201 }, (_, n) => surf.lows(n / 200)).map(p => (inBox(p) ? p : null));
 		noise();
 		$$('.exe-note[data-for]').forEach(p => p.classList.toggle('on', p.dataset.for === key));
-		$('.opt-caption').textContent = 'Long ticks: PyTorch’s defaults · maps: L − L* at step ' + fmt(surf.steps) + ' by η across and the navy knob down · lighter is lower · × diverged · outlined, the sliders · click a cell to set them';
+		$('.opt-caption').textContent = 'Maps: L − L* at step ' + fmt(surf.steps) + ' by η across and the navy knob down · lighter is lower · × diverged · outlined, the sliders · click a cell to set them';
 		restart();
 	}
-	runBtn.addEventListener('click', () => {
-		if (t >= surf.steps) rewind();
-		play(!playing);
+	// What the transport and the keys do, as a player's: a button's data-act, a
+	// key's name in KEYS; n, ten with Shift
+	const ACTS = {
+		run: () => {
+			if (t >= surf.steps) rewind();
+			play(!playing);
+		},
+		start: rewind,
+		back: n => goTo(t - n),
+		next: n => goTo(t + n),
+		end: () => goTo(surf.steps),
+		help: () => help(),
+	};
+	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end', '?': 'help' };
+	for (const b of $$('.exe-run, .exe-buttons [data-act]')) b.addEventListener('click', () => ACTS[b.dataset.act](1));
+	// the keys wherever the focus is in the window but on a control, whose
+	// keys are its own; presses keep them with the window but for a slider's
+	root.addEventListener('keydown', e => {
+		if (e.target.closest('button, select, input') || !KEYS[e.key]) return;
+		e.preventDefault();
+		ACTS[KEYS[e.key]](e.shiftKey ? 10 : 1);
 	});
-	// a step cannot wait on the sweep, so a tuned η is found now
-	$('[data-act="step"]').addEventListener('click', () => {
-		if (tuning()) sweeper.finish();
-		play(false);
-		if (t < surf.steps) advance();
-		drawRace();
+	root.addEventListener('pointerdown', e => {
+		if (!e.target.closest('input')) setTimeout(() => root.focus({ preventScroll: true }));
 	});
-	$('[data-act="reset"]').addEventListener('click', rewind);
 	buttons.surface.forEach(b => b.addEventListener('click', () => pick(b.dataset.surface)));
 	buttons.view.forEach(b => b.addEventListener('click', () => {
 		view = b.dataset.view;
@@ -1650,13 +1673,7 @@
 
 	// ---- the panes' controls ----
 	// the surface's note and the credits, in a balloon from the ? on the map
-	const helpBtn = $('.opt-help'), balloon = $('.opt-balloon');
-	function help(open) {
-		balloon.hidden = !open;
-		helpBtn.setAttribute('aria-expanded', open);
-	}
-	helpBtn.addEventListener('click', () => help(balloon.hidden));
-	root.addEventListener('keydown', e => e.key === 'Escape' && help(false));
+	const help = exeHelp(root);
 	// the palettes, a chip each in the map's corner, its heat ramp on it
 	chips.innerHTML = Object.entries(PALETTES).map(([key, p]) => '<button type="button" data-palette="' + key + '" title="' + p.name + '" aria-label="' + p.name
 		+ '" style="background:linear-gradient(to right,' + p.heat.map(css).join(',') + ')"></button>').join('');
