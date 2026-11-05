@@ -28,17 +28,17 @@
 	add('C', { name: '(C:)', kind: 'drive', addr: 'C:\\', up: 'mc', kids: tags });
 	add('D', { name: '(D:)', kind: 'drive', addr: 'D:\\', up: 'mc', kids: programs.map(x => x.url) });
 	tags.forEach(t => add(t, { name: t, kind: 'folder', addr: 'C:\\' + t, up: 'C' }));
+	// Each place's own order, which its list keeps until Arrange picks another:
+	// a folder's posts newest first, as searchIndex holds them and the
+	// desktop's folder windows (tag-filter.js) list them; (D:)'s programs by
+	// their dates, which, as the posts' do, place each in the series of the
+	// note it draws for
 	posts.forEach(p => {
 		add(p.url, { name: p.title, kind: 'file', up: p.tags[0], post: p, url: p.url, icon: p.icon, type: p.type, size: p.size, created: p.xp.created });
 		if (N[p.tags[0]]) N[p.tags[0]].kids.push(p.url);
 	});
 	programs.forEach(x => add(x.url, { name: x.name, kind: 'exe', up: 'D', exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, created: x.created }));
-	// Each place's own order, which its list keeps until Arrange picks another:
-	// a folder's posts by name, as (C:)'s folders are; (D:)'s programs by their
-	// dates, which, as the posts' do, place each in the series of the note it
-	// draws for
 	const byName = (a, b) => a.localeCompare(b, 'en', { numeric: true });
-	tags.forEach(t => N[t].kids.sort((a, b) => byName(N[a].name, N[b].name)));
 	const isBox = n => n.kind !== 'file' && n.kind !== 'exe';
 	const TYPE = { drive: 'Local Disk', folder: 'File Folder' };
 	// Windows 98's own icons: 16px drawings, and for the large icons its 48px

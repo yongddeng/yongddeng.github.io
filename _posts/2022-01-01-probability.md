@@ -8,36 +8,114 @@ use_math: true
 
 # Probability Theory
 ---
-Stein's [Real Analysis III](http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf) outlined an outer measure, browsed its limitations, and adopted measurable sets with sigma algebras. I have perused Amir Dembo's [Stanford STAT310](https://web.stanford.edu/class/stats310a/lnotes.pdf) and Allan Gut's [Probability: A Graduate Course](https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf) along with $\lbrace$[W1](https://www.randomservices.org), [W2](http://theanalysisofdata.com/), [W3](https://www.stat.berkeley.edu/~aldous/)$\rbrace$ to acquire the modern measure-theoretic foundations of probability theory.
+A probability space is a measure space of total mass one, built in three layers, the events, the measure on them and its continuity, which is what lets probabilities pass to limits of events. The events cannot be every subset of an uncountable $\Omega$, as Stein and Shakarchi's [Real Analysis](http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf) shows for Lebesgue measure, and the rest follows Dembo's [Stanford STAT310](https://web.stanford.edu/class/stats310a/lnotes.pdf) notes and Gut's graduate course [Probability](https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf)<!-- , along with W1 https://www.randomservices.org, W2 http://theanalysisofdata.com/ and W3 https://www.stat.berkeley.edu/~aldous/ -->.
 
 
 ## I
 ---
-A [probability theory](https://en.wikipedia.org/wiki/Probability_theory) is grounded in the framework of random [experiments](https://en.wikipedia.org/wiki/Experiment_(probability_theory)) (i.e. trials) where the outcome is inherently uncertain prior to execution. A practical execution allows for repetitions under temporally or spatially analogous (or even consistent) conditions **(#1)**. Confidence gained from such repetitions can be further enhanced with, or contended against our prior knowledge. The subject matter pertains to fully specified mathematical objects in contrast to [statistics](https://en.wikipedia.org/wiki/Statistics) which deals with incomplete ones. We engage in the drawing, analysis, and visualisation of samples to determine an unbiased estimator for one or more unknown parameters in the latter.
+**Definition.** A [$\sigma$-algebra]() on a set $\Omega$ is a collection $\mathcal{F}$ of subsets of $\Omega$ such that (i) $\Omega \in \mathcal{F}$; (ii) $A \in \mathcal{F}$ implies $A^c \in \mathcal{F}$; (iii) $A\_1, A\_2, \dots \in \mathcal{F}$ implies $\bigcup\_n A\_n \in \mathcal{F}$. The pair $(\Omega, \mathcal{F})$ is a [measurable space](), $\Omega$ the [sample space](), its points the outcomes and the members of $\mathcal{F}$ the [events](). The $\sigma$-algebra $\sigma(\mathcal{C})$ [generated]() by a collection $\mathcal{C}$ of subsets is the intersection of all $\sigma$-algebras containing it, and $\mathcal{F}$ is [countably generated]() if $\mathcal{F} = \sigma(\mathcal{C})$ for a countable $\mathcal{C}$.
 
-We call a set $\Omega$ a [sample space](https://en.wikipedia.org/wiki/Sample_space), an element of a set $\omega \in \Omega$ an [elementary event](https://en.wikipedia.org/wiki/Elementary_event), and a subset of a set $A \subseteq \Omega$ of $\lvert{A}\rvert \leq \lvert{\Omega}\rvert$ an [event](https://en.wikipedia.org/wiki/Event_(probability_theory)). $A$ is said to be occurred (not occurred) if $\omega \in A$ ($\omega \notin A$), and can be a generator for a [$\sigma$-algebra](https://en.wikipedia.org/wiki/%CE%A3-algebra) $\mathcal{F} = \sigma(A)$ such that (i) $\Omega \in \mathcal{F}$; (ii) if $A \in \mathcal{F}$, then $A^{c} \in \mathcal{F}$; (iii) if $(A\_{n})\_{n \in \mathbb{N}} \in \mathcal{F}$, then $\bigcup_{n \in \mathbb{N}} A_n \in \mathcal{F}$; If one has $\sigma$-algebras $\mathcal{F}^* = \lbrace \mathcal{F}_0, \mathcal{F}_1, \dots \lvert \, A \subset \mathcal{F_n} \rbrace$, then $\mathcal{F}^*$ is said to be countably generated if there exists only countably many generators **(#2)**. The fundamental idea of a $\sigma$-algebra is to quantify the amount of tangible information from its generator and the largest $\sigma$-algebra yields an extremely fruitful tuple $(\Omega, \mathcal{F})$.
+*Remarks.* $\Omega$ holds the outcomes of a random experiment, one whose outcome is unknown before it is run and which can be repeated under like conditions, in time as consecutive tosses of a coin or in space as many coins thrown at once. An event $A$ occurs when the outcome lies in $A$, and a $\sigma$-algebra records which questions about the outcome can be answered, so $\sigma(\lbrace 1 \rbrace) = \lbrace \emptyset, \lbrace 1 \rbrace, \lbrace 2, 3 \rbrace, \Omega \rbrace$ on $\Omega = \lbrace 1, 2, 3 \rbrace$ tells $1$ from $2$ but not $2$ from $3$. Probability fixes the model and derives what it implies, whereas statistics infers an unknown model from samples drawn from it.
 
-We are free to take a [power set](https://en.wikipedia.org/wiki/Power_set) $\mathcal{F}\_\Omega = \sigma(\Omega)$ for a finite or a countable $\Omega$, but the same set on an uncountable $\Omega$ (i.e. $\mathbb{R}$) violates the axioms as a sum of uncountably many probabilities $P(\Omega) = \Sigma\_{\omega\in\Omega} p\_\omega = \infty$. Hence we take the [Borel $\sigma$-algebra](https://en.wikipedia.org/wiki/Borel_set) $\mathcal{B}\_{\mathbb{R}} = \sigma(\mathcal{O} \subset \mathbb{R})$, the smallest $\sigma$-algebra containing every open subsets (that are measurable), and build an Euclidean space $(\mathbb{R}^n, \mathcal{B}\_{\mathbb{R}^n})$. Besides, the [monotone class theorem](https://en.wikipedia.org/wiki/Monotone_class_theorem) and the $\pi - \lambda$ theorem exist for an algebra and a $\pi$-system, respectively. If an algebra $A$ is a subset of a monotone class $\mathcal{M}$ **(#3)**, then the smallest $\sigma$-algebra $\sigma(A)$ is precisely equal to the smallest monotone class $\mathcal{M}(A)$.
+**Theorem** ([Vitali]())**.** No probability measure defined on every subset of $[0, 1)$ satisfies $P(A \oplus x) = P(A)$ for all $A$ and $x$, where $A \oplus x$ is the translate of $A$ by $x$ modulo $1$.
+
+<details><summary>Proof</summary>
+Call $x \sim y$ when $x - y \in \mathbb{Q}$, and let $V \subseteq [0, 1)$ contain exactly one point of each class, by the axiom of choice. The translates $V \oplus q$ for $q \in \mathbb{Q} \cap [0, 1)$ are pairwise disjoint and cover $[0, 1)$, so countable additivity and invariance give $1 = \sum_q P(V \oplus q) = \sum_q P(V)$, which is $0$ or $\infty$. &#8718;
+</details>
+
+*Remarks.* The uniform law on $[0, 1)$ must give translates equal probability, so it cannot live on the power set, and the events are cut down to a $\sigma$-algebra where it can. The obstruction is not that uncountably many point probabilities sum to $\infty$, since under the uniform law they are all $0$ and countable additivity says nothing of uncountable unions. On a countable $\Omega$ the power set is always available. Without invariance the question belongs to set theory, as under the continuum hypothesis no probability on every subset of $[0, 1)$ vanishes on all points (Banach and Kuratowski).
+
+**Definition.** The [Borel $\sigma$-algebra]() $\mathcal{B}(\mathbb{R})$ is generated by the open subsets of $\mathbb{R}$, and equally by the half-lines $(-\infty, x]$ with $x \in \mathbb{Q}$, so it is countably generated. $\mathcal{B}(\mathbb{R}^n)$ is generated by the products of such half-lines. A [$\pi$-system]() is a collection closed under finite intersections, and a [$\lambda$-system]() is one that contains $\Omega$ and is closed under complements and countable disjoint unions.
+
+**Theorem** ([Dynkin's $\pi$-$\lambda$ theorem]())**.** If a $\pi$-system $\mathcal{P}$ lies in a $\lambda$-system $\mathcal{L}$, then $\sigma(\mathcal{P}) \subseteq \mathcal{L}$.
+
+<details><summary>Proof</summary>
+Let $\lambda(\mathcal{P})$ be the smallest $\lambda$-system containing $\mathcal{P}$. For $A \in \mathcal{P}$ the sets $B$ with $A \cap B \in \lambda(\mathcal{P})$ form a $\lambda$-system containing $\mathcal{P}$, hence $\lambda(\mathcal{P})$, and the same argument for $A \in \lambda(\mathcal{P})$ makes $\lambda(\mathcal{P})$ a $\pi$-system. A $\lambda$-system closed under intersections is a $\sigma$-algebra, as $\bigcup_n A_n$ is the disjoint union of the $A_n \cap A_1^c \cap \dots \cap A_{n-1}^c$, so $\sigma(\mathcal{P}) \subseteq \lambda(\mathcal{P}) \subseteq \mathcal{L}$. &#8718;
+</details>
+
+**Corollary.** Two probability measures that agree on a $\pi$-system $\mathcal{P}$ agree on $\sigma(\mathcal{P})$, so a probability on $\mathcal{B}(\mathbb{R})$ is fixed by its values $F(x) = P((-\infty, x])$.
+
+<details><summary>Proof</summary>
+The events on which they agree contain $\Omega$ and are closed under complements and countable disjoint unions, and the half-lines form a $\pi$-system. &#8718;
+</details>
+
+*Remark.* The [monotone class theorem]() is the same statement for an algebra, whose generated $\sigma$-algebra is the smallest class containing it that is closed under increasing unions and decreasing intersections.
 
 
 ## II
 ---
-A [probability measure](https://en.wikipedia.org/wiki/Probability_measure) $P: \mathcal{F} \to [0,1]$ defined on any $(\Omega, \mathcal{F})$ must be under the [Kolmogorov axioms](https://www.stat.berkeley.edu/~aldous/Real_World/kolmogorov.html) (i) $P(A) \geq 0$ for any $A \in \mathcal{F}$; (ii) $P(\Omega) = 1$; (iii) if $(A\_{n})\_{n\in\mathbb{N}}$ is a set of pairwise disjoint events, then $P(\bigcup\_{n=1}^{\infty} A\_{n}) = \Sigma_{n=1}^{\infty} P(A_n)$ **(#4)**; It inherits useful properties of a measure including (i) zero probability: $P\left(\emptyset\right) = 0$; (ii) complement: $P(A^c) = 1 - P(A)$; (iii) monotonicity: if $A \subseteq B$, then $P(A) \leq P(B)$; (iv) sub-additivity: if $A \subseteq \bigcup_n A_n$, then $P(A) \leq \Sigma_n P(A_n)$;. In particular, the monotonicity yields a well-defined $P$ on the limits (if exists) of a sequence $(A_n)_{n\in\mathbb{N}}$ of events. Note that there exists non-empty sets with zero probability.
+**Definition.** A [probability measure]() on $(\Omega, \mathcal{F})$ is a map $P \colon \mathcal{F} \to [0, 1]$ with $P(\Omega) = 1$ and $P(\bigcup\_n A\_n) = \sum\_n P(A\_n)$ for pairwise disjoint events $A\_1, A\_2, \dots$, and $(\Omega, \mathcal{F}, P)$ is a [probability space]().
 
-By construction, if $P\left(\Omega\right) = \Sigma_{\omega\in\Omega}\, p_{\omega} = 1$ with $p_\omega \geq 0$ for all $\omega \in \Omega$, then a probability of $A$ occurring is given by $P(A) = \Sigma_{\omega\in{A}}\, p_\omega$. For instance, if the [uniform probability](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) $p_\omega = {\lvert \Omega \rvert}^{-1}$ is assigned to all elements of a finite $\Omega \subset \mathbb{R}$, then $P$ is the counting measure, or the [Gaussian probability](https://en.wikipedia.org/wiki/Normal_distribution) $f(x) = {1 \over \sigma\sqrt{2\pi}} e^{-{1 \over 2}({x - \mu \over \sigma})^2}$ assigns non-equal values to the subsets. In discrete sense, given a set of non-negative integers $\Omega = \lbrace k: k \in \mathbb{N}\_{0} \rbrace$ and an expected rate of occurrences $\lambda > 0$, the [Poisson probability](https://en.wikipedia.org/wiki/Poisson_distribution) $p_k = {\lambda^k\over{k!}}e^{-\lambda}$ which can be derived from the [binomial distribution](https://en.wikipedia.org/wiki/Binomial_distribution) assigns measures to an event occurring $k$ times.
+**Proposition.** For events $A, B, A\_1, A\_2, \dots$, (i) $P(\emptyset) = 0$; (ii) $P(A^c) = 1 - P(A)$; (iii) $A \subseteq B$ implies $P(A) \leq P(B)$; (iv) $P(A \cup B) = P(A) + P(B) - P(A \cap B)$; (v) $P(\bigcup\_n A\_n) \leq \sum\_n P(A\_n)$.
 
-If there exists $B \in \mathcal{F}$ such that $A \subset B$ with $P(B) = 0$ (i.e. $B$ is measurable), then $A \subset \Omega$ which may or may not be an element of $\mathcal{F}$ is a [null set](g/wiki/Null_set). We often restrict a [probability space](https://en.wikipedia.org/wiki/Probability_space) $(\Omega, \mathcal{F}, P)$ to a [complete probability space](https://math.stackexchange.com/questions/4095399/complete-probability-spaces) for the sake of measurability of null sets. The completion treats $A$ being measurable whenever $B$ is measurable. Besides, if there does not exists $\psi \in \Omega$ such that $P(\psi) > P(\omega) > 0$, then $\omega \in \Omega$ is an atom **(#5)**. It hints us that an uncountable $\Omega$ can make a [non-atomic probability space](https://en.wikipedia.org/wiki/Atom_(measure_theory)). I.e. the counting measure $\mu$ on $\Omega = \lbrace 1,2,\dots, 10 \rbrace$ takes a singleton $\lbrace j \rbrace$ as an atom, but the Lebesgue measure $\lambda$ on $\Omega = \mathbb{R}$ has no atom.
+<details><summary>Proof</summary>
+(i) follows from $\Omega = \Omega \cup \emptyset \cup \emptyset \cup \dots$, (ii) and (iii) from additivity on $A \cup A^c$ and $A \cup (B \setminus A)$, and (iv) from $A \cup B = A \cup (B \setminus A)$ and $B = (A \cap B) \cup (B \setminus A)$. For (v), the sets $B_n = A_n \setminus \bigcup_{k < n} A_k$ are disjoint with the same union and $B_n \subseteq A_n$. &#8718;
+</details>
+
+*Remark.* The definition is Kolmogorov's axioms (1933), and the measure-theoretic content is countable additivity, which finite additivity and continuity together recover.
+
+**Examples.**
+
+- On a countable $\Omega$ every probability on all subsets is $P(A) = \sum\_{\omega \in A} p\_\omega$ for weights $p\_\omega \geq 0$ summing to $1$, the uniform law $p\_\omega = 1/\lvert \Omega \rvert$ on a finite $\Omega$ being the normalised counting measure;
+- the [Poisson law]() $p\_k = e^{-\lambda} \lambda^k / k!$ on $\lbrace 0, 1, 2, \dots \rbrace$ is the limit of the binomial probabilities $\binom{n}{k} (\lambda/n)^k (1 - \lambda/n)^{n-k}$ as $n \to \infty$, for a rate $\lambda > 0$;
+- on $(\mathbb{R}, \mathcal{B}(\mathbb{R}))$ a density $f \geq 0$ with $\int f \, \mathrm{d}x = 1$ gives $P(A) = \int\_A f \, \mathrm{d}x$, as the Gaussian $f(x) = (2\pi\sigma^2)^{-1/2} e^{-(x - \mu)^2 / 2\sigma^2}$ does, and then every point has probability $0$.
+
+**Definition.** A [null set]() is a subset of an event of probability $0$, and $(\Omega, \mathcal{F}, P)$ is [complete]() if every null set is an event. The [completion]() adds them, with $\bar{\mathcal{F}} = \lbrace A \cup N \mid A \in \mathcal{F}, N \text{ null} \rbrace$ and $\bar{P}(A \cup N) = P(A)$.
+
+*Remark.* Completion makes any set that differs from an event by a null set an event, so changing a random variable on a null set keeps it measurable. The Lebesgue $\sigma$-algebra is the completion of $\mathcal{B}(\mathbb{R})$ under Lebesgue measure and is strictly larger, since every subset of the Cantor set is null, giving $2^{\mathfrak{c}}$ Lebesgue sets against $\mathfrak{c}$ Borel ones.
+
+**Definition.** An [atom]() of $P$ is an event $A$ with $P(A) > 0$ such that every event $B \subseteq A$ has $P(B) \in \lbrace 0, P(A) \rbrace$, and $P$ is [non-atomic]() if it has no atom.
+
+**Theorem** (Sierpiński)**.** If $P$ is non-atomic, then for every event $A$ and every $t \in [0, P(A)]$ there is an event $B \subseteq A$ with $P(B) = t$.
+
+<details><summary>Proof</summary>
+An event $D$ of positive probability is no atom, so it contains some $C$ with $0 < P(C) < P(D)$, and one of $C$ and $D \setminus C$ has at most half of $P(D)$, so repeating gives events of arbitrarily small positive probability inside $D$. Build $B_1 \subseteq B_2 \subseteq \dots$ in $A$ greedily, adding at step $n$ an event of $A \setminus B_{n-1}$ whose probability is at least half the supremum $s_n$ of what can be added without exceeding $t$. The added amounts sum to at most $t$, so $s_n \to 0$, and if $B = \bigcup_n B_n$ had $P(B) < t$, a small enough event of positive probability inside $A \setminus B$ would keep every $s_n$ above its probability. &#8718;
+</details>
+
+*Remarks.* Every probability on a countable $\Omega$ has an atom, some $p\_\omega$ being positive, so a non-atomic law needs an uncountable $\Omega$, as Lebesgue measure on $[0, 1)$ shows, while each point of $\lbrace 1, \dots, 10 \rbrace$ under the uniform law is an atom. An atom need not be a point. The countable subsets of $\mathbb{R}$ and their complements form a $\sigma$-algebra, and giving the former probability $0$ and the latter $1$ makes $\mathbb{R}$ an atom although every point has probability $0$.
 
 
 ## III
 ---
-Suppose $(A\_{n})\_{n \in \mathbb{N}}$ such that $A \subset \Omega$. If $(A\_{n})\_{n\in\mathbb{N}}$ is [strictly increasing](https://en.wikipedia.org/wiki/Monotonic_function) (strictly decreasing), i.e. if $A\_{n} \subset A\_{n+1}$ ($A\_{n} \supset A\_{n+1}$), then $\lim\_{n \to \infty} A\_{n} = \bigcup\_{n=1}^{\infty} A\_{n}$ ($\lim\_{n \to \infty} A\_n = \bigcap\_{n=1}^{\infty} A\_{n}$). A limit of increasing unions of front segments $\bigcup\_{k=1}^{n} A\_{k} \subset \bigcup\_{k=1}^{n+1} A\_k$ is defined by $\lim\_{n \to \infty} \bigcup\_{k=1}^{n} A\_k = \bigcup\_{k=1}^{\infty} A\_k$, and also a limit of decreasing unions of tail segments $\bigcup\_{k=n}^{\infty} A\_{k} \supset \bigcup\_{k=n+1}^{\infty} A\_{k}$ is defined by $\lim\_{n\to\infty} \bigcup\_{k=n}^{\infty} A\_{k} = \bigcap\_{n=1}^{\infty} \bigcup\_{k=n}^{\infty} A\_{k} = \limsup_{n\to\infty} A\_{n}$. If $\lim\_{n\to\infty} \bigcap\_{k=n}^{\infty}A\_{k} = \bigcup\_{n=1}^{\infty}\bigcap\_{k=n}^{\infty} A\_{k} = \liminf\_{n\to\infty} A\_{n}$ is equal to $\limsup_{n\to\infty} A\_{n}$, then $\liminf_{n\to\infty} A\_{n} = \limsup_{n\to\infty} A\_{n} = \lim\_{n\to\infty} A\_{n} = A$. Notice that the first equality is not true in general.
+**Definition.** For events $A\_1, A\_2, \dots$,
 
-$P$ on a [bounded monotonic sequence](http://www-groups.mcs.st-andrews.ac.uk/~john/analysis/Lectures/L8.html) can be a continuous function **(#6)** as analogue to a real-valued function with well-defined limits. That is, if $A_n \nearrow A$ ($A_n \searrow A$) as $n \to \infty$, then $P(A_n) \nearrow P(A)$ ($P(A_n) \searrow P(A)$) as $n \to \infty$. In particular, based on the chain of probabilistic inequalities $P\left(\liminf\_{n \to \infty}A\_{n}\right) \leq \liminf\_{n \to \infty} P\left(A\_{n} \right) \leq \limsup\_{n \to \infty} P\left(A\_{n} \right) \leq P\left(\limsup\_{n \to \infty} A\_{n}\right)$, if $A\_{n} \to A$ as $n \to \infty$, then $P\left(A\_{n} \right) \to P(A)$ as $n \to \infty$. The interchange of a probability measure and a limit of a union is also allowed, thus we can express $\lim_{n \to \infty} P(\bigcup_{k=1}^{n} A_{k}) = P(\bigcup_{k=1}^{\infty} A_{k})$ and $\lim_{n \to \infty} P(\bigcup_{k=n}^{\infty} A_{n}) = P(\bigcap_{n=1}^{\infty} \bigcup_{k=n}^{\infty} A_{k}) = P(\limsup_{n\to\infty} A\_{n})$.
+$$
+\limsup_{n} A_n = \bigcap_{n \geq 1} \bigcup_{k \geq n} A_k = \lbrace A_n \text{ i.o.} \rbrace, \qquad \liminf_{n} A_n = \bigcup_{n \geq 1} \bigcap_{k \geq n} A_k = \lbrace A_n \text{ eventually} \rbrace,
+$$
 
-The [Borel–Cantelli lemmas](https://en.wikipedia.org/wiki/Borel%E2%80%93Cantelli_lemma) state sufficient conditions for a convergence of a sequence $(A\_n)\_{n\in\mathbb{N}}$ of events. The 1st lemma states that if $\Sigma\_{n=1}^{\infty} P(A_n) < \infty$, then $P(A_n \text{ i.o.}) = P(\limsup\_{n \to \infty} A_n) \leq \lim_{n\to\infty}\Sigma_{k=n}^{\infty}P(A\_k) = 0$ **(#7)**, signifying that almost all $\omega\in\Omega$ belong to at most a finite number of events $A_n$. The 2nd lemma states that if $\Sigma_{n=1}^{\infty} P(A\_n) = \infty$ and the events $A_n$ are independent, then $P(A_n \text{ i.o.}) = 1$. Nevertheless, despite their usabilities in mathematical proofs, the [infinite monkey theorem](https://en.wikipedia.org/wiki/Infinite_monkey_theorem) which Émile Borel brought to the public encountered the pungent criticism and the 2nd lemma was considered to be quite nonsense.
+and $A\_n \to A$ if both equal $A$. An increasing sequence has $A\_n \uparrow \bigcup\_n A\_n$, and a decreasing one $A\_n \downarrow \bigcap\_n A\_n$.
 
+*Remarks.* The first collects the outcomes lying in infinitely many $A\_n$ and the second those lying in all but finitely many, so $\liminf\_n A\_n \subseteq \limsup\_n A\_n$ and $I\_{\limsup\_n A\_n} = \limsup\_n I\_{A\_n}$. Equality can fail, as $A\_n$ alternating between $A$ and $A^c$ has $\liminf\_n A\_n = \emptyset$ and $\limsup\_n A\_n = \Omega$.
 
-## **
---- 
-**(#1)** In time: consecutive coin tosses; In space: throwing multiple coins at once; **(#2)** Let $\Omega = \lbrace 1,2,3 \rbrace$, $A\_{0} = \lbrace 1 \rbrace$, $A\_{1} = \lbrace 2,3 \rbrace$, then $\mathcal{F} := \sigma(A_0) = \sigma(A_1) = \lbrace \emptyset, \lbrace 1 \rbrace, \lbrace 2,3 \rbrace, \lbrace 1,2,3 \rbrace \rbrace$. **(#3)** $\mathcal{M}$ is a collection of sets that is closed under countable monotone unions and intersections. **(#4)** $A$ and $B$ are ind.: $P(A \cap B) = P(A)P(B)$; $A$ and $B$ are disjoint (mutually exclusive): $A \cap B = \emptyset$; **(#5)** $P(B) > 0$ means that $\exists A \subset B$ s.t. $0 < P(A) < P(B)$. **(#6)** $f:D \to R$ is continuous at $x_0 \in D$ iff $\forall\varepsilon>0\, \exists\delta>0\, \forall{x}\in{D}$ s.t. $|x-x_0|<\delta: |f(x)-f(x_0)|<\varepsilon$. **(#7)** Let $X = [0,1]$, $E_k = [0, 1/2^k]$, and $\lambda$ be a Lebesgue measure, then $\Sigma_{k=1}^{\infty}\lambda(E_k)=1$, and so $\lambda\left(\lbrace x \in X: x \in E\_{k} \;\forall k \in \mathbb{N} \rbrace \right) = 0$.
+**Theorem** (continuity)**.** If $A\_n \uparrow A$ or $A\_n \downarrow A$, then $P(A\_n) \to P(A)$, and for any events
+
+$$
+P(\liminf_n A_n) \leq \liminf_n P(A_n) \leq \limsup_n P(A_n) \leq P(\limsup_n A_n),
+$$
+
+so $A\_n \to A$ implies $P(A\_n) \to P(A)$.
+
+<details><summary>Proof</summary>
+If $A_n \uparrow A$, then $A$ is the disjoint union of $A_1$ and the $A_n \setminus A_{n-1}$, so $P(A) = \lim_n P(A_n)$ by countable additivity, and decreasing sequences follow by complements. The inequalities apply this to $\bigcap_{k \geq n} A_k \uparrow \liminf_n A_n$ and $\bigcup_{k \geq n} A_k \downarrow \limsup_n A_n$, which enclose $A_n$. &#8718;
+</details>
+
+*Remarks.* A finitely additive $P$ is countably additive exactly when it is continuous from below, so continuity carries the whole of the third axiom. Continuity from above uses $P(\Omega) < \infty$, and Lebesgue measure on $\mathbb{R}$ fails it, with $[n, \infty) \downarrow \emptyset$ while every $[n, \infty)$ has measure $\infty$.
+
+**Theorem** ([Borel-Cantelli lemmas]())**.** For events $A\_1, A\_2, \dots$,
+
+- if $\sum\_n P(A\_n) < \infty$, then $P(A\_n \text{ i.o.}) = 0$;
+- if the $A\_n$ are independent, $P(\bigcap\_{k \in J} A\_k) = \prod\_{k \in J} P(A\_k)$ for every finite $J$, and $\sum\_n P(A\_n) = \infty$, then $P(A\_n \text{ i.o.}) = 1$.
+
+<details><summary>Proof</summary>
+The first follows from $P(\limsup_n A_n) \leq P(\bigcup_{k \geq n} A_k) \leq \sum_{k \geq n} P(A_k) \to 0$. For the second, independence of the complements and $1 - x \leq e^{-x}$ give $P(\bigcap_{k=n}^m A_k^c) = \prod_{k=n}^m (1 - P(A_k)) \leq \exp(-\sum_{k=n}^m P(A_k)) \to 0$ as $m \to \infty$, so every $\bigcup_{k \geq n} A_k$ has probability $1$. &#8718;
+</details>
+
+- <div style="display: inline-block;"><iframe src="../assets/blog/maths.html#201/borel" width="520" height="226" style="border: none; overflow: hidden;" scrolling="no"></iframe> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">Forty outcomes, one per row, and a mark where the independent event $A_n$ with $P(A_n) = n^{-p}$ occurs, $n$ on a log scale. For $p \leq 1$ the sum diverges and the marks never stop, while for $p > 1$ each row eventually falls silent, beyond the frame when $p$ is near $1$.</div></div>
+
+**Examples.**
+
+- The intervals $E\_k = [0, 2^{-k}]$ in $[0, 1]$ have $\sum\_k \lambda(E\_k) = 1$ under Lebesgue measure, and $\limsup\_k E\_k = \bigcap\_k E\_k = \lbrace 0 \rbrace$ is null, as the first lemma says;
+- the intervals $(0, 1/n)$ in $[0, 1)$ have $\sum\_n 1/n = \infty$ but $\limsup\_n (0, 1/n) = \emptyset$, so the second lemma needs its independence;
+- a stream of independent uniform keystrokes types a given text of $m$ letters in each of the disjoint blocks of positions $jm + 1, \dots, (j+1)m$, independently and with the same probability $p > 0$, so by the second lemma it types the text infinitely often almost surely, the [infinite monkey theorem]() of Borel.
+
+*Remark.* Pairwise independence is enough for the second lemma, by Chebyshev's inequality applied to the number of the $A\_k$ with $k \leq n$ that occur. With independence the event $\lbrace A\_n \text{ i.o.} \rbrace$ can only have probability $0$ or $1$, and the lemmas decide which.

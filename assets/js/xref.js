@@ -29,6 +29,7 @@
   // has settled the heights
   function fillPreview(body, html, section) {
     body.innerHTML = html;
+    if (window.groupStatements) groupStatements(body);
     var links = body.querySelectorAll('a');
     for (var i = 0; i < links.length; i++) {
       links[i].removeAttribute('href');

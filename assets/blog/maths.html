@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* One live figure of a maths post, named by the hash as 2NN/name, so an
+     iframe src of maths.html#206/typewriter draws 206's typewriter */
+  body { margin: 0; background: #fff; color: #4d4852; font: 11px "Helvetica Neue", Arial, sans-serif; user-select: none; }
+  canvas { display: block; }
+  canvas.turn { cursor: grab; touch-action: none; }
+  canvas.turn:active { cursor: grabbing; }
+  .fig-row { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 8px; white-space: nowrap; overflow: hidden; }
+  .fig-row input[type="range"] { width: 130px; accent-color: #000080; }
+  .fig-row b { font: 11px "Lucida Console", Menlo, Monaco, monospace; color: #000; font-variant-numeric: tabular-nums; white-space: pre; }
+  .fig-row select { height: 20px; font: 11px "Helvetica Neue", Arial, sans-serif; }
+  .fig-btn { height: 20px; padding: 0 8px; background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; font: 11px "Helvetica Neue", Arial, sans-serif; color: #000; cursor: pointer; }
+  .fig-btn:active, .fig-btn[aria-pressed="true"] { border-color: #000 #fff #fff #000; background: #d4d0d4; }
+  .fig-btn:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
+  /* as wide as ❚❚ Pause, so the row holds still when it toggles */
+  .fig-run { min-width: 66px; }
+</style>
+</head>
+<body>
+<div class="fig"></div>
+<script src="maths/kit.js"></script>
+<script>
+  // the post's own figures, then the one the hash names, or a word that it is missing
+  var key = decodeURIComponent(location.hash.slice(1));
+  var fig = document.querySelector('.fig');
+  var own = document.createElement('script');
+  own.src = 'maths/' + key.split('/')[0] + '.js';
+  own.onload = own.onerror = function () {
+    if (FIGS[key]) FIGS[key](fig);
+    else fig.textContent = 'no figure ' + key;
+  };
+  document.body.appendChild(own);
+</script>
+</body>
+</html>

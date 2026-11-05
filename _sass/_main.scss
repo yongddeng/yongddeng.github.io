@@ -888,7 +888,9 @@ img.task-menu-ic {
 // Name / Size / Type / Created columns. Used by the folder windows and My
 // Computer's file pane. A column's head and cells share its width and sit
 // $det-gutter in from its edges, the head's bevel taking 1px of it; text
-// to the left, sizes to the right, sizes and dates in figures of one width
+// to the left, sizes to the right, sizes and dates in figures of one width.
+// The head and rows read in the posts' font, as System Properties sets it,
+// at 12px, so a folder of a dozen posts fits its window whatever the text size
 $det-gutter: 8px;
 $det-size: 64px;   // 10.0MB
 $det-type: 88px;   // Application
@@ -897,6 +899,7 @@ $det-date: 88px;   // 2026-01-01
 	.det-head {
 		display: flex;
 		background: #c0c0c0;
+		font-family: var(--font, inherit);
 		font-size: 12px;
 
 		span {
@@ -919,6 +922,8 @@ $det-date: 88px;   // 2026-01-01
 		list-style: none;
 		margin: 0;
 		padding: 2px 0 4px;
+		font-family: var(--font, inherit);
+		font-size: 12px;
 
 		li {
 			padding: 0;
@@ -961,7 +966,6 @@ $det-date: 88px;   // 2026-01-01
 					flex: none;
 					box-sizing: border-box;
 					padding: 0 $det-gutter;
-					font-size: 12px;
 					color: #55505a;
 				}
 

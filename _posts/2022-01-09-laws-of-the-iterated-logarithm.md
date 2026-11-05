@@ -8,37 +8,59 @@ use_math: true
 
 # Law of the Iterated Logarithm
 ---
-For sums of independent random variables we already know two limit theorems: the law of large numbers and the central limit theorem. The LLN describes for large $n \in \mathbb{N}$ the typical behavior, or average value behavior, of sums of $n$ random variables. On the other hand, the CLT quantifies the typical fluctuations about this average value. The goal is to quantify the typical fluctuations of the whole process as $n \to \infty$. The main message is: while for fixed time $n$ the partial sum $S_n$ deviates by approximately $\sqrt{n}$ from its expected value (CLT), the maximal fluctuation up to time $n$ is of order $\sqrt{n \log \log n}$ (LIL) as stated by the Hartman–Wintner theorem.
-
-1. Khintchine (i.i.d.): zero mean and unit variance.
-2. Kolmogorov (ind.): zero mean and finite variance.
-   - Hartman-Wintner-Strassen (i.i.d.): zero mean and finite variance.
-   - Khinchin (i.i.d.): a special case of Hartman-Wintner.
+Between the strong law, $S\_n = o(n)$ almost surely, and the central limit theorem, $S\_n$ of order $\sqrt{n}$ in distribution, lies the exact almost sure size of the excursions of a sum of independent random variables. It is $\sqrt{2n\log\log n}$, which the path reaches infinitely often and exceeds by any fixed factor only finitely often<!-- , while for fixed time $n$ the partial sum deviates by about $\sqrt{n}$ from its mean -->.
 
 
 ## I
 ---
-Consider i.i.d. random variables $X_k$ with $\operatorname{E}X_k = 0$ and $\operatorname{Var}X_k = 1$, and let the partial sum $S_n = \Sigma_{k=1}^{n} X_k$, then the (Khinchin's) LIL states that $\limsup_{n \to \infty} {S_n \over \sqrt{2n \log \log n}} = 1$ a.s. **(#1)**. On the other hand, the CLT tells us that ${S_n \over \sqrt{n}} \sim \mathcal{N}(0, 1)$. The focus is not a single partial sum $S_n$, but rather a partial sum process $(S_n)_{n \in \mathbb{N}}$ and its overall behaviour through values of $n$. That is, the LIL provides a sharp boundary between which values of $n$ the normalised partial sum $S_n / \sqrt{n}$ oscillates. In particular, for any $\varepsilon > 0$, the event $\lbrace S_n > (1+\varepsilon)\sqrt{2n\log\log n} \rbrace$ occurs finitely often, whereas $\lbrace S_n > (1-\varepsilon)\sqrt{2n\log\log n} \rbrace$ occurs infinitely often **(#2)**.
+**Theorem** ([Hartman-Wintner]())**.** If $X\_1, X\_2, \dots$ are i.i.d. with $\operatorname{E}X\_1 = 0$ and $\operatorname{E}X\_1^2 = \sigma^2 \in (0, \infty)$, and $S\_n = \sum\_{k=1}^{n}X\_k$, then almost surely
 
-[Kolmogorov's LIL]() generalises to independent (not necessarily identically distributed) random variables. If $(X\_n)\_{n \in \mathbb{N}}$ consists of ind. random variables with $\operatorname{E}X\_k = 0$, $\operatorname{Var}X\_k = \sigma^2\_k < \infty$, and $\vert X\_k \vert \leq c\_k$ a.s. for some constants $c\_k$ with $c\_k = \mathcal{o}(\sqrt{s^2\_n / \log \log s^2\_n})$ as $n \to \infty$, where $s^2\_n = \Sigma\_{k=1}^{n}\sigma^2\_k \to \infty$, then $\limsup\_{n \to \infty} S\_n / \sqrt{2s^2\_n \log \log s^2\_n} = 1$ a.s. The assumption on the boundedness of $X\_k$ is crucial and reflects that the LIL is sensitive to the tail behavior of the summands.
+$$
+\limsup_{n \to \infty}\frac{S_n}{\sqrt{2\sigma^2 n\log\log n}} = 1 \quad \text{and} \quad \liminf_{n \to \infty}\frac{S_n}{\sqrt{2\sigma^2 n\log\log n}} = -1.
+$$
+
+<details><summary>Proof</summary>
+Skorokhod's embedding writes $S_n = B_{T_n}$ for a standard Brownian motion $B$ and stopping times $T_n$ with i.i.d. increments of mean $\sigma^2$, so $T_n/n \to \sigma^2$ almost surely by the strong law. The oscillation of $B$ between the times $T_n$ and $\sigma^2 n$ is then $o(\sqrt{n\log\log n})$ almost surely, and the law for Brownian motion below transfers to $S_n$, which is how Strassen proved the theorem in 1964. &#8718;
+</details>
+
+*Remarks.* Equivalently, for every $\varepsilon > 0$, almost surely $S\_n > (1 + \varepsilon)\sqrt{2\sigma^2 n\log\log n}$ only finitely often and $S\_n > (1 - \varepsilon)\sqrt{2\sigma^2 n\log\log n}$ infinitely often, while with the other common normalisation $\limsup\_n S\_n/\sqrt{\sigma^2 n\log\log n} = \sqrt{2}$. As $S\_n/\sqrt{n}$ is tight, $S\_n/\sqrt{2\sigma^2 n\log\log n} \xrightarrow{p} 0$, a natural sequence that converges in probability and not almost surely.
+
+**Theorem** ([Kolmogorov]())**.** If $X\_1, X\_2, \dots$ are independent with $\operatorname{E}X\_k = 0$, variances $\sigma\_k^2$ with $s\_n^2 = \sum\_{k=1}^{n}\sigma\_k^2 \to \infty$, and $\lvert X\_n \rvert \leq c\_n$ almost surely for constants $c\_n = o(\sqrt{s\_n^2/\log\log s\_n^2})$, then $\limsup\_n S\_n/\sqrt{2s\_n^2\log\log s\_n^2} = 1$ almost surely.
+
+<details><summary>Proof</summary>
+Kolmogorov's exponential bounds put $P(S_n > xs_n)$ between $\exp(-\frac{x^2}{2}(1 + \gamma))$ and $\exp(-\frac{x^2}{2}(1 - \gamma))$ for large $x$ with $xc_n/s_n$ small, and the bound on $c_n$ keeps $x = \sqrt{2\log\log s_n^2}$ in that range. They replace the Gaussian tails in the argument for Brownian motion below, along the indices where $s_n^2$ first passes $\alpha^k$. &#8718;
+</details>
+
+*Remark.* Khinchin (1924) found the law for coin tossing, Kolmogorov (1929) for bounded independent summands, Hartman and Wintner (1941) for i.i.d. ones with finite variance, and Strassen (1966) the converse, that i.i.d. summands with $\limsup\_n \lvert S\_n \rvert/\sqrt{n\log\log n} < \infty$ on a set of positive probability have $\operatorname{E}X\_1^2 < \infty$ and $\operatorname{E}X\_1 = 0$. The law is sensitive to the tails of single summands, and Marcinkiewicz and Zygmund showed that the $o$ in the bound on $c\_n$ cannot be weakened to $O$.
 
 
 ## II
 ---
-The [Hartman-Wintner theorem]() (1941) establishes the LIL for i.i.d. random variables under the assumption of a finite second moment, without requiring bounded summands. Let $(X\_n)\_{n \in \mathbb{N}}$ be i.i.d. with $\operatorname{E}X\_1 = 0$ and $\operatorname{E}X^2\_1 = \sigma^2 < \infty$. Then $\limsup\_{n \to \infty} S\_n / \sqrt{2n\sigma^2 \log \log n} = 1$ a.s. and $\liminf\_{n \to \infty} S\_n / \sqrt{2n\sigma^2 \log \log n} = -1$ a.s. Conversely, if $(X\_n)\_{n \in \mathbb{N}}$ is i.i.d. with $\operatorname{E}X\_1 = 0$ and $\limsup\_{n \to \infty} \vert S\_n \vert / \sqrt{n \log \log n} < \infty$ a.s., then $\operatorname{E}X^2\_1 < \infty$.
+**Theorem** (law of the iterated logarithm for [Brownian motion]())**.** A standard Brownian motion $B$ satisfies, almost surely, (i) $\limsup\_{t \to \infty}B\_t/\sqrt{2t\log\log t} = 1$; (ii) $\limsup\_{t \to 0^+}B\_t/\sqrt{2t\log\log(1/t)} = 1$.
 
-The proof of the upper bound uses the [Borel-Cantelli lemma]() and [exponential bounds](). One considers the subsequence $n\_k = \lfloor \alpha^k \rfloor$ for some $\alpha > 1$ and shows that $P(S\_{n\_k} > (1+\varepsilon)\sqrt{2n\_k \log \log n\_k}) \leq \exp(-(1+\varepsilon)^2 \log \log n\_k)$. Since the sum of these probabilities converges, the first Borel-Cantelli lemma gives the upper bound. The lower bound is more delicate and requires the second Borel-Cantelli lemma for weakly dependent events; one must show $P(\max\_{n\_{k-1} < j \leq n\_k} S\_j - S\_{n\_{k-1}} > (1-\varepsilon)\sqrt{2(n\_k - n\_{k-1}) \log \log n\_k})$ is sufficiently large **(#3)**.
+<details><summary>Proof</summary>
+Let $h(t) = \sqrt{2t\log\log t}$ and $t_k = \alpha^k$. By the reflection principle $P(\max_{s \leq t_k}B_s > (1 + \varepsilon)h(t_{k-1})) \leq \exp(-(1 + \varepsilon)^2\alpha^{-1}\log\log t_{k-1})$, a constant times $k^{-(1+\varepsilon)^2/\alpha}$, which is summable for $1 < \alpha < (1 + \varepsilon)^2$, so the first Borel-Cantelli lemma bounds $B_t \leq (1 + \varepsilon)h(t)$ for all large $t$. For the lower bound the increments $B_{t_k} - B_{t_{k-1}}$ are independent, the Gaussian tail makes $P(B_{t_k} - B_{t_{k-1}} > (1 - \varepsilon)h(t_k))$ non-summable once $\alpha$ is large, and the second lemma together with $-B_{t_{k-1}} \leq 2h(t_{k-1}) \approx 2\alpha^{-1/2}h(t_k)$ gives $B_{t_k} > (1 - 2\varepsilon)h(t_k)$ infinitely often. Time inversion, $tB_{1/t}$ being again a Brownian motion, turns (i) into (ii). &#8718;
+</details>
 
-[Strassen's functional LIL]() (1964) strengthens the Hartman-Wintner result. Let $\eta\_n(t) = S\_{\lfloor nt \rfloor} / \sqrt{2n \log \log n}$ for $t \in [0,1]$ and $K = \lbrace f \in C[0,1] : f(0) = 0,\, \int\_0^1 (f^{\prime}(t))^2 \,\mathrm{d}t \leq 1 \rbrace$ be the unit ball in the [Cameron-Martin space](). The theorem states that $\lbrace \eta\_n \rbrace$ is relatively compact in $C[0,1]$ and its set of limit points is exactly $K$, a.s. The Khinchin's LIL follows by evaluating at $t = 1$.
+- <div style="display: inline-block;"><iframe src="../assets/blog/maths.html#209/clock" width="600" height="246" style="border: none; overflow: hidden;" scrolling="no"></iframe> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">A coin-tossing walk to $n = 10^6$ on a logarithmic clock, $S_n/\sqrt{n}$ against $\log n$, between $\pm\sqrt{2\log\log n}$ in orange and $\pm 1$ in grey, red where it passes the envelope. The walk looks the same in every decade, and the envelope is the slow growth of its records.</div></div>
+
+*Remarks.* On the logarithmic clock $u = \log t$ the process $U\_u = e^{-u/2}B\_{e^u}$ is a stationary [Ornstein-Uhlenbeck process]() with $\operatorname{E}U\_u U\_v = e^{-\lvert u - v \rvert/2}$, so it forgets its past in a fixed time and its maximum over $[0, T]$ grows like $\sqrt{2\log T}$, as for independent standard normals. With $T = \log t$ this is $\sqrt{2\log\log t}$, and the law becomes a statement about extremes.
+
+*Remark.* At a fixed time (ii) makes $B$ fail to be Hölder of order $1/2$, while uniformly over $[0, 1]$ Lévy's modulus governs, $\limsup\_{h \to 0}\sup\_{\lvert t - s \rvert \leq h}\lvert B\_t - B\_s \rvert/\sqrt{2h\log(1/h)} = 1$ almost surely, the supremum over time costing $\log$ in place of $\log\log$.
 
 
 ## III
 ---
-A hierarchy of scaling emerges from the three limit theorems. The LLN asserts $S\_n / n \to 0$ a.s., that is, $S\_n = \mathcal{o}(n)$. The CLT refines this to $S\_n / \sqrt{n} \xrightarrow{d} \mathcal{N}(0, \sigma^2)$, indicating fluctuations of order $\sqrt{n}$. The LIL further sharpens the picture: $S\_n$ oscillates between $\pm\sigma\sqrt{2n \log \log n}$ and the envelope $\sqrt{2n \log \log n}$ is exact a.s. In summary, the typical deviation at time $n$ is $\sqrt{n}$ (CLT), but the maximal deviation up to time $n$ is $\sqrt{n \log \log n}$ (LIL).
+**Theorem** ([Strassen]())**.** Under the hypotheses of the Hartman-Wintner theorem, let $\eta\_n \in C[0, 1]$ interpolate $\eta\_n(k/n) = S\_k/\sqrt{2\sigma^2 n\log\log n}$ linearly, for $n \geq 3$. Almost surely $(\eta\_n)$ is relatively compact in the supremum norm and its set of limit points is $K = \lbrace f \in C[0, 1] \mid f(0) = 0, f \text{ absolutely continuous}, \int\_0^1 f^{\prime}(t)^2\,\mathrm{d}t \leq 1 \rbrace$, the unit ball of the [Cameron-Martin space]().
 
-A collection $\lbrace S\_t \rbrace\_{t \in T}$ which appears in the CLT and LIL is also a [random walk](). In fact, the CLT and LIL describe important aspects of the behavior of simple random walks on $\mathbb{Z}$. The CLT entails that as $n$ increases, the distribution of $S\_n / \sqrt{n}$ approaches a normal distribution. The LIL provides a precise envelope: a simple random walk with i.i.d. increments of zero mean and unit variance satisfies $\limsup\_{n \to \infty} S\_n / \sqrt{2n \log \log n} = 1$ a.s. For [Brownian motion]() $B = (B\_t)\_{t \geq 0}$, the continuous analogue reads $\limsup\_{t \to \infty} B\_t / \sqrt{2t \log \log t} = 1$ a.s. and $\limsup\_{t \to 0^+} B\_t / \sqrt{2t \log \log (1/t)} = 1$ a.s., describing the local regularity of sample paths near the origin **(#4)**.
+<details><summary>Proof</summary>
+Skorokhod's embedding again reduces it to Brownian motion, where Schilder's large deviations give $P(\lVert B_{n\cdot}/\sqrt{2n\log\log n} - f \rVert_\infty < \varepsilon) \approx (\log n)^{-\int_0^1 f'^2}$ on $C[0, 1]$. Along $n = \alpha^k$ these probabilities are summable for paths outside $K$, which the first Borel-Cantelli lemma excludes, and not summable for $f$ inside $K$, which the second lemma, on nearly independent blocks, reaches. &#8718;
+</details>
 
+**Corollary.** Almost surely, (i) the limit points of $S\_n/\sqrt{2\sigma^2 n\log\log n}$ fill $[-1, 1]$; (ii) $\limsup\_n \sum\_{k=1}^{n}S\_k/(n\sqrt{2\sigma^2 n\log\log n}) = 1/\sqrt{3}$.
 
-## **
----
-**(#1)** An equivalent statement writes $\limsup\_{n \to \infty} S\_n / \sqrt{2n \log \log n} = \sqrt{2}$ when $\operatorname{Var}X\_k = 1$ is absorbed into the normalisation. **(#2)** This is a consequence of the Borel-Cantelli lemma: convergence of the probability sum implies finitely many occurrences, divergence implies infinitely many. **(#3)** Gut (2005, Ch.9) provides a complete treatment. **(#4)** The local LIL for Brownian motion follows from the scaling property $B\_t \overset{d}{=} \sqrt{t}\,B\_1$.
+<details><summary>Proof</summary>
+Both are continuous functionals of $\eta_n$, $f \mapsto f(1)$ and, up to a Riemann sum error that equicontinuity removes, $f \mapsto \int_0^1 f$. Their suprema over $K$ are $1$, by Cauchy-Schwarz $f(1)^2 \leq \int_0^1 f'^2$ with equality at $f(t) = t$, and $1/\sqrt{3}$, as $\int_0^1 f = \int_0^1 (1 - s)f'(s)\,\mathrm{d}s \leq (\int_0^1 (1 - s)^2\,\mathrm{d}s)^{1/2}$, and $K$ is convex and symmetric, so every value in between is a limit point. &#8718;
+</details>
+
+*Remarks.* The scales interlock. For $0 < p < 2$ a finite $p$-th moment, with mean zero when $p \geq 1$, gives $S\_n = o(n^{1/p})$ almost surely (Marcinkiewicz and Zygmund), the strong law being $p = 1$, while at $p = 2$ the central limit theorem puts $S\_n$ at order $\sqrt{n}$ in distribution and the law of the iterated logarithm at $\sqrt{2\sigma^2 n\log\log n}$ almost surely. The maximum has a lower envelope as well, $\liminf\_n \max\_{k \leq n}\lvert S\_k \rvert/\sqrt{n/\log\log n} = \pi/\sqrt{8}$ almost surely for the simple random walk (Chung 1948).

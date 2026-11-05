@@ -1,0 +1,53 @@
+// The maths posts' statements and proofs. statements.js wraps each run-in
+// head (Definition., Theorem (…)., Example., Remark.) and the display or
+// list that completes it in a .st block; definitions, results and examples
+// are tinted by kind, and a proof, the <details> after a statement, hangs
+// from it folded, in grey. The blocks are the post's own children, which
+// keeps these rules off any .st an interactive post draws inside itself
+$st-gap: 15px;
+
+.post_content {
+	> .st {
+		margin-bottom: $st-gap;
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+	> .st-def, > .st-thm, > .st-ex {
+		padding: 7px 9px;
+	}
+	> .st-def { background: #edf1f9; }
+	> .st-thm { background: #fbf5de; }
+	> .st-ex { background: #ebf4ea; }
+
+	> .st + details {
+		margin: (-$st-gap) 0 $st-gap;
+		padding: 3px 9px 4px;
+		background: #f1f0f3;
+		line-height: 150%;
+
+		&[open] {
+			padding-left: 10px;
+			border-left: 2px solid #b7b2ba;
+		}
+		> summary {
+			display: inline-block;
+			color: #4d4852;
+			font-style: italic;
+			cursor: pointer;
+			list-style: none;
+
+			&::-webkit-details-marker {
+				display: none;
+			}
+			&::before {
+				content: '\25B8\00A0';
+				font-style: normal;
+			}
+		}
+		&[open] > summary::before {
+			content: '\25BE\00A0';
+		}
+	}
+}
