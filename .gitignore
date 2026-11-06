@@ -1,3 +1,5 @@
 _site/
 
 .claude/
+.DS_Store
+_todo/
