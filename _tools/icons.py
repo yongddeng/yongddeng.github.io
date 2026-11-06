@@ -18,7 +18,7 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "
 PAL = {
     ".": None, "k": (0, 0, 0), "w": (255, 255, 255), "g": (192, 192, 192), "d": (128, 128, 128),
     "n": (0, 0, 128), "r": (176, 0, 0), "t": (0, 128, 128), "v": (176, 166, 204),
-    "y": (184, 134, 11), "p": (128, 0, 128), "e": (30, 30, 30), "b": (24, 64, 45), "a": (27, 175, 122),
+    "y": (184, 134, 11), "p": (128, 0, 128), "o": (194, 91, 0), "e": (30, 30, 30), "b": (24, 64, 45),
 }
 
 
@@ -42,10 +42,10 @@ def rect(g, x, y, w, h, c):
             g[j][i] = c
 
 
-def box(g, x0, y0, x1, y1, fill="w", shadow=False):
-    # a black outline around a fill, and Windows 98's grey shadow under the right and bottom edges
+def box(g, x0, y0, x1, y1, shadow=False):
+    # a black outline around white, and Windows 98's grey shadow under the right and bottom edges
     rect(g, x0, y0, x1 - x0 + 1, y1 - y0 + 1, "k")
-    rect(g, x0 + 1, y0 + 1, x1 - x0 - 1, y1 - y0 - 1, fill)
+    rect(g, x0 + 1, y0 + 1, x1 - x0 - 1, y1 - y0 - 1, "w")
     if shadow:
         rect(g, x1 + 1, y0 + 1, 1, y1 - y0 + 1, "d")
         rect(g, x0 + 1, y1 + 1, x1 - x0 + 1, 1, "d")
@@ -154,6 +154,31 @@ def scheduler48():
     return g
 
 
+# ---- init: the signal down a stack's layers in navy, the gradient back up
+# them in orange, as two staircases that cross at the middle ----
+def stairs(g, x, y, steps, run, rise, thick, c):
+    # steps of run across and rise down (up, if rise is negative), thick pixels wide
+    for k in range(steps):
+        rect(g, x + k * run, y + k * rise, run + thick, thick, c)
+        rect(g, x + (k + 1) * run, min(y + k * rise, y + (k + 1) * rise), thick, abs(rise) + thick, c)
+
+
+def init16():
+    g = canvas(16)
+    box(g, 0, 1, 15, 14)
+    stairs(g, 3, 11, 4, 2, -2, 1, "o")
+    stairs(g, 3, 3, 4, 2, 2, 1, "n")
+    return g
+
+
+def init48():
+    g = canvas(48)
+    box(g, 1, 4, 45, 43, shadow=True)
+    stairs(g, 9, 34, 5, 6, -5, 2, "o")
+    stairs(g, 9, 11, 5, 6, 5, 2, "n")
+    return g
+
+
 # ---- device: the editor's dark half, its lines in Dark+'s colours and the
 # debugger's arrow at the one in play, beside the board, two GPUs over the
 # CPU, a bus lit between ----
@@ -196,40 +221,11 @@ def device48():
     return g
 
 
-# ---- sampler: a page of text, its lines the answer so far, the last ending
-# in the draft's tokens, kept, aqua under them, one refused, red, and the
-# caret where the next comes ----
-def sampler16():
-    g = canvas(16)
-    box(g, 0, 1, 15, 14)
-    for y, length in ((4, 10), (7, 12)):
-        rect(g, 2, y, length, 1, "n")
-    rect(g, 2, 10, 3, 1, "n")
-    rect(g, 6, 10, 4, 1, "a")
-    rect(g, 11, 10, 2, 1, "r")
-    rect(g, 2, 12, 1, 2, "k")
-    return g
-
-
-def sampler48():
-    g = canvas(48)
-    box(g, 1, 4, 45, 43, shadow=True)
-    for y, length in ((10, 30), (16, 36), (22, 24), (28, 33)):
-        rect(g, 5, y, length, 2, "n")
-    rect(g, 5, 34, 8, 2, "n")
-    for x, length in ((15, 6), (23, 5)):
-        rect(g, x, 34, length, 2, "n")
-        rect(g, x, 37, length, 1, "a")
-    rect(g, 30, 34, 6, 2, "r")
-    rect(g, 39, 32, 1, 7, "k")
-    return g
-
-
 def main():
     x8 = sys.argv[2] if sys.argv[1:2] == ["--x8"] else None
     for name, grid in [("lil-16", lil16()), ("lil-48", lil48()), ("optimiser-16", optimiser16()), ("optimiser-48", optimiser48()),
-                       ("scheduler-16", scheduler16()), ("scheduler-48", scheduler48()), ("device-16", device16()), ("device-48", device48()),
-                       ("sampler-16", sampler16()), ("sampler-48", sampler48())]:
+                       ("scheduler-16", scheduler16()), ("scheduler-48", scheduler48()), ("init-16", init16()), ("init-48", init48()),
+                       ("device-16", device16()), ("device-48", device48())]:
         png(os.path.join(OUT, name + ".png"), grid)
         if x8:
             png(os.path.join(x8, name + "-x8.png"), [[c for c in row for _ in range(8)] for row in grid for _ in range(8)])

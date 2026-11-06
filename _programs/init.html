@@ -1,0 +1,52 @@
+---
+title: init.exe
+date: 2023-01-04
+note: "302"
+icon: init-16.png
+large: init-48.png
+winclass: exe-win ini-win
+description: A ring of inputs through a deep stack at initialisation, each layer's ring on its own top two principal components as a tube that turns, its length by layer against √χ, and the input-output Jacobian's singular values, under linear, tanh or ReLU with Gaussian or orthogonal weights, from the ordered phase through the edge of chaos to chaos, and at dynamical isometry.
+---
+
+<div class="exe ini">
+<div class="lit-tool">
+<span class="exe-lbl"><i>φ</i></span>
+<button type="button" class="lit-btn" data-act-f="linear" title="φ(x) = x">linear</button>
+<button type="button" class="lit-btn" data-act-f="tanh" title="φ(x) = tanh x">tanh</button>
+<button type="button" class="lit-btn" data-act-f="relu" title="φ(x) = max(x, 0)">ReLU</button>
+<span class="lit-sep"></span>
+<span class="exe-lbl">weights</span>
+<button type="button" class="lit-btn" data-orth="0" title="Each entry an independent Gaussian of variance σw²/N">Gaussian</button>
+<button type="button" class="lit-btn" data-orth="1" title="σw times a random orthogonal matrix (Haar), the same variance an entry">orthogonal</button>
+<span class="lit-sep"></span>
+<label class="exe-lbl" title="Layers, L">depth <select data-in="L"><option>16</option><option selected>32</option><option>64</option></select></label>
+<span class="lit-sep"></span>
+<button type="button" class="lit-btn" data-preset="ordered" title="tanh, σw² 0.8, σb² 0.05, Gaussian weights">Ordered</button>
+<button type="button" class="lit-btn" data-preset="edge" title="tanh, σw² 1.761, σb² 0.05, Gaussian weights, where χ₁ = 1">Edge</button>
+<button type="button" class="lit-btn" data-preset="chaos" title="tanh, σw² 4, σb² 0.05, Gaussian weights">Chaos</button>
+<button type="button" class="lit-btn" data-preset="isometry" title="tanh, σw² 1.05, σb² 0.0001, orthogonal weights">Isometry</button>
+<button type="button" class="exe-help" aria-expanded="false" title="About the three panes">?</button>
+</div>
+<div class="lit-tool">
+<label class="exe-lbl" title="The weights’ variance times the fan-in, 0.01 to 4"><span><i>σ</i><sub>w</sub>²</span> <input type="range" min="1" max="400" value="176" data-in="w"></label><output data-out="w"></output>
+<label class="exe-lbl" title="The biases’ variance, 0, then 0.0001 to 0.5 on a log scale"><span><i>σ</i><sub>b</sub>²</span> <input type="range" min="0" max="100" value="73" data-in="b"></label><output data-out="b"></output>
+<span class="lit-sep"></span>
+<button type="button" class="lit-btn exe-run" data-act="run" title="Sweep the bold layer from 1 to L">&#9654; Run</button>
+<label class="exe-lbl" title="The layer drawn bold, and on its own in the corner">layer <input type="range" min="1" max="32" value="32" data-in="layer"></label><output data-out="layer"></output>
+</div>
+<div class="exe-body">
+<div class="lit-pane"><canvas class="ini-ring" aria-label="A ring of inputs layer by layer, each on its own top two principal components, laid along the depth as a tube; drag to turn it"></canvas></div>
+<div class="lit-pane"><canvas class="ini-len" aria-label="The ring’s length by layer, measured as dots, against √χ a layer"></canvas></div>
+<div class="lit-pane"><canvas class="ini-jac" aria-label="Histogram of the input-output Jacobian’s singular values on a log scale"></canvas></div>
+<div class="exe-balloon" hidden>
+<p class="exe-note">A ring of 96 inputs, <i>u</i> cos <i>θ</i> + <i>v</i> sin <i>θ</i> with <i>u</i> and <i>v</i> random, orthogonal and of unit variance a unit, goes through a plain stack of <i>N</i> = 64 units a layer. Each layer’s ring is drawn on its own top two principal components, turned to match the layer before, so the tube shows the ring’s shape and size layer by layer. Poole et al. (2016) drew theirs on three components, at layers 5 and 10.</p>
+<p class="exe-note">The ring’s length is the sum of its 96 steps. The distance between two nearby inputs grows by √<i>χ</i> a layer, with <i>χ</i> = <i>σ</i><sub>w</sub>² E <i>φ</i>′(√<i>q z</i>)² at that layer’s <i>q</i>. In chaos the steps grow until neighbours are as far apart as any two inputs, √(2<i>q</i>*(1 − <i>c</i>*)) a unit, and the drawn length levels off while the ring’s own length keeps growing.</p>
+<p class="exe-note">The input-output Jacobian ∂<i>h</i><sup><i>L</i></sup>/∂<i>h</i><sup>1</sup> is taken at one input scaled to start at <i>q</i>*. Mean field gives the mean of its <i>σ</i>², <i>χ</i><sub>1</sub> a layer, but not their spread. Orthogonal weights with tanh near <i>q</i>* = 0 keep them near 1, the dynamical isometry of Pennington, Schoenholz and Ganguli (2017). Gaussian weights spread them over decades. ReLU’s inactive units leave half or more at 0, since the Jacobian’s rank is at most the fewest units active in any layer.</p>
+</div>
+</div>
+<p class="exe-note ini-caption" data-out="caption"></p>
+<dl class="exe-read" data-out="read"></dl>
+<a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/init.js" defer></script>
