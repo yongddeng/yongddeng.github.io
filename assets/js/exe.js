@@ -1,9 +1,10 @@
-// What the programs on (D:) share (lil.js, optimiser.js, sampler.js,
-// scheduler.js, device.js): a place in their window's status bar beside the
-// note they draw for, canvases drawn at the screen's density, a key to what
-// they draw, the hatching for room set aside that nothing fills, toggles
-// pressed, the notes in a balloon from a ?, and a player's seek bar and
-// transport.
+// What the programs on (D:) share (lil.js, optimiser.js, scheduler.js,
+// init.js, device.js): a place in their window's status bar beside the
+// note they draw for, canvases drawn at the screen's density and drawn again as
+// they resize, the hatching for room set aside that nothing fills, toggles
+// pressed, the notes in a balloon from a ?, a player's seek bar, transport and
+// Run, and chance and numbers as they draw and write them. Declared as functions,
+// as the desktop runs this file again for each window.
 
 // The note's link moves into the status bar and opens the note in a window of
 // its own, as My Computer does. Returns a setter for the bar's first cell, which
@@ -38,14 +39,15 @@ function fitCanvas(cv) {
 	return { cx: cx, W: W, H: H };
 }
 
-// A key from x, y down: a row for each [colour, label], its swatch then its
-// label, in the font the context has
-function legend(cx, x, y, items) {
-	cx.textAlign = 'left';
-	items.forEach(function (item, i) {
-		cx.fillStyle = item[0];
-		cx.fillRect(x, y + i * 14, 9, 9);
-		cx.fillText(item[1], x + 14, y + 8 + i * 14);
+// fn whenever any of els changes size, as a grip-resize or a maximise does; a
+// closed window lets go
+function exeResized(root, fn, ...els) {
+	const sized = new ResizeObserver(function () {
+		if (root.isConnected) fn();
+		else sized.disconnect();
+	});
+	els.forEach(function (el) {
+		sized.observe(el);
 	});
 }
 
@@ -115,6 +117,13 @@ function exeEnds(root) {
 	};
 }
 
+// Run, or Pause while the run goes; written only when it changes, as a player
+// says so every frame
+function exeRunning(button, on) {
+	const text = on ? '❚❚ Pause' : '▶ Run';
+	if (button.textContent !== text) button.textContent = text;
+}
+
 // A toggle pressed or not: its look, and its state as a screen reader hears it
 function exePress(button, on) {
 	button.classList.toggle('on', on);
@@ -138,4 +147,38 @@ function exeHelp(root) {
 		if (e.key === 'Escape') help(false);
 	});
 	return help;
+}
+
+// A seeded uniform on [0, 1) (mulberry32), so that a draw is the same on every
+// visit
+function exeRng(seed) {
+	let a = seed >>> 0;
+	return function () {
+		a = (a + 0x6d2b79f5) >>> 0;
+		let t = Math.imul(a ^ (a >>> 15), 1 | a);
+		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+// A standard normal from a uniform, by Box-Muller, one of each pair
+function exeNormal(random) {
+	return Math.sqrt(-2 * Math.log(1 - random())) * Math.cos(2 * Math.PI * random());
+}
+
+// A number with a thousands comma
+function exeFmt(v) {
+	return v.toLocaleString('en-GB');
+}
+// To two places, with a true minus sign
+function exeSigned(v) {
+	return (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+}
+// An integer in superscript, and that power of ten
+function exeSup(k) {
+	return String(k).replace(/\d/g, function (d) {
+		return '⁰¹²³⁴⁵⁶⁷⁸⁹'[d];
+	}).replace('-', '⁻');
+}
+function exePower(k) {
+	return '10' + exeSup(k);
 }

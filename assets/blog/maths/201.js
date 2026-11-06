@@ -22,8 +22,7 @@ FIGS['201/borel'] = el => {
 		return t + N ** (1 - s) / (s - 1) + N ** -s / 2;
 	};
 	function draw() {
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the last decade, where infinitely often shows
 		c.fillStyle = COL.pale;
 		c.fillRect(X(1000), P.y1, P.x1 - X(1000), P.y0 - P.y1);

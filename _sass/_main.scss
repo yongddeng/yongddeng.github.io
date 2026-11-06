@@ -1,3 +1,14 @@
+// The desktop's type and colours, which the other stylesheets share
+$ui: "Helvetica Neue", Arial, sans-serif;
+$serif: Georgia, "Times New Roman", serif;
+$mono: "Lucida Console", Menlo, Monaco, monospace;
+$face: #c0c0c0;
+$shade: #7f787f;
+$mute: #55505a;
+$navy: #000080;
+$note: #ffffe1;
+$title-bar: linear-gradient(to right, #00007f, #1084d0);
+
 // Win95 bevel: raised borders catch light from the top-left,
 // sunken ones are the inverse
 @mixin bevel($raised: true, $style: solid) {
@@ -6,8 +17,13 @@
 	@if $raised {
 		border-color: #ffffff #000000 #000000 #ffffff;
 	} @else {
-		border-color: #7f787f #ffffff #ffffff #7f787f;
+		border-color: $shade #ffffff #ffffff $shade;
 	}
+}
+
+// A button held down, or a toggle that stays in: the raised bevel inverted
+@mixin pressed {
+	border-color: #000000 #ffffff #ffffff #000000;
 }
 
 // Caption glyphs as Marlett draws them, pixel for pixel, in the button's
@@ -46,7 +62,7 @@ body {
 	align-items: center;
 	gap: 4px;
 	padding: 3px 4px;
-	background: #c0c0c0;
+	background: $face;
 	border-top: 2px solid #ffffff;
 
 	button[hidden] {
@@ -60,7 +76,7 @@ body {
 		height: 24px;
 		padding: 0 8px;
 		font-size: 12px;
-		background: #c0c0c0;
+		background: $face;
 		@include bevel;
 		cursor: pointer;
 
@@ -72,7 +88,7 @@ body {
 	}
 
 	button:active {
-		border-color: #000000 #ffffff #ffffff #000000;
+		@include pressed;
 	}
 
 	.task-start {
@@ -95,7 +111,7 @@ body {
 	}
 
 	.task-win.active {
-		border-color: #000000 #ffffff #ffffff #000000;
+		@include pressed;
 		background: #dadada;
 		font-weight: bold;
 	}
@@ -110,7 +126,7 @@ body {
 		bottom: 100%;
 		left: 0;
 		margin-bottom: 4px;
-		background: #c0c0c0;
+		background: $face;
 		@include bevel;
 
 		.task-items {
@@ -140,7 +156,7 @@ body {
 		}
 
 		a:hover, .task-mi:hover {
-			background: #000080;
+			background: $navy;
 			color: #ffffff;
 		}
 
@@ -152,7 +168,7 @@ body {
 			top: -4px;
 			min-width: 160px;
 			padding: 2px;
-			background: #c0c0c0;
+			background: $face;
 			color: #000000;
 			@include bevel;
 		}
@@ -164,13 +180,13 @@ body {
 
 		.task-menu-sep {
 			margin: 3px 2px;
-			border-top: 1px solid #7f787f;
+			border-top: 1px solid $shade;
 			border-bottom: 1px solid #ffffff;
 		}
 
 		.task-menu-fine {
 			font-size: 11px;
-			color: #55505a;
+			color: $mute;
 		}
 	}
 
@@ -192,7 +208,7 @@ body {
 	}
 
 	.task-arr.active {
-		border-color: #000000 #ffffff #ffffff #000000;
+		@include pressed;
 		background: #dadada;
 	}
 
@@ -250,7 +266,7 @@ body {
 		}
 
 		&:hover span {
-			background: #000080;
+			background: $navy;
 			border-color: #ffff00;
 		}
 
@@ -316,6 +332,9 @@ body {
 .default_title, .post_title {
 	padding: 2px 4px 3px 4px;
 	position: relative;
+	// Title bars are grey by default; only the focused window's goes navy
+	// (the .active-win class is managed by 001.js)
+	background: linear-gradient(to right, #808080, #b5b5b5);
 
 	h1 {
 		color: #bfb8bf;
@@ -345,30 +364,19 @@ body {
 	margin-right: 4px;
 	font-size: 13px;
 }
-// Title bars are grey by default; only the focused window's goes navy
-// (the .active-win class is managed by 001.js)
-.default_title, .post_title {
-	background: linear-gradient(to right, #808080, #b5b5b5);
-}
 .active-win .default_title, .active-win .post_title {
-	background: linear-gradient(to right, #00007f, #1084d0);
+	background: $title-bar;
 }
-.default_title .btn {
+.default_title .btn, .post_title .btn {
 	background: #cccccc;
 	width: 13px;
 	height: 11px;
 	float: right;
 	@include bevel;
-	cursor: pointer;
-
-	span {
-		font-size: 11px;
-		position: relative;
-		left: 2px;
-		top: -2px;
-	}
-
 	@include caption-glyphs;
+}
+.default_title .btn {
+	cursor: pointer;
 }
 .post_title {
 	h1 {
@@ -377,23 +385,6 @@ body {
 
 	a {
 		color: #000000;
-	}
-
-	.btn {
-		background: #cccccc;
-		width: 13px;
-		height: 11px;
-		float: right;
-		@include bevel;
-
-		span {
-			font-size: 11px;
-			position: relative;
-			left: 2px;
-			top: -2px;
-		}
-
-		@include caption-glyphs;
 	}
 
 	.btn_max {
@@ -437,20 +428,22 @@ ul.topbar {
 		background: #00007f;
 		color: #ffffff;
 	}
-	.tb-drop {
+	.tb-drop, .tb-fly {
 		display: none;
-		position: absolute;
-		top: 100%;
-		left: 0;
-		z-index: 7;
 		min-width: 165px;
 		max-height: 330px;
 		overflow-y: auto;
-		background: #c0c0c0;
+		background: $face;
 		@include bevel;
 		padding: 2px;
 		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 		white-space: nowrap;
+	}
+	.tb-drop {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		z-index: 7;
 	}
 	.tb-menu.open > .tb-drop {
 		display: block;
@@ -494,17 +487,8 @@ ul.topbar {
 		font-size: 9px;
 	}
 	.tb-fly {
-		display: none;
 		position: fixed;
 		z-index: 9;
-		min-width: 165px;
-		max-height: 330px;
-		overflow-y: auto;
-		background: #c0c0c0;
-		@include bevel;
-		padding: 2px;
-		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
-		white-space: nowrap;
 	}
 	.tb-item.fly-open {
 		background: #00007f;
@@ -523,13 +507,13 @@ ul.topbar {
 	top: 26px;
 	right: 8px;
 	z-index: 6;
-	background: #c0c0c0;
+	background: $face;
 	@include bevel;
 	padding: 2px;
 	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 
 	.find-dlg-tbar {
-		background: linear-gradient(to right, #00007f, #1084d0);
+		background: $title-bar;
 		color: #ffffff;
 		font-size: 11px;
 		font-weight: bold;
@@ -578,12 +562,12 @@ ul.topbar {
 		height: 18px;
 		padding: 0;
 		font-size: 7px;
-		background: #c0c0c0;
+		background: $face;
 		@include bevel;
 		cursor: pointer;
 
 		&:active {
-			border-color: #000000 #ffffff #ffffff #000000;
+			@include pressed;
 		}
 	}
 
@@ -611,7 +595,6 @@ ul.topbar {
 // content pane shrink-wraps instead of the fixed post height
 .content.deck-win {
 	width: 540px;
-	max-width: 100%;
 
 	.post_content {
 		height: auto;
@@ -701,7 +684,7 @@ ul.topbar {
 		padding: 3px 12px;
 		margin-right: 2px;
 		font-size: 12px;
-		background: #c0c0c0;
+		background: $face;
 		border: 2px solid;
 		border-color: #ffffff #000000 transparent #ffffff;
 		cursor: pointer;
@@ -720,7 +703,7 @@ ul.topbar {
 		margin: 0 4px;
 		padding: 12px;
 		min-height: 148px;
-		background: #c0c0c0;
+		background: $face;
 		@include bevel;
 	}
 
@@ -760,8 +743,8 @@ ul.topbar {
 		height: auto;
 		flex: none;
 		font-size: 12px;
-		font-family: "Helvetica Neue", Arial, sans-serif;
-		background: #c0c0c0;
+		font-family: $ui;
+		background: $face;
 		padding: 10px 12px;
 		overflow: visible;
 	}
@@ -771,7 +754,7 @@ ul.topbar {
 		margin: 0 0 12px;
 		padding: 8px 10px 10px;
 		border: 1px solid;
-		border-color: #7f787f #ffffff #ffffff #7f787f;
+		border-color: $shade #ffffff #ffffff $shade;
 		outline: 1px solid #ffffff;
 		outline-offset: 0;
 	}
@@ -811,15 +794,7 @@ ul.topbar {
 		padding: 10px 0 0;
 
 		button {
-			background: #c0c0c0;
-			@include bevel;
-			font-size: 12px;
 			padding: 3px 18px;
-			cursor: pointer;
-		}
-
-		button:active {
-			border-color: #000000 #ffffff #ffffff #000000;
 		}
 	}
 }
@@ -858,21 +833,24 @@ ul.topbar {
 		padding: 4px 0 12px;
 
 		button {
-			background: #c0c0c0;
-			@include bevel;
-			font-size: 12px;
 			padding: 3px 28px;
-			cursor: pointer;
 		}
 
 		// the shutdown box asks Yes / No, the error box only OK
 		button + button {
 			margin-left: 10px;
 		}
+	}
+}
+.content.settings-win .set-btnrow button,
+.err-win .err-btnrow button {
+	background: $face;
+	@include bevel;
+	font-size: 12px;
+	cursor: pointer;
 
-		button:active {
-			border-color: #000000 #ffffff #ffffff #000000;
-		}
+	&:active {
+		@include pressed;
 	}
 }
 .task-menu-ic {
@@ -883,6 +861,28 @@ ul.topbar {
 img.task-menu-ic {
 	height: 17px;
 	object-fit: contain;
+}
+// A window whose pane is chrome, the panes inside it carrying the paper. On a
+// phone the window goes back to the ordinary page
+@mixin pane-window($height) {
+	.post_content {
+		display: flex;
+		flex-direction: column;
+		height: $height;
+		overflow: hidden;
+		background: #bfb8bf;
+		border: 0;
+		padding: 0 4px 2px;
+	}
+	@media only screen and (max-width: 700px) {
+		.post_content {
+			display: block;
+			height: auto;
+			overflow: visible;
+			background: var(--paper, #fbfafb);
+			padding: 16px 14px 40px;
+		}
+	}
 }
 // Explorer "Details" view: header row + one file per row with
 // Name / Size / Type / Created columns. Used by the folder windows and My
@@ -898,7 +898,7 @@ $det-date: 88px;   // 2026-01-01
 @mixin file-details-view {
 	.det-head {
 		display: flex;
-		background: #c0c0c0;
+		background: $face;
 		font-family: var(--font, inherit);
 		font-size: 12px;
 
@@ -966,7 +966,7 @@ $det-date: 88px;   // 2026-01-01
 					flex: none;
 					box-sizing: border-box;
 					padding: 0 $det-gutter;
-					color: #55505a;
+					color: $mute;
 				}
 
 				.sz { width: $det-size; text-align: right; }
@@ -975,7 +975,7 @@ $det-date: 88px;   // 2026-01-01
 				.sz, .dt { font-variant-numeric: tabular-nums; }
 
 				&:hover .nm {
-					background: #000080;
+					background: $navy;
 					color: #ffffff;
 					border-color: #ffff00;
 				}
@@ -986,9 +986,12 @@ $det-date: 88px;   // 2026-01-01
 // Standalone folder window spawned by a desktop tag icon
 .folder-win {
 	width: 500px;
+	// a floor of its own, low enough for the list below to set the window's height
+	min-height: 200px;
 
 	.post_content {
-		height: 240px;
+		// ten rows under the header, and no part of an eleventh
+		height: 238px;
 		@include file-details-view;
 	}
 
@@ -1016,12 +1019,6 @@ $det-date: 88px;   // 2026-01-01
 		border-color: #888888 #dadada #dadada #888888;
 		box-sizing: border-box;
 		padding: 1px 3px;
-	}
-	.left {
-		flex: 0 0 26%;
-	}
-	.right {
-		flex: 1 1 auto;
 	}
 }
 .content {
@@ -1061,7 +1058,7 @@ $det-date: 88px;   // 2026-01-01
 .content.dos-win .post_total, .content.deck-win .post_total {
 	display: none;
 }
-// A window never outgrows the screen: the wide ones (toy 1080, help 860)
+// A window never outgrows the screen: the wide ones (device 1040, help 860)
 // shrink to the desktop above the taskbar, as Maximize sizes them. Not a
 // maximized one, which 001.js marks with data-premax, nor on a phone, where
 // a window is the page (_mobile.scss). 80: the taskbar and a new window's top
@@ -1082,9 +1079,9 @@ $det-date: 88px;   // 2026-01-01
 	z-index: 5;
 	cursor: nwse-resize;
 	background: linear-gradient(315deg,
-		#7f787f 0 2px, #ffffff 2px 4px, transparent 4px 6px,
-		#7f787f 6px 8px, #ffffff 8px 10px, transparent 10px 12px,
-		#7f787f 12px 14px, #ffffff 14px 16px, transparent 16px);
+		$shade 0 2px, #ffffff 2px 4px, transparent 4px 6px,
+		$shade 6px 8px, #ffffff 8px 10px, transparent 10px 12px,
+		$shade 12px 14px, #ffffff 14px 16px, transparent 16px);
 }
 .post_content {
 	position: relative;
@@ -1185,39 +1182,6 @@ $det-date: 88px;   // 2026-01-01
 		margin-bottom: 15px;
 	}
 }
-.hljs {
-	background: var(--paper, #fbfafb);
-}
-pre code.numbered {
-	counter-reset: line;
-
-	.code-line {
-		display: block;
-		counter-increment: line;
-
-		&::before {
-			content: counter(line);
-			display: inline-block;
-			min-width: 2ch;
-			padding: 0 8px 0 3px;
-			margin-right: 8px;
-			text-align: right;
-			border-right: 2px solid #777777;
-		}
-	}
-}
-.footer {
-	font-size: 12px;
-	margin: 30px 0 10px 0;
-
-	p {
-		text-align: center;
-
-		a {
-			color: #24244a;
-		}
-	}
-}
 .comment {
 	float: right;
 	padding: 0 3px 0 0;
@@ -1232,19 +1196,6 @@ pre code.numbered {
         width: 90%;
     }
 }
-@media only screen and (max-width: 700px) {
-    .content {
-        width: 90%;
-    }
-	.post_content {
-		width: 98%;
-	}
-}
-@media only screen and (max-width: 400px) {
-	.post_content {
-		width: 97%;
-	}
-}
 @media only screen and (max-width: 610px) {
 	// Name needs the room more than Size does
 	.dh-size, .sz {
@@ -1256,7 +1207,6 @@ pre code.numbered {
 } /* this targets the default scrollbar (compulsory) */
 ::-webkit-scrollbar-track {
 	background-image: url("/assets/img/track.png");
-	background-repeat: repeat-x repeat-y;
 } /* the new scrollbar will have a flat appearance with the set background color */
  
 ::-webkit-scrollbar-thumb {
@@ -1302,7 +1252,7 @@ pre code.numbered {
 		padding: 0;
 		vertical-align: middle;
 		background: #ffffff;
-		border: 1px solid #7f787f;
+		border: 1px solid $shade;
 		font-size: 11px;
 		line-height: 11px;
 		color: #000000;

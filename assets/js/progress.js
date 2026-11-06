@@ -33,12 +33,6 @@
 		}
 
 		cont.addEventListener('scroll', update);
-		// Self-removing: the desktop SPA replaces windows, and a listener
-		// on window would otherwise keep each dead one reachable
-		window.addEventListener('scroll', function onPage() {
-			if (!cont.isConnected) { window.removeEventListener('scroll', onPage); return; }
-			update();
-		}, { passive: true });
 		// Re-sync when the pane is resized without scrolling (grip, maximise)
 		if (window.ResizeObserver) new ResizeObserver(update).observe(cont);
 		update();
@@ -49,10 +43,16 @@
 	}
 	initAll();
 	document.addEventListener('content:swapped', initAll);
-	// MathJax and images change scrollHeight after first paint
-	window.addEventListener('load', function () {
+
+	function updateAll() {
 		document.querySelectorAll('.content .post_content').forEach(function (c) {
 			c.dispatchEvent(new Event('scroll'));
 		});
-	});
+	}
+	// One listener for every window, so a closed one leaves nothing behind
+	window.addEventListener('scroll', function () {
+		if (phone()) updateAll();
+	}, { passive: true });
+	// MathJax and images change scrollHeight after first paint
+	window.addEventListener('load', updateAll);
 })();

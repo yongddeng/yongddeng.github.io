@@ -3,8 +3,8 @@
 # blank the window with a script error in the browser. How a chat is
 # written is the YAML's head; this holds a chat to it, and to what scheduler.js
 # can do with it: a lang its LANGS share out, a make its MAKERS have a rule
-# for, and sizes ({n}, {a}, …) its rule names; and no "</", which would end
-# the page's script early.
+# for, and sizes ({n}, {a}, …) its rule names; no "</", which would end the
+# page's script early; and a chat in English for every length an answer can be.
 Jekyll::Hooks.register :site, :post_read do |site|
   chats = site.data["scheduler_chats"]
   raise "scheduler_chats.yml: no chats" unless chats.is_a?(Array) && !chats.empty?
@@ -49,4 +49,17 @@ Jekyll::Hooks.register :site, :post_read do |site|
       raise "#{at}: a size ({#{sizes.join('}, {')}}) without make" unless sizes.empty?
     end
   end
+  # A request's own prompt may be as short as PROMPT's least and its answer any
+  # length from OUTPUT's least, and past its language's chats scheduler.js has only
+  # English's. Primes, a token an item, come to any length past their own words,
+  # so English keeps a chat of them whose ask and words fit those least
+  engine = File.read(File.join(site.source, "assets/js/serve-engine.js"))
+  prompt, output = %w[PROMPT OUTPUT].map { |k| engine[/\b#{k} = \[[^\]]*?, (\d+), \d+\]/, 1]&.to_i }
+  raise "check_scheduler.rb: no PROMPT or OUTPUT in serve-engine.js" unless prompt && output
+  tokens = ->(text) { text.scan(/\s*\S+/).flat_map { |word| word.split(/(?<=[,;])(?=\S)/) }.size }
+  fewest = ->(c) { (c["answer"] - ["{items}"]).sum { |p| p.is_a?(Array) ? 0 : tokens.(p.gsub(/⟨.*?⟩/, "")) } }
+  fits = chats.any? do |c|
+    c["lang"] == "en" && c["make"] == "primes" && (tokens.(c["ask"]) * 1.4).ceil <= prompt && fewest.(c) < output
+  end
+  raise "scheduler_chats.yml: no English primes chat short enough to come to every answer's length" unless fits
 end

@@ -2,50 +2,49 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	{% comment %} strip_html first: a markup-only excerpt must fall through to site.description. {% endcomment %}
 	{% assign raw_desc = page.description | default: page.excerpt | strip_html | normalize_whitespace %}
 	{% assign page_desc = raw_desc | default: site.description | truncate: 160 %}
 	<meta name="description" content="{{ page_desc | escape }}">
 	<link rel="canonical" href="{{ page.url | replace: 'index.html', '' | absolute_url }}">
-    {% if page.title or page.title == 'me' %}
-        <title>{{ page.title }}</title>
-		<link rel="stylesheet" type="text/css" href="/assets/css/002.css">
-    {% else %}
-        <title>{{ site.name }}</title>
-		<link rel="stylesheet" type="text/css" href="/assets/css/001.css">
-    {% endif %}
+	<title>{{ page.title | default: site.name }}</title>
+	<link rel="stylesheet" type="text/css" href="/assets/css/001.css">
 	<link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon">
 	<script src="/assets/js/phone.js"></script>
 	<script>
-		// Apply saved Settings before first paint (no colour flash)
-		(function () {
-			var r = document.documentElement;
-			function g(k, d) { try { return localStorage.getItem('set-' + k) || d; } catch (e) { return d; } }
-			r.style.setProperty('--desk', g('desk', '#008082'));
-			r.style.setProperty('--paper', g('paper', '#fbfafb'));
-			// Phones start one notch up: Medium, against the desktop's Small
-			r.style.setProperty('--text', g('text', '12px'));
-			var fonts = { arial: '"Helvetica Neue", Arial, sans-serif', georgia: 'Georgia, "Times New Roman", serif', courier: '"Courier New", monospace' };
-			r.style.setProperty('--font', fonts[g('font', 'georgia')] || fonts.georgia);
+		// Saved Settings, applied before first paint (no colour flash) and
+		// again whenever System Properties (settings.js) changes one
+		window.deskSettings = (function () {
+			var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '12px', clock: '12', font: 'georgia' };
+			var FONTS = {
+				arial: '"Helvetica Neue", Arial, sans-serif',
+				georgia: 'Georgia, "Times New Roman", serif',
+				courier: '"Courier New", monospace'
+			};
+			function get(key) {
+				try { return localStorage.getItem('set-' + key) || DEFAULTS[key]; }
+				catch (e) { return DEFAULTS[key]; }
+			}
+			function apply() {
+				var root = document.documentElement;
+				root.style.setProperty('--desk', get('desk'));
+				root.style.setProperty('--paper', get('paper'));
+				root.style.setProperty('--text', get('text'));
+				root.style.setProperty('--font', FONTS[get('font')] || FONTS.arial);
+			}
+			apply();
+			return { DEFAULTS: DEFAULTS, get: get, apply: apply };
 		})();
 	</script>
-	{% comment %} Code and maths bring their scripts: here for this page's own, and from tag-filter.js for a window opened later. {% endcomment %}
-	{% if content contains '<pre><code' %}
-	<link rel="stylesheet" href="/assets/css/atom-one-light.css">
-	<script src="/assets/js/highlight.pack.js"></script>
-	<script src="/assets/js/x86asm.min.js"></script>
-	<script>hljs.initHighlightingOnLoad();</script>
-	{% endif %}
 	{% include mathjax.html %}
 	{% include analytics.html %}
 </head>
 <body data-site="{{ site.name }}"{% if page.title %} class="has-post"{% endif %}>
 	<div class="desktop-icons">
 		<a href="/"><img src="/assets/img/mycomputer-32.png" alt="" /><span>My Computer</span></a>
-		<a href="/?tag=cs600"><img src="/assets/img/folder-48.png" alt="" /><span>cs600</span></a>
+		<a href="/?tag=maths200"><img src="/assets/img/folder-48.png" alt="" /><span>maths200</span></a>
 		<a href="/20260109/videos"><img src="/assets/img/video.svg" alt="" /><span>699. videos</span></a>
 		<a href="/20230101/toy"><img src="/assets/img/msagent.png" alt="" /><span>301. toy</span></a>
 		<a href="/20230102/decoder-block"><img src="/assets/img/defragment.png" alt="" /><span>302. blocks</span></a>
@@ -108,24 +107,14 @@
 		<div class="xp-body">
 			<div class="xp-side"></div>
 			<div class="post_list" tabindex="0">
-				<div class="det-head"><span class="dh-name">Name</span><span class="dh-size" data-sort="size">Size</span><span class="dh-type">Type</span><span class="dh-date" data-sort="date">Date</span></div>
-				{% unless page.date%}
-					{% if page.title == 'MS-DOS Prompt' or page.title == '404...' %}
-						<ul>
-							{% for post in site.posts %}
-							{% include post-item.html post=post %}
-							{% endfor %}
-						</ul>
-					{% else %}
-						{{ content }}
-					{% endif %}
-				{% else %}
-					<ul>
-						{% for post in site.posts %}
-						{% include post-item.html post=post %}
-						{% endfor %}
-					</ul>
-				{% endunless %}
+				<div class="det-head"><span class="dh-name">Name</span><span class="dh-size">Size</span><span class="dh-type">Type</span><span class="dh-date">Date</span></div>
+				{% comment %} The list a reader without JavaScript gets; explorer.js draws over it {% endcomment %}
+				{% assign listed = site.tags[page.tag] | default: site.posts %}
+				<ul>
+					{% for post in listed %}
+					{% include post-item.html post=post %}
+					{% endfor %}
+				</ul>
 			</div>
 		</div>
 		<script>
@@ -143,11 +132,11 @@
 			document.querySelector('.post_list').style.visibility = 'hidden';
 			var sess = null;
 			try { sess = JSON.parse(sessionStorage.getItem('desk-session')); } catch (e) {}
-			// Pre-paint twin of applyGeom (tag-filter.js) so a restored
-			// window paints straight at its saved spot instead of jumping
-			// there; keep the clamping in sync with the original.
+			// Pins a window to saved coordinates, here so a restored window
+			// paints straight at its saved spot instead of jumping there.
+			// Clamped so the title bar stays reachable in a shrunken viewport.
 			window.preGeom = function (win, g) {
-				if (!win || !g) return;
+				if (!g) return;
 				win.style.position = 'absolute';
 				win.style.margin = '0';
 				win.style.left = Math.max(0, Math.min(g.left || 0, window.innerWidth - 80)) + 'px';
@@ -158,7 +147,7 @@
 			window.deskSess = sess;
 			// The restore this pre-paints is skipped on phones (session.js),
 			// so the pre-paint is skipped with it
-			if (!phone() && sess && sess.explorer) {
+			if (!phone() && sess) {
 				if (sess.explorer.hidden) wrapper.style.display = 'none';
 				else preGeom(wrapper, sess.explorer.geom);
 			} else if (!tagged && window.matchMedia('(min-width: 910px)').matches) {
@@ -167,7 +156,7 @@
 		})();
 	</script>
 		<div class="post_total">
-			<div class="left">{% if page.tag %}{{ site.tags[page.tag] | size }}{% else %}{{ site.posts | size }}{% endif %} object(s)</div>
+			<div class="left">{{ listed | size }} object(s)</div>
 			<div class="right"></div>
 			<div class="zone"><img src="/assets/img/mycomputer-16.png" alt="" />My Computer</div>
 		</div>
@@ -177,7 +166,7 @@
         <div class="content{% if page.winclass %} {{ page.winclass }}{% endif %}" data-url="{{ page.url }}"{% if page.use_math %} data-math{% endif %}>
 			<script>
 			// Runs while this window's div is still open, ahead of first
-			// paint of its contents; session.js re-applies the same geom.
+			// paint of its contents.
 			(function (win) {
 				if (phone()) return;
 				(window.deskSess && window.deskSess.windows || []).forEach(function (w) {
@@ -200,7 +189,7 @@
 					<div class="tb-drop">
 						<span class="tb-item tb-static">{{ page.date | date: '%B %-d, %Y' }}</span>
 						<div class="tb-sep"></div>
-						<a class="tb-item" href="/">Close</a>
+						<button type="button" class="tb-item" data-act="closewin">Close</button>
 					</div>
 				</li>
 				<li class="tb-menu"><span class="tb-label">Edit</span>
@@ -270,7 +259,6 @@
 		];
 	</script>
 	<script src="/assets/js/001.js"></script>
-	<script src="/assets/js/002.js"></script>
 	<script src="/assets/js/tag-filter.js"></script>
 	<script src="/assets/js/explorer.js"></script>
 	<script src="/assets/js/sheet.js"></script>
@@ -289,7 +277,7 @@
 				<div class="task-items">
 					<div class="task-mi has-sub"><span class="task-menu-ic">&#128100;</span>About<span class="task-arrow">&#9654;</span>
 						<div class="task-sub">
-							<a href="/me"><img class="task-menu-ic" src="/assets/img/msdos.svg" alt="">me.bat</a>
+							<a href="/me/"><img class="task-menu-ic" src="/assets/img/msdos.svg" alt="">me.bat</a>
 							<a href="https://www.linkedin.com/in/sung-kim-28b78a7b/" target="_blank"><span class="task-menu-ic">&#128188;</span>LinkedIn</a>
 						</div>
 					</div>

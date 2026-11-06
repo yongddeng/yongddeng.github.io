@@ -4,6 +4,10 @@
 const SUB_DIGITS = '₀₁₂₃₄₅₆₇₈₉', SUP_DIGITS = '⁰¹²³⁴⁵⁶⁷⁸⁹';
 const subN = n => String(n).replace(/\d/g, d => SUB_DIGITS[d]);
 const supN = n => String(n).replace(/\d/g, d => SUP_DIGITS[d]);
+// a standard normal from a uniform source, by Box-Muller
+function gauss(u) {
+	return Math.sqrt(-2 * Math.log(1 - u())) * Math.cos(2 * Math.PI * u());
+}
 
 // sample paths of the walk and of the autoregression along the floor, and over
 // them the law of the value at each time as a surface, with its slices at time
@@ -20,12 +24,7 @@ FIGS['210/slices'] = el => {
 			start: () => 0,
 			step: (x, u) => x + (u() < 0.5 ? 1 : -1),
 			// the atoms (2k − t, P(Sₜ = 2k − t)/2), a density on the lattice of step 2
-			law: t => {
-				const pts = [];
-				let w = 2 ** -t;
-				for (let k = 0; k <= t; k++) { pts.push([2 * k - t, w / 2]); w = w * (t - k) / (k + 1); }
-				return pts;
-			},
+			law: t => binom(t).map((w, k) => [2 * k - t, w / 2]),
 			text: t => [`Var Sₜ = t = ${t}`, t > S ? `Sₜ − S₅ has the law of S${subN(t - S)}` : 'stationary increments, Sₜ not stationary'],
 		},
 		ar: {
@@ -59,8 +58,7 @@ FIGS['210/slices'] = el => {
 	}
 	function draw() {
 		const k = KIND[kind];
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the floor's frame and ticks
 		view.curve([pt(0, -k.lim, 0), pt(0, k.lim, 0), pt(N, k.lim, 0), pt(N, -k.lim, 0), pt(0, -k.lim, 0)], COL.frame, 1);
 		for (const v of k.ticks) {
@@ -157,8 +155,7 @@ FIGS['210/ergodic'] = el => {
 		const LX = n => 40 + Math.log10(n) / 3 * 460;
 		const top = plotBox(40, 500, 58, 20, [0, 1], [-4.5, 4.5]);
 		const P = plotBox(40, 500, 186, 72, [0, 1], [-2.5, 2.5]);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the path itself, a thin strip on the same log scale
 		frameBox(c, top);
 		c.save();

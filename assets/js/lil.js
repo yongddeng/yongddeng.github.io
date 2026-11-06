@@ -2,9 +2,9 @@
 // against the two scales of 209: ±√n, where the CLT keeps Sₙ at any one n, and
 // ±√(2n log log n), the envelope the LIL says a walk's records trace. The
 // second view divides through by the envelope, on a log axis from n = 100, so
-// it becomes the lines ±1 and the CLT's scale closes in on 0. The desktop
-// re-creates a window's scripts when it swaps the window in, so this runs once
-// per window and claims it with data-ready.
+// it becomes the lines ±1 and the CLT's scale closes in on 0. The desktop runs a
+// window's scripts each time it opens one, so this runs once per window and
+// claims it with data-ready.
 (function () {
 	const root = document.querySelector('.lil:not([data-ready])');
 	if (!root) return;
@@ -12,12 +12,8 @@
 	const $ = sel => root.querySelector(sel), $$ = sel => [...root.querySelectorAll(sel)];
 	const cv = $('.lil-plot'), records = $('[data-out="records"]');
 	const say = exeStatus(root);
-	const fmt = v => v.toLocaleString('en-GB');
-	// a number with a true minus sign: as it comes for the axes, to two places for the records
-	const num = v => (v < 0 ? '−' : '') + fmt(Math.abs(v));
-	const signed = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
-	const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
-	const power = k => '10' + String(k).split('').map(d => SUP[d]).join('');
+	// a number as it comes, with a true minus sign, for the axes
+	const num = v => (v < 0 ? '−' : '') + exeFmt(Math.abs(v));
 
 	const COLOURS = ['#000080', '#008080', '#800080', '#808000', '#008000'];
 	const FROM = 100; // the normalised view and the records start here
@@ -49,8 +45,8 @@
 			return [hi, lo];
 		});
 		records.innerHTML = rec.map(([hi, lo], w) => '<div><dt><i class="exe-sw" style="background:' + COLOURS[w] + '"></i>walk ' + (w + 1)
-			+ '</dt><dd><span>max</span> ' + signed(hi) + ' <span>min</span> ' + signed(lo) + '</dd></div>').join('');
-		say(COLOURS.length + ' walks to n = ' + fmt(N));
+			+ '</dt><dd><span>max</span> ' + exeSigned(hi) + ' <span>min</span> ' + exeSigned(lo) + '</dd></div>').join('');
+		say(COLOURS.length + ' walks to n = ' + exeFmt(N));
 		draw();
 	}
 
@@ -63,6 +59,16 @@
 		const step = [1, 2, 5, 10].map(k => k * pow).find(s => s >= raw), out = [];
 		for (let y = -Math.floor(m / step) * step; y <= m; y += step) out.push(y);
 		return out;
+	}
+	// a key from x, y down: a row for each [colour, label], its swatch then its
+	// label, in the font the context has
+	function legend(cx, x, y, items) {
+		cx.textAlign = 'left';
+		items.forEach(([colour, label], i) => {
+			cx.fillStyle = colour;
+			cx.fillRect(x, y + i * 14, 9, 9);
+			cx.fillText(label, x + 14, y + 8 + i * 14);
+		});
 	}
 	function draw() {
 		const { cx, W, H } = fitCanvas(cv), L = 50, R = 12, T = 10, B = 22;
@@ -88,7 +94,7 @@
 		const xs = raw ? [0, 0.25, 0.5, 0.75, 1].map(k => Math.round(k * N)) : Array.from({ length: hi10 - lo10 + 1 }, (_, k) => Math.pow(10, lo10 + k));
 		xs.forEach((n, i) => {
 			cx.textAlign = i === 0 ? 'left' : i === xs.length - 1 ? 'right' : 'center';
-			cx.fillText(raw ? fmt(n) : power(Math.log10(n)), X(Math.max(n, n0)), H - 6);
+			cx.fillText(raw ? exeFmt(n) : exePower(Math.log10(n)), X(Math.max(n, n0)), H - 6);
 		});
 
 		// a curve through every pixel column
@@ -158,8 +164,7 @@
 		draw();
 	}));
 	exeHelp(root);
-	// a grip-resize or a maximise redraws the pane at its new size
-	new ResizeObserver(() => { if (walks.length) draw(); }).observe($('.exe-body'));
+	exeResized(root, draw, $('.exe-body'));
 	pressed();
 	walk();
 })();

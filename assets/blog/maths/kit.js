@@ -84,8 +84,6 @@ function runButton(row, frame) {
 	const tick = now => {
 		const more = frame(now - last);
 		last = now;
-		// a frame that stopped the run, itself or through a control it moved
-		if (!id) return;
 		if (more) id = requestAnimationFrame(tick);
 		else stop();
 	};
@@ -102,9 +100,15 @@ function runButton(row, frame) {
 }
 
 // ---- drawing ----
-// a plot box { x0, x1, y0 (bottom), y1 (top) } with maps X and Y from data to pixels
+// the whole canvas back to paper
+function clear(c) {
+	const { width, height } = c.canvas.style;
+	c.fillStyle = COL.paper;
+	c.fillRect(0, 0, parseFloat(width), parseFloat(height));
+}
+// a plot box { x0, x1, y0 (bottom), y1 (top) } with maps X and Y from data to pixels, and x from a pixel back to data
 function plotBox(x0, x1, y0, y1, [a, b], [lo, hi]) {
-	return { x0, x1, y0, y1, X: t => x0 + (t - a) / (b - a) * (x1 - x0), Y: v => y0 - (v - lo) / (hi - lo) * (y0 - y1) };
+	return { x0, x1, y0, y1, X: t => x0 + (t - a) / (b - a) * (x1 - x0), Y: v => y0 - (v - lo) / (hi - lo) * (y0 - y1), x: px => a + (px - x0) / (x1 - x0) * (b - a) };
 }
 function frameBox(c, P) {
 	c.strokeStyle = COL.frame;
@@ -117,18 +121,18 @@ function polyline(c, pts) {
 	pts.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y));
 	c.stroke();
 }
+// a filled disc
+function dot(c, x, y, r) {
+	c.beginPath();
+	c.arc(x, y, r, 0, 2 * Math.PI);
+	c.fill();
+}
 function label(c, text, x, y, align = 'left', colour = COL.mute, font = FONT) {
 	c.fillStyle = colour;
 	c.font = font;
 	c.textAlign = align;
 	c.fillText(text, x, y);
 }
-// 1/d when v is the reciprocal of a whole number d, else three decimals
-const frac = v => {
-	if (v === 1) return '1';
-	const d = Math.round(1 / v);
-	return Math.abs(1 / d - v) < 1e-12 ? `1/${d}` : v.toFixed(3);
-};
 const minus = s => String(s).replace(/-/g, '−');
 
 // ---- 3D: a view that turns under the pointer ----
@@ -136,7 +140,7 @@ const minus = s => String(s).replace(/-/g, '−');
 // towards the viewer, and v.at(p) projects a point orthographically to
 // [x, y, depth] with depth larger nearer. onTurn redraws at every move of a
 // drag, and v.curve(pts, colour, width) draws in the context c
-function view3d(c, { W, H, scale, yaw = -0.55, pitch = 0.42, centre = [0, 0, 0] }, onTurn) {
+function view3d(c, { W, H, scale, yaw = -0.55, pitch = 0.42, centre }, onTurn) {
 	const v = { yaw, pitch };
 	v.at = p => {
 		const [x, y, z] = p.map((q, i) => q - centre[i]);
@@ -148,7 +152,7 @@ function view3d(c, { W, H, scale, yaw = -0.55, pitch = 0.42, centre = [0, 0, 0] 
 	// over the ±1.4 of depth round the centre a figure spans; a run of segments
 	// of one shade is one stroke
 	const shade = p => Math.round(12 * Math.min(1, Math.max(0, (p[2] + 1.4) / 2.8)));
-	v.curve = (pts, colour, width = 1.2) => {
+	v.curve = (pts, colour, width) => {
 		const ps = pts.map(v.at);
 		c.strokeStyle = colour;
 		c.lineWidth = width;
@@ -194,10 +198,12 @@ function rng(seed) {
 		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 	};
 }
-// a standard normal from a uniform source, by Box-Muller
-function gauss(u) {
-	return Math.sqrt(-2 * Math.log(1 - u())) * Math.cos(2 * Math.PI * u());
-}
+// the weights of Binomial(m, ½), at 0 to m heads
+const binom = m => {
+	const w = [2 ** -m];
+	for (let j = 0; j < m; j++) w.push(w[j] * (m - j) / (j + 1));
+	return w;
+};
 // Φ by Abramowitz and Stegun 7.1.26, and Φ⁻¹ by bisection on it
 const erf = x => {
 	const s = x < 0 ? -1 : 1, a = Math.abs(x), t = 1 / (1 + 0.3275911 * a);

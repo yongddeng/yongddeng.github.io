@@ -4,7 +4,6 @@
 	var desktopBtn = document.getElementById('task-desktop');
 	var postBtns = document.getElementById('task-posts');
 	var clock = document.getElementById('task-clock');
-	if (!startBtn) return;
 
 	function tick() {
 		var d = new Date();
@@ -48,19 +47,12 @@
 	function syncWindows() {
 		var wins = Array.prototype.slice.call(document.querySelectorAll('.content'))
 			.sort(function(a, b) { return (a.dataset.seq || 0) - (b.dataset.seq || 0); });
-		var explorerOpen = wrapper && wrapper.style.display !== 'none';
-		var front = null, frontZ = -1;
-		if (explorerOpen) { frontZ = parseInt(wrapper.style.zIndex, 10) || 0; front = wrapper; }
-		wins.forEach(function (win) {
-			var z = parseInt(win.style.zIndex, 10) || 0;
-			if (z >= frontZ) { frontZ = z; front = win; }
-		});
+		var explorerOpen = wrapper.style.display !== 'none';
 		postBtns.innerHTML = '';
 		wins.forEach(function (win) {
 			var h1 = win.querySelector('.post_title h1');
-			if (!h1) return;
 			var b = document.createElement('button');
-			b.className = 'task-win' + (win === front ? ' active' : '');
+			b.className = 'task-win' + (win.classList.contains('active-win') ? ' active' : '');
 			var icon = win.querySelector('.post_title img');
 			var emoji = win.querySelector('.post_title .t-emoji');
 			if (icon) {
@@ -82,19 +74,17 @@
 			postBtns.appendChild(b);
 		});
 		desktopBtn.hidden = !explorerOpen;
-		desktopBtn.classList.toggle('active', explorerOpen && front === wrapper);
+		desktopBtn.classList.toggle('active', explorerOpen && wrapper.classList.contains('active-win'));
 	}
 	syncWindows();
 	document.addEventListener('content:swapped', syncWindows);
 	document.addEventListener('window:focused', syncWindows);
 
-	var desktopClose = document.getElementById('desktop-close');
-	if (desktopClose) {
-		desktopClose.addEventListener('click', function () {
-			wrapper.style.display = 'none';
-			syncWindows();
-		});
-	}
+	// content:swapped so that 001.js hands the focus to the window behind
+	document.getElementById('desktop-close').addEventListener('click', function () {
+		wrapper.style.display = 'none';
+		document.dispatchEvent(new CustomEvent('content:swapped'));
+	});
 	desktopBtn.addEventListener('click', function () {
 		wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 		wrapper.dispatchEvent(new MouseEvent('mousedown'));

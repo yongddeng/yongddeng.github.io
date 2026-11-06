@@ -68,7 +68,7 @@
 			item.addEventListener('click', function () {
 				closeAll();
 				// a heading inside a folded section (fold.js) must be seen
-				if (window.unfoldTo) unfoldTo(h);
+				unfoldTo(h);
 				cont.scrollTop += h.getBoundingClientRect().top - cont.getBoundingClientRect().top - 6;
 			});
 			drop.appendChild(item);
@@ -93,7 +93,7 @@
 				k.textContent = a.textContent;
 				k.addEventListener('click', function () {
 					closeAll();
-					if (window.unfoldTo) unfoldTo(a);
+					unfoldTo(a);
 					cont.scrollTop += a.getBoundingClientRect().top - cont.getBoundingClientRect().top - 60;
 					a.classList.add('kw-flash');
 					setTimeout(function () { a.classList.remove('kw-flash'); }, 1600);
@@ -125,7 +125,7 @@
 		if (act) {
 			var win = act.closest('.content');
 			closeAll();
-			if (act.dataset.act === 'find' && window.openFind) {
+			if (act.dataset.act === 'find') {
 				window.openFind(win);
 			} else if (act.dataset.act === 'selectall') {
 				var range = document.createRange();
@@ -133,10 +133,17 @@
 				var sel = window.getSelection();
 				sel.removeAllRanges();
 				sel.addRange(range);
+			} else if (act.dataset.act === 'closewin') {
+				win.querySelector('.post_title a').click();
 			}
 			return;
 		}
 		if (!e.target.closest('.tb-drop')) closeAll();
+	});
+
+	// A keyword's empty href would reload the page, and lose the reader's place
+	document.addEventListener('click', function (e) {
+		if (e.target.closest('.post_content a[href=""]')) e.preventDefault();
 	});
 
 	// Classic behaviour: once a menu is open, hovering a sibling switches to it

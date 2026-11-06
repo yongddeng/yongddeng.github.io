@@ -1,9 +1,7 @@
 (function() {
 	// My Computer itself is explorer.js; this opens the windows it and the
 	// desktop launch: posts, and the folder windows of the desktop's icons
-	if (!document.querySelector('.wrapper')) return;
-
-	var posts = window.searchIndex || [];
+	var posts = window.searchIndex;
 
 	var DET_HEAD = '<div class="det-head"><span class="dh-name">Name</span>'
 		+ '<span class="dh-size" data-sort="size">Size</span>'
@@ -29,9 +27,7 @@
 
 	function postsForTag(tagName) {
 		return posts.filter(function(post) {
-			return post.tags.some(function(t) {
-				return t.toLowerCase().replace(/\s+/g, '-') === tagName.toLowerCase();
-			});
+			return post.tags.indexOf(tagName) !== -1;
 		});
 	}
 
@@ -66,7 +62,7 @@
 		});
 		placeWindow(win, geom);
 		// 001.js adds drag/raise/close/resize, taskbar adds a button
-		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+		document.dispatchEvent(new CustomEvent('content:swapped'));
 		win.dispatchEvent(new MouseEvent('mousedown'));
 	}
 
@@ -82,7 +78,6 @@
 		var head = e.target.closest('.det-head [data-sort]');
 		if (!head) return;
 		var list = head.parentNode.nextElementSibling;
-		if (!list || list.tagName !== 'UL') return;
 		var asc = head.dataset.dir !== 'asc';
 		// only the sorted column carries an arrow
 		head.parentNode.querySelectorAll('[data-sort]').forEach(function(other) {
@@ -122,48 +117,32 @@
 		openShortcut(href);
 	});
 
-	var desktopIcons = document.querySelector('.desktop-icons');
-	if (desktopIcons) {
-		desktopIcons.addEventListener('click', function(e) {
-			var link = e.target.closest('a');
-			if (!link) return;
-			var href = link.getAttribute('href');
-			if (openShortcut(href)) {
-				e.preventDefault();
-			} else if (href === '/') {
-				// My Computer opens at its top, or comes forward where it is
-				e.preventDefault();
-				var wrapper = document.querySelector('.wrapper');
-				if (wrapper.style.display === 'none') {
-					wrapper.style.display = '';
-					window.explorer.home();
-					placeWindow(wrapper);
-				}
-				wrapper.dispatchEvent(new MouseEvent('mousedown'));
+	document.querySelector('.desktop-icons').addEventListener('click', function(e) {
+		var link = e.target.closest('a');
+		if (!link) return;
+		var href = link.getAttribute('href');
+		if (openShortcut(href)) {
+			e.preventDefault();
+		} else if (href === '/') {
+			// My Computer opens at its top, or comes forward where it is
+			e.preventDefault();
+			var wrapper = document.querySelector('.wrapper');
+			if (wrapper.style.display === 'none') {
+				wrapper.style.display = '';
+				window.explorer.home();
+				placeWindow(wrapper);
 			}
-		});
-	}
-
-	// Pin a window to saved coordinates, used when restoring a session.
-	// Clamped so the title bar stays reachable in a shrunken viewport.
-	function applyGeom(win, g) {
-		win.style.position = 'absolute';
-		win.style.margin = '0';
-		win.style.left = Math.max(0, Math.min(g.left || 0, window.innerWidth - 80)) + 'px';
-		win.style.top = Math.max(0, Math.min(g.top || 0, window.innerHeight - 60)) + 'px';
-		if (g.width) win.style.width = g.width + 'px';
-		if (g.height) win.style.height = g.height + 'px';
-		// 001.js re-stretches the panes of a restored-size explorer
-		win.dispatchEvent(new CustomEvent('win:relayout'));
-	}
+			wrapper.dispatchEvent(new MouseEvent('mousedown'));
+		}
+	});
 
 	// Random spot overlapping the open windows least (zero if possible),
 	// unless geom pins it to a remembered one
 	function placeWindow(win, geom) {
-		if (geom) return applyGeom(win, geom);
+		if (geom) return preGeom(win, geom);
 		var others = [];
 		var wrapper = document.querySelector('.wrapper');
-		if (wrapper && wrapper !== win && wrapper.style.display !== 'none') others.push(wrapper.getBoundingClientRect());
+		if (wrapper !== win && wrapper.style.display !== 'none') others.push(wrapper.getBoundingClientRect());
 		document.querySelectorAll('.content').forEach(function(w) {
 			if (w !== win) others.push(w.getBoundingClientRect());
 		});
@@ -217,28 +196,6 @@
 		box.querySelector('button').addEventListener('click', function() { box.remove(); });
 	}
 
-	// default.html loads highlight.js only on a page with code, so a window
-	// that brings code to any other page loads it first, once
-	var hljsLoad = null;
-	function loadHljs() {
-		if (hljsLoad) return hljsLoad;
-		var css = document.createElement('link');
-		css.rel = 'stylesheet';
-		css.href = '/assets/css/atom-one-light.css';
-		document.head.appendChild(css);
-		hljsLoad = ['/assets/js/highlight.pack.js', '/assets/js/x86asm.min.js'].reduce(function(prev, src) {
-			return prev.then(function() {
-				return new Promise(function(done) {
-					var s = document.createElement('script');
-					s.src = src;
-					s.onload = s.onerror = done;
-					document.head.appendChild(s);
-				});
-			});
-		}, Promise.resolve());
-		return hljsLoad;
-	}
-
 	// Posts still on their way in, by URL: a double-click's second click
 	// lands before the first one's window exists, and must not open another
 	var loading = {};
@@ -257,7 +214,8 @@
 			return Promise.resolve();
 		}
 		if (loading[key]) return loading[key];
-		if (!opts.force && openPosts().length + Object.keys(loading).length >= 5) {
+		// "/" is no post: Back to it closes the post windows, however many
+		if (!opts.force && key !== '/' && openPosts().length + Object.keys(loading).length >= 5) {
 			showError('There is not enough memory to open another window. '
 				+ 'Close one of the open posts, and then try again.');
 			return Promise.resolve();
@@ -289,20 +247,12 @@
 					if (!old.src) s.textContent = old.textContent;
 					old.replaceWith(s);
 				});
-				// highlight before the swap event: 002.js splits this markup
-				function shown() {
-					newContent.querySelectorAll('pre code').forEach(function(block) {
-						if (window.hljs) hljs.highlightBlock(block);
-					});
-					document.dispatchEvent(new CustomEvent('content:swapped', { detail: { content: newContent } }));
-				}
-				if (window.hljs || !newContent.querySelector('pre code')) shown();
-				else loadHljs().then(shown);
+				document.dispatchEvent(new CustomEvent('content:swapped'));
 				if (newContent.hasAttribute('data-math')) typesetMath(newContent);
 			} else {
 				// navigated to an index page: close all post windows
 				open.forEach(function(w) { w.remove(); });
-				document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+				document.dispatchEvent(new CustomEvent('content:swapped'));
 			}
 			var newTitle = doc.querySelector('title');
 			if (newTitle) document.title = newTitle.textContent;
@@ -325,7 +275,7 @@
 	window.desktop = {
 		loadPost: loadPost,
 		openFolderWindow: openFolderWindow,
-		applyGeom: applyGeom,
+		applyGeom: preGeom,
 		escapeHtml: escapeHtml,
 		sizeValue: sizeValue
 	};

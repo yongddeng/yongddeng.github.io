@@ -2,45 +2,37 @@
 // scroll in the pane on the left; the maths, one section per component, is the
 // pane on the right. Toolbar, buttons and panes reuse the WinHelp chrome from
 // _literature.scss; KaTeX typesets the maths.
+@use "sass:math";
 @use "main";
+@use "maths";
 
-$toy-ui: "Helvetica Neue", Arial, sans-serif;
-$toy-serif: Georgia, "Times New Roman", serif;
-$toy-mute: #55505a;
-$toy-navy: #000080;
 $toy-rule: #ebe8ee;
 $toy-gold: #c8a000;
-$toy-mono: "Lucida Console", Menlo, Monaco, monospace;
-$toy-green: #006400;
+$toy-scale: 0.9;
 
-// the reading text, set in Georgia, follows System Properties' Font and Text size;
-// Small (12px) gives the size it was drawn at
-@mixin reading($size, $leading) {
-	font-family: var(--font, $toy-serif);
-	font-size: calc(var(--text, 12px) + #{$size - 12px});
-	line-height: $leading;
+// the reading text as the maths posts set it, following System Properties' Font and Text size
+@mixin reading {
+	font-family: var(--font, main.$serif);
+	font-size: var(--text, 12px);
+	line-height: 1.5;
 }
 
 .toy-win {
 	width: 960px;
-
-	.post_content {
-		display: flex;
-		flex-direction: column;
-		height: 600px;
-		overflow: hidden;
-		background: #bfb8bf;
-		border: 0;
-		padding: 0 4px 2px;
-	}
+	@include main.pane-window(540px);
 }
 
 .toy {
-	flex: 1;
-	min-height: 0;
+	// everything inside scaled as one, its text and gaps together: laid out larger
+	// than the window above and drawn at 90% into it
+	flex: none;
+	width: calc(100% / #{$toy-scale});
+	height: calc(100% / #{$toy-scale});
+	transform: scale($toy-scale);
+	transform-origin: 0 0;
 	display: flex;
 	flex-direction: column;
-	font: 12px/1.35 $toy-ui;
+	font: 12px/1.35 main.$ui;
 	color: #000000;
 
 	// outrank the post body's own rules; a class on one of these needs .toy in front to outrank this in turn
@@ -62,7 +54,7 @@ $toy-green: #006400;
 	}
 }
 .toy-lbl {
-	color: $toy-mute;
+	color: main.$mute;
 	padding: 0 2px 0 4px;
 }
 .toy-toks {
@@ -103,7 +95,7 @@ $toy-green: #006400;
 		background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 0 0 / 2px 2px;
 	}
 	&::-webkit-scrollbar-thumb {
-		background: #c0c0c0;
+		background: main.$face;
 		border: 2px solid;
 		border-color: #ffffff #000000 #000000 #ffffff;
 		box-shadow: inset -1px -1px #808080;
@@ -127,16 +119,19 @@ $toy-green: #006400;
 .toy-tip {
 	position: absolute;
 	pointer-events: none;
-	background: #ffffe1;
+	background: main.$note;
 	border: 1px solid #000000;
 	padding: 2px 6px;
-	font: 11.5px $toy-ui;
+	font: 11.5px main.$ui;
 	white-space: nowrap;
 	font-variant-numeric: tabular-nums;
 }
 
 // the maths pane: a sticky step map and component nav, then one section per component
+// It is read, so it stays out of the toy's scale, at the maths posts' own sizes
 .toy-side {
+	zoom: math.div(1, $toy-scale);
+	font-size: var(--text, 12px);
 	position: relative;
 	overflow-y: auto;
 	overflow-anchor: none;
@@ -161,8 +156,8 @@ $toy-green: #006400;
 
 	.grp {
 		grid-row: 1;
-		font: bold 10px $toy-ui;
-		color: $toy-mute;
+		font: bold 10px main.$ui;
+		color: main.$mute;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
 	}
@@ -175,7 +170,7 @@ $toy-green: #006400;
 		cursor: pointer;
 
 		&.done { background: #8b8bc4; }
-		&.on { background: $toy-navy; border-color: $toy-navy; }
+		&.on { background: main.$navy; border-color: main.$navy; }
 		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
 	}
 }
@@ -185,15 +180,15 @@ $toy-green: #006400;
 	gap: 3px;
 
 	button {
-		font: 11px $toy-ui;
+		font: 11px main.$ui;
 		color: #000000;
-		background: #c0c0c0;
+		background: main.$face;
 		border: 1px solid;
 		border-color: #ffffff #808080 #808080 #ffffff;
 		padding: 1px 6px;
 		cursor: pointer;
 
-		span { color: $toy-navy; }
+		span { color: main.$navy; }
 		&.on {
 			background: #ffffff;
 			border-color: #808080 #ffffff #ffffff #808080;
@@ -217,19 +212,21 @@ $toy-green: #006400;
 		align-items: baseline;
 		gap: 2px 8px;
 		margin: 18px 0 2px;
-		@include reading(16px, 1.3);
+		@include reading;
+		font-size: calc(var(--text, 12px) * 1.5);
+		line-height: 1.3;
 		font-weight: bold;
 
-		.num { color: $toy-navy; min-width: 14px; }
+		.num { color: main.$navy; min-width: 14px; }
 		small {
 			flex-basis: 100%;
 			padding-left: 22px;
-			font: 11px $toy-ui;
-			color: $toy-mute;
+			font: 11px main.$ui;
+			color: main.$mute;
 		}
 	}
 	&.here .toy-cph .num {
-		background: $toy-navy;
+		background: main.$navy;
 		color: #ffffff;
 		padding: 0 5px;
 		min-width: 0;
@@ -237,7 +234,7 @@ $toy-green: #006400;
 }
 .toy .toy-intro {
 	margin: 8px 0 4px 22px;
-	@include reading(12px, 1.55);
+	@include reading;
 	color: #2b2830;
 }
 .toy-cpeq {
@@ -247,37 +244,38 @@ $toy-green: #006400;
 	margin: 12px 0 2px;
 	padding-bottom: 3px;
 	border-bottom: 1px solid $toy-rule;
-	font: bold 10px $toy-ui;
+	font: bold 10px main.$ui;
 	text-transform: uppercase;
 	letter-spacing: 0.07em;
-	color: $toy-navy;
+	color: main.$navy;
 }
 .toy-tok {
 	margin-left: 4px;
-	font: normal 12px $toy-ui;
+	font: normal 12px main.$ui;
 	text-transform: none;
 	letter-spacing: 0;
-	color: $toy-mute;
+	color: main.$mute;
 
-	i { font: italic bold 13px $toy-serif; color: $toy-navy; }
+	i { font: italic bold 13px main.$serif; color: main.$navy; }
 	sub { font-size: 9px; }
 }
 .toy .toy-also {
 	margin: 4px 0 0;
-	font: 11px/1.5 $toy-ui;
-	color: $toy-mute;
+	font: 11px/1.5 main.$ui;
+	color: main.$mute;
 }
 // a prerequisite folds to its title and defining line, behind Win98's tree-view box;
 // `now` when the current step uses it, `flash` when a reference opens it
 .toy-pre {
 	display: block;
-	margin: 0 -14px;
+	margin: 0 -14px 3px;
 	padding: 6px 14px 6px 11px;
 	border-left: 3px solid transparent;
+	background: maths.$tint-def;
 
 	&.now {
-		border-left-color: $toy-navy;
-		background: #f1f1f8;
+		border-left-color: main.$navy;
+		background: #dfe6f5;
 	}
 	&.flash {
 		animation: toy-flash 1.4s ease-out;
@@ -288,10 +286,10 @@ $toy-green: #006400;
 		cursor: pointer;
 
 		&::-webkit-details-marker { display: none; }
-		&:hover .toy-preh { color: $toy-navy; }
+		&:hover .toy-preh { color: main.$navy; }
 		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
-		.toy-mx { padding-left: 19px; }
-		.katex { font-size: 0.96em; }
+		// the defining line may run into the gutter, as an open section's text does not
+		.toy-mx { padding-left: 19px; margin-right: -9px; }
 	}
 	&[open] > summary { margin-bottom: 4px; }
 	> :not(summary) { margin-left: 19px; }
@@ -301,7 +299,8 @@ $toy-green: #006400;
 		align-items: baseline;
 		gap: 2px 8px;
 		margin: 0;
-		font: bold 12px $toy-ui;
+		@include reading;
+		font-weight: bold;
 
 		&::before {
 			content: "+";
@@ -314,16 +313,16 @@ $toy-green: #006400;
 			margin-right: -2px;
 			border: 1px solid #808080;
 			background: #ffffff;
-			font: 9px/1 $toy-ui;
+			font: 9px/1 main.$ui;
 			color: #000000;
 		}
-		.num { color: $toy-navy; font-weight: normal; }
-		em { font: italic 11px $toy-serif; color: $toy-mute; }
+		.num { color: main.$navy; font-weight: normal; }
+		em { font: italic 11px main.$serif; color: main.$mute; }
 	}
 	&[open] .toy-preh::before { content: "−"; }
 	p {
 		margin: 4px 0;
-		@include reading(12px, 1.55);
+		@include reading;
 	}
 }
 // a prerequisite's points, and a step's notes: a bold lead, then a sentence or two
@@ -332,12 +331,12 @@ $toy-green: #006400;
 	display: grid;
 	gap: 3px;
 	padding-left: 13px;
-	@include reading(11.5px, 1.5);
+	@include reading;
 
 	li { list-style: disc; }
 	b { font-weight: bold; }
 	code {
-		font: 10px $toy-mono;
+		font: 10px main.$mono;
 		background: #efedf1;
 		padding: 0 3px;
 	}
@@ -350,12 +349,12 @@ $toy-green: #006400;
 }
 .toy-used {
 	margin-top: 4px;
-	font: 11px $toy-ui;
-	color: $toy-mute;
+	font: 11px main.$ui;
+	color: main.$mute;
 }
 .toy-ref {
-	font: 11px $toy-ui;
-	color: $toy-navy;
+	font: 11px main.$ui;
+	color: main.$navy;
 	background: none;
 	border: 0;
 	padding: 0 1px;
@@ -369,15 +368,15 @@ $toy-green: #006400;
 }
 .toy-dims {
 	border-collapse: collapse;
-	font: 11px $toy-ui;
+	font: 11px main.$ui;
 	font-variant-numeric: tabular-nums;
 	margin: 2px 0;
 
 	th {
-		font: bold 10px $toy-ui;
+		font: bold 10px main.$ui;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
-		color: $toy-mute;
+		color: main.$mute;
 		text-align: right;
 		padding: 0 0 2px 12px;
 	}
@@ -400,11 +399,10 @@ $toy-green: #006400;
 
 	&.future .toy-fph { opacity: 0.45; }
 	&.cur {
-		border-left-color: $toy-navy;
-		background: #f6f6fb;
+		border-left-color: main.$navy;
 
-		.toy-fph b { color: $toy-navy; font-size: calc(var(--text, 12px) + 2px); }
-		.toy-fph .n { color: $toy-navy; font-weight: bold; }
+		.toy-fph b { color: main.$navy; font-size: calc(var(--text, 12px) + 2px); }
+		.toy-fph .n { color: main.$navy; font-weight: bold; }
 	}
 }
 .toy-fph {
@@ -421,17 +419,15 @@ $toy-green: #006400;
 	font: inherit;
 	cursor: pointer;
 
-	.n { font: 11px/1.6 $toy-ui; color: $toy-mute; font-variant-numeric: tabular-nums; }
-	b { @include reading(12px, 1.5); font-weight: bold; }
+	.n { font: 11px/1.6 main.$ui; color: main.$mute; font-variant-numeric: tabular-nums; }
+	b { @include reading; font-weight: bold; }
 	.eq {
 		grid-column: 2;
 		overflow-x: auto;
 		overflow-y: hidden;
 		padding: 1px 0 2px;
-
-		.katex { font-size: 1.04em; }
 	}
-	&:hover b { color: $toy-navy; }
+	&:hover b { color: main.$navy; }
 	&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
 }
 // a step: a line or two on the cubes, then its parts in a fixed order
@@ -449,42 +445,43 @@ $toy-green: #006400;
 	min-width: 0;
 
 	> * { min-width: 0; }
-	> .toy-lab { margin-top: 0; }
 }
-.toy-pm > .toy-lab { color: $toy-navy; }
-.toy-py > .toy-lab { color: $toy-green; }
-.toy-nb > .toy-lab { color: #7a5f00; }
+// the maths as a definition is tinted and the worked numbers as an example, the
+// bands reaching into the gutter so that what is in them keeps its width
+.toy-pm, .toy-ph {
+	margin: 0 -9px;
+	padding: 7px 9px;
+}
+.toy-pm { background: maths.$tint-def; }
+.toy-ph { background: maths.$tint-ex; }
+.toy-pm > .toy-lab { color: main.$navy; }
 .toy-lab {
-	margin-top: 4px;
-	font: bold 10px $toy-ui;
+	font: bold 10px main.$ui;
 	text-transform: uppercase;
 	letter-spacing: 0.07em;
-	color: $toy-mute;
+	color: main.$mute;
 
 	span { font-weight: normal; text-transform: none; letter-spacing: 0; margin-left: 4px; }
 	.toy-ref { font-size: 10.5px; }
 }
-.toy-mth .katex-display {
-	margin: 2px 0;
-}
-.toy-cap {
-	@include reading(12.5px, 1.5);
+.toy .toy-cap {
+	@include reading;
 
-	i { font-style: normal; font-weight: bold; color: $toy-navy; }
+	i { font-style: normal; font-weight: bold; color: main.$navy; }
 }
 // PyTorch: the lines, then what they print for the token
 .toy-code,
 .toy-out {
 	margin: 0;
 	padding: 4px 8px;
-	font: 10px/1.45 $toy-mono;
+	font: 10px/1.45 main.$mono;
 	white-space: pre;
 	overflow-x: auto;
 }
 .toy-code {
 	background: #ffffff;
 	border: 1px solid #d6d2da;
-	border-left: 3px solid $toy-green;
+	border-left: 3px solid #808080;
 	color: #000000;
 
 	.cm { color: #6a6470; }
@@ -494,17 +491,17 @@ $toy-green: #006400;
 	background: #f1eff3;
 	border: 1px solid #d6d2da;
 	border-top: 0;
-	border-left: 3px solid #93b893;
+	border-left: 3px solid #b7b2ba;
 	color: #2b2830;
 
 	&::before {
 		content: "out · " attr(data-t);
 		display: block;
 		padding-bottom: 1px;
-		font: bold 9px $toy-ui;
+		font: bold 9px main.$ui;
 		text-transform: uppercase;
 		letter-spacing: 0.07em;
-		color: $toy-mute;
+		color: main.$mute;
 	}
 }
 // the toy against Mixtral: the Sizes table's look, the numbers right
@@ -515,12 +512,6 @@ $toy-green: #006400;
 	th:first-child { width: 100%; }
 	td:first-child { white-space: normal; color: #45404a; }
 	td:nth-child(2) { text-align: right; color: #000000; white-space: nowrap; }
-}
-// the note: the help balloon's gold
-.toy-nb {
-	padding: 4px 8px 6px 9px;
-	border-left: 3px solid $toy-gold;
-	background: #fbf8ec;
 }
 .toy .toy-notes {
 	color: #2b2830;
@@ -537,18 +528,19 @@ $toy-green: #006400;
 
 	.katex-display { margin: 4px 0; }
 	.katex-display.fleqn > .katex { padding-left: 0; }
-	.katex { font-size: 1.02em; }
 	&.tight .arraycolsep { width: 0.24em !important; }
 }
 .toy .toy-mnote {
 	margin: 2px 0 6px;
-	@include reading(11.5px, 1.5);
+	@include reading;
 	color: #2b2830;
 
-	i { font-style: normal; font-weight: bold; color: $toy-navy; }
+	i { font-style: normal; font-weight: bold; color: main.$navy; }
 }
+// the size MathJax comes to against the maths posts' text
 .toy .katex {
 	color: inherit;
+	font-size: 1.09em;
 }
 
 // the cells: the step's numbers as an SVG, each cell keyed to a cube
@@ -559,41 +551,33 @@ $toy-green: #006400;
 		max-width: 440px;
 		height: auto;
 	}
-	text { font-family: $toy-ui; }
+	text { font-family: main.$ui; }
 	[data-k].on rect { stroke: $toy-gold; stroke-width: 2.5; }
 	.cl { stroke: #ffffff; stroke-width: 1; }
 	.cv { font-size: 10px; font-variant-numeric: tabular-nums; }
 	.cv9 { font-size: 8.5px; font-variant-numeric: tabular-nums; }
-	.pl { font-size: 11px; fill: $toy-mute; }
-	.pv { font: italic bold 14px $toy-serif; fill: #000000; }
-	.ps { font-size: 10.5px; fill: $toy-mute; }
+	.pl { font-size: 11px; fill: main.$mute; }
+	.pv { font: italic bold 14px main.$serif; fill: #000000; }
+	.ps { font-size: 10.5px; fill: main.$mute; }
 	.po { font-size: 11.5px; fill: #000000; }
-	.hl { font-size: 9px; font-weight: bold; fill: $toy-mute; }
-	.hb { stroke: $toy-mute; stroke-width: 1; fill: none; }
+	.hl { font-size: 9px; font-weight: bold; fill: main.$mute; }
+	.hb { stroke: main.$mute; stroke-width: 1; fill: none; }
 	.rl { font-size: 11px; fill: #000000; }
-	.rl.cur { font-weight: bold; fill: $toy-navy; }
-	.wb { fill: $toy-navy; }
+	.rl.cur { font-weight: bold; fill: main.$navy; }
+	.wb { fill: main.$navy; }
 	.wv { font-size: 9.5px; fill: #000000; font-variant-numeric: tabular-nums; }
-	.new { fill: none; stroke: $toy-navy; stroke-width: 2; }
+	.new { fill: none; stroke: main.$navy; stroke-width: 2; }
 	.dl { fill: #ffffff; stroke: #b8b8b8; }
 	.dax { stroke: #e2e2e2; }
 	.dbe { stroke: #9a9a9a; stroke-dasharray: 2 2; fill: none; }
 	.darc { fill: none; stroke: #b00000; stroke-width: 1; }
 }
 
-// On a phone the toy is hidden behind a one-line notice (.toy-phone);
-// the window chrome goes back to the ordinary page
+// On a phone the toy is hidden behind a one-line notice (.toy-phone)
 .toy-phone {
 	display: none;
 }
 @media only screen and (max-width: 700px) {
-	.toy-win .post_content {
-		display: block;
-		height: auto;
-		overflow: visible;
-		background: var(--paper, #fbfafb);
-		padding: 16px 14px 40px;
-	}
 	.toy {
 		display: none;
 	}

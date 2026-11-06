@@ -1,5 +1,7 @@
 // ---- 206. mode of convergence ----
 
+// the reciprocal of d as a reading
+const frac = d => d === 1 ? '1' : `1/${d}`;
 // the ω × n raster for a sequence on [0, 1), with Aₙ and Tₙ as bars
 const lev = n => Math.floor(Math.log2(n));
 const RASTER = {
@@ -7,13 +9,13 @@ const RASTER = {
 		value: (n, w) => Math.floor(w * 2 ** lev(n)) === n - 2 ** lev(n) ? 1 : 0,
 		last: () => Infinity,
 		start: 21,
-		read: n => `P(A<sub>n</sub>) = ${frac(2 ** -lev(n))} · P(T<sub>n</sub>) = 1 · E X<sub>n</sub> = ${frac(2 ** -lev(n))}`,
+		read: n => `P(A<sub>n</sub>) = ${frac(2 ** lev(n))} · P(T<sub>n</sub>) = 1 · E X<sub>n</sub> = ${frac(2 ** lev(n))}`,
 	},
 	spikes: {
 		value: (n, w) => w < 1 / n ? n : 0,
 		last: w => Math.ceil(1 / w) - 1,
 		start: 6,
-		read: n => `P(A<sub>n</sub>) = ${frac(1 / n)} · P(T<sub>n</sub>) = ${frac(1 / n)} · E X<sub>n</sub> = 1`,
+		read: n => `P(A<sub>n</sub>) = ${frac(n)} · P(T<sub>n</sub>) = ${frac(n)} · E X<sub>n</sub> = 1`,
 	},
 };
 function rasterFig(el, seq) {
@@ -39,8 +41,7 @@ function rasterFig(el, seq) {
 	const colW = G.w / N, colX = n => G.x0 + (n - 1) * colW;
 	const row = figRow(el);
 	function draw(n) {
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		c.imageSmoothingEnabled = false;
 		c.drawImage(off, G.x0, G.y0, G.w, G.h);
 		c.fillStyle = 'rgba(255, 255, 255, 0.7)';
@@ -89,20 +90,14 @@ FIGS['206/quantile'] = el => {
 	const row = figRow(el);
 	const Y = v => P.Y(Math.max(-YMAX, Math.min(YMAX, v)));
 	const normal = [];
-	for (let px = P.x0 + 1; px < P.x1; px++) normal.push([px, Y(PhiInv((px - P.x0) / (P.x1 - P.x0)))]);
+	for (let px = P.x0 + 1; px < P.x1; px++) normal.push([px, Y(PhiInv(P.x(px)))]);
 	function draw(n) {
 		// the law of Sₙ/√n, its values (2k − n)/√n with binomial weights
-		const cdf = [];
-		let w = 2 ** -n, acc = 0;
-		for (let k = 0; k <= n; k++) {
-			acc += w;
-			cdf.push(acc);
-			w = w * (n - k) / (k + 1);
-		}
+		let acc = 0;
+		const cdf = binom(n).map(w => (acc += w));
 		const value = k => (2 * k - n) / Math.sqrt(n);
 		const quant = u => { let k = 0; while (k < n && cdf[k] < u) k++; return value(k); };
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		c.strokeStyle = COL.grid;
 		c.lineWidth = 1;
 		for (const v of [-2, -1, 0, 1, 2]) { c.beginPath(); c.moveTo(P.x0, Math.round(Y(v)) + 0.5); c.lineTo(P.x1, Math.round(Y(v)) + 0.5); c.stroke(); }
@@ -119,7 +114,7 @@ FIGS['206/quantile'] = el => {
 		c.strokeStyle = COL.black;
 		c.lineWidth = 1.4;
 		const pts = [];
-		for (let px = P.x0 + 1; px < P.x1; px++) pts.push([px, Y(quant((px - P.x0) / (P.x1 - P.x0)))]);
+		for (let px = P.x0 + 1; px < P.x1; px++) pts.push([px, Y(quant(P.x(px)))]);
 		polyline(c, pts);
 		label(c, 'Yₙ(ω), the quantile of Sₙ/√n', P.x0 + 8, P.y1 + 14, 'left', COL.black);
 		label(c, 'Φ⁻¹(ω)', P.x0 + 8, P.y1 + 28, 'left', COL.tail);

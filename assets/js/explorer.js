@@ -8,8 +8,7 @@
 // carries its post's opening sentence. The facts come from _plugins/explorer.rb.
 (function () {
 	const win = document.querySelector('.wrapper');
-	if (!win) return;
-	const posts = window.searchIndex || [], programs = window.programs || [];
+	const posts = window.searchIndex, programs = window.programs;
 	const $ = sel => win.querySelector(sel);
 	const side = $('.xp-side'), pane = $('.post_list'), combo = $('.xp-combo'), places = $('.xp-places');
 	const esc = desktop.escapeHtml, kb = desktop.sizeValue;
@@ -67,7 +66,7 @@
 		const x = p.xp;
 		if (x.about) return x.about.slice();
 		const out = [];
-		if (x.parts) out.push(x.sections ? many(x.parts, 'part') + ', ' + many(x.sections, 'section') : many(x.parts, 'part') + (x.notes ? ' and notes' : ''));
+		if (x.parts) out.push(x.sections ? many(x.parts, 'part') + ', ' + many(x.sections, 'section') : many(x.parts, 'part'));
 		const bits = [];
 		if (x.figures) bits.push(many(x.figures, 'figure'));
 		if (x.formulas) bits.push(many(x.formulas, 'formula'));
@@ -99,7 +98,6 @@
 		if (!k) return own;
 		const val = m => (k === 'size' ? kbOf(m) : k === 'type' ? typeOf(m) : k === 'made' ? madeOf(m) : m.name);
 		return own.sort((a, b) => {
-			if (isBox(a) !== isBox(b)) return isBox(a) ? -1 : 1;
 			const x = val(a), y = val(b);
 			return dir * (typeof x === 'number' ? x - y : byName(String(x), String(y)));
 		});
@@ -138,21 +136,18 @@
 		const slice = (i, y, dark, edge) => {
 			const [a, b] = arcs[i], m = (a + b) / 2;
 			const pt = t => (cx + rx * Math.cos(t)).toFixed(2) + ' ' + (y + ry * Math.sin(t)).toFixed(2);
-			// a whole pie has no wedge to draw: two half arcs instead
-			const d = b - a > 2 * Math.PI - 1e-9 ? 'M' + pt(a) + 'A' + rx + ' ' + ry + ' 0 1 1 ' + pt(a + Math.PI) + 'A' + rx + ' ' + ry + ' 0 1 1 ' + pt(a) + 'Z'
-				: 'M' + cx + ' ' + y + 'L' + pt(a) + 'A' + rx + ' ' + ry + ' 0 ' + (b - a > Math.PI ? 1 : 0) + ' 1 ' + pt(b) + 'Z';
+			const d = 'M' + cx + ' ' + y + 'L' + pt(a) + 'A' + rx + ' ' + ry + ' 0 ' + (b - a > Math.PI ? 1 : 0) + ' 1 ' + pt(b) + 'Z';
 			return '<path' + (i === hl ? ' transform="translate(' + (7 * Math.cos(m)).toFixed(2) + ' ' + (4 * Math.sin(m)).toFixed(2) + ')"' : '')
 				+ ' d="' + d + '" fill="' + shade(i, dark) + '"' + (edge ? ' stroke="#000" stroke-width=".5"' : '') + '/>';
 		};
 		let svg = '<svg class="dp-pie" viewBox="-6 -4 132 78" aria-hidden="true">';
-		for (let d = depth; d > 0; d--) values.forEach((v, i) => { if (v) svg += slice(i, cy + d, true, d === depth); });
-		values.forEach((v, i) => { if (v) svg += slice(i, cy, false, true); });
+		for (let d = depth; d > 0; d--) values.forEach((v, i) => { svg += slice(i, cy + d, true, d === depth); });
+		values.forEach((v, i) => { svg += slice(i, cy, false, true); });
 		return svg + '</svg>';
 	}
 	function props(id) {
 		const n = N[id], kids = n.kids.map(k => N[k]), hl = n.kids.indexOf(S.sel);
 		const head = '<div class="dp-head"><img src="' + icon(n, true) + '" alt="" /><div><b>' + esc(n.name) + '</b><span>' + TYPE.drive + '</span></div></div>';
-		if (!leaves(n).length) return '<section class="dp">' + head + '<p>Empty.</p></section>';
 		// a row: the item's mark and name, what it holds or is for, and its size
 		const row = (m, i, mark, what) => '<tr' + (i === hl ? ' class="on"' : '') + '><td>' + mark + '<span>' + esc(m.name) + '</span></td><td>' + what + '</td><td>' + fmtKB(kbOf(m)) + '</td></tr>';
 		const table = (rows, total, cls) => '<table class="dp-table' + (cls ? ' ' + cls : '') + '"><tbody>' + rows.join('')
@@ -178,8 +173,8 @@
 		}
 		const th = (k, label, cls) => '<span class="' + cls + '" data-k="' + k + '"' + (S.sort.k === k ? ' data-dir="' + (S.sort.asc ? 'asc' : 'desc') + '"' : '') + '>' + label + '</span>';
 		pane.innerHTML = '<div class="det-head">' + th('name', 'Name', 'dh-name') + th('size', 'Size', 'dh-size') + th('type', 'Type', 'dh-type') + th('made', 'Created', 'dh-date') + '</div><ul>'
-			+ items.map(n => '<li>' + a(n, '<img src="' + icon(n) + '" alt="" /><span class="nm">' + esc(n.name) + '</span><span class="sz">' + (isBox(n) ? '' : n.size)
-				+ '</span><span class="ty">' + typeOf(n) + '</span><span class="dt">' + (dated(n) && madeOf(n) ? madeOf(n) : '') + '</span>') + '</li>').join('') + '</ul>';
+			+ items.map(n => '<li>' + a(n, '<img src="' + icon(n) + '" alt="" /><span class="nm">' + esc(n.name) + '</span><span class="sz">' + n.size
+				+ '</span><span class="ty">' + typeOf(n) + '</span><span class="dt">' + n.created + '</span>') + '</li>').join('') + '</ul>';
 	}
 
 	// ---- the chrome: title, address, buttons, menus and status bar ----
@@ -341,9 +336,7 @@
 				+ '<div class="k">Created: ' + n.created + ' · Size: ' + n.size + '</div>';
 		}
 		// a folder; the drives have none
-		const ps = files(n);
-		if (!ps.length) return '<div>Empty.</div>';
-		return '<div>' + esc(span(ps)) + '</div><div class="k">Created: ' + madeOf(n) + '</div>';
+		return '<div>' + esc(span(files(n))) + '</div><div class="k">Created: ' + madeOf(n) + '</div>';
 	}
 	pane.addEventListener('mousemove', e => {
 		if (phone()) return;

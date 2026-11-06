@@ -24,7 +24,7 @@
 				if (!el.getClientRects().length && !el.closest('[hidden]')) return NodeFilter.FILTER_REJECT;
 				while (el && el !== root) {
 					// Leave rendered maths alone; wrapping its text breaks layout
-					if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.tagName.indexOf('MJX-') === 0) {
+					if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE' || el.classList.contains('mjx-chtml')) {
 						return NodeFilter.FILTER_REJECT;
 					}
 					el = el.parentElement;
@@ -78,7 +78,7 @@
 		var el = state.hits[state.cur];
 		el.classList.add('current');
 		// a match inside a folded section (fold.js) must be seen
-		if (window.unfoldTo) unfoldTo(el);
+		unfoldTo(el);
 		var r = el.getBoundingClientRect();
 		if (phone()) {
 			// The page is the pane; 100 clears the app bar and the

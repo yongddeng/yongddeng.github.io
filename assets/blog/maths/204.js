@@ -25,8 +25,7 @@ FIGS['204/markov'] = el => {
 	let kind = 'x²', a = 2;
 	function draw() {
 		const k = KINDS[kind](a);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the tails under the indicator, then the indicator itself
 		c.fillStyle = COL.pale;
 		c.fillRect(top.X(-4), top.Y(1), top.X(-a) - top.X(-4), top.Y(0) - top.Y(1));
@@ -38,10 +37,7 @@ FIGS['204/markov'] = el => {
 		c.strokeStyle = COL.tail;
 		c.lineWidth = 1.6;
 		const pts = [];
-		for (let px = top.x0; px <= top.x1; px++) {
-			const x = -4 + 8 * (px - top.x0) / (top.x1 - top.x0);
-			pts.push([px, top.Y(Math.min(2, k.ratio(x)))]);
-		}
+		for (let px = top.x0; px <= top.x1; px++) pts.push([px, top.Y(Math.min(2, k.ratio(top.x(px))))]);
 		polyline(c, pts);
 		frameBox(c, top);
 		label(c, 'I{|x| ≥ a}', top.X(a) + 4, top.Y(1) + 13, 'left', COL.ink);
@@ -67,7 +63,7 @@ FIGS['204/markov'] = el => {
 		c.strokeStyle = COL.black;
 		c.lineWidth = 1;
 		const outline = [];
-		for (let px = bot.x0; px <= bot.x1; px++) outline.push([px, bot.Y(normalPdf(-4 + 8 * (px - bot.x0) / (bot.x1 - bot.x0)))]);
+		for (let px = bot.x0; px <= bot.x1; px++) outline.push([px, bot.Y(normalPdf(bot.x(px)))]);
 		polyline(c, outline);
 		frameBox(c, bot);
 		for (const x of [-4, -2, 0, 2, 4]) label(c, minus(x), bot.X(x), bot.y0 + 13, 'center');
@@ -103,8 +99,7 @@ FIGS['204/young'] = el => {
 	let p = 2, b = 0.8;
 	function draw() {
 		const q = p / (p - 1);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the area aᵖ/p under the curve, from 0 to a
 		c.fillStyle = 'rgba(0, 0, 128, 0.22)';
 		c.beginPath();
@@ -126,7 +121,7 @@ FIGS['204/young'] = el => {
 		c.lineWidth = 1.4;
 		const pts = [];
 		for (let px = P.x0; px <= P.x1; px++) {
-			const y = ((px - P.x0) / (P.x1 - P.x0) * 2.6) ** (p - 1);
+			const y = P.x(px) ** (p - 1);
 			if (y > 2.2) break;
 			pts.push([px, P.Y(y)]);
 		}
@@ -169,16 +164,12 @@ FIGS['204/jensen'] = el => {
 		const P = plotBox(34, 296, 184, 10, k.dom, k.range);
 		const mean = (1 - theta) * k.x1 + theta * k.x2;
 		const meanF = (1 - theta) * k.f(k.x1) + theta * k.f(k.x2);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the curve φ
 		c.strokeStyle = COL.black;
 		c.lineWidth = 1.4;
 		const pts = [];
-		for (let px = P.x0; px <= P.x1; px++) {
-			const x = k.dom[0] + (k.dom[1] - k.dom[0]) * (px - P.x0) / (P.x1 - P.x0);
-			pts.push([px, P.Y(Math.min(k.range[1], k.f(x)))]);
-		}
+		for (let px = P.x0; px <= P.x1; px++) pts.push([px, P.Y(Math.min(k.range[1], k.f(P.x(px))))]);
 		polyline(c, pts);
 		// the chord, with each value's weight as the area of its dot
 		c.strokeStyle = COL.ink;
@@ -186,22 +177,16 @@ FIGS['204/jensen'] = el => {
 		polyline(c, [[P.X(k.x1), P.Y(k.f(k.x1))], [P.X(k.x2), P.Y(k.f(k.x2))]]);
 		c.fillStyle = COL.ink;
 		for (const [x, w] of [[k.x1, 1 - theta], [k.x2, theta]]) {
-			c.beginPath();
-			c.arc(P.X(x), P.Y(k.f(x)), 2 + 6 * Math.sqrt(w), 0, 2 * Math.PI);
-			c.fill();
+			dot(c, P.X(x), P.Y(k.f(x)), 2 + 6 * Math.sqrt(w));
 		}
 		// the gap between E φ(X) on the chord and φ(E X) on the curve
 		c.strokeStyle = COL.tail;
 		c.lineWidth = 2;
 		polyline(c, [[P.X(mean), P.Y(meanF)], [P.X(mean), P.Y(k.f(mean))]]);
 		c.fillStyle = COL.ink;
-		c.beginPath();
-		c.arc(P.X(mean), P.Y(meanF), 4, 0, 2 * Math.PI);
-		c.fill();
+		dot(c, P.X(mean), P.Y(meanF), 4);
 		c.fillStyle = COL.tail;
-		c.beginPath();
-		c.arc(P.X(mean), P.Y(k.f(mean)), 4, 0, 2 * Math.PI);
-		c.fill();
+		dot(c, P.X(mean), P.Y(k.f(mean)), 4);
 		frameBox(c, P);
 		label(c, 'x₁', P.X(k.x1), P.y0 + 13, 'center');
 		label(c, 'x₂', P.X(k.x2), P.y0 + 13, 'center');
@@ -262,8 +247,7 @@ FIGS['204/lp'] = el => {
 	}
 	const volume = p => (p === Infinity ? 8 : (2 * gamma(1 + 1 / p)) ** 3 / gamma(1 + 3 / p));
 	function draw() {
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		for (const e of [[1.4, 0, 0], [0, 1.4, 0], [0, 0, 1.4]]) view.curve([e.map(x => -x), e], COL.grid, 1);
 		const p = pOf(s), q = pOf(1 - s);
 		// the polar of the ball for p < 1 is that of its convex hull, the octahedron,

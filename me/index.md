@@ -1,5 +1,5 @@
 ---
-layout: me
+layout: default
 title: MS-DOS Prompt
 winclass: dos-win
 icon: msdos.svg

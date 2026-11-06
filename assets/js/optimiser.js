@@ -16,9 +16,9 @@
 // From the top: the maths (the optimisers, schedules, mixed precision,
 // surfaces and inits), the settings the controls change, the runs, the sweep
 // and the cards' maps, which run them in the background, the race on screen,
-// then the panes, the cards, the status bar and the controls. The desktop
-// re-creates a window's scripts when it swaps the window in, so this runs once
-// per window and claims it with data-ready.
+// then the panes, the cards, the status bar and the controls. The desktop runs a
+// window's scripts each time it opens one, so this runs once per window and
+// claims it with data-ready.
 (function () {
 	const root = document.querySelector('.opt:not([data-ready])');
 	if (!root) return;
@@ -30,14 +30,9 @@
 
 	// ---- numbers, as the window writes them ----
 	const FLOOR = 1e-12; // gaps below this are drawn and read at it
-	const SUP = { '-': '⁻', '+': '', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
-	const fmt = v => v.toLocaleString('en-GB');
-	const power = k => '10' + String(k).split('').map(c => SUP[c]).join('');
-	const decade = v => (v === 1 ? '1' : power(Math.round(Math.log10(v)))); // a power of 10 as an axis labels it
-	const signed = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
-	const sci = v => (v < FLOOR ? '< ' + power(-12) : v >= 0.01 && v < 1000 ? v.toPrecision(3)
-		: v.toExponential(1).replace(/e(.*)/, (_, e) => '×' + power(+e)));
-	const plain = html => html.replace(/<[^>]+>/g, '');
+	const decade = v => (v === 1 ? '1' : exePower(Math.round(Math.log10(v)))); // a power of 10 as an axis labels it
+	const sci = v => (v < FLOOR ? '< ' + exePower(-12) : v >= 0.01 && v < 1000 ? v.toPrecision(3)
+		: v.toExponential(1).replace(/e(.*)/, (_, e) => '×' + exePower(+e)));
 	const median = vs => vs.slice().sort((a, b) => a - b)[vs.length >> 1];
 
 	// ---- θ as weight matrices ----
@@ -262,7 +257,7 @@
 			box: [-2.5, 2.5, -2.5, 2.5], min: [1, 1], start: [0.012, 0.01], steps: 600,
 			noise: 0.4, decades: 4, shape: SHAPES.layers,
 			lows: u => [5 * u - 2.5, 1 / (5 * u - 2.5)],
-			reading: { label: '<span><i>a</i>² − <i>b</i>²</span>', of: ([a, b]) => signed(a * a - b * b) },
+			reading: { label: '<span><i>a</i>² − <i>b</i>²</span>', of: ([a, b]) => exeSigned(a * a - b * b) },
 		},
 		// θ = (w, b), each a 1×1, and the gradient back through the 50 steps;
 		// its lowest points are on the lip, so found by halving, as a step down
@@ -304,17 +299,6 @@
 		return (a + d) / 2 + Math.hypot((a - d) / 2, b);
 	}
 
-	// ---- chance: seeded, so the nth draw of an init, and the noise a run meets, are the same on every visit ----
-	const normal = random => Math.sqrt(-2 * Math.log(1 - random())) * Math.cos(2 * Math.PI * random());
-	function seeded(seed) {
-		return () => {
-			seed = (seed + 0x6d2b79f5) | 0;
-			let r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-			r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
-			return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
-		};
-	}
-
 	// ---- the inits: θ about 0, each coordinate drawn alike ----
 	// From the fan-in and fan-out of θ's shape: Xavier's (Glorot and Bengio),
 	// N(0, 2/(fan-in + fan-out)), keeps a linear layer's output as spread as its
@@ -322,7 +306,7 @@
 	// a = √5. Each writes its law on a shape's fans and draws a coordinate from it
 	const gaussian = sigma => ({
 		law: fans => 'N(0, ' + +sigma(fans).toPrecision(2) + '²)',
-		draw: (fans, random) => sigma(fans) * normal(random),
+		draw: (fans, random) => sigma(fans) * exeNormal(random),
 	});
 	const INITS = {
 		zero: { name: '0', ...gaussian(() => 0) },
@@ -338,7 +322,7 @@
 	const CLOUD = 64; // how many of its draws the map shows, round the ones run
 	// seed n's draw of an init on this surface
 	function sample(key, n) {
-		const random = seeded(n), { draw } = INITS[key], fans = surf.shape.fans;
+		const random = exeRng(n), { draw } = INITS[key], fans = surf.shape.fans;
 		return [draw(fans, random), draw(fans, random)];
 	}
 
@@ -385,7 +369,7 @@
 	// GradScaler's multiple and the steps that skipped; keep: its path and
 	// L − L* step by step
 	function fresh(s0, n, keep, precision = amp) {
-		return { at: s0, p: precision && PRECISIONS[precision], mem: { m: [0, 0], v: [0, 0] }, taken: 0, scaler: { scale: SCALE, good: 0 }, skips: [], random: seeded(1000 + n),
+		return { at: s0, p: precision && PRECISIONS[precision], mem: { m: [0, 0], v: [0, 0] }, taken: 0, scaler: { scale: SCALE, good: 0 }, skips: [], random: exeRng(1000 + n),
 			path: keep ? [s0] : null, loss: keep ? [gap(s0)] : null, out: 0, arrive: gap(s0) < TOL ? 0 : -1 };
 	}
 	// the gradient run r takes at step t: its minibatch's, scaled as the loss
@@ -394,7 +378,7 @@
 	function gradient(r, t) {
 		const p = r.p;
 		let g = surf.grad(...(p ? r.at.map(p.round) : r.at));
-		if (sigma) g = g.map(gi => gi + sigma * normal(r.random));
+		if (sigma) g = g.map(gi => gi + sigma * exeNormal(r.random));
 		g = seen(g);
 		if (p && p.scaler) {
 			const s = r.scaler, scaled = g.map(gi => p.round(gi * s.scale));
@@ -591,7 +575,7 @@
 	function play(on) {
 		const was = playing;
 		playing = on;
-		runBtn.innerHTML = on ? '&#10074;&#10074; Pause' : '&#9654; Run';
+		exeRunning(runBtn, on);
 		if (!on || was) return;
 		preview = null;
 		requestAnimationFrame(tick);
@@ -1160,7 +1144,7 @@
 			cx.moveTo(L, Y(10 ** d));
 			cx.lineTo(W - R, Y(10 ** d));
 			cx.stroke();
-			if ((d1 - d) % every === 0) cx.fillText(power(d), L - 6, Y(10 ** d) + 4);
+			if ((d1 - d) % every === 0) cx.fillText(exePower(d), L - 6, Y(10 ** d) + 4);
 		}
 		cx.setLineDash([]);
 		return Y;
@@ -1216,7 +1200,7 @@
 		const X = n => L + n / surf.steps * (W - L - R), Y = decades(cx, W, H, ...bounds(mids));
 		[0, 0.5, 1].forEach((k, i) => {
 			cx.textAlign = ['left', 'center', 'right'][i];
-			cx.fillText(fmt(k * surf.steps), X(k * surf.steps), H - 6);
+			cx.fillText(exeFmt(k * surf.steps), X(k * surf.steps), H - 6);
 		});
 		// the schedule's share of η, from the pane's foot at 0 to its top at 1
 		const scheduled = schedule !== 'constant';
@@ -1335,7 +1319,7 @@
 		});
 		// dotted, the rate the pointer is over
 		if (preview) dashed(cx, X(ETAS[preview.e]), T, H - B, [2, 3]);
-		title(cx, 'L − L* at step ' + fmt(surf.steps) + ' by η · dot: its η, filled at its best');
+		title(cx, 'L − L* at step ' + exeFmt(surf.steps) + ' by η · dot: its η, filled at its best');
 	}
 
 	// ---- the cards: an optimiser each ----
@@ -1377,10 +1361,10 @@
 		});
 	}
 	// a reading in words, its labels in spans for a quieter face
-	const gapText = r => (one() ? (r.out ? '<span>diverged at step</span> ' + fmt(r.out) : sci(r.gap))
+	const gapText = r => (one() ? (r.out ? '<span>diverged at step</span> ' + exeFmt(r.out) : sci(r.gap))
 		: isFinite(r.gap) ? '<span>median</span> ' + sci(r.gap) : '<span>diverged</span> ' + r.outs + ' of ' + SEEDS);
 	const whenText = r => '<span>under 10⁻³</span> ' + (!one() ? r.there + ' <span>of</span> ' + SEEDS + ' <span>seeds</span>'
-		: isFinite(r.arrive) ? '<span>at step</span> ' + fmt(r.arrive) : '—');
+		: isFinite(r.arrive) ? '<span>at step</span> ' + exeFmt(r.arrive) : '—');
 	// an optimiser's η as shown, waiting while the sweep tunes it
 	const etaText = i => (settings[i].tuned && !sweep.best ? '…' : String(ETAS[settings[i].eta]));
 	// a knob as torch.optim's arguments write it; the arguments it takes there,
@@ -1388,7 +1372,7 @@
 	const argOf = (i, key) => knobOf(i, key).arg || key;
 	const args = i => OPTIMISERS[i].args.replace(/\{(\w+)\}/g, (_, key) => (key === 'lr' ? ETAS[settings[i].eta] : settings[i].k[key]));
 	const torchCall = i => 'torch.optim.' + OPTIMISERS[i].cls + '(params, ' + args(i) + ')' + SCHEDULES[schedule].call(surf.steps)
-		+ (scale > 1 ? ' · loss × ' + fmt(scale) : '')
+		+ (scale > 1 ? ' · loss × ' + exeFmt(scale) : '')
 		+ (clip ? ' · clip_grad_norm_(params, max_norm=' + CLIP.toFixed(1) + ')' : '')
 		+ (amp ? ' · autocast("cuda", dtype=' + PRECISIONS[amp].dtype + ')' + (PRECISIONS[amp].scaler ? ' · GradScaler()' : '') : '');
 	function updateCards(res) {
@@ -1484,8 +1468,8 @@
 		if (same) rateIn.value = settings[0].eta;
 		$('[data-out="rate"]').textContent = same ? ETAS[settings[0].eta] : '—';
 		say(tip ?? (hover !== null ? torchCall(hover) : preview ? 'All at η = ' + ETAS[preview.e] + ', run to the end · click to keep it'
-			: scrub !== null ? 'At step ' + fmt(scrub) : playing && tuning() ? 'Tuning η…'
-			: (playing ? 'Playing' : t >= surf.steps ? 'The run’s end' : 'Paused') + ' · step ' + fmt(t) + ' of ' + fmt(surf.steps)));
+			: scrub !== null ? 'At step ' + exeFmt(scrub) : playing && tuning() ? 'Tuning η…'
+			: (playing ? 'Playing' : t >= surf.steps ? 'The run’s end' : 'Paused') + ' · step ' + exeFmt(t) + ' of ' + exeFmt(surf.steps)));
 		ends(t <= 0, t >= surf.steps);
 	}
 	function draw() {
@@ -1515,7 +1499,7 @@
 		lows = surf.lows && Array.from({ length: 201 }, (_, n) => surf.lows(n / 200)).map(p => (inBox(p) ? p : null));
 		noise();
 		$$('.exe-note[data-for]').forEach(p => p.classList.toggle('on', p.dataset.for === key));
-		$('.opt-caption').textContent = 'Maps: L − L* at step ' + fmt(surf.steps) + ' by η across and the navy knob down · lighter is lower · × diverged · outlined, the sliders · click a cell to set them';
+		$('.opt-caption').textContent = 'Maps: L − L* at step ' + exeFmt(surf.steps) + ' by η across and the navy knob down · lighter is lower · × diverged · outlined, the sliders · click a cell to set them';
 		restart();
 	}
 	// What the transport and the keys do, as a player's: a button's data-act, a
@@ -1600,7 +1584,7 @@
 	// the loss scaled up: every gradient as much longer, and SGD's edge as much nearer
 	scaleIn.addEventListener('input', () => {
 		scale = SCALES[scaleIn.value];
-		$('[data-out="scale"]').textContent = fmt(scale);
+		$('[data-out="scale"]').textContent = exeFmt(scale);
 		brink = brinkOf();
 		restart();
 	});
@@ -1652,7 +1636,7 @@
 		c.heat.addEventListener('pointermove', e => {
 			const at = cellAt(i, e), v = at && cells[i][at[0]][at[1]];
 			tip = v === undefined || v === null ? null : OPTIMISERS[i].name + ' at lr=' + ETAS[at[1]] + (s.axis ? ', ' + argOf(i, s.axis) + '=' + rowsOf(i)[at[0]] : '')
-				+ ': L − L* ' + (isFinite(v) ? plain(sci(v)) : 'diverged') + ' at step ' + fmt(surf.steps) + ' · click to take it';
+				+ ': L − L* ' + (isFinite(v) ? sci(v) : 'diverged') + ' at step ' + exeFmt(surf.steps) + ' · click to take it';
 			readout();
 		});
 		c.heat.addEventListener('pointerleave', () => {
@@ -1688,7 +1672,7 @@
 	map.addEventListener('pointermove', e => {
 		if (view !== 'flat') return;
 		const f = frame(map.clientWidth, map.clientHeight), p = [f.x(e.offsetX), f.y(e.offsetY)];
-		tip = 'θ = (' + signed(p[0]) + ', ' + signed(p[1]) + ') · L − L* ' + plain(sci(gap(p))) + ' · click to start there';
+		tip = 'θ = (' + exeSigned(p[0]) + ', ' + exeSigned(p[1]) + ') · L − L* ' + sci(gap(p)) + ' · click to start there';
 		readout();
 	});
 	map.addEventListener('pointerleave', () => {
@@ -1745,12 +1729,7 @@
 	// the slider for all at one η steps through ETAS, at first at most optimisers' lr
 	rateIn.max = ETAS.length - 1;
 	rateIn.value = ETAS.indexOf(OPTIMISERS[0].lr);
-	// a grip-resize or a maximise redraws the panes at their new size; a closed window lets go
-	const resized = new ResizeObserver(() => {
-		if (!root.isConnected) resized.disconnect();
-		else if (runs) draw();
-	});
-	resized.observe($('.exe-body'));
+	exeResized(root, draw, $('.exe-body'));
 	paint('cividis');
 	pick('ravine');
 })();

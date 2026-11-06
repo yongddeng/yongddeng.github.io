@@ -3,6 +3,8 @@
 // become the page. Layout only — the three scripts that would fight it
 // (001.js, tag-filter.js, xref.js) test the same breakpoint at event
 // time through phone() in assets/js/phone.js.
+@use "main";
+
 @media only screen and (max-width: 700px) {
 	body {
 		padding-bottom: 0;
@@ -65,7 +67,7 @@
 		gap: 8px;
 		height: 48px;
 		padding: 0 12px;
-		background: linear-gradient(to right, #00007f, #1084d0);
+		background: main.$title-bar;
 
 		img {
 			float: none;
@@ -128,9 +130,6 @@
 		}
 
 		span {
-			position: static;
-			left: auto;
-			top: auto;
 			font-size: 14px;
 		}
 
@@ -142,8 +141,6 @@
 
 	// File rows become full-width list items with touch-sized targets
 	.post_list {
-		overflow: visible;
-		background: var(--paper, #fbfafb);
 		border: 0;
 
 		ul {
@@ -151,33 +148,11 @@
 			padding: 0;
 		}
 
-		li {
-			margin: 0;
-			padding: 0;
-		}
-
 		li a {
 			gap: 10px;
 			min-height: 56px;
-			padding: 10px 12px;
 			border-bottom: 1px solid #d8d4cc;
 			font-size: 15px;
-			white-space: normal;
-
-			// the icons' own 16px, so their pixels stay whole
-			img {
-				width: 16px;
-				height: 16px;
-				margin: 0;
-			}
-
-			.nm {
-				flex: 1;
-				padding: 0;
-				overflow: visible;
-				border: 0;
-				text-overflow: clip;
-			}
 
 			.sz,
 			.ty {
@@ -185,9 +160,6 @@
 			}
 
 			.dt {
-				flex: none;
-				width: auto;
-				color: #777777;
 				font-size: 12px;
 			}
 		}
@@ -198,15 +170,6 @@
 		li a:active {
 			background: #00007f;
 			color: #ffffff;
-		}
-
-		// The ul is load-bearing: it matches the desktop .nm rule's
-		// (0,3,3) specificity so this wins on order, not by accident
-		ul li a:hover .nm,
-		ul li a:active .nm {
-			background: none;
-			color: inherit;
-			border-color: transparent;
 		}
 
 		li a:hover .dt,
@@ -351,7 +314,6 @@
 	// me.txt keeps its terminal colours, loses its fixed height
 	.content.dos-win .post_content {
 		height: auto;
-		background: #000000;
 	}
 
 	// Section references are links on touch, since there is no hover card
@@ -366,8 +328,8 @@
 		display: flex;
 		gap: 6px;
 		padding: 8px 10px;
-		background: silver;
-		border-bottom: 2px solid #7f787f;
+		background: main.$face;
+		border-bottom: 2px solid main.$shade;
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
 
@@ -377,13 +339,13 @@
 			font-size: 13px;
 			color: #000000;
 			text-decoration: none;
-			background: silver;
+			background: main.$face;
 			border: 2px solid;
 			border-color: #ffffff #000000 #000000 #ffffff;
 
 			&.on {
 				background: #dadada;
-				border-color: #000000 #ffffff #ffffff #000000;
+				@include main.pressed;
 				font-weight: bold;
 			}
 		}
@@ -399,8 +361,8 @@
 		gap: 1px;
 		height: 7px;
 		padding: 1px;
-		background: silver;
-		border-bottom: 1px solid #7f787f;
+		background: main.$face;
+		border-bottom: 1px solid main.$shade;
 
 		i {
 			flex: 1;
@@ -426,7 +388,7 @@
 			font-size: 13px;
 			color: #000000;
 			text-decoration: none;
-			background: silver;
+			background: main.$face;
 			border: 2px solid;
 			border-color: #ffffff #000000 #000000 #ffffff;
 
@@ -435,11 +397,11 @@
 				margin-bottom: 2px;
 				font-size: 11px;
 				font-weight: normal;
-				color: #55505a;
+				color: main.$mute;
 			}
 
 			&:active {
-				border-color: #000000 #ffffff #ffffff #000000;
+				@include main.pressed;
 			}
 		}
 
@@ -462,14 +424,14 @@
 		justify-content: center;
 		width: 36px;
 		height: 36px;
-		background: silver;
+		background: main.$face;
 		border: 2px solid;
 		border-color: #ffffff #000000 #000000 #ffffff;
 		box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
 		font-size: 14px;
 
 		&:active {
-			border-color: #000000 #ffffff #ffffff #000000;
+			@include main.pressed;
 		}
 
 		&[hidden] {
@@ -571,7 +533,7 @@
 		display: flex;
 		flex-direction: column;
 		height: 70%;
-		background: silver;
+		background: main.$face;
 		border: 2px solid;
 		border-color: #ffffff #000000 #000000 #ffffff;
 		border-bottom: 0;
@@ -596,7 +558,7 @@
 		font-size: 14px;
 		font-weight: bold;
 		color: #ffffff;
-		background: linear-gradient(to right, #00007f, #1084d0);
+		background: main.$title-bar;
 	}
 
 	.xp-sheet .xp-x {
@@ -627,7 +589,7 @@
 		line-height: 1.65;
 		background: var(--paper, #fbfafb);
 		border: 2px solid;
-		border-color: #7f787f #ffffff #ffffff #7f787f;
+		border-color: main.$shade #ffffff #ffffff main.$shade;
 	}
 
 	// the peek's body carries .post_content for the post typography;
@@ -685,7 +647,7 @@
 		right: 0;
 		bottom: 0;
 		z-index: 41;
-		background: silver;
+		background: main.$face;
 		border: 2px solid;
 		border-color: #ffffff #000000 #000000 #ffffff;
 		padding: 2px 2px 6px;
@@ -696,7 +658,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 4px 4px 4px 8px;
-		background: linear-gradient(to right, #00007f, #1084d0);
+		background: main.$title-bar;
 		color: #ffffff;
 		font-size: 13px;
 		font-weight: bold;
@@ -719,7 +681,7 @@
 		margin: 10px 8px 0;
 		padding: 6px 10px 10px;
 		border: 1px solid;
-		border-color: #7f787f #ffffff #ffffff #7f787f;
+		border-color: main.$shade #ffffff #ffffff main.$shade;
 		outline: 1px solid #ffffff;
 	}
 
@@ -745,12 +707,12 @@
 			padding: 6px 28px;
 			font-size: 13px;
 			font-family: inherit;
-			background: silver;
+			background: main.$face;
 			border: 2px solid;
 			border-color: #ffffff #000000 #000000 #ffffff;
 
 			&:active {
-				border-color: #000000 #ffffff #ffffff #000000;
+				@include main.pressed;
 			}
 		}
 	}

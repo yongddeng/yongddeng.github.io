@@ -53,8 +53,7 @@ FIGS['202/law'] = el => {
 	}
 	function draw() {
 		const [lo, hi] = map.range, x = lo + (hi - lo) * t, Fx = map.F(x);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		frameBox(c, L);
 		frameBox(c, R);
 		label(c, map.name, L.x0, 14, 'left', COL.black);
@@ -86,13 +85,11 @@ FIGS['202/law'] = el => {
 		c.strokeStyle = COL.black;
 		c.lineWidth = 1.4;
 		const pts = [];
-		for (let px = R.x0; px <= R.x1; px++) pts.push([px, R.Y(map.F(lo + (px - R.x0) / (R.x1 - R.x0) * (hi - lo)))]);
+		for (let px = R.x0; px <= R.x1; px++) pts.push([px, R.Y(map.F(R.x(px)))]);
 		polyline(c, pts);
 		c.fillStyle = COL.ink;
 		c.fillRect(R.x0 - 12, R.Y(Fx), 6, R.Y(0) - R.Y(Fx));
-		c.beginPath();
-		c.arc(R.X(x), R.Y(Fx), 3, 0, 2 * Math.PI);
-		c.fill();
+		dot(c, R.X(x), R.Y(Fx), 3);
 		label(c, minus(lo), R.x0, R.y0 + 13, 'center');
 		label(c, minus(hi), R.x1, R.y0 + 13, 'center');
 		label(c, 'x', R.X(x), R.y0 + 13, 'center', COL.tail);

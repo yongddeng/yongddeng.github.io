@@ -5,24 +5,13 @@
 // Toolbar, buttons and panes reuse the WinHelp chrome from _literature.scss.
 @use "main";
 
-$wb-ui: "Helvetica Neue", Arial, sans-serif;
-$wb-mute: #55505a;
 $wb-new: #fff4b0;
 $wb-newline: #c8a000;
 $wb-newtext: #8a6d00;
 
 .wb-win {
 	width: 852px;
-
-	.post_content {
-		display: flex;
-		flex-direction: column;
-		height: 650px;
-		overflow: hidden;
-		background: #bfb8bf;
-		border: 0;
-		padding: 0 4px 2px;
-	}
+	@include main.pane-window(650px);
 }
 
 .wb {
@@ -30,7 +19,7 @@ $wb-newtext: #8a6d00;
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
-	font: 12px/1.35 $wb-ui;
+	font: 12px/1.35 main.$ui;
 
 	ul, ul li, ul li ul, ul li ul li {
 		list-style: none;
@@ -69,24 +58,24 @@ $wb-newtext: #8a6d00;
 	svg {
 		display: block;
 		width: 100%;
-		font-family: $wb-ui;
+		font-family: main.$ui;
 	}
 	.rail { stroke: #000000; stroke-width: 1.2; fill: none; }
-	.dot { fill: #000080; stroke: #ffffff; stroke-width: 1; }
+	.dot { fill: main.$navy; stroke: #ffffff; stroke-width: 1; }
 	.bg { fill: transparent; }
-	.yr, .lb { font-size: 9.5px; fill: $wb-mute; }
+	.yr, .lb { font-size: 9.5px; fill: main.$mute; }
 	.nm { font-size: 11.5px; fill: #000000; }
 	.rl { cursor: default; outline: none; }
 	.rl:hover .bg { fill: #eef1f8; }
 	.rl:focus-visible .bg { stroke: #000000; stroke-dasharray: 1 1; }
-	.rl.on .bg { fill: #000080; }
+	.rl.on .bg { fill: main.$navy; }
 	.rl.on .nm { fill: #ffffff; font-weight: bold; }
 	.rl.on .yr, .rl.on .lb { fill: #ddddee; }
-	.rl.on .dot { fill: #ffffff; stroke: #000080; }
+	.rl.on .dot { fill: #ffffff; stroke: main.$navy; }
 	// while searching: the highlighter on the models with every tick, the rest dimmed, and a cell a part at the
 	// end of each row (its part's colour where the model passes, grey where it fails, hollow where nothing is ticked)
 	.rl.hit .bg { fill: $wb-new; }
-	.rl.on.hit .bg { fill: #000080; stroke: $wb-newline; stroke-width: 2; }
+	.rl.on.hit .bg { fill: main.$navy; stroke: $wb-newline; stroke-width: 2; }
 	&.filtering .rl:not(.hit):not(.on) { opacity: 0.32; }
 	.mx { display: none; fill: var(--pc); }
 	&.filtering .mx { display: inline; }
@@ -124,7 +113,7 @@ $wb-newtext: #8a6d00;
 	font-size: 11px;
 
 	.lab {
-		color: $wb-mute;
+		color: main.$mute;
 		margin-right: 3px;
 	}
 	.res {
@@ -138,10 +127,10 @@ $wb-newtext: #8a6d00;
 .wb-menu {
 	height: 21px;
 	padding: 0 6px;
-	background: #c0c0c0;
+	background: main.$face;
 	@include main.bevel;
 	color: #000000;
-	font: 11px $wb-ui;
+	font: 11px main.$ui;
 	white-space: nowrap;
 	cursor: pointer;
 
@@ -169,7 +158,7 @@ $wb-newtext: #8a6d00;
 	width: 340px;
 	overflow: auto;
 	padding: 2px;
-	background: #c0c0c0;
+	background: main.$face;
 	border: 1px solid #000000;
 	box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080, 3px 3px 0 rgba(0, 0, 0, 0.35);
 
@@ -185,8 +174,8 @@ $wb-newtext: #8a6d00;
 	gap: 8px;
 	align-items: baseline;
 	padding: 4px 8px;
-	background: #c0c0c0;
-	border-bottom: 1px solid #7f787f;
+	background: main.$face;
+	border-bottom: 1px solid main.$shade;
 	box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 	font-size: 11px;
 	font-weight: bold;
@@ -200,7 +189,7 @@ $wb-newtext: #8a6d00;
 	}
 	span {
 		font-weight: normal;
-		color: $wb-mute;
+		color: main.$mute;
 	}
 }
 // the shown model, part by part, under the tree; a line finds the models that share that part
@@ -221,7 +210,7 @@ $wb-newtext: #8a6d00;
 		display: block;
 		font-weight: normal;
 		font-size: 10.5px;
-		color: $wb-mute;
+		color: main.$mute;
 	}
 }
 .wb-part {
@@ -234,7 +223,7 @@ $wb-newtext: #8a6d00;
 	border: 0;
 	border-top: 1px solid #ebe8ee;
 	color: #000000;
-	font: 12px $wb-ui;
+	font: 12px main.$ui;
 	cursor: pointer;
 
 	&:hover {
@@ -250,7 +239,7 @@ $wb-newtext: #8a6d00;
 		font-weight: bold;
 		text-transform: uppercase;
 		letter-spacing: 0.06em;
-		color: $wb-mute;
+		color: main.$mute;
 
 		&::before {
 			content: "";
@@ -263,7 +252,7 @@ $wb-newtext: #8a6d00;
 	}
 	.how {
 		font-size: 10.5px;
-		color: $wb-mute;
+		color: main.$mute;
 	}
 }
 // each technique is one row: its tick and name, then when and which model brought it, then what it does,
@@ -288,7 +277,7 @@ $wb-newtext: #8a6d00;
 		font-weight: bold;
 	}
 	.meta {
-		color: $wb-mute;
+		color: main.$mute;
 		font-size: 11px;
 		font-style: italic;
 		font-variant-numeric: tabular-nums;
@@ -308,13 +297,13 @@ $wb-newtext: #8a6d00;
 		display: inline-block;
 		width: 1.3em;
 		font-weight: normal;
-		color: #000080;
+		color: main.$navy;
 	}
 	&.on {
 		background: #f1f1f8;
-		box-shadow: inset 3px 0 0 #000080;
+		box-shadow: inset 3px 0 0 main.$navy;
 
-		.what { color: #000080; }
+		.what { color: main.$navy; }
 	}
 	&.ticked {
 		box-shadow: inset 5px 0 0 var(--pc);
@@ -332,7 +321,7 @@ $wb-newtext: #8a6d00;
 .g-hint { stroke: #9a9a9a; fill: none; stroke-width: 0.8; }
 .g-rt { fill: #ffffff; stroke: #000000; }
 .g-see { fill: #9fb4e8; }
-.g-cur { fill: #000080; }
+.g-cur { fill: main.$navy; }
 .g-lat { fill: none; stroke: #d18a3c; stroke-width: 1; }
 .g-dim { fill: #e6e6e6; }
 .g-tint { fill: #e7e7f3; }
@@ -357,7 +346,7 @@ $wb-newtext: #8a6d00;
 	flex-wrap: wrap;
 	padding: 8px 12px 2px;
 	font-size: 11.5px;
-	color: $wb-mute;
+	color: main.$mute;
 
 	b {
 		color: #000000;
@@ -383,22 +372,22 @@ $wb-newtext: #8a6d00;
 	padding: 8px 12px 10px;
 	border-top: 1px solid #dddddd;
 	// reading text: System Properties' Font and Text size, Small being the 13px it was drawn at
-	font-family: var(--font, Georgia, "Times New Roman", serif);
+	font-family: var(--font, main.$serif);
 	font-size: calc(var(--text, 12px) + 1px);
 	line-height: 1.45;
 
 	.wb-src {
 		display: block;
 		margin-top: 3px;
-		color: $wb-mute;
-		font: 11px $wb-ui;
+		color: main.$mute;
+		font: 11px main.$ui;
 	}
 }
 .wb-legend {
 	flex: none;
 	padding: 4px 12px 8px;
 	font-size: 10.5px;
-	color: $wb-mute;
+	color: main.$mute;
 
 	i {
 		display: inline-block;
@@ -435,12 +424,12 @@ $wb-newtext: #8a6d00;
 	align-items: center;
 	gap: 2px 10px;
 	font-size: 11px;
-	color: $wb-mute;
+	color: main.$mute;
 
 	select {
 		height: 20px;
 		max-width: 230px;
-		font: 11px $wb-ui;
+		font: 11px main.$ui;
 	}
 	.sum {
 		flex-basis: 100%;
@@ -463,17 +452,17 @@ $wb-newtext: #8a6d00;
 	}
 	b { font-weight: normal; }
 	i { font-style: normal; }
-	.h { display: block; color: #000080; background: #eef0fa; }
+	.h { display: block; color: main.$navy; background: #eef0fa; }
 	.d { color: #8f0000; background: #fbe9e9; }
 	.a { color: #135a1f; background: #e6f4e6; }
-	.c { color: $wb-mute; }
+	.c { color: main.$mute; }
 	[data-menu] { cursor: pointer; }
 	[data-menu]:hover i { text-decoration: underline; }
 }
 
 // the drawing
 .wb-sch {
-	text { font-family: $wb-ui; }
+	text { font-family: main.$ui; }
 	.trunk { stroke: #000000; stroke-width: 1.5; fill: none; }
 	.ln { stroke: #000000; stroke-width: 1; fill: none; }
 	.wf { stroke: #b8b8b8; stroke-width: 0.8; fill: none; }
@@ -487,13 +476,13 @@ $wb-newtext: #8a6d00;
 	.chg { fill: $wb-new; stroke: $wb-newline; stroke-width: 1.5; animation: wb-flash 0.7s ease-out; }
 	.ghost { fill: #fafafa; stroke: #999999; stroke-dasharray: 3 2; }
 	.ghost.chg { fill: $wb-new; stroke: $wb-newline; }
-	.frame { fill: none; stroke: #7f787f; stroke-dasharray: 4 3; }
-	.fl { font-size: 11px; font-weight: bold; fill: $wb-mute; }
+	.frame { fill: none; stroke: main.$shade; stroke-dasharray: 4 3; }
+	.fl { font-size: 11px; font-weight: bold; fill: main.$mute; }
 	.fl.chgt { fill: $wb-newtext; }
 	.bt { font-size: 11px; font-weight: bold; fill: #000000; }
 	.bs { font-size: 9.5px; fill: #333333; }
 	.bs2 { font-weight: normal; font-size: 10px; fill: #444444; }
-	.lab { font-size: 9px; font-weight: bold; fill: $wb-mute; }
+	.lab { font-size: 9px; font-weight: bold; fill: main.$mute; }
 	.tag { font-size: 9px; font-weight: bold; fill: $wb-newtext; }
 	.plus { fill: #ffffff; stroke: #000000; }
 	.arr { fill: #b00000; }
@@ -505,9 +494,9 @@ $wb-newtext: #8a6d00;
 	.c-on { fill: #9fb4e8; }
 	.c-dim { fill: #dfe6f7; }
 	.c-off { fill: #e6e6e6; }
-	.c-cur { fill: #000080; }
+	.c-cur { fill: main.$navy; }
 	.mt { fill: #dddddd; }
-	.mf { fill: #000080; }
+	.mf { fill: main.$navy; }
 	.dd { fill: #ffffff; stroke: #2e7d32; }
 	.dw { fill: #c8e6b8; stroke: #2e7d32; }
 	.rt { fill: #ffffff; stroke: #000000; }
@@ -515,17 +504,17 @@ $wb-newtext: #8a6d00;
 	.e-off { fill: #d9e2d2; }
 	.e-sh { fill: #b05a00; }
 	.gs { font-size: 9.5px; fill: #777777; }
-	.io { font-size: 10px; fill: $wb-mute; }
-	.axis { font-size: 9px; font-style: italic; fill: $wb-mute; }
+	.io { font-size: 10px; fill: main.$mute; }
+	.axis { font-size: 9px; font-style: italic; fill: main.$mute; }
 	// the attention box opens into the second level
 	.openable { cursor: pointer; outline: none; }
 	.openable:hover > rect.attn, .openable:focus-visible > rect.attn, .openable:hover > rect.ffn, .openable:focus-visible > rect.ffn { stroke-width: 2; }
-	.opn { font-size: 9px; font-weight: bold; fill: $wb-mute; }
+	.opn { font-size: 9px; font-weight: bold; fill: main.$mute; }
 	.openable:hover .opn { fill: #000000; }
 	.attn-open { fill: #f4f7ff; stroke: #000000; }
 	.ffn-open { fill: #f5faf1; stroke: #000000; }
 	.wave { stroke: #000000; fill: none; stroke-width: 1.6; }
-	.btn { fill: #c0c0c0; stroke: #000000; }
+	.btn { fill: main.$face; stroke: #000000; }
 	.btnt { font-size: 10px; fill: #000000; }
 	.openable:hover > rect.btn { fill: #d8d8d8; }
 	.ttl { font-size: 13px; font-weight: bold; fill: #000000; }
@@ -544,19 +533,11 @@ $wb-newtext: #8a6d00;
 	to { fill: $wb-new; }
 }
 
-// On a phone the workbench is hidden behind a one-line notice (.wb-phone);
-// the window chrome goes back to the ordinary page
+// On a phone the workbench is hidden behind a one-line notice (.wb-phone)
 .wb-phone {
 	display: none;
 }
 @media only screen and (max-width: 700px) {
-	.wb-win .post_content {
-		display: block;
-		height: auto;
-		overflow: visible;
-		background: var(--paper, #fbfafb);
-		padding: 16px 14px 40px;
-	}
 	.wb {
 		display: none;
 	}

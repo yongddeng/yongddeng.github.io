@@ -28,8 +28,7 @@ FIGS['207/means'] = el => {
 	function draw() {
 		const lo = law.mu - law.span, hi = law.mu + law.span;
 		const Y = v => P.y0 - (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (P.y0 - P.y1);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the late window, where an exit puts the path in the tail event
 		c.fillStyle = '#f3f2f5';
 		c.fillRect(X(LATE), P.y1, P.x1 - X(LATE), P.y0 - P.y1);

@@ -27,8 +27,7 @@ FIGS['211/doubling'] = el => {
 		const lo = Math.min(0, ...g.fortune), hi = Math.max(4, ...g.fortune);
 		const pad = (hi - lo) * 0.06;
 		const P = plotBox(40, 410, 186, 26, [0, BETS], [lo - pad, hi + pad]);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		frameBox(c, P);
 		c.strokeStyle = COL.grid;
 		c.lineWidth = 1;
@@ -145,8 +144,7 @@ FIGS['211/upcrossings'] = el => {
 		let lo, hi;
 		if (kind === 'walk') { const r = Math.max(6, ...path.map(Math.abs)) + 1; lo = -r; hi = r; } else { lo = 0; hi = 1; }
 		const P = plotBox(40, 560, 186, 30, [0, N], [lo, hi]);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		c.fillStyle = COL.pale;
 		c.fillRect(P.x0, P.Y(k.b), P.x1 - P.x0, P.Y(k.a) - P.Y(k.b));
 		frameBox(c, P);

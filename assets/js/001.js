@@ -5,10 +5,6 @@
 	var zTop = 10;
 	var openSeq = 0;
 
-	function getWidth () {
-		return window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName("body")[0].clientWidth;
-	}
-
 	// Maximize: fill the desktop above the taskbar. Sizes are content-box,
 	// so the window's own frame (bevel + padding) is subtracted. The window
 	// is placed and given its height before data-premax lifts the screen-fit
@@ -17,14 +13,12 @@
 	// short by. The pre-maximize spot is kept for Restore.
 	function maximize (content) {
 		var cont = content.querySelector(".post_content");
-		if (getWidth() <= 900) return;
 		var st = content.style;
 		var pre = content.dataset.premax || JSON.stringify({ position: st.position, margin: st.margin, left: st.left, top: st.top });
 		var cs = getComputedStyle(content);
 		var frameW = content.offsetWidth - parseFloat(cs.width);
 		var frameH = content.offsetHeight - parseFloat(cs.height);
-		var bar = document.querySelector(".taskbar");
-		var barH = bar ? bar.offsetHeight : 0;
+		var barH = document.querySelector(".taskbar").offsetHeight;
 		window.scrollTo(0, 0);
 		content.style.position = "absolute";
 		content.style.margin = "0";
@@ -41,7 +35,6 @@
 	// a maximized window also goes back to where it was
 	function minimize (content) {
 		var cont = content.querySelector(".post_content");
-		if (getWidth() <= 900) return;
 		if (content.dataset.premax) {
 			var pre = JSON.parse(content.dataset.premax);
 			content.style.position = pre.position;
@@ -118,24 +111,15 @@
 		});
 	}
 
-	// Resize from the corner grip; onResize (optional) runs per move.
-	// Double-clicking the grip restores the window's default size.
-	function resizable (el, onResize, onReset) {
+	// Resize from the corner grip; double-clicking it restores the
+	// window's default size.
+	function resizable (el) {
 		var grip = el.querySelector(".win-grip");
 		if (!grip) return;
-		// A session restore sets the size directly, skipping the drag
-		el.addEventListener("win:relayout", function () {
-			if (onResize) onResize();
-		});
-		// Shut Down restores the default size, like the grip's double-click
-		el.addEventListener("win:reset", function () {
-			if (onReset) onReset();
-		});
 		grip.addEventListener("dblclick", function () {
 			if (phone()) return;
 			el.style.width = "";
 			el.style.height = "";
-			if (onReset) onReset();
 		});
 		grip.addEventListener("mousedown", function (e) {
 			if (phone()) return;
@@ -144,7 +128,6 @@
 			function move (ev) {
 				el.style.width = Math.max(420, sw + ev.clientX - sx) + "px";
 				el.style.height = Math.max(300, sh + ev.clientY - sy) + "px";
-				if (onResize) onResize();
 			}
 			function up () {
 				document.removeEventListener("mousemove", move);
@@ -158,12 +141,11 @@
 
 	function initWrapper () {
 		var wrapper = document.querySelector(".wrapper");
-		if (!wrapper || wrapper.dataset.win) return;
+		if (wrapper.dataset.win) return;
 		wrapper.dataset.win = "1";
 		wrapper.style.zIndex = ++zTop;
 		raisable(wrapper);
-		var tbar = wrapper.querySelector(".default_title");
-		if (tbar) dragify(wrapper, tbar);
+		dragify(wrapper, wrapper.querySelector(".default_title"));
 		// The grid layout stretches the tree and file panes on its own
 		resizable(wrapper);
 	}
@@ -178,14 +160,14 @@
 		var tbar = content.querySelector(".post_title");
 		var max = content.querySelector(".btn_max");
 		var min = content.querySelector(".btn_min");
-		var close = tbar ? tbar.querySelector("a") : null;
+		var close = tbar.querySelector("a");
 
 		if (max) max.addEventListener("click", function () { maximize(content); });
 		if (min) min.addEventListener("click", function () { minimize(content); });
 
 		// X closes just this window; when the last one goes, restore the
 		// desktop title and (only off "/") a clean URL
-		if (close) close.addEventListener("click", function (e) {
+		close.addEventListener("click", function (e) {
 			// On a phone the explorer behind this window is hidden, so
 			// removing the window would leave a blank page: let the link
 			// navigate home instead
@@ -197,11 +179,11 @@
 				// Tab title carries the site name, not the window title
 				document.title = document.body.dataset.site || "";
 			}
-			document.dispatchEvent(new CustomEvent("content:swapped", { detail: {} }));
+			document.dispatchEvent(new CustomEvent("content:swapped"));
 		});
 
 		raisable(content);
-		if (tbar) dragify(content, tbar);
+		dragify(content, tbar);
 		resizable(content);
 	}
 

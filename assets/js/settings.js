@@ -1,34 +1,14 @@
 // Start → System Properties: General is the About sheet, Settings holds
 // the controls. Persisted in localStorage, applied pre-paint from <head>.
 (function () {
-	// Text default is one notch up on phones (default.html pre-paints the
-	// same choice); decided at load, like the pre-paint
-	var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '12px', clock: '12', font: 'georgia' };
-	var FONTS = {
-		arial: '"Helvetica Neue", Arial, sans-serif',
-		georgia: 'Georgia, "Times New Roman", serif',
-		courier: '"Courier New", monospace'
-	};
-
-	function get(key) {
-		try { return localStorage.getItem('set-' + key) || DEFAULTS[key]; }
-		catch (e) { return DEFAULTS[key]; }
-	}
+	var DEFAULTS = deskSettings.DEFAULTS, get = deskSettings.get;
 
 	function set(key, value) {
 		try {
 			if (value === DEFAULTS[key]) localStorage.removeItem('set-' + key);
 			else localStorage.setItem('set-' + key, value);
 		} catch (e) {}
-		apply();
-	}
-
-	function apply() {
-		var root = document.documentElement;
-		root.style.setProperty('--desk', get('desk'));
-		root.style.setProperty('--paper', get('paper'));
-		root.style.setProperty('--text', get('text'));
-		root.style.setProperty('--font', FONTS[get('font')] || FONTS.arial);
+		deskSettings.apply();
 		document.dispatchEvent(new CustomEvent('settings:changed'));
 	}
 
@@ -39,8 +19,26 @@
 			+ (value === current ? ' checked' : '') + '> ' + label + '</label>';
 	}
 
+	// The reading controls, in the Settings pane and the phone's sheet
+	function readingFields(prefix) {
+		return '<fieldset><legend>Paper</legend><div data-key="paper">'
+			+ radio(prefix + '-paper', '#fbfafb', 'White', get('paper'))
+			+ radio(prefix + '-paper', '#fff8ff', 'Pink (classic)', get('paper'))
+			+ '</div></fieldset>'
+			+ '<fieldset><legend>Text size</legend><div data-key="text">'
+			+ radio(prefix + '-text', '12px', 'Small', get('text'))
+			+ radio(prefix + '-text', '13px', 'Medium', get('text'))
+			+ radio(prefix + '-text', '15px', 'Large', get('text'))
+			+ '</div></fieldset>'
+			+ '<fieldset><legend>Font</legend><div data-key="font">'
+			+ radio(prefix + '-font', 'arial', 'Arial', get('font'))
+			+ radio(prefix + '-font', 'georgia', 'Georgia', get('font'))
+			+ radio(prefix + '-font', 'courier', 'Courier', get('font'))
+			+ '</div></fieldset>';
+	}
+
 	function generalPane() {
-		var postCount = (window.searchIndex || []).length;
+		var postCount = window.searchIndex.length;
 		return '<div class="set-sysrow">'
 			+ '<img src="/assets/img/mycomputer-32.png" alt="" />'
 			+ '<div class="set-kv">'
@@ -76,20 +74,7 @@
 				return '<span class="set-sw' + (c === get('desk') ? ' on' : '') + '" data-c="' + c
 					+ '" style="background:' + c + '"></span>';
 			}).join('') + '</div></fieldset>'
-			+ '<fieldset><legend>Paper</legend><div data-key="paper">'
-			+ radio('set-paper', '#fbfafb', 'White', get('paper'))
-			+ radio('set-paper', '#fff8ff', 'Pink (classic)', get('paper'))
-			+ '</div></fieldset>'
-			+ '<fieldset><legend>Text size</legend><div data-key="text">'
-			+ radio('set-text', '12px', 'Small', get('text'))
-			+ radio('set-text', '13px', 'Medium', get('text'))
-			+ radio('set-text', '15px', 'Large', get('text'))
-			+ '</div></fieldset>'
-			+ '<fieldset><legend>Font</legend><div data-key="font">'
-			+ radio('set-font', 'arial', 'Arial', get('font'))
-			+ radio('set-font', 'georgia', 'Georgia', get('font'))
-			+ radio('set-font', 'courier', 'Courier', get('font'))
-			+ '</div></fieldset>'
+			+ readingFields('set')
 			+ '<fieldset><legend>Clock</legend><div data-key="clock">'
 			+ radio('set-clock', '12', '12-hour', get('clock'))
 			+ radio('set-clock', '24', '24-hour', get('clock'))
@@ -129,12 +114,12 @@
 		win.querySelector('.set-reset').addEventListener('click', function () {
 			Object.keys(DEFAULTS).forEach(function (k) { set(k, DEFAULTS[k]); });
 			win.remove();
-			document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+			document.dispatchEvent(new CustomEvent('content:swapped'));
 			openSettings();
 		});
 		win.querySelector('.set-ok').addEventListener('click', function () {
 			win.remove();
-			document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+			document.dispatchEvent(new CustomEvent('content:swapped'));
 		});
 
 		win.style.position = 'absolute';
@@ -142,7 +127,7 @@
 		win.style.left = Math.max(10, window.scrollX + (window.innerWidth - 400) / 2) + 'px';
 		win.style.top = (window.scrollY + 110) + 'px';
 
-		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+		document.dispatchEvent(new CustomEvent('content:swapped'));
 		win.dispatchEvent(new MouseEvent('mousedown'));
 	}
 
@@ -158,20 +143,7 @@
 			+ '<div class="vs-box">'
 			+ '<div class="vs-title"><span>Display Properties</span>'
 			+ '<span class="vs-x">&#10005;</span></div>'
-			+ '<fieldset><legend>Paper</legend><div data-key="paper">'
-			+ radio('vs-paper', '#fbfafb', 'White', get('paper'))
-			+ radio('vs-paper', '#fff8ff', 'Pink (classic)', get('paper'))
-			+ '</div></fieldset>'
-			+ '<fieldset><legend>Text size</legend><div data-key="text">'
-			+ radio('vs-text', '12px', 'Small', get('text'))
-			+ radio('vs-text', '13px', 'Medium', get('text'))
-			+ radio('vs-text', '15px', 'Large', get('text'))
-			+ '</div></fieldset>'
-			+ '<fieldset><legend>Font</legend><div data-key="font">'
-			+ radio('vs-font', 'arial', 'Arial', get('font'))
-			+ radio('vs-font', 'georgia', 'Georgia', get('font'))
-			+ radio('vs-font', 'courier', 'Courier', get('font'))
-			+ '</div></fieldset>'
+			+ readingFields('vs')
 			+ '<div class="vs-ok"><button>OK</button></div>'
 			+ '</div>';
 		document.body.appendChild(wrap);
@@ -199,13 +171,8 @@
 		if (e.target.closest('.btn_view') && phone()) openViewSheet();
 	});
 
-	var menuItem = document.getElementById('menu-settings');
-	if (menuItem) {
-		menuItem.addEventListener('click', function (e) {
-			e.preventDefault();
-			openSettings();
-		});
-	}
-
-	apply();
+	document.getElementById('menu-settings').addEventListener('click', function (e) {
+		e.preventDefault();
+		openSettings();
+	});
 })();

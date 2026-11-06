@@ -10,7 +10,7 @@
 	const root = document.querySelector('.toy:not([data-ready])');
 	if (!root) return;
 	root.dataset.ready = '1';
-	const win = root.closest('.content') || root;
+	const win = root.closest('.content');
 	const $ = (sel, from) => (from || root).querySelector(sel);
 	const $$ = (sel, from) => [...(from || root).querySelectorAll(sel)];
 	const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -82,7 +82,7 @@
 		const tok = WORDS.map((w, t) => {
 			const x = E[w], r = rms(x), xn = x.map(v => v / r);
 			const q = mul(xn, Wq), k = mul(xn, Wk), v = mul(xn, Wv);
-			return { w, t, x, rms: r, xn, q, k, v, qr: rope(q, t), kr: rope(k, t) };
+			return { t, x, rms: r, xn, q, k, v, qr: rope(q, t), kr: rope(k, t) };
 		});
 		tok.forEach(a => {
 			// attention: each query head scores the cached keys of its key-value head up to this position,
@@ -539,6 +539,7 @@
 	const CX = 10.5; // the scene turns about this x
 	let yaw = VIEWS.turned[0], pitch = VIEWS.turned[1];
 	let W = 0, H = 0, S = 18, OX = 0, OY = 0, camY = -15; // canvas size, pixels a unit, origin, camera height
+	let dpr = 1; // canvas pixels a CSS pixel, the toy's scale included, so the scene stays sharp
 	const rotate = (x, y, z) => {
 		const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
 		const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
@@ -578,7 +579,7 @@
 		S = Math.min((W - 24) / (hi - lo), H / 30, 24);
 		OX = W / 2 - S * (hi + lo) / 2;
 		OY = H / 2;
-		const dpr = window.devicePixelRatio || 1;
+		dpr = (window.devicePixelRatio || 1) * stage.getBoundingClientRect().width / stage.clientWidth;
 		canvas.width = Math.round(W * dpr);
 		canvas.height = Math.round(H * dpr);
 		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -623,7 +624,6 @@
 	}
 	// draw with a shadow, in CSS pixels; the shadow ends with the drawing, so none leaks into the next one
 	function shadowed(colour, blur, dx, dy, draw) {
-		const dpr = window.devicePixelRatio || 1;
 		ctx.save();
 		ctx.shadowColor = colour;
 		ctx.shadowBlur = blur * dpr;
@@ -641,6 +641,11 @@
 	function edge(a, b, colour, alpha, width, lit) {
 		if (lit) liftedEdges.push([a, b, colour, alpha, width]);
 		else line(a, b, colour, alpha, width);
+	}
+	// a weight w's edge in a bundle, x the input it multiplies: lit, plain and thick; unlit, faint at rest, then as
+	// strong as its product against the bundle's top, by on, how far the sweep has come and how lit the board is
+	function weightEdge(a, b, w, x, lit, on, top, rest = 0.05, gain = 0.4, litWidth = 2.2) {
+		edge(a, b, sign(w), lit ? LIT : rest + on * gain * Math.abs(x * w) / top, lit ? litWidth : 0.8, lit);
 	}
 	// ends a bundle of edges: the lit ones over their shadows, and the alpha back to 1
 	function flushEdges() {
@@ -969,7 +974,7 @@
 			for (let f = 0; f < D; f++) {
 				const w = model.Wg[f][e], id = `wg|0|${f}|${e}`;
 				if (id === hoverKey) hovE.push([pin[f], pr[e]]);
-				edge(pin[f], pr[e], sign(w), lit ? LIT : 0.05 + done * fm * 0.4 * Math.abs(t.hn[f] * w) / cr, lit ? 2.2 : 0.8, lit);
+				weightEdge(pin[f], pr[e], w, t.hn[f], lit, done * fm, cr);
 			}
 		}
 		// W3 edges into the value nodes, then W1 edges into the gate nodes
@@ -980,7 +985,7 @@
 				for (let f = 0; f < D; f++) {
 					const w = model.EX[Math.floor(n / FE)][Wn][f][n % FE], id = `${b}|${h}|${f}|${n}`;
 					if (id === hoverKey) hovE.push([pin[f], dst[n]]);
-					edge(pin[f], dst[n], sign(w), lit ? LIT : rest(n) + done * fm * 0.4 * Math.abs(t.hn[f] * w) / cm, lit ? 2.2 : 0.8, lit);
+					weightEdge(pin[f], dst[n], w, t.hn[f], lit, done * fm, cm, rest(n));
 				}
 			}
 		});
@@ -999,7 +1004,7 @@
 				const w = model.EX[Math.floor(n / FE)].W2[n % FE][j], id = `w2|0|${j}|${n}`, x = rec(n);
 				if (id === hoverKey) hovE.push([pm[n], pout[j]]);
 				if (!x) { line(pm[n], pout[j], sign(w), rest(n), 0.8); continue; }
-				edge(pm[n], pout[j], sign(w), lit ? LIT : 0.05 + done * fm * 0.4 * Math.abs(t.G[slot(n)] * x.m[n % FE] * w) / c2, lit ? 2.2 : 0.8, lit);
+				weightEdge(pm[n], pout[j], w, t.G[slot(n)] * x.m[n % FE], lit, done * fm, c2);
 			}
 		}
 		flushEdges();
@@ -1072,7 +1077,7 @@
 						const [fx, fy, fz] = flatPos(b, c), dst = project(fx, fy + WALLS[b].u / 2, fz), lit = live(ST.qkv, ...sweepWin(c, n));
 						for (let f = 0; f < D; f++) {
 							const w = Wm[f][c];
-							edge(src[f], dst, sign(w), lit ? LIT : 0.04 + done * fm * 0.45 * Math.abs(t.xn[f] * w) / cm, lit ? 2 : 0.8, lit);
+							weightEdge(src[f], dst, w, t.xn[f], lit, done * fm, cm, 0.04, 0.45, 2);
 						}
 					}
 				});
@@ -1092,7 +1097,7 @@
 					const dst = project(WALLS.h.x + f + 0.5, yb + 0.05, 0), lit = live(ST.wo, ...mixWin(f));
 					for (let c = 0; c < NH * DH; c++) {
 						const w = model.Wo[c][f];
-						edge(src[c], dst, sign(w), lit ? LIT : 0.04 + done * fm * 0.45 * Math.abs(t.cat[c] * w) / cm, lit ? 2 : 0.8, lit);
+						weightEdge(src[c], dst, w, t.cat[c], lit, done * fm, cm, 0.04, 0.45, 2);
 					}
 				}
 				flushEdges();
@@ -1155,7 +1160,7 @@
 			for (let f = 0; f < D; f++) {
 				const w = model.WU[f][j], id = `wu|0|${f}|${j}`;
 				if (id === hoverKey) hovE.push([pin[f], pv[j]]);
-				edge(pin[f], pv[j], sign(w), lit ? LIT : 0.05 + done * fm * 0.4 * Math.abs(t.zn[f] * w) / cm, lit ? 2.2 : 0.8, lit);
+				weightEdge(pin[f], pv[j], w, t.zn[f], lit, done * fm, cm);
 			}
 		}
 		flushEdges();
@@ -1714,7 +1719,7 @@
 	// the window's status bar: the step in words, then the token and how far through the pass it is. The layout
 	// draws the bar after the post, so the post defers this script
 	const status = $('.post_total', win), place = document.createElement('span');
-	if (status) status.append(place);
+	status.append(place);
 	const PRE = {};
 	DATA.prerequisites.forEach(it => { PRE[it.id] = it; });
 	DATA.components.forEach(c => c.pre.forEach((id, k) => { PRE[id].tag = `${c.n}.${k + 1}`; }));
@@ -1777,7 +1782,6 @@
 		$$('.toy-fp', secs).forEach(b => {
 			const i = +b.dataset.s;
 			b.classList.toggle('cur', i === s);
-			b.classList.toggle('done', i < s);
 			b.classList.toggle('future', i > s);
 		});
 		row.appendChild(detail);
@@ -1801,10 +1805,8 @@
 		$$('button', map).forEach((b, i) => { b.classList.toggle('on', i === s); b.classList.toggle('done', i < s); });
 		$('.toy-end').hidden = s !== NST - 1;
 		$('[data-act="nexttok"]').textContent = cur < T - 1 ? `Run the next token: ${tokName(cur + 1)} →` : 'Back to the first token';
-		if (status) {
-			$('.left', status).textContent = `${COMP_OF[s].nav} · ${DATA.steps[s].title}`;
-			place.textContent = `${WORDS[cur]} · step ${s + 1} of ${NST}`;
-		}
+		$('.left', status).textContent = `${COMP_OF[s].nav} · ${DATA.steps[s].title}`;
+		place.textContent = `${WORDS[cur]} · step ${s + 1} of ${NST}`;
 		// the side follows the step, as the cubes do; on first load it stays at the top
 		if (shownStep !== null && shownStep !== s) sideTo(row);
 		shownStep = s;
@@ -1879,7 +1881,7 @@
 		playBtn.innerHTML = '&#10074;&#10074; Pause';
 		playBtn.classList.add('on');
 		const tick = now => {
-			if (!playing || !root.isConnected) return; // a closed window stops here, so it can be freed
+			if (!playing) return;
 			const dt = Math.min(64, now - lastT);
 			lastT = now;
 			readTau();
@@ -1912,7 +1914,7 @@
 		const tick = now => {
 			const u = clamp((now - t0) / ms);
 			scroller.scrollTop = from + (to - from) * u;
-			if (u < 1 && root.isConnected) glideRaf = requestAnimationFrame(tick);
+			if (u < 1) glideRaf = requestAnimationFrame(tick);
 			else navTarget = null;
 		};
 		glideRaf = requestAnimationFrame(tick);
@@ -1998,7 +2000,7 @@
 		return `${name}[${who}, ${c.i}] = ${v}${past}`;
 	}
 	let drag = null;
-	const local = e => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+	const local = e => [e.offsetX, e.offsetY];
 	canvas.addEventListener('pointerdown', e => {
 		if (e.pointerType !== 'mouse') return;
 		drag = { x: e.clientX, y: e.clientY, yaw, pitch };
@@ -2072,6 +2074,7 @@
 		resized.disconnect();
 		document.removeEventListener('settings:changed', repaper);
 		stopPlay();
+		stopGlide();
 		clearTimeout(explainTimer);
 		document.removeEventListener('content:swapped', closed);
 	});

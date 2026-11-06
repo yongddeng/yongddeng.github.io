@@ -64,24 +64,13 @@ var ServeEngine = ServeEngine || (function () {
 	// ---- the workload ----
 	// Chat lengths, log-normal about a median: [median, σ, least, most]
 	const PROMPT = [600, 0.8, 32, 6144], OUTPUT = [250, 0.7, 16, 2048];
-	// Mulberry32
-	function rng(seed) {
-		let a = seed >>> 0;
-		return function () {
-			a = (a + 0x6d2b79f5) >>> 0;
-			let t = Math.imul(a ^ (a >>> 15), 1 | a);
-			t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-			return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-		};
-	}
 	// count requests arriving as a Poisson process of rate a second, each
 	// prompt led by the same system prompt of system tokens, each answer cut
 	// at max_tokens, cap
 	function requests({ rate, count, seed, system, cap }) {
-		const r = rng(seed);
-		const normal = () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());
+		const r = exeRng(seed);
 		const len = ([median, sigma, lo, hi]) => Math.round(Math.min(hi,
-			Math.max(lo, median * Math.exp(sigma * normal()))));
+			Math.max(lo, median * Math.exp(sigma * exeNormal(r)))));
 		let t = 0;
 		return Array.from({ length: count }, (_, id) => {
 			t += -Math.log(1 - r()) / rate;
@@ -163,14 +152,14 @@ var ServeEngine = ServeEngine || (function () {
 		const isSystem = k => k !== null && k[0] === 's';
 		// A block as it is now: [block, owner, ref, its KEY, slot]; and the
 		// whole cache so, for a keyframe
-		S.keyOf = b => key[b] === null ? KEY.none : isSystem(key[b]) ? KEY.system : KEY.own;
+		const keyOf = b => key[b] === null ? KEY.none : isSystem(key[b]) ? KEY.system : KEY.own;
 		S.trace = opt.trace ? [] : null;
 		const mark = b => {
-			if (S.trace) S.trace.push([b, owner[b], ref[b], S.keyOf(b), slot[b]]);
+			if (S.trace) S.trace.push([b, owner[b], ref[b], keyOf(b), slot[b]]);
 		};
 		S.snapshot = () => {
 			const kind = new Uint8Array(N);
-			for (let b = 0; b < N; b++) kind[b] = S.keyOf(b);
+			for (let b = 0; b < N; b++) kind[b] = keyOf(b);
 			return { owner: Int16Array.from(owner), ref: Uint8Array.from(ref), kind, slot: Int16Array.from(slot) };
 		};
 		const tokens = r => r.prompt + r.generated;
@@ -592,10 +581,9 @@ var ServeEngine = ServeEngine || (function () {
 	const NUMBER = new Intl.NumberFormat('en-GB');
 	const fmt = v => NUMBER.format(v);
 	// q of the way through xs, as numpy's percentile takes it, which vllm
-	// bench serve uses: straight between the two nearest ranks; xs as they
-	// are when sorted says they are in order already
-	function quantile(xs, q, sorted = false) {
-		const s = sorted ? xs : Float64Array.from(xs).sort(), h = (s.length - 1) * q, i = Math.floor(h);
+	// bench serve uses: straight between the two nearest ranks
+	function quantile(xs, q) {
+		const s = Float64Array.from(xs).sort(), h = (s.length - 1) * q, i = Math.floor(h);
 		return i + 1 < s.length ? s[i] + (h - i) * (s[i + 1] - s[i]) : s[i];
 	}
 	// Round steps for an axis from a to b
@@ -649,7 +637,7 @@ var ServeEngine = ServeEngine || (function () {
 	// none did. A static batch's index on each of its steps
 	function simulate(at) {
 		const a = effective(at);
-		// at.count, vllm bench serve's --num-prompts: COUNT unless a take sets fewer
+		// at.count, vllm bench serve's --num-prompts: COUNT unless a program sets its own
 		const reqs = requests({ rate: a.rate, count: a.count || COUNT,
 			seed: a.seed, system: a.system, cap: a.reserve });
 		const budget = a.sched === 'prefill' ? MAX_LEN : BUDGET;
@@ -791,21 +779,21 @@ var ServeEngine = ServeEngine || (function () {
 		playOn(run, out, from, false, k, after);
 		return out;
 	}
-	// The requests waiting at t, the head of the queue first: those preempted,
-	// the oldest first, then the rest as they came. Each with its kind
+	// The ids of the requests waiting at t, the head of the queue first: those
+	// preempted, the oldest first, then the rest as they came
 	function queueAt(run, t) {
 		const back = [], rest = [];
 		for (const r of run.S.reqs) {
 			if (r.arrival > t) break;
 			const s = r.segs.find(s => s.t0 <= t && t < s.t1);
-			if (s && s.kind === 'preempted') back.push([r, s.kind]);
-			else if (s && s.kind === 'wait') rest.push([r, s.kind]);
+			if (s && s.kind === 'preempted') back.push(r.id);
+			else if (s && s.kind === 'wait') rest.push(r.id);
 		}
 		return back.concat(rest);
 	}
 
 return {
-	MODEL, GPU, GPUS, W_BYTES, WEIGHTS, BLOCK, UTIL, kvToken, numBlocks, rng, effective, KEY,
+	MODEL, GPU, GPUS, W_BYTES, WEIGHTS, BLOCK, UTIL, kvToken, numBlocks, effective, KEY,
 	fmt, quantile, ticks, TONES, hue, KEYED, BRIEF,
 	VALUES, SHOW, HOME, simulate, stepAt, cacheAt, playOn, blocksAt, queueAt,
 };

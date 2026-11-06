@@ -16,9 +16,9 @@
 // block's slots, the map and the GPU over it, a request's block table, why
 // the head of the queue waits, the river and the key; the strip, a chat's
 // cards (Users' thread, Memory's blocks), the pinned chat and the
-// tooltips; then the views, the clock and the controls. The desktop
-// re-creates a window's scripts when it swaps the window in, so this runs
-// once per window and claims it with data-ready.
+// tooltips; then the views, the clock and the controls. The desktop runs a
+// window's scripts each time it opens one, so this runs once per window and
+// claims it with data-ready.
 (function () {
 	const root = document.querySelector('.sv:not([data-ready])');
 	if (!root) return;
@@ -48,8 +48,8 @@
 	// the run's clock, speed times real time, and whether a frame is due
 	const clock = { t: 0, playing: false, last: 0, looping: false };
 	// the picked chat, { side, id }; the first server's request under the
-	// pointer; the river's pointer, and whether it is dragged
-	let picked = null, hovered = -1, guide = -1, scrubbing = false;
+	// pointer; the river's pointer
+	let picked = null, hovered = -1, guide = -1;
 	// The one model of the run at the clock that every view draws (the
 	// cache at the clock, below), and the blocks lit a moment ago
 	const now = { k: -2, after: false, s: null, cells: null, bands: new Map(), marks: new Map(), stranded: 0 };
@@ -68,9 +68,6 @@
 		pinCard = $('[data-out="pin-card"]'), pinTime = $('.sv-pin-time'), tip = $('.sv-tip');
 	const atField = $('[data-out="at"]'), runBtn = $('[data-act="run"]'), ends = exeEnds(root);
 	const sel = name => $('[data-in="' + name + '"]');
-	// the pinned chat's window named by its title bar, an id for this window's
-	pinTitle.id = 'sv-pin-title-' + document.querySelectorAll('.sv[data-ready]').length;
-	pin.setAttribute('aria-labelledby', pinTitle.id);
 
 	// ---- type and colours ----
 	// the site's own: navy, purple, gold, a red for what gives way; the
@@ -94,9 +91,6 @@
 	// reserved, tokens to come, so they read as the tokens' own
 	const tint = (colour, alpha = 0.4) => 'rgba('
 		+ [1, 3, 5].map(i => parseInt(colour.slice(i, i + 2), 16)).join(', ') + ', ' + alpha + ')';
-	// slots that will never hold a token are hatched (exe.js's hatch), and
-	// free blocks the other way, so they part from slots set aside without
-	// their colour
 	// Text cut to a width, with an ellipsis
 	function cut(cx, text, w) {
 		if (cx.measureText(text).width <= w) return text;
@@ -324,8 +318,8 @@
 	const fillIn = (text, vars) => text.replace(/\{(\w)\}/g, (_, k) => vars[k]);
 
 	// A deterministic hash in [0, 1) of a few integers: them folded into one,
-	// then the first draw of the engine's own Mulberry32 from it
-	const hash = (...xs) => E.rng(xs.reduce((h, x) => Math.imul(h ^ (x >>> 0), 2654435761) >>> 0, 2166136261))();
+	// then the first draw of exeRng from it
+	const hash = (...xs) => exeRng(xs.reduce((h, x) => Math.imul(h ^ (x >>> 0), 2654435761) >>> 0, 2166136261))();
 	// A piece's ways of being said, as [tokens, text]: its words with each
 	// set of its ⟨…⟩ left out, and, bracketed, not at all. Each way is
 	// counted whole, as a piece starts a fresh token
@@ -438,14 +432,10 @@
 				}
 				return null;
 			};
-			// that language's, or else English's; and should the data have lost
-			// every chat that comes to this count, an answer of dots rather
-			// than a window blanked by an error
+			// that language's, or else English's, whose primes come to any count
+			// (_plugins/check_scheduler.rb)
 			let got = fitIn(lang);
 			if (!got) got = fitIn((lang = 'en'));
-			if (!got) {
-				return { lang, ask: '…', asks: own, rest: 0, paste: '', turns: [], tokens: Array(r.output).fill(' …') };
-			}
 			const [chat, answer] = got;
 			used.set(chat, (used.get(chat) || 0) + 1);
 			const left = own - estimate(answer.ask, lang), rest = left < MARKED ? 0 : left;
@@ -464,18 +454,6 @@
 		const sum = weights.reduce((a, w) => a + w, 0), out = weights.map(w => Math.max(1, Math.floor(rest * w / sum)));
 		out[out.length - 1] += rest - out.reduce((a, x) => a + x, 0);
 		return out;
-	}
-	// The chats for a run's requests, made again only for requests not seen
-	// lately, as most settings change how the requests are served, not what
-	// they ask: chatsFor reads a request's own prompt and its answer's length
-	const chatsMade = new Map();
-	function chatsOf(run, seed) {
-		const key = seed + ':' + run.S.reqs.map(r => (r.prompt - r.system) + '/' + r.output).join(',');
-		if (!chatsMade.has(key)) {
-			if (chatsMade.size >= 8) chatsMade.delete(chatsMade.keys().next().value);
-			chatsMade.set(key, chatsFor(run, seed));
-		}
-		return chatsMade.get(key);
 	}
 	// a chat's message as a tile shows it, a paste named after it
 	const message = c => c.paste ? c.ask + ' + pasted: ' + c.paste + ' (' + fmt(c.rest) + ' tokens)' : c.ask;
@@ -573,7 +551,7 @@
 		// the run ends with its last step, or with the last request, refused
 		const end = Math.max(run.S.t, users[users.length - 1].r.arrival);
 		return { at: a, run, whole, users, firsts, gapAt, gapLen,
-			made, end, name: nameOf(a), chats: chatsOf(run, a.seed) };
+			made, end, name: nameOf(a), chats: chatsFor(run, a.seed) };
 	}
 	const lastArrival = () => Math.max(...sides.map(v => v.run.S.reqs[v.run.S.reqs.length - 1].arrival));
 	// the servers a view shows, the second only in Users; and the end of the
@@ -1009,7 +987,7 @@
 		let p = MOST_CELL;
 		while (p > LEAST_CELL && tall(p) + TOP + FOOT > shared - least) p--;
 		const H = Math.max(0, shared - least), cols = Math.floor(w / p), spare = Math.max(0, H - tall(p) - TOP - FOOT);
-		mapCv.style.height = H + 'px';
+		mapCv.style.height = wiresCv.style.height = H + 'px';
 		mapCv.width = Math.round(W * dpr);
 		mapCv.height = Math.round(H * dpr);
 		const gap = p >= 12 ? 2 : 1;
@@ -1216,12 +1194,6 @@
 		const { cx } = fitCanvas(wiresCv);
 		wired = false;
 		if (!geo || view !== 'memory') return;
-		const box = body.getBoundingClientRect(), m = mapCv.getBoundingClientRect();
-		const mx = m.left - box.left, my = m.top - box.top;
-		cx.save();
-		cx.beginPath();
-		cx.rect(mx, my, m.width, m.height);
-		cx.clip();
 		const t = performance.now();
 		for (const [b, [colour, until]] of flashes) {
 			if (until < t) {
@@ -1232,11 +1204,11 @@
 			cx.globalAlpha = Math.min(1, (until - t) / FLASH);
 			if (colour === C.red) {
 				cx.fillStyle = colour;
-				cx.fillRect(mx + x, my + y, geo.c, geo.c);
+				cx.fillRect(x, y, geo.c, geo.c);
 			} else {
 				cx.strokeStyle = colour;
 				cx.lineWidth = 1.5;
-				cx.strokeRect(mx + x - 0.75, my + y - 0.75, geo.c + 1.5, geo.c + 1.5);
+				cx.strokeRect(x - 0.75, y - 0.75, geo.c + 1.5, geo.c + 1.5);
 			}
 		}
 		cx.globalAlpha = 1;
@@ -1248,10 +1220,9 @@
 			for (let b = 0; b < run.N; b++) {
 				if (owner[b] !== lit || kind[b] === KEY.system) continue;
 				const [x, y] = cellAt(b);
-				cx.strokeRect(mx + x - 0.5, my + y - 0.5, geo.c + 1, geo.c + 1);
+				cx.strokeRect(x - 0.5, y - 0.5, geo.c + 1, geo.c + 1);
 			}
 		}
-		cx.restore();
 	}
 
 	// ---- why the head of the queue waits ----
@@ -1683,26 +1654,14 @@
 	}
 	// The gaps between tokens as they reach their users, every answer's, in
 	// bins of a quarter of a decade, as shares of the server's gaps, the
-	// median and the 99th percentile marked; two servers on one scale. The
-	// gaps come by the clock are kept in order, those come since the last
-	// frame sorted and merged in from the back, and counted again from none
-	// when the clock goes back
+	// median and the 99th percentile marked; two servers on one scale
 	const BINS = { lo: -3, hi: 1, per: 4 };
 	const binOf = g => Math.max(0,
 		Math.min((BINS.hi - BINS.lo) * BINS.per - 1, Math.floor((Math.log10(g) - BINS.lo) * BINS.per)));
 	function gapsBy(v, t) {
-		const k = upto(v.gapAt, t);
-		if (!v.come || k < v.come.n) {
-			v.come = { n: 0, sorted: new Float64Array(v.gapLen.length),
-				bins: new Array((BINS.hi - BINS.lo) * BINS.per).fill(0) };
-		}
-		const c = v.come, add = v.gapLen.slice(c.n, k).sort();
-		for (let i = c.n - 1, j = add.length - 1, w = k - 1; j >= 0; w--) {
-			c.sorted[w] = i >= 0 && c.sorted[i] > add[j] ? c.sorted[i--] : add[j--];
-		}
-		for (const g of add) c.bins[binOf(g)]++;
-		c.n = k;
-		return { come: c.sorted.subarray(0, k), bins: c.bins };
+		const come = v.gapLen.subarray(0, upto(v.gapAt, t)), bins = new Array((BINS.hi - BINS.lo) * BINS.per).fill(0);
+		for (const g of come) bins[binOf(g)]++;
+		return { come, bins };
 	}
 	function drawItl(t) {
 		const two = sides.length > 1, { cx, W, H } = fitCanvas(itlCv), y0 = two ? 34 : 22, y1 = H - 14, labels = [];
@@ -1740,7 +1699,7 @@
 				const h = count / set.come.length / most * (y1 - y0 - 4);
 				cx.fillRect(a + j * w + 1, y1 - h, w - 2, h);
 			});
-			const p50 = E.quantile(set.come, 0.5, true), p99 = E.quantile(set.come, 0.99, true);
+			const p50 = E.quantile(set.come, 0.5), p99 = E.quantile(set.come, 0.99);
 			cx.fillStyle = C.ink;
 			cx.fillText(cut(cx, 'p50 ' + secs(p50) + ' · p99 ' + secs(p99), b - a), a, textY);
 			for (const s of [p50, p99]) {
@@ -1772,7 +1731,7 @@
 	function factsOf(v, u, t, whole) {
 		const r = u.r, c = stateAt(v, u, t), talk = v.chats[r.id], from = Math.max(0, c.shown - TAIL.tip);
 		const latest = (from ? '… ' : '') + answerText(talk, from, c.shown);
-		return { v, u, r, c, t, talk, whole, held: v.whole && c.st !== 'done' && c.made > 0,
+		return { v, u, r, c, t, talk, held: v.whole && c.st !== 'done' && c.made > 0,
 			cached: E.effective(v.at).prefix,
 			latest, answer: whole ? answerText(talk, 0, c.shown) : latest };
 	}
@@ -1871,24 +1830,24 @@
 	// with its colour in the grid (fill) and as a swatch (css)
 	function partsOf(f) {
 		const { v, u, r, c, talk } = f, made = f.held ? c.made : c.sent, out = [];
-		const part = (key, label, tokens, fill, text = '', lang = '') => tokens > 0
-			&& out.push({ key, label, tokens, fill, css: fill, text, lang });
+		const part = (label, tokens, fill, text = '', lang = '') => tokens > 0
+			&& out.push({ label, tokens, fill, css: fill, text, lang });
 		const batch = v.whole && r.batch >= 0 ? v.run.batches[r.batch] : null;
-		if (batch) part('pad', 'padding, to its batch’s longest prompt', batch.len - r.prompt, PADDING);
-		part('system', 'system prompt' + (f.cached ? ', cached and shared' : ''),
+		if (batch) part('padding, to its batch’s longest prompt', batch.len - r.prompt, PADDING);
+		part('system prompt' + (f.cached ? ', cached and shared' : ''),
 			r.system, C.gold, 'the same for every chat');
-		if (talk.paste) part('rest', 'pasted', talk.rest, tint(C.purple, 0.3), talk.paste);
-		else part('rest', turnsWords(talk), talk.rest, tint(C.purple, 0.3), 'the conversation so far');
-		part('message', 'its message', talk.asks, tint(C.purple, 0.6), talk.ask, talk.lang);
-		part('made', f.held ? 'the answer, made but held' : 'the answer', made,
+		if (talk.paste) part('pasted', talk.rest, tint(C.purple, 0.3), talk.paste);
+		else part(turnsWords(talk), talk.rest, tint(C.purple, 0.3), 'the conversation so far');
+		part('its message', talk.asks, tint(C.purple, 0.6), talk.ask, talk.lang);
+		part(f.held ? 'the answer, made but held' : 'the answer', made,
 			f.held ? tint(u.colour, 0.55) : u.colour, f.latest, talk.lang);
-		part('tocome', 'the answer, still to come', r.output - made, tint(u.colour, 0.2));
-		if (batch) part('tail', 'padding, to its batch’s longest answer', batch.longest - r.output, PADDING);
+		part('the answer, still to come', r.output - made, tint(u.colour, 0.2));
+		if (batch) part('padding, to its batch’s longest answer', batch.longest - r.output, PADDING);
 		if (v.run.alloc === 'contiguous') {
 			const row = batch ? batch.len + batch.longest : r.prompt + r.output;
 			const aside = Math.ceil(((batch ? batch.len : r.prompt) + v.at.reserve) / BLOCK) * BLOCK - row;
 			if (aside > 0) {
-				out.push({ key: 'aside', label: 'set aside for max_tokens, never used', tokens: aside,
+				out.push({ label: 'set aside for max_tokens, never used', tokens: aside,
 					fill: hatch(STRANDED),
 					css: 'repeating-linear-gradient(135deg, #808080 0 1px, #ffffff 1px 4px)', text: '' });
 			}
@@ -1958,9 +1917,8 @@
 	// answer so far, and what it did through the run as a strip of its
 	// states. Its card is laid out again only for another chat
 	function drawPin(t) {
-		const hide = !picked || picked.side >= sides.length;
-		if (pin.hidden !== hide) pin.hidden = hide;
-		if (hide) return;
+		if (pin.hidden !== !picked) pin.hidden = !picked;
+		if (!picked) return;
 		const v = sides[picked.side], u = v.users[picked.id], r = u.r, f = factsOf(v, u, t, true);
 		setText(pinTitle,
 			'#' + (r.id + 1)
@@ -2094,7 +2052,7 @@
 			tenths(t) + ' of ' + tenths(endOf()) + ' · step '
 				+ fmt(Math.max(0, Math.min(E.stepAt(run, t) + 1, run.steps.length))));
 		paintAt(t);
-		setText(runBtn, clock.playing ? '❚❚ Pause' : '▶ Run');
+		exeRunning(runBtn, clock.playing);
 		ends(t <= 0, t >= endOf());
 		drawWalls(t, states);
 		if (view === 'users') {
@@ -2347,21 +2305,14 @@
 		const id = ownerAt(blockAt(e));
 		if (id >= 0) pickChat(0, id);
 	});
-	// the river: press to move the clock there, drag to scrub; the pointer's
-	// moment in a tooltip
-	const scrub = e => seek(riverBox().T(e.clientX - riverCv.getBoundingClientRect().left));
-	riverCv.addEventListener('pointerdown', e => {
-		scrubbing = true;
-		riverCv.setPointerCapture(e.pointerId);
-		scrub(e);
-	});
+	// the river, a seek bar too: press to move the clock there, drag to scrub;
+	// the pointer's moment in a tooltip
+	exeSeekBar(riverCv, share => seek(riverBox().T(share * riverCv.getBoundingClientRect().width)));
 	riverCv.addEventListener('pointermove', e => {
 		guide = e.clientX - riverCv.getBoundingClientRect().left;
-		if (scrubbing) scrub(e);
-		else paintRiver();
+		paintRiver();
 		showTip(e, riverWords(riverBox().T(guide)));
 	});
-	riverCv.addEventListener('pointerup', () => (scrubbing = false));
 	riverCv.addEventListener('pointerleave', () => {
 		guide = -1;
 		tip.hidden = true;
@@ -2374,15 +2325,6 @@
 			setTimeout(() => pin.contains(document.activeElement) || root.focus({ preventScroll: true }));
 		}
 	});
-	// A pane resized, or the key under the map, as it takes another line:
-	// the map laid out again and everything drawn; let go with the window
-	const resized = new ResizeObserver(() => {
-		if (!root.isConnected) return resized.disconnect();
-		if (!sides.length) return;
-		relayout();
-		draw();
-	});
-
 	// Opened in Users, paused at a telling step of the static batches it
 	// opens on: one under way with the most left waiting for it at its
 	// middle (those come, less those let in and those refused), and of
@@ -2404,5 +2346,10 @@
 	serveAll();
 	clock.t = openingStep();
 	drawAll();
-	for (const el of [body, keyEl]) resized.observe(el);
+	// A pane resized, or the key under the map, as it takes another line:
+	// the map laid out again and everything drawn
+	exeResized(root, () => {
+		relayout();
+		draw();
+	}, body, keyEl);
 })();

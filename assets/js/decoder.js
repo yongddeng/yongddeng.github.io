@@ -11,17 +11,16 @@
 	const root = document.querySelector('.wb:not([data-ready])');
 	if (!root) return;
 	root.dataset.ready = '1';
-	const win = root.closest('.content') || root;
+	const win = root.closest('.content');
 	const $ = (sel, from) => (from || root).querySelector(sel);
 	const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 	const n = x => Number(x).toLocaleString('en-US');
 
 	// ---- data ---------------------------------------------------------------
 	const data = JSON.parse($('script[type="application/json"]', win).textContent);
-	const M = data.models, byId = {};
+	const M = data.models, byId = {}; // the file is in date order
 	M.forEach(m => { byId[m.id] = m; });
-	const chrono = M.slice(); // the file is in date order
-	const idx = id => chrono.indexOf(byId[id]);
+	const idx = id => M.indexOf(byId[id]);
 	const kids = {};
 	M.forEach(m => { if (m.parent) (kids[m.parent] = kids[m.parent] || []).push(m.id); });
 	const year = m => m.date.split(' ')[1];
@@ -371,7 +370,7 @@
 	];
 	// the model compared with: the one picked in the diff's menu, unless that is the shown model; else the parent (the
 	// first model has none, so the second)
-	const base = (m, p) => (state.base && state.base !== m.id ? byId[state.base] : p || chrono[1]);
+	const base = (m, p) => (state.base && state.base !== m.id ? byId[state.base] : p || M[1]);
 	function diffView(m, p) {
 		const b = base(m, p), lines = [];
 		const line = (k, sign, label, value, part) => lines.push(`<div class="${k}"${part ? ` data-menu="${part}" title="Open the ${esc(partById[part].name)} menu"` : ''}><b>${sign}</b><i>${esc(label)}</i><span>${esc(value)}</span></div>`);
@@ -390,7 +389,7 @@
 		NUMBERS.forEach(([label, f]) => row(label, f(b), f(m)));
 		const changed = data.parts.filter(part => techs(part, b) !== techs(part, m)).length;
 		const r = kv(m) / kv(b), cache = r < 1 ? '−' + Math.round((1 - r) * 100) + '%' : r > 1 ? '×' + r.toFixed(1) : 'the same';
-		const opts = chrono.filter(q => q !== m).map(q => `<option value="${q.id}"${q === b ? ' selected' : ''}>${esc(q.name)}${q.id === m.parent ? ' (parent)' : ''}</option>`).join('');
+		const opts = M.filter(q => q !== m).map(q => `<option value="${q.id}"${q === b ? ' selected' : ''}>${esc(q.name)}${q.id === m.parent ? ' (parent)' : ''}</option>`).join('');
 		return `<div class="wb-view"><div class="wb-vbar"><label>against <select data-pick="base">${opts}</select></label><span class="sum">${changed} of ${data.parts.length} parts changed · KV a token ${cache} · parameters ×${(m.params / b.params).toFixed(1)}</span></div><div class="wb-diff">${lines.join('')}</div></div>`;
 	}
 
@@ -417,13 +416,13 @@
 	// the model pane is a rail: one row per model in date order, a rail per branch that forks where a child leaves its
 	// parent. A first child inherits its parent's lane; any other child takes the lowest lane with nothing on it between
 	// the parent's row and the end of its own branch, so a rail never runs through a dead-end sibling.
-	const LAB = { 'Google DeepMind': 'Google', 'Meta AI': 'Meta', 'Mistral AI': 'Mistral', 'AI21 Labs': 'AI21' };
+	const LAB = { 'Google DeepMind': 'Google', 'Mistral AI': 'Mistral', 'AI21 Labs': 'AI21' };
 	const lab = m => LAB[m.org] || m.org;
 	function railHtml() {
-		const RH = 15, rowOf = {}; chrono.forEach((m, i) => rowOf[m.id] = i);
-		const last = {}; const span = id => { let r = rowOf[id]; (kids[id] || []).forEach(k => r = Math.max(r, span(k))); last[id] = r; return r; }; span(chrono[0].id);
+		const RH = 15, rowOf = {}; M.forEach((m, i) => rowOf[m.id] = i);
+		const last = {}; const span = id => { let r = rowOf[id]; (kids[id] || []).forEach(k => r = Math.max(r, span(k))); last[id] = r; return r; }; span(M[0].id);
 		const lane = {}, occ = [], taken = {};
-		chrono.forEach(m => {
+		M.forEach(m => {
 			const r = rowOf[m.id], p = m.parent && byId[m.parent];
 			if (p && !taken[p.id]) { taken[p.id] = true; lane[m.id] = lane[p.id]; return; }
 			const rp = p ? rowOf[p.id] : r, re = last[m.id];
@@ -431,11 +430,11 @@
 			lane[m.id] = l; (occ[l] = occ[l] || []).push([rp + 1, re]);
 		});
 		const X = l => 44 + l * 9, Y = r => 11 + r * RH, o = [];
-		chrono.forEach(m => { if (!m.parent) return; const p = byId[m.parent], x0 = X(lane[p.id]), y0 = Y(rowOf[p.id]), x1 = X(lane[m.id]), y1 = Y(rowOf[m.id]);
+		M.forEach(m => { if (!m.parent) return; const p = byId[m.parent], x0 = X(lane[p.id]), y0 = Y(rowOf[p.id]), x1 = X(lane[m.id]), y1 = Y(rowOf[m.id]);
 			o.push(x0 === x1 ? `<path d="M${x0},${y0}V${y1}" class="rail"/>` : `<path d="M${x0},${y0}V${y1 - 8}Q${x0},${y1} ${x0 + 8},${y1}H${x1}" class="rail"/>`); });
-		chrono.forEach((m, i) => { const y = Y(i), yr = i && year(chrono[i - 1]) === year(m) ? '' : `<text x="4" y="${y + 3.5}" class="yr">${year(m)}</text>`;
+		M.forEach((m, i) => { const y = Y(i), yr = i && year(M[i - 1]) === year(m) ? '' : `<text x="4" y="${y + 3.5}" class="yr">${year(m)}</text>`;
 			o.push(`<g class="rl" data-id="${m.id}" tabindex="0" role="button" aria-label="${esc(m.name)}"><rect x="2" y="${y - RH / 2}" width="100%" height="${RH}" class="bg"/>${yr}<circle cx="${X(lane[m.id])}" cy="${y}" r="3.2" class="dot"/><text x="110" y="${y + 3.5}" class="nm">${esc(m.name)}<tspan class="lb" dx="6">${esc(lab(m))}</tspan></text>${data.parts.map((p, i) => `<rect x="${i * 8}" y="${y - 5}" width="7" height="10" class="mx pc-${p.id}" data-p="${p.id}"/>`).join('')}</g>`); });
-		return `<svg height="${chrono.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
+		return `<svg height="${M.length * RH + 5}" role="list" aria-label="The models, oldest first, with the lineage drawn as rails">${o.join('')}</svg>`;
 	}
 	$('.wb-tree').innerHTML = railHtml();
 	// at one unit a pixel the names can run past a narrow pane; the rail is as wide as they are, so the pane scrolls.
@@ -474,7 +473,7 @@
 		const intro = byId[t.models[0]], rest = t.models.length - 1, on = tickedIn(part).includes(t.id);
 		const cls = [t.models.includes(state.cur) ? 'on' : '', on ? `ticked pc-${part}` : ''].filter(Boolean).join(' ');
 		return `<li data-part="${part}" data-tick="${t.id}" role="checkbox" aria-checked="${on}" tabindex="0"${cls ? ` class="${cls}"` : ''}><b class="what"><span class="tk" aria-hidden="true">${on ? '☑' : '☐'}</span>${esc(t.what)}</b>`
-			+ `<span class="meta">${year(intro)} · <span class="lit-link" data-id="${intro.id}" title="Show ${esc(intro.name)}, which introduced it">${esc(intro.name)}</span>${rest ? ' +' + rest + ' more' : ''}</span><span class="how">${esc(t.how)}</span><svg viewBox="0 0 64 22" aria-hidden="true">${GLYPH[part][t.id] || ''}</svg></li>`;
+			+ `<span class="meta">${year(intro)} · <span class="lit-link" data-id="${intro.id}" title="Show ${esc(intro.name)}, which introduced it">${esc(intro.name)}</span>${rest ? ' +' + rest + ' more' : ''}</span><span class="how">${esc(t.how)}</span><svg viewBox="0 0 64 22" aria-hidden="true">${GLYPH[part][t.id]}</svg></li>`;
 	}
 	// after any change: the tree marks the models that pass every part's ticks, then the menus, the card and an open
 	// drop-down are drawn afresh. The control that had the keys gets them back, or its menu does if its drop-down closed
@@ -539,7 +538,7 @@
 		clear() { state.ticked = {}; render(); }
 	};
 	// the model a step earlier (-1) or later (1) in time, if there is one
-	const step = d => { const m = chrono[idx(state.cur) + d]; if (m) go(m.id); };
+	const step = d => { const m = M[idx(state.cur) + d]; if (m) go(m.id); };
 	root.addEventListener('click', e => {
 		const b = e.target.closest('[data-act]'); if (b) { actions[b.dataset.act](); return; }
 		const mn = e.target.closest('[data-menu]'); if (mn) { toggleMenu(mn.dataset.menu); return; }
@@ -584,11 +583,9 @@
 	document.addEventListener('keydown', onKey);
 	document.addEventListener('pointerdown', onPress);
 	// The window's View menu normally lists headings (menubar.js); filled here, it lists the two views, as 303's does
-	const viewMenu = $('.tb-outline', win);
-	if (viewMenu) viewMenu.innerHTML = '<button type="button" class="tb-item cur" data-view="block">Block</button><button type="button" class="tb-item" data-view="diff">Diff</button>';
+	$('.tb-outline', win).innerHTML = '<button type="button" class="tb-item cur" data-view="block">Block</button><button type="button" class="tb-item" data-view="diff">Diff</button>';
 	// The references take the status bar's first cell, where a post that is read says Ready, which leaves the toolbar
 	// to the menus and the views. The layout draws the bar after the post, so the post defers this script
-	const status = $('.post_total .left', win);
-	if (status) status.replaceChildren($('.wb-see'));
+	$('.post_total .left', win).replaceChildren($('.wb-see'));
 	go('llama');
 })();

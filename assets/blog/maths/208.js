@@ -18,11 +18,6 @@ const SUMMANDS = [
 ];
 const logFact = [0];
 for (let k = 1; k <= 400; k++) logFact.push(logFact[k - 1] + Math.log(k));
-const binom = m => {
-	const w = [2 ** -m];
-	for (let j = 0; j < m; j++) w.push(w[j] * (m - j) / (j + 1));
-	return w;
-};
 // the big coin's size b and the standard deviation s of the whole sum
 const bigScale = n => {
 	const b = n > 1 ? Math.sqrt(3 * (n - 1)) : 1;
@@ -112,8 +107,7 @@ FIGS['208/law'] = el => {
 	const Y = v => P.Y(Math.min(0.7, v));
 	controls(el, ({ sum, n }) => {
 		const law = lawOf(sum, n);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		c.fillStyle = COL.pale;
 		c.strokeStyle = COL.ink;
 		c.lineWidth = 1;
@@ -135,7 +129,7 @@ FIGS['208/law'] = el => {
 			}
 		} else {
 			const pts = [];
-			for (let px = P.x0; px <= P.x1; px++) pts.push([px, Y(law.density(-4 + (px - P.x0) / (P.x1 - P.x0) * 8))]);
+			for (let px = P.x0; px <= P.x1; px++) pts.push([px, Y(law.density(P.x(px)))]);
 			c.beginPath();
 			c.moveTo(P.x0, P.y0);
 			pts.forEach(([x, y]) => c.lineTo(x, y));
@@ -145,7 +139,7 @@ FIGS['208/law'] = el => {
 		}
 		// the standard normal density
 		const normal = [];
-		for (let px = P.x0; px <= P.x1; px++) { const z = -4 + (px - P.x0) / (P.x1 - P.x0) * 8; normal.push([px, Y(normalPdf(z))]); }
+		for (let px = P.x0; px <= P.x1; px++) normal.push([px, Y(normalPdf(P.x(px)))]);
 		c.strokeStyle = COL.tail;
 		c.lineWidth = 2;
 		c.setLineDash([5, 3]);
@@ -175,8 +169,7 @@ FIGS['208/cf'] = el => {
 	function draw(state) {
 		shown = state;
 		const { sum, n } = state;
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		view.curve([pt(0, 0, 0), pt(T, 0, 0)], COL.frame, 1);
 		for (const t of [0, 3, 6, 9, 12, 15]) {
 			const [x, y] = view.at(pt(t, 0, 0));

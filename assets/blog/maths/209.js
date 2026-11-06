@@ -23,8 +23,7 @@ FIGS['209/clock'] = el => {
 		}
 	}
 	function draw() {
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		c.strokeStyle = COL.grid;
 		c.lineWidth = 1;
 		for (let k = A + 1; k < B; k++) polyline(c, [[Math.round(P.X(k)) + 0.5, P.y1], [Math.round(P.X(k)) + 0.5, P.y0]]);
@@ -37,7 +36,7 @@ FIGS['209/clock'] = el => {
 		// the envelope ±√(2 log log n)
 		const up = [], down = [];
 		for (let px = P.x0; px <= P.x1; px++) {
-			const n = 10 ** (A + (px - P.x0) / (P.x1 - P.x0) * (B - A));
+			const n = 10 ** P.x(px);
 			up.push([px, P.Y(env(n))]);
 			down.push([px, P.Y(-env(n))]);
 		}
@@ -48,8 +47,8 @@ FIGS['209/clock'] = el => {
 		// the walk, each pixel column drawn from its lowest to its highest value, red past the envelope
 		let prev = null;
 		for (let px = P.x0; px < P.x1; px++) {
-			const a = Math.ceil(10 ** (A + (px - P.x0) / (P.x1 - P.x0) * (B - A)));
-			const b = Math.max(a, Math.ceil(10 ** (A + (px + 1 - P.x0) / (P.x1 - P.x0) * (B - A))) - 1);
+			const a = Math.ceil(10 ** P.x(px));
+			const b = Math.max(a, Math.ceil(10 ** P.x(px + 1)) - 1);
 			let lo = Infinity, hi = -Infinity, out = false;
 			const e = env(a);
 			for (let n = a; n <= Math.min(b, N); n++) {

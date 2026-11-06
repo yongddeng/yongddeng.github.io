@@ -8,7 +8,6 @@
 		cascade: document.getElementById('task-cascade'),
 		tile: document.getElementById('task-tile')
 	};
-	if (!bar || !desktop || !btns.cascade) return;
 
 	// The arrangeable set: the explorer plus post and folder windows.
 	// Settings stays put — property sheets are dialogs, not windows.
@@ -16,7 +15,7 @@
 		var wins = Array.prototype.slice.call(document.querySelectorAll('.content'))
 			.filter(function (w) { return !w.classList.contains('settings-win'); });
 		var wrapper = document.querySelector('.wrapper');
-		if (wrapper && wrapper.style.display !== 'none') wins.unshift(wrapper);
+		if (wrapper.style.display !== 'none') wins.unshift(wrapper);
 		return wins;
 	}
 
@@ -30,7 +29,6 @@
 			// rather than leaving the DOM) — an undo must not reopen it
 			if (!s.win.isConnected || s.win.style.display === 'none') return;
 			s.win.style.cssText = s.css;
-			s.win.dispatchEvent(new CustomEvent('win:relayout'));
 		});
 		undo = null;
 	}

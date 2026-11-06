@@ -1,22 +1,15 @@
 // The programs on (D:) (_programs), in its order: lil.exe, optimiser.exe,
-// sampler.exe, scheduler.exe and device.exe, each in a window of its own
-// (assets/js/lil.js, optimiser.js, sampler.js, scheduler.js, device.js). A
+// scheduler.exe, init.exe and device.exe, each in a window of its own
+// (assets/js/lil.js, optimiser.js, scheduler.js, init.js, device.js). A
 // toolbar, the panes their canvases fill, a row of readings and a note on
 // what is drawn; the link to the note each draws for moves into the status bar
 // (assets/js/exe.js). Toolbar, buttons and panes reuse the WinHelp chrome from
-// _literature.scss, and scheduler.exe and sampler.exe play a run with one
-// player's controls (.exe-player); scheduler.exe draws chat clients and a Disk
-// Defragmenter's map, and device.exe draws VS Code's.
+// _literature.scss; scheduler.exe draws chat clients and a Disk Defragmenter's
+// map, and device.exe draws VS Code's.
 @use "main";
 
-$exe-ui: "Helvetica Neue", Arial, sans-serif;
 // grey text on the toolbar's face, #bfb8bf, at 4.6:1
 $exe-mute: #4d4852;
-$exe-mono: "Lucida Console", Menlo, Monaco, monospace;
-$exe-navy: #000080;
-$exe-face: #c0c0c0;
-$exe-shade: #7f787f;
-$exe-note: #ffffe1;
 
 // sunken, as Windows 98 sinks a field or a pane
 @mixin exe-sunken {
@@ -26,17 +19,8 @@ $exe-note: #ffffe1;
 }
 
 .exe-win {
-	width: 780px;
-
-	.post_content {
-		display: flex;
-		flex-direction: column;
-		height: 470px;
-		overflow: hidden;
-		background: #bfb8bf;
-		border: 0;
-		padding: 0 4px 2px;
-	}
+	// each program sets its own height, below
+	@include main.pane-window(auto);
 	// the note's link, moved in beside the program's own cell
 	.post_total .exe-for {
 		flex: none;
@@ -50,7 +34,7 @@ $exe-note: #ffffe1;
 	display: flex;
 	flex-direction: column;
 	gap: 3px;
-	font: 12px/1.35 $exe-ui;
+	font: 12px/1.35 main.$ui;
 	color: #000000;
 
 	// outrank the post body's own rules
@@ -66,6 +50,10 @@ $exe-note: #ffffe1;
 	sub {
 		font-size: 75%;
 		vertical-align: -0.25em;
+	}
+	sup {
+		font-size: 75%;
+		vertical-align: 0.4em;
 	}
 	// the toolbar small, every program's: 11px, its rows close; a row wraps
 	// only in a window made narrower than it
@@ -108,12 +96,12 @@ $exe-note: #ffffe1;
 	}
 	// greyed, as a disabled button's words are
 	select:disabled {
-		background: $exe-face;
+		background: main.$face;
 		color: #808080;
 	}
 	output {
 		min-width: 3ch;
-		font: 12px $exe-mono;
+		font: 12px main.$mono;
 	}
 }
 .exe-lbl {
@@ -137,21 +125,21 @@ $exe-note: #ffffe1;
 		height: 2px;
 		background: #ffffff;
 		border: 1px solid;
-		border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		border-color: main.$shade #ffffff #ffffff main.$shade;
 		box-shadow: inset 1px 1px 0 #404040;
 	}
 	&::-moz-range-track {
 		height: 2px;
 		background: #ffffff;
 		border: 1px solid;
-		border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		border-color: main.$shade #ffffff #ffffff main.$shade;
 	}
 	&::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		width: 9px;
 		height: 16px;
 		margin-top: -8px;
-		background: $exe-face;
+		background: main.$face;
 		@include main.bevel;
 	}
 	&::-moz-range-thumb {
@@ -159,7 +147,7 @@ $exe-note: #ffffe1;
 		width: 9px;
 		height: 16px;
 		border-radius: 0;
-		background: $exe-face;
+		background: main.$face;
 		@include main.bevel;
 	}
 	&:focus-visible {
@@ -203,12 +191,12 @@ $exe-note: #ffffe1;
 		color: $exe-mute;
 	}
 	dd {
-		font: 700 12px $exe-mono;
+		font: 700 12px main.$mono;
 		font-variant-numeric: tabular-nums;
 	}
 	// a word among a reading's numbers reads as its label does
 	dd span {
-		font: 12px $exe-ui;
+		font: 12px main.$ui;
 		color: $exe-mute;
 	}
 }
@@ -233,13 +221,13 @@ $exe-note: #ffffe1;
 	padding: 0;
 	border: 1px solid #000000;
 	border-radius: 50%;
-	font: bold 11px $exe-ui;
+	font: bold 11px main.$ui;
 	color: #000000;
-	background: $exe-note;
+	background: main.$note;
 	cursor: pointer;
 
 	&[aria-expanded="true"] {
-		color: $exe-note;
+		color: main.$note;
 		background: #000000;
 	}
 }
@@ -248,7 +236,7 @@ $exe-note: #ffffe1;
 	z-index: 4;
 	overflow: auto;
 	padding: 6px 2px 3px;
-	background: $exe-note;
+	background: main.$note;
 	border: 1px solid #000000;
 	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
 }
@@ -275,20 +263,9 @@ $exe-note: #ffffe1;
 	}
 }
 
-// ---- a run played on a clock (.exe-player), scheduler.exe's and
-// sampler.exe's; its transport and seek bar optimiser.exe's and device.exe's
-// too: a player's four buttons, the time field a seek bar, and what is
-// compared at the right ----
-.exe-player {
-	position: relative;
-	font-size: 11px;
-	line-height: 1.4;
-
-	button {
-		font: inherit;
-		color: inherit;
-	}
-}
+// ---- a run played on a clock: a player's four buttons, scheduler.exe's,
+// optimiser.exe's and device.exe's, and the time field a seek bar, scheduler.exe's
+// and device.exe's ----
 // the transport: the toolbar's buttons, square, a 12-pixel glyph each, greyed
 // and embossed where it cannot go; a second set, as device.exe's stepping into
 // and out of the forward pass, a little apart
@@ -321,21 +298,13 @@ $exe-note: #ffffe1;
 	padding: 2px 5px;
 	@include exe-sunken;
 	--at: 0px;
-	background: var(--ticks,) linear-gradient($exe-navy, $exe-navy) 0 100% / var(--at) 2px no-repeat,
+	background: var(--ticks,) linear-gradient(main.$navy, main.$navy) 0 100% / var(--at) 2px no-repeat,
 		linear-gradient(#dcdff0, #dcdff0) 0 0 / var(--at) 100% no-repeat, #ffffff;
-	font: 11px $exe-mono;
+	font: 11px main.$mono;
 	white-space: nowrap;
 	cursor: ew-resize;
 	user-select: none;
 	touch-action: none;
-}
-// what is compared, at the right of the clock's row
-.exe-versus {
-	margin-left: auto;
-
-	select {
-		width: 150px;
-	}
 }
 
 // ---- lil.exe: the walks in one pane, each walk's records under it ----
@@ -410,7 +379,7 @@ $exe-note: #ffffe1;
 	display: flex;
 	gap: 3px;
 	padding: 3px;
-	background: $exe-face;
+	background: main.$face;
 	border: 1px solid;
 	border-color: #ffffff #000000 #000000 #ffffff;
 
@@ -419,7 +388,7 @@ $exe-note: #ffffe1;
 		height: 12px;
 		padding: 0;
 		border: 1px solid;
-		border-color: $exe-shade #ffffff #ffffff $exe-shade;
+		border-color: main.$shade #ffffff #ffffff main.$shade;
 		cursor: pointer;
 	}
 	.on {
@@ -449,7 +418,7 @@ $exe-note: #ffffe1;
 .opt .opt-hyper {
 	margin-top: 3px;
 	border-top: 1px solid #ffffff;
-	box-shadow: 0 -1px 0 $exe-shade, 0 1px 0 #ffffff;
+	box-shadow: 0 -1px 0 main.$shade, 0 1px 0 #ffffff;
 }
 // a card an optimiser: its name, its readings, its η and knobs, and its map at the foot
 .opt .opt-cards {
@@ -489,7 +458,7 @@ $exe-note: #ffffe1;
 	padding: 0;
 	border: 0;
 	background: none;
-	font: 11px/13px $exe-ui;
+	font: 11px/13px main.$ui;
 	color: #000000;
 	cursor: pointer;
 
@@ -499,7 +468,7 @@ $exe-note: #ffffe1;
 		width: 13px;
 		height: 13px;
 		margin-right: 5px;
-		font: bold 10px/9px $exe-ui;
+		font: bold 10px/9px main.$ui;
 		text-align: center;
 		background: #ffffff;
 		@include main.bevel(false);
@@ -513,15 +482,15 @@ $exe-note: #ffffe1;
 .opt-axis {
 	height: 14px;
 	padding: 0 4px;
-	font: 11px $exe-ui;
-	color: $exe-navy;
-	background: $exe-face;
+	font: 11px main.$ui;
+	color: main.$navy;
+	background: main.$face;
 	border: 1px solid;
 	border-color: #ffffff #000000 #000000 #ffffff;
 	cursor: pointer;
 
 	&:active {
-		border-color: #000000 #ffffff #ffffff #000000;
+		@include main.pressed;
 	}
 }
 // a² − b² on ab = 1 and the steps a GradScaler skipped, a line kept for them
@@ -544,7 +513,7 @@ $exe-note: #ffffe1;
 	}
 	// the knob the map spans
 	> .opt-mapped {
-		color: $exe-navy;
+		color: main.$navy;
 		font-weight: bold;
 	}
 	input[type="range"] {
@@ -634,19 +603,19 @@ $exe-note: #ffffe1;
 		height: 596px;
 	}
 }
-// the programs' own type and colours, as _programs.scss names them ($exe-ui,
-// $exe-mono, $exe-mute, $exe-note, $exe-navy, $exe-face), and scheduler.js's
-// purple, gold and faint grey; one gap between panes, down the window and
-// across it; and the walls' rows at their least, which a window made smaller
-// keeps (scheduler.js reads Memory's): three of a tile's in Users, twelve of a
-// line's with two servers compared, six over the cache
+// the desktop's type and colours (main.$ui, $mono, $note, $navy, $face), the
+// programs' $exe-mute, and scheduler.js's purple, gold and faint grey; one gap
+// between panes, down the window and across it; and the walls' rows at their
+// least, which a window made smaller keeps (scheduler.js reads Memory's): three
+// of a tile's in Users, twelve of a line's with two servers compared, six over
+// the cache
 .sv {
-	--ui: #{$exe-ui};
-	--mono: #{$exe-mono};
+	--ui: #{main.$ui};
+	--mono: #{main.$mono};
 	--mute: #{$exe-mute};
-	--note: #{$exe-note};
-	--navy: #{$exe-navy};
-	--face: #{$exe-face};
+	--note: #{main.$note};
+	--navy: #{main.$navy};
+	--face: #{main.$face};
 	--purple: #800080;
 	--gold: #b8860b;
 	--faint: #9a949a;
@@ -654,6 +623,14 @@ $exe-note: #ffffe1;
 	--rows: 3;
 	--row: 15px;
 	--row-gap: 3px;
+	position: relative;
+	font-size: 11px;
+	line-height: 1.4;
+
+	button {
+		font: inherit;
+		color: inherit;
+	}
 }
 .sv-pane {
 	@include exe-sunken;
@@ -663,6 +640,13 @@ $exe-note: #ffffe1;
 // at the right of its row: compare applies to Users alone
 .sv .exe-at {
 	min-width: 32ch;
+}
+.sv-versus {
+	margin-left: auto;
+
+	select {
+		width: 150px;
+	}
 }
 // the views, as the papers' window has its Page, Timeline and Lineage
 .sv-views {
@@ -687,7 +671,6 @@ $exe-note: #ffffe1;
 // scheduler.js sizes to what the rows leave, and the rows below their least
 // are cut off rather than laid over it
 .sv-body {
-	position: relative;
 	flex: 1;
 	min-height: 0;
 	display: grid;
@@ -708,7 +691,7 @@ $exe-note: #ffffe1;
 .sv.view-memory .sv-users {
 	overflow: hidden;
 }
-.sv.view-users :is(.sv-cache, .sv-wires, .sv-time),
+.sv.view-users :is(.sv-cache, .sv-time),
 .sv.view-memory .sv-box {
 	display: none;
 }
@@ -1305,8 +1288,9 @@ $exe-note: #ffffe1;
 	width: 100%;
 }
 
-// ---- the map, its key, and the wires over the panes ----
+// ---- the map, the wires over it, and its key ----
 .sv-cache {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
@@ -1348,11 +1332,12 @@ $exe-note: #ffffe1;
 		font: 11px var(--mono);
 	}
 }
+// as tall as the map, as measure() sets it, so that a map cut off cuts it off
 .sv-wires {
 	position: absolute;
-	inset: 0;
+	top: 0;
+	left: 0;
 	width: 100%;
-	height: 100%;
 	pointer-events: none;
 	z-index: 2;
 }
@@ -1396,6 +1381,51 @@ $exe-note: #ffffe1;
 	margin-top: 3px;
 }
 
+// ---- init.exe: the ring down the left, its length and the Jacobian's singular
+// values stacked on the right, what to look at under them ----
+.ini-win {
+	width: 810px;
+
+	.post_content {
+		height: 549px;
+	}
+}
+.ini {
+	.exe-body {
+		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+		grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+		grid-auto-flow: row;
+
+		> :first-child {
+			grid-row: 1 / 3;
+		}
+	}
+	.exe-lbl input[type="range"] {
+		width: 90px;
+	}
+	// wide enough for any reading, so that a preset leaves the toolbar where it is
+	output[data-out="w"] {
+		min-width: 5ch;
+	}
+	output[data-out="b"] {
+		min-width: 9ch;
+	}
+	// three lines hold any caption, so that the panes keep their size
+	.ini-caption {
+		min-height: 4.35em;
+		padding: 2px 6px 0;
+	}
+}
+// the tube turns under a drag, which on a touch screen is not a scroll
+.ini-ring {
+	cursor: grab;
+	touch-action: none;
+
+	&:active {
+		cursor: grabbing;
+	}
+}
+
 // ---- device.exe: the code and what is where on the left, the machine in 3D
 // on the right with the timeline floating over its foot. Windows 98 is the
 // frame; inside it the editor is VS Code's Dark+ as a debugger shows it, the
@@ -1406,7 +1436,6 @@ $exe-note: #ffffe1;
 
 	.post_content {
 		height: 640px;
-		padding: 0 4px 2px;
 	}
 }
 .trn {
@@ -1995,7 +2024,7 @@ $exe-note: #ffffe1;
 	border-radius: 2px;
 	color: #e8ebe7;
 	white-space: nowrap;
-	font: 500 11.5px/1.25 "Helvetica Neue", Arial, sans-serif;
+	font: 500 11.5px/1.25 main.$ui;
 
 	span {
 		display: block;
@@ -2049,7 +2078,7 @@ $exe-note: #ffffe1;
 		border: 1px solid rgba(232, 235, 231, 0.18);
 		border-radius: 2px;
 		color: #8e9792;
-		font: 11px "Helvetica Neue", Arial, sans-serif;
+		font: 11px main.$ui;
 		cursor: pointer;
 	}
 	button.on {
@@ -2108,7 +2137,7 @@ $exe-note: #ffffe1;
 	border: 1px solid rgba(232, 235, 231, 0.35);
 	border-radius: 50%;
 	color: #e8ebe7;
-	font: 600 10.5px/15px "Helvetica Neue", Arial, sans-serif;
+	font: 600 10.5px/15px main.$ui;
 	cursor: pointer;
 
 	&:hover {
@@ -2211,7 +2240,7 @@ $exe-note: #ffffe1;
 	background: rgba(9, 11, 13, 0.94);
 	border: 1px solid rgba(232, 235, 231, 0.22);
 	border-radius: 2px;
-	font: 11px/1.35 "Helvetica Neue", Arial, sans-serif;
+	font: 11px/1.35 main.$ui;
 	color: #e8ebe7;
 	pointer-events: none;
 }
@@ -2299,387 +2328,12 @@ $exe-note: #ffffe1;
 	}
 }
 
-// ---- sampler.exe: two of generate()'s decoders on one prompt, as
-// scheduler.exe sets a second server beside the first. Two rows of toolbar:
-// the clock, as scheduler.exe's, and the prompt, the seed and what a draft
-// pass costs. Under them the two lanes, each its text, its rounds and its
-// passes, with the race said between them; the key; the pair's figures; the
-// note in a balloon from the ? at the second row's end. A token's card is a
-// Windows 98 tooltip. ----
-.smp-win {
-	width: 800px;
-
-	.post_content {
-		height: 550px;
-	}
-}
-// the programs' own type and colours, as _programs.scss names them, a faint
-// grey for what is cut or to come, and the marks the text and the key share:
-// a refusal's red (sampler.js's REFUSED), a proposal waiting, prompt lookup's
-// gold (ORIGIN.copy) and what it copied, what beam search rewrote
-.smp {
-	--mono: #{$exe-mono};
-	--mute: #{$exe-mute};
-	--faint: #9a949a;
-	--refused: #b00000;
-	--pending: #7a757d;
-	--gold: #b8860b;
-	--copied: #f6ecc9;
-	--rewritten: #fff1a0;
-
-	output {
-		min-width: 5ch;
-	}
-	.exe-lbl input[type="range"] {
-		width: 84px;
-	}
-	// the clock as wide as its longest: the slowest run, a draft at c = 1,
-	// ends at 77.0 passes, and a step runs to three digits; each lane's finish
-	// ticked. The pair at the right of its row, as narrow as its longest,
-	// “draft model, sampled”
-	.exe-at {
-		min-width: 30ch;
-	}
-	.exe-versus select, .exe-versus + .exe-lbl select {
-		width: 130px;
-	}
-	.exe-body .smp-strip {
-		height: 20px;
-	}
-}
-.smp-prompts {
-	display: flex;
-	gap: 2px;
-}
-
-// ---- the lanes: the pair, the race said between them ----
-.smp-lanes {
-	display: flex;
-	flex-direction: column;
-	background: #ffffff;
-}
-// a lane: its name and call, the text as long as it is (at most half the
-// lane, then scrolled), the rounds filling the rest and wrapping, the newest
-// last, and the strip of its passes at its foot
-.smp-lane {
-	flex: 1 1 0;
-	min-height: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	padding: 4px 6px;
-
-	> * {
-		flex: none;
-	}
-}
-.smp-who {
-	display: flex;
-	align-items: baseline;
-	gap: 8px;
-	white-space: nowrap;
-}
-.smp-name {
-	font-size: 12px;
-}
-.smp-call {
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	color: var(--mute);
-	font: 10px var(--mono);
-}
-.smp-flag {
-	margin-left: auto;
-	color: var(--mute);
-	font-variant-numeric: tabular-nums;
-}
-.smp-gap {
-	flex: none;
-	padding: 3px 8px;
-	border-block: 1px solid #dcd9dc;
-	background: #f3f2f6;
-	font-size: 11.5px;
-	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-// the text: the prompt faint, the answer in ink, a token marked underneath by
-// where it came from (--m)
-.smp-text {
-	max-height: 50%;
-	overflow-y: auto;
-	font-size: 12px;
-	line-height: 18px;
-	white-space: pre-wrap;
-	overflow-wrap: anywhere;
-
-	span {
-		padding-bottom: 1px;
-	}
-	.smp-p {
-		color: #8a858d;
-	}
-	[style*="--m"] {
-		background: linear-gradient(var(--m), var(--m)) 0 100% / 100% 3px no-repeat;
-	}
-	// beam search's best beam, not yet its answer: dotted under
-	&.smp-prov .smp-t {
-		text-decoration: underline dotted var(--faint);
-		text-underline-offset: 3px;
-	}
-	[tabindex]:focus-visible {
-		outline: 1px dotted #000000;
-		outline-offset: 0;
-	}
-}
-// the text's marks, which the key shows on its own sample: a proposal
-// waiting, one refused or discarded, prompt lookup's n-gram boxed where it is
-// and where it matched and what it copied lit, what beam search's last step
-// rewrote washed yellow
-.smp-pend {
-	color: var(--pending);
-	font-style: italic;
-	outline: 1px dashed #b9b4bc;
-	outline-offset: -1px;
-}
-.smp-x {
-	color: var(--refused);
-	text-decoration: line-through;
-}
-.smp-src {
-	background-color: var(--copied);
-}
-.smp-gram {
-	outline: 1px solid var(--gold);
-	outline-offset: -1px;
-}
-.smp-rw {
-	background-color: var(--rewritten);
-}
-
-// the rounds, the newest last: a chip a proposal, its check marked
-.smp-lane > .smp-rounds {
-	flex: 1 1 0;
-	min-height: 0;
-	display: flex;
-	flex-wrap: wrap;
-	align-content: flex-start;
-	gap: 4px 6px;
-	overflow-y: auto;
-	padding-top: 4px;
-	border-top: 1px solid #ecebee;
-}
-.smp-round {
-	display: flex;
-	align-items: center;
-	gap: 2px;
-	padding-left: 6px;
-	border-left: 1px solid #dcd9dc;
-
-	&:first-child {
-		padding-left: 0;
-		border-left: 0;
-	}
-	> b {
-		margin-right: 2px;
-		color: var(--faint);
-		font-weight: normal;
-		font-size: 9px;
-	}
-	&.smp-now {
-		background: #f3f2f6;
-	}
-}
-.smp-chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 2px;
-	padding: 0 3px;
-	border: 1px solid #c9c5cb;
-	background: #ffffff;
-	font: 11px/16px var(--mono);
-	white-space: pre;
-
-	i {
-		font: normal 10px $exe-ui;
-	}
-	&[style*="--m"] {
-		box-shadow: inset 0 -3px 0 var(--m);
-	}
-	&.smp-refused {
-		color: var(--refused);
-		text-decoration: line-through;
-		border-color: var(--refused);
-	}
-	&.smp-discarded, &.smp-unused, &.smp-dead {
-		color: var(--faint);
-		text-decoration: line-through;
-	}
-	&.smp-pending {
-		color: var(--pending);
-		font-style: italic;
-		border-style: dashed;
-	}
-	&.smp-best {
-		font-weight: bold;
-		border-color: #000000;
-	}
-	&:focus-visible {
-		outline: 1px dotted #000000;
-	}
-}
-.smp-arrow, .smp-wait {
-	color: var(--mute);
-}
-
-// ---- the key, a row under the lanes ----
-.smp-key {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 1px 14px;
-	padding: 0 6px;
-	color: var(--mute);
-
-	> span {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-	}
-}
-.smp-sw {
-	display: inline-block;
-	width: 14px;
-	height: 9px;
-}
-.smp-sw-tok {
-	height: 3px;
-}
-.smp-sw-draft {
-	height: 5px;
-}
-
-// ---- the pair's figures ----
-// the post's own tables are blocks with ruled cells; these are neither
-.post_content .smp .smp-table, .post_content .smp .smp-dist {
-	display: table;
-	max-width: none;
-	overflow: visible;
-	border: 0;
-
-	th, td {
-		border: 0;
-	}
-}
-.smp-table {
-	margin: 0 6px;
-	border-collapse: collapse;
-	font-variant-numeric: tabular-nums;
-
-	th, td {
-		padding: 0 0 0 16px;
-		text-align: right;
-		white-space: nowrap;
-	}
-	th:first-child {
-		min-width: 130px;
-		padding-left: 0;
-	}
-	thead th {
-		color: var(--mute);
-		font-weight: normal;
-		border-bottom: 1px solid var(--faint);
-	}
-	tbody th {
-		color: var(--mute);
-		font-weight: normal;
-		text-align: left;
-	}
-	td {
-		font: 700 12px var(--mono);
-	}
-}
-
-// ---- the card: a token's distribution, as a Windows 98 tooltip ----
-.smp-card {
-	position: absolute;
-	z-index: 5;
-	width: 320px;
-	padding: 4px 6px 5px;
-	background: $exe-note;
-	border: 1px solid #000000;
-	font-size: 11px;
-	line-height: 1.35;
-	pointer-events: none;
-
-	p + p, p + table, table + p {
-		margin-top: 4px;
-	}
-	.smp-sub {
-		color: var(--mute);
-	}
-}
-.smp-dist {
-	width: 100%;
-	border-collapse: collapse;
-	font-variant-numeric: tabular-nums;
-
-	th {
-		padding: 0 4px 1px 0;
-		color: var(--mute);
-		font-weight: normal;
-		text-align: left;
-		white-space: nowrap;
-	}
-	td {
-		padding: 0 4px 0 0;
-		white-space: nowrap;
-	}
-	th:nth-child(n+3), td:nth-child(n+3) {
-		text-align: right;
-	}
-	td:nth-child(n+3) {
-		font: 10px var(--mono);
-	}
-	.smp-w {
-		max-width: 80px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		font: 10px var(--mono);
-		white-space: pre;
-	}
-	.smp-bar {
-		width: 100%;
-
-		i {
-			display: block;
-			height: 7px;
-			background: #5c5760;
-		}
-	}
-	.smp-pick td {
-		font-weight: bold;
-	}
-	.smp-pick .smp-bar i {
-		background: #000000;
-	}
-	.smp-cut td {
-		color: var(--faint);
-	}
-	.smp-cut .smp-bar i {
-		background: repeating-linear-gradient(135deg, #b9b4bc 0 2px, transparent 2px 4px);
-	}
-}
-
 // On a phone the window is the page: the panes stack, each as tall as a share
 // of its width, and the note's link stays in the program, as its last line
 @media only screen and (max-width: 700px) {
 	.exe-win .post_content {
-		display: block;
 		height: auto;
-		overflow: visible;
+		background: #bfb8bf;
 		padding: 8px 6px 24px;
 	}
 	.exe-body {
@@ -2692,7 +2346,7 @@ $exe-note: #ffffe1;
 	.lil .exe-body .lit-pane {
 		aspect-ratio: 5 / 4;
 	}
-	.opt .exe-body {
+	.opt .exe-body, .ini .exe-body {
 		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: none;
 
@@ -2705,6 +2359,6 @@ $exe-note: #ffffe1;
 	}
 	.exe .exe-for {
 		padding: 4px 6px 0;
-		color: #000080;
+		color: main.$navy;
 	}
 }

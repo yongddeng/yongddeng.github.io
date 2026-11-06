@@ -55,8 +55,7 @@ FIGS['212/tv'] = el => {
 	}
 	function draw() {
 		const ch = CHAINS[key], k = ch.names.length;
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// left, the bars of π(n) with π as an orange tick on each
 		const L = plotBox(30, 230, 170, 30, [0, k], [0, 1]);
 		frameBox(c, L);
@@ -102,9 +101,7 @@ FIGS['212/tv'] = el => {
 			if (dist[t] < 1e-6) continue;
 			c.fillStyle = t === n ? COL.bad : COL.ink;
 			const r = t === n ? 3.5 : 2;
-			c.beginPath();
-			c.arc(R.X(t), R.Y(lg(dist[t])), r, 0, 2 * Math.PI);
-			c.fill();
+			dot(c, R.X(t), R.Y(lg(dist[t])), r);
 		}
 		label(c, `‖π(n) − π‖ by n, and |λ₂|ⁿ with |λ₂| = ${l2.toFixed(3)}`, R.x0, 18, 'left', COL.black);
 		out.innerHTML = `‖π(${n}) − π‖ = ${dist[n] < 1e-4 ? dist[n].toExponential(1) : dist[n].toFixed(4)}`;
@@ -156,8 +153,7 @@ FIGS['212/coupling'] = el => {
 		}
 	}
 	function draw() {
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// left, the two paths of state against time
 		const L = plotBox(40, 380, 176, 24, [0, NT], [-0.5, K - 0.5]);
 		frameBox(c, L);
@@ -199,7 +195,7 @@ FIGS['212/coupling'] = el => {
 		label(c, '‖π(n) − π‖', R.X(24), R.Y(dist[24]) + 16, 'left', COL.ink);
 		if (T >= 0) {
 			c.fillStyle = COL.black;
-			c.beginPath(); c.arc(R.X(T), R.Y(survive[T]), 3, 0, 2 * Math.PI); c.fill();
+			dot(c, R.X(T), R.Y(survive[T]), 3);
 			out.innerHTML = `T = ${T} · ‖π(${T}) − π‖ = ${dist[T].toFixed(3)} ≤ P(T &gt; ${T}) = ${survive[T].toFixed(3)}`;
 		} else out.innerHTML = `not met by ${NT} · P(T &gt; ${NT}) = ${survive[NT].toFixed(3)}`;
 	}
@@ -240,8 +236,7 @@ FIGS['212/flow'] = el => {
 	function draw() {
 		// the law, part of the way from step n to step n + 1
 		const mu = laws[n].map((m, i) => m + part * (laws[Math.min(STEPS, n + 1)][i] - m));
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// each direction of an edge a curve as thick as its flow
 		for (let i = 0; i < k; i++) for (let j = 0; j < k; j++) {
 			if (i === j || !P[i][j]) continue;

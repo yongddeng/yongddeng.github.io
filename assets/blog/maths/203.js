@@ -20,7 +20,7 @@ const cellAverage = (a, k) => {
 // a function on the M midpoints as pixel pairs
 const trace = (P, a) => {
 	const pts = [];
-	for (let px = P.x0; px <= P.x1; px++) pts.push([px, P.Y(a[Math.min(M - 1, Math.floor((px - P.x0) / (P.x1 - P.x0) * M))])]);
+	for (let px = P.x0; px <= P.x1; px++) pts.push([px, P.Y(a[Math.min(M - 1, Math.floor(P.x(px) * M))])]);
 	return pts;
 };
 const axes = (c, P) => {
@@ -52,8 +52,7 @@ FIGS['203/simple'] = el => {
 	}
 	function draw() {
 		const s = approx();
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the cuts, levels across or cells along, while they stay apart
 		c.strokeStyle = COL.grid;
 		c.lineWidth = 1;
@@ -100,8 +99,7 @@ FIGS['203/condexp'] = el => {
 	const row = figRow(el);
 	function draw(j) {
 		const fine = cellAverage(xs, 2 ** j);
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		c.strokeStyle = COL.grid;
 		c.lineWidth = 1;
 		for (let i = 1; i < 2 ** j; i++) polyline(c, [[Math.round(P.X(i / 2 ** j)) + 0.5, P.y1], [Math.round(P.X(i / 2 ** j)) + 0.5, P.y0]]);
@@ -159,8 +157,7 @@ FIGS['203/proj'] = el => {
 		x = [0, 1, 2].map(() => -0.4 + 2 * u());
 	}
 	function draw() {
-		c.fillStyle = COL.paper;
-		c.fillRect(0, 0, W, H);
+		clear(c);
 		// the plane L²(𝒢), spanned by the indicators of the two cells
 		const [a, b] = cells.map(cell => [0, 1, 2].map(i => (cell.includes(i) ? 1 : 0)));
 		const corner = (s, t) => a.map((ai, i) => s * ai + t * b[i]);
@@ -199,9 +196,7 @@ FIGS['203/proj'] = el => {
 		for (const [p, colour, name, dx, dy, align] of [[x, COL.ink, 'X', 8, -6, 'left'], [G, COL.tail, 'E(X | 𝒢)', -8, 14, 'right'], [E, COL.black, 'E X', -8, -6, 'right']]) {
 			const [px, py] = view.at(p);
 			c.fillStyle = colour;
-			c.beginPath();
-			c.arc(px, py, 3.5, 0, 2 * Math.PI);
-			c.fill();
+			dot(c, px, py, 3.5);
 			label(c, name, px + dx, py + dy, align, colour);
 		}
 		// Pythagoras in the triangle X, E(X | 𝒢), E X is the law of total variance;

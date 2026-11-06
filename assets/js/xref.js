@@ -3,7 +3,7 @@
 // post is citable as soon as it is built (_plugins/check_xref.rb)
 (function () {
   var refs = {};
-  (window.searchIndex || []).forEach(function (post) {
+  window.searchIndex.forEach(function (post) {
     var n = post.title.match(/^(\d{3})\./);
     if (n) refs[n[1]] = post;
   });
@@ -29,7 +29,7 @@
   // has settled the heights
   function fillPreview(body, html, section) {
     body.innerHTML = html;
-    if (window.groupStatements) groupStatements(body);
+    groupStatements(body);
     var links = body.querySelectorAll('a');
     for (var i = 0; i < links.length; i++) {
       links[i].removeAttribute('href');
@@ -45,11 +45,7 @@
         }
       }
     }
-    if (window.MathJax && MathJax.Hub) {
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, body], scrollToSection);
-    } else {
-      scrollToSection();
-    }
+    typesetMath(body, scrollToSection);
   }
 
   // Re-runnable: SPA navigation (tag-filter.js loadPost) swaps in fresh
@@ -101,7 +97,6 @@
   function showTip(target) {
     var id = target.getAttribute('data-ref');
     var section = target.getAttribute('data-section');
-    if (!id || !refs[id]) return;
     if (tip) tip.remove();
     clearTimeout(hideTimer);
 
@@ -135,7 +130,7 @@
 
   function positionTip(target) {
     var r = target.getBoundingClientRect();
-    tip.style.left = Math.min(r.left, window.innerWidth - 470) + 'px';
+    tip.style.left = Math.min(r.left, window.innerWidth - tip.offsetWidth - 20) + 'px';
     tip.style.top = (r.bottom + 4 + window.scrollY) + 'px';
   }
 
@@ -175,7 +170,6 @@
   function openPeek(ref) {
     var id = ref.getAttribute('data-ref');
     var section = ref.getAttribute('data-section');
-    if (!id || !refs[id]) return;
     if (!peek) buildPeek();
     peek.title.textContent = '§ ' + refs[id].title + (section ? ' — ' + section : '');
     peek.root.dataset.url = refs[id].url;

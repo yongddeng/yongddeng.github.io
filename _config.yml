@@ -8,7 +8,6 @@ description: Notes on mathematics and computer science.
 cloudflare_analytics_token: d39f12a22c66442389e654cf251872e5
 
 # File management
-include: [".htaccess"]
 exclude: ["README.md", "LICENSE"]
 
 # The programs on (D:) in My Computer, each a window of its own
@@ -21,13 +20,12 @@ defaults:
       type: programs
     values:
       layout: default
-      winclass: exe-win
       no_comment: true
 
 # Sass
 sass:
   style: :compressed
-  sass_dir: _sass
+  sourcemap: never
 
 # Markdown
 markdown: kramdown

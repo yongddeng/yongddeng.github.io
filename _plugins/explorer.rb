@@ -83,7 +83,6 @@ Jekyll::Hooks.register :site, :post_read do |site|
       "lead" => about ? "" : Explorer.opening(text),
       "about" => about,
       "parts" => text.scan(/^## +[IVX]+\s*$/).size,
-      "notes" => text.match?(/^## +\*\*\s*$/),
       "sections" => text.scan(/^### +\*\*\d+(?:\.\d+)+\.\s*.+?\*\*\s*$/).size,
       "figures" => text.scan(/<img\b|!\[/).size,
       "formulas" => text.scan(Explorer::TEX).size,

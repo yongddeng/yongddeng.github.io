@@ -45,11 +45,10 @@
   const orderedEl = document.getElementById('ordered');
 
   // philosopher i sits between fork i (left) and fork (i+1)%N (right)
-  let ph, forks, dead, timer, meals;
+  let ph, forks, dead;
 
   function init() {
-    meals = 0;
-    ph = Array.from({length: N}, () => ({ state: 'thinking', held: [], wait: -1, t: rand(40, 360) }));
+    ph =Array.from({length: N}, () => ({ state: 'thinking', held: [], wait: -1, t: rand(40, 360) }));
     forks = Array(N).fill(-1); // -1 free, else holder index
     dead = false;
     statusEl.textContent = 'Running';
@@ -126,7 +125,7 @@
     for (let i = 0; i < N; i++) {
       const p = ph[i], [x, y] = pos(i, R);
       // waiting arrow (dashed) toward the fork it awaits
-      if (p.wait !== -1 && !dead || (dead && p.wait !== -1)) {
+      if (p.wait !== -1) {
         const [fx, fy] = chopPos(p.wait);
         ctx.beginPath(); ctx.setLineDash([4, 3]);
         ctx.moveTo(x + (fx - x) * 0.3, y + (fy - y) * 0.3); ctx.lineTo(fx, fy);
@@ -157,7 +156,7 @@
     });
   }
 
-  function loop() { step(); draw(); timer = requestAnimationFrame(loop); }
+  function loop() { step(); draw(); requestAnimationFrame(loop); }
   document.getElementById('reset').onclick = init;
   document.getElementById('force').onclick = function () {
     orderedEl.checked = false; // the fatal state is unreachable under lock ordering

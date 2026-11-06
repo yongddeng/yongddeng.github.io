@@ -21,6 +21,8 @@
 		addon('postprocessing/OutputPass.js'), addon('geometries/RoundedBoxGeometry.js'),
 	]);
 
+	const SE = ServeEngine;
+
 	// ---- the machine's links, after copy.exe's engine. A copy streams: every
 	// hop of its route runs at once, all at the slowest hop's rate, so its
 	// bytes arrive after the latencies at that rate. The units that compute
@@ -30,7 +32,7 @@
 	// (Luo et al., 2024) at the 1,830 MHz that the data sheet's 989 TFLOPS
 	// imply ----
 	const E = (function () {
-		const fmt = (v, k = 3) => (+v.toPrecision(k)).toLocaleString('en-GB');
+		const fmt = v => exeFmt(+v.toPrecision(3));
 		const UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
 		function bytes(n) {
 			const k = Math.min(UNITS.length - 1, Math.max(0, Math.floor(Math.log2(Math.max(n, 1)) / 10)));
@@ -43,7 +45,7 @@
 			if (s < 120) return fmt(s) + ' s';
 			return fmt(s / 60) + ' min';
 		}
-		const CLOCK = 1.83e9, PEAK = 989.4e12;
+		const CLOCK = 1.83e9, PEAK = SE.GPU.peak;
 		// the DGX H100's host, one Micron 7450 for the SSD, two H100 SXM5s
 		// through NVSwitch; and a socket of the host computing for itself,
 		// 1,024 bf16 FLOPs a clock a core on AMX (Intel), 56 cores at 2.0 GHz
@@ -54,7 +56,7 @@
 			pcie: { from: 'pinned', to: 'hbm', over: 'PCIe 5.0 ×16', lane: 'PCIe', bw: 63e9, lat: 2e-6 },
 			back: { from: 'hbm', to: 'dram', over: 'PCIe 5.0 ×16', lane: 'PCIe', bw: 63e9, lat: 2e-6 },
 			nvlink: { from: 'hbm', to: 'hbm1', over: 'NVLink 4', lane: 'NVLink', bw: 450e9, lat: 3e-6 },
-			hbm: { from: 'hbm', to: 'l2', over: 'HBM3, 5 stacks', lane: 'HBM', bw: 3.35e12, lat: 479 / CLOCK },
+			hbm: { from: 'hbm', to: 'l2', over: 'HBM3, 5 stacks', lane: 'HBM', bw: SE.GPU.bw, lat: 479 / CLOCK },
 			l2: { from: 'l2', to: 'smem', over: 'L2 to the SMs', lane: 'HBM', bw: 5.5e12, lat: 263 / CLOCK },
 			smem: { from: 'smem', to: 'tc', over: 'shared memory',
 				lane: 'HBM', bw: 132 * 128 * CLOCK, lat: 29 / CLOCK },
@@ -65,13 +67,11 @@
 		// a copy's hops, each at the slowest's rate, and when it is done; held
 		// by the slowest hop, or by its latencies where they take longer
 		function lay(c) {
-			const ways = key => (typeof c.ways === 'number' ? c.ways : (c.ways || {})[key] || 1);
-			const hops = c.route.map(key => ({ key, ways: ways(key),
-				bw: HOPS[key].bw * ways(key), lat: HOPS[key].lat }));
+			const ways = c.ways || 1;
+			const hops = c.route.map(key => ({ key, ways, bw: HOPS[key].bw * ways, lat: HOPS[key].lat }));
 			if (c.flops) {
 				const on = c.on || 'tc';
-				hops.push({ key: on, ways: ways('hbm'),
-					bw: (HOPS[on].peak || PEAK) * ways('hbm') * c.n / c.flops, lat: 0 });
+				hops.push({ key: on, ways, bw: (HOPS[on].peak || PEAK) * ways * c.n / c.flops, lat: 0 });
 			}
 			const pace = Math.min(...hops.map(h => h.bw));
 			let wait = 0;
@@ -82,7 +82,7 @@
 			const slow = hops.reduce((a, b) => (b.bw < a.bw ? b : a));
 			const lat = hops.reduce((a, h) => a + h.lat, 0);
 			const held = lat > c.n / slow.pace ? 'latency' : slow.key;
-			return { hops, T: hops[hops.length - 1].end, slow, held,
+			return { hops, T: hops[hops.length - 1].end, held,
 				lane: held === 'latency' ? HOPS[hops[0].key].lane : HOPS[held].lane };
 		}
 		const copyTime = c => (c.k || 1) * lay(c).T;
@@ -90,7 +90,11 @@
 	})();
 
 	const H = E.HOPS;
-	const root = document.querySelector('.trn');
+	// claimed only now: through the imports above the window may have closed, or
+	// opened again with another run of this waiting on them too
+	const root = document.querySelector('.trn:not([data-ready])');
+	if (!root) return;
+	root.dataset.ready = '1';
 	const $ = sel => root.querySelector(sel), $$ = sel => [...root.querySelectorAll(sel)];
 	const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const view = $('.trn-view'), canvas = $('.trn-gl');
@@ -1106,8 +1110,7 @@
 		camera.setViewOffset(w, top, 0, 0, w, h);
 		frameServer(w / top);
 	}
-	const sized = new ResizeObserver(() => (root.isConnected ? resize() : sized.disconnect()));
-	sized.observe(view);
+	exeResized(root, resize, view);
 	resize();
 
 	// ---- the reader's hands: the wheel zooms, a drag turns, a double-click straightens ----
@@ -1196,7 +1199,7 @@
 	let modelName = 'llama-3.2-1b', M = MODELS[modelName], device = 'cuda', strategy = 'ddp';
 	// HBM as CUDA reports it on an H100 SXM5, a little under its 80 GiB, and
 	// the host's DRAM, 2 TiB
-	const HBM_CAP = 79.19 * 2 ** 30, CAP = { cuda: HBM_CAP, cpu: 2 * 2 ** 40 };
+	const HBM_CAP = SE.GPU.mem, CAP = { cuda: HBM_CAP, cpu: 2 * 2 ** 40 };
 	const GEMM = ['hbm', 'l2', 'smem'];
 	let batchSize = 8, ckpt = false;
 
@@ -1222,7 +1225,6 @@
 	];
 	let MODEL = modelCode();
 	const mm = (m, n, k) => 2 * m * n * k;
-	const int = n => n.toLocaleString('en-GB');
 	// where the arithmetic and the bytes go: on the GPU through HBM to the
 	// tensor cores, on the CPU through its DDR5 to its AMX tiles
 	const ON = {
@@ -1237,7 +1239,7 @@
 		const share = 3 * FFN * DM / (DM * (DM + 2 * KVD) + (SEQ + 1) * DM + DM * DM + 3 * FFN * DM);
 		return [
 			{ line: 2, short: 'embedding',
-				text: 'a row of the table for each of ' + int(T) + ' tokens: a gather, held by '
+				text: 'a row of the table for each of ' + exeFmt(T) + ' tokens: a gather, held by '
 					+ at.memName + ', no arithmetic to speak of',
 				copies: [{ n: 2 * T * DM * 4, route: at.mem }] },
 			{ line: 4, short: 'for layer', note: true,
@@ -1259,7 +1261,7 @@
 			{ line: 9, short: 'RMSNorm',
 				text: 'the second norm of the layer, held by ' + at.memName + ' like the first', copies: [norm] },
 			{ line: 10, last: 11, short: 'MLP',
-				text: 'three matmuls with a ' + int(FFN) + '-wide middle: '
+				text: 'three matmuls with a ' + exeFmt(FFN) + '-wide middle: '
 					+ Math.round(100 * share) + '% of the layer’s FLOPs, ' + at.units + ' flat out',
 				copies: [matmul(3 * DM * FFN * 4 + 2 * T * DM * 2 + 3 * T * FFN * 2, 3 * mm(T, FFN, DM), LAYERS)] },
 			{ line: 13, short: 'lm_head',
@@ -1446,7 +1448,7 @@
 		const stop = s => {
 			s.k = stops.length;
 			s.step = step;
-			s.t = s.t === undefined ? cpu : s.t;
+			s.t = cpu;
 			stops.push(s);
 			return s;
 		};
@@ -1601,7 +1603,7 @@
 			const reserve = whole * IDS * 4;
 			note('n = os.path', 'os.path.getsize',
 				'a stat call: the file system answers from its metadata, 8 GB, without reading the data; '
-				+ int(whole) + ' whole batches of ' + batchSize + ' × 2,049');
+				+ exeFmt(whole) + ' whole batches of ' + batchSize + ' × 2,049');
 			stop({ line: at('tokens = torch.empty'), short: 'torch.empty', note: true,
 				text: 'reserves ' + E.fmt(reserve / 1e9) + ' GB of HBM for the whole file; nothing is written to it',
 				mem: { add: [['hbm', 'tokens', 'tokens, reserved', reserve]] } });
@@ -2203,7 +2205,7 @@
 		list.forEach((c, i) => {
 			const w = c.x1 - c.x0 - 1;
 			let acc = 0;
-			cx.globalAlpha = at !== null && i > at ? 0.22 : 1;
+			cx.globalAlpha = i > at ? 0.22 : 1;
 			for (const [colour, n] of stack(i)) {
 				if (!n) continue;
 				cx.fillStyle = colour;
@@ -2581,11 +2583,11 @@
 	// differs they ask these sections. The code for static batches is
 	// transformers', whose cache is bf16 here, so static batches run at bf16
 	// whatever the dtype set ----
-	const SE = ServeEngine, BLOCK = SE.BLOCK;
+	const BLOCK = SE.BLOCK;
 	// thirty chats, two a second, served first as static batches, the oldest
 	// way, so that each newer scheduler picked shows what it makes better; a
 	// light load, which keeps the timeline's rows within train.py's lanes;
-	// played at two seconds of the run a second
+	// played at ×1, as fast as its users would see it
 	const SV = { at: { ...SE.HOME, sched: 'static', count: 30, speed: 1 }, run: null, k: 0,
 		frames: [{ file: 'serve', at: 0 }], stops: [], file: null,
 		spans: [], pick: -1, hover: -1, playing: false, clock: 0, wall: 0 };
@@ -2601,7 +2603,7 @@
 	// on the timeline, or under the pointer there, is lit wherever it is named
 	const lit = () => (SV.hover >= 0 ? SV.hover : SV.pick);
 	const ids = list => list.map(id => '<b data-id="' + id + '">#' + (id + 1) + '</b>').join(', ');
-	const plural = (n, one, many = one + 's') => int(n) + ' ' + (n === 1 ? one : many);
+	const plural = (n, one, many = one + 's') => exeFmt(n) + ' ' + (n === 1 ? one : many);
 	const sorted = (list, t) => {
 		let lo = 0, hi = list.length - 1;
 		while (lo <= hi) {
@@ -2626,14 +2628,14 @@
 			: h.refused ? WHY[h.refused.reason](h.refused) : ''),
 		budget: h => (h.left
 			? ids([h.id]) + '’s whole prompt, ' + plural(h.tokens, 'token') + ', is more than the '
-				+ int(h.left) + ' left of the budget' : 'the token budget is spent'),
+				+ exeFmt(h.left) + ' left of the budget' : 'the token budget is spent'),
 		seqs: () => 'max_num_seqs is reached',
 		cache: h => (SV.run.alloc === 'contiguous'
-			? ids([h.id]) + ' needs a run of ' + int(h.run) + ' blocks, its prompt and max_tokens, and '
-				+ int(h.free) + ' are free' + (h.free >= h.run ? ', but the longest run is ' + int(h.longest) : '')
+			? ids([h.id]) + ' needs a run of ' + exeFmt(h.run) + ' blocks, its prompt and max_tokens, and '
+				+ exeFmt(h.free) + ' are free' + (h.free >= h.run ? ', but the longest run is ' + exeFmt(h.longest) : '')
 			: (SV.at.sched === 'prefill' ? '' : 'None: ') + ids([h.id]) + ' needs ' + plural(h.need, 'new block')
-				+ (h.chunk < h.tokens ? ' for its first ' + int(h.chunk) + ' tokens' : '')
-				+ (h.hits ? ' past its ' + plural(h.hits, 'cached block') : '') + ', and ' + int(h.room) + ' are free'),
+				+ (h.chunk < h.tokens ? ' for its first ' + exeFmt(h.chunk) + ' tokens' : '')
+				+ (h.hits ? ' past its ' + plural(h.hits, 'cached block') : '') + ', and ' + exeFmt(h.room) + ' are free'),
 	};
 	// A step's facts, read once: its rows as the scheduler gave them tokens;
 	// the blocks taken fresh, from the trace, a block given an owner, one
@@ -2663,7 +2665,7 @@
 			takenRunning: add(running, r => taken.get(r.id) || 0),
 			takenAdmitted: add(admitted, r => taken.get(r.id) || 0),
 			freedOut: s.out.reduce((a, id) => a + own(id), 0), used: s.used,
-			queue: SE.queueAt(run, s.t0 + 1e-9).map(([r]) => r.id),
+			queue: SE.queueAt(run, s.t0 + 1e-9),
 			arrived: reqs.filter(r => r.arrival > (before ? before.t1 : -Infinity) && r.arrival <= s.t0).map(r => r.id),
 			emitted: rows.filter(r => sorted(reqs[r.id].times, s.t1)).map(r => r.id),
 			firsts: rows.filter(r => reqs[r.id].first === s.t1).map(r => r.id),
@@ -2676,16 +2678,16 @@
 	function stepName(i) {
 		const f = facts(i);
 		if (SV.at.sched === 'static') {
-			if (f.prompts.length) return plural(f.rows.length, 'prompt') + ', padded to ' + int(f.prompts[0].n);
+			if (f.prompts.length) return plural(f.rows.length, 'prompt') + ', padded to ' + exeFmt(f.prompts[0].n);
 			return plural(f.rows.length, 'row')
-				+ (f.padding.length ? ', ' + int(f.padding.length) + ' of them padding' : ', a token each');
+				+ (f.padding.length ? ', ' + exeFmt(f.padding.length) + ' of them padding' : ', a token each');
 		}
 		const parts = [];
 		if (f.decodes.length) parts.push(plural(f.decodes.length, 'decode'));
-		if (f.prompts.length === 1) parts.push('a ' + int(f.prompts[0].n) + '-token prompt chunk');
+		if (f.prompts.length === 1) parts.push('a ' + exeFmt(f.prompts[0].n) + '-token prompt chunk');
 		else if (f.prompts.length) parts.push(plural(f.prompts.length, 'prompt chunk')
-			+ ', ' + int(f.prompts.reduce((a, r) => a + r.n, 0)) + ' tokens');
-		if (f.again.length) parts.push(int(f.again.reduce((a, r) => a + r.n, 0)) + ' tokens computed again');
+			+ ', ' + exeFmt(f.prompts.reduce((a, r) => a + r.n, 0)) + ' tokens');
+		if (f.again.length) parts.push(exeFmt(f.again.reduce((a, r) => a + r.n, 0)) + ' tokens computed again');
 		return parts.join(' + ') || 'nothing';
 	}
 	// What a step moves, as copies the machine lights: every weight and the
@@ -2716,7 +2718,7 @@
 	const MODEL_TITLE = () => 'Llama 3.1 70B, its weights split over both GPUs, which leaves each '
 		+ E.bytes(SE.numBlocks(2) * BLOCK * SE.kvToken(2) / SE.GPUS)
 		+ ' for the cache: little enough that a heavier load, or fewer blocks, makes requests wait. train.py’s 8B on one GPU would leave room for about '
-		+ int(Math.round((SE.UTIL * SE.GPU.mem
+		+ exeFmt(Math.round((SE.UTIL * SE.GPU.mem
 			- 2 * MODELS['llama-3.1-8b'].params) / (2 * 32 * 8 * 128 * 2) / 1000) * 1000)
 		+ ' tokens, far more than these chats hold at once';
 	function serveFile() {
@@ -2994,15 +2996,15 @@
 			+ (f.firsts.length ? ', the first for ' + ids(f.firsts) : '')
 			+ (f.s.left.length ? '; ' + ids(f.s.left) + ' done, blocks freed' : '') },
 		// the v1 scheduler
-		budget: { value: () => int(SV.run.budget) },
+		budget: { value: () => exeFmt(SV.run.budget) },
 		running: { value: f => plural(f.running.length + f.s.out.length, 'request') + ' running'
-			+ (f.stalled.length ? ', ' + int(f.stalled.length) + ' given none: the budget ran out' : '') },
+			+ (f.stalled.length ? ', ' + exeFmt(f.stalled.length) + ' given none: the budget ran out' : '') },
 		tokens: { skip: f => !f.running.length, value: f => {
 			const parts = [], dec = f.running.filter(r => r.kind === 'decode'),
 				chunks = f.running.filter(r => r.kind === 'prefill' && r.n > 0);
-			if (dec.length) parts.push('1 each for ' + int(dec.length));
-			for (const r of chunks) parts.push(ids([r.id]) + ': ' + int(r.n) + ' of its prompt');
-			for (const r of f.again) if (!r.joined) parts.push(ids([r.id]) + ': ' + int(r.n) + ' again');
+			if (dec.length) parts.push('1 each for ' + exeFmt(dec.length));
+			for (const r of chunks) parts.push(ids([r.id]) + ': ' + exeFmt(r.n) + ' of its prompt');
+			for (const r of f.again) if (!r.joined) parts.push(ids([r.id]) + ': ' + exeFmt(r.n) + ' again');
 			return parts.join('; ');
 		} },
 		alloc: { skip: f => !f.running.length && !f.s.out.length,
@@ -3015,20 +3017,20 @@
 		gate: { value: f => (f.s.out.length ? 'False: none admitted this step' : 'True') },
 		waiting: { skip: f => f.s.out.length > 0, value: f => {
 			const n = f.queue.length + f.admitted.length, head = f.admitted.length ? f.admitted[0].id : f.queue[0];
-			return n ? int(n) + ' waiting, the head ' + ids([head]) : 'none waiting';
+			return n ? exeFmt(n) + ' waiting, the head ' + ids([head]) : 'none waiting';
 		} },
 		hits: { skip: f => f.s.out.length > 0 || !f.admitted.length,
 			value: f => f.admitted.map(r => ids([r.id]) + ': '
-						+ (r.ctx ? int(r.ctx / BLOCK) + ' blocks cached' : 'none cached')).join('; ') },
+						+ (r.ctx ? exeFmt(r.ctx / BLOCK) + ' blocks cached' : 'none cached')).join('; ') },
 		walloc: { skip: f => f.s.out.length > 0 || (!f.admitted.length && !f.queue.length),
 			value: f => (f.admitted.length ? '+' + plural(f.takenAdmitted, 'block') : '')
 					+ (f.why ? (f.admitted.length ? '; then ' : '') + f.why : '') },
 		admit: { skip: f => f.s.out.length > 0 || !f.admitted.length,
 			value: f => ids(f.admitted.map(r => r.id)) + ' join, '
-					+ f.admitted.map(r => int(r.n)).join(' + ') + ' tokens' },
-		return: { value: f => scheduled(f) + ' of ' + int(SV.run.budget) },
+					+ f.admitted.map(r => exeFmt(r.n)).join(' + ') + ' tokens' },
+		return: { value: f => scheduled(f) + ' of ' + exeFmt(SV.run.budget) },
 		// the v0 scheduler
-		budget0: { value: () => int(SV.run.budget) + ' tokens, ' + int(SV.at.seqs) + ' sequences' },
+		budget0: { value: () => exeFmt(SV.run.budget) + ' tokens, ' + exeFmt(SV.at.seqs) + ' sequences' },
 		prefills: { value: f => (f.admitted.length
 				? ids(f.admitted.map(r => r.id)) + ': whole prompts, '
 					+ plural(f.admitted.reduce((a, r) => a + r.n, 0), 'token') : 'none')
@@ -3039,9 +3041,9 @@
 				+ (f.s.out.length ? '; ' + ids(f.s.out) + ' preempted' : '') },
 		// transformers' loop
 		rows: { value: f => plural(f.rows.length, 'row') + ', '
-			+ int(f.rows.length - f.padding.length) + ' unfinished' },
+			+ exeFmt(f.rows.length - f.padding.length) + ' unfinished' },
 		pass: { gpu: true, value: f => stepName(SV.k) + ' · ≥ ' + E.time(f.s.cost.time) },
-		pad: { value: f => (f.padding.length ? int(f.padding.length) + ' done, given padding' : 'none done yet') },
+		pad: { value: f => (f.padding.length ? exeFmt(f.padding.length) + ' done, given padding' : 'none done yet') },
 		ends: { value: f => (f.s.left.length ? ids(f.s.left) + ' end' : 'none ends') },
 	};
 
@@ -3158,7 +3160,7 @@
 		const text = SV.file.lines[s.line][0], step = SV.run.steps[SV.k];
 		$('[data-out="lncol"]').textContent = 'Ln ' + (s.line + 1) + ', Col '
 			+ (text.length - text.trimStart().length + 1) + '    Python 3.12';
-		$('[data-out="where"]').textContent = 'Python Debugger  ·  step ' + int(SV.k + 1) + ', ' + E.time(step.t0)
+		$('[data-out="where"]').textContent = 'Python Debugger  ·  step ' + exeFmt(SV.k + 1) + ', ' + E.time(step.t0)
 			+ (SV.frames.length > 1 ? '  ·  ' + SV.file.path[SV.file.path.length - 1] + '()' : '');
 		reveal(s.line, end, peek);
 		transport();
@@ -3183,7 +3185,7 @@
 				? 'held by HBM: each GPU reads ' + E.bytes(each(c.weightBytes)) + ' of its ' + E.bytes(SE.WEIGHTS)
 				+ ' of weights, all but the embedding table, and ' + E.bytes(each(c.kvBytes))
 				+ ' of cache, ' + E.time(c.memory) + ' at 3.35 TB/s'
-				: 'held by the tensor cores: ' + int(Math.round(each(c.matmul + c.attention) / 1e12))
+				: 'held by the tensor cores: ' + exeFmt(Math.round(each(c.matmul + c.attention) / 1e12))
 					+ ' TFLOP a GPU, ' + E.time(c.compute) + ' at 989 TFLOPS',
 			text: stepNote(f) + ' Tensor parallelism sums the two halves of every layer over NVLink, twice a layer: '
 				+ E.bytes(nvBytes(c)) + ' from each GPU this step, '
@@ -3194,10 +3196,10 @@
 	function stepNote(f) {
 		const c = f.s.cost;
 		if (SV.at.sched === 'static' && f.padding.length) return 'The finished rows are computed all the same: '
-			+ int(f.padding.length) + ' of ' + int(f.rows.length)
+			+ exeFmt(f.padding.length) + ' of ' + exeFmt(f.rows.length)
 			+ ' rows write padding, their slots set aside till the batch’s longest answer ends.';
 		if (c.bound === 'compute') {
-			return 'Its ' + int(c.tokens)
+			return 'Its ' + exeFmt(c.tokens)
 				+ ' tokens make every matmul wide enough that the arithmetic, not the reading, sets the time; any decodes in it ride along almost free.';
 		}
 		return 'Every step reads all of the weights, whatever the batch: the ' + plural(c.tokens, 'token')
@@ -3234,7 +3236,7 @@
 		return {
 			now: E.bytes(facts(SV.k).used * BLOCK * per),
 			of: 'of ' + E.bytes(all) + ' of KV cache on each GPU, '
-				+ int(SV.run.usable) + ' blocks of ' + E.bytes(BLOCK * per)
+				+ exeFmt(SV.run.usable) + ' blocks of ' + E.bytes(BLOCK * per)
 				+ (SV.run.nullBlock >= 0 ? ' and block 0, vLLM’s null block' : '')
 				+ (id >= 0 ? '; <em>#' + (id + 1) + '</em> holds ' + (mine ? E.bytes(mine * BLOCK * per) : 'none')
 					: ''),
@@ -3305,14 +3307,14 @@
 		const most = steps[peak].used * BLOCK,
 			held = Math.min(cols.length - 1, Math.floor(steps[peak].t0 / SV.spans[0].t1));
 		peakLine(cx, W, Math.round(Y(most)) + 0.5, cols[held].x0,
-			'peak ' + E.bytes(most * per) + ' at step ' + int(peak + 1), 0, Y(most) - Y(cap) < 12);
+			'peak ' + E.bytes(most * per) + ' at step ' + exeFmt(peak + 1), 0, Y(most) - Y(cap) < 12);
 		capLine(cx, W, Y(cap), E.bytes(cap * per) + ', the cache');
 	}
 	// a column's span, its unit once, and the step whose cache it shows, as it
 	// runs or after it
 	function spanName(s) {
 		const to = E.time(s.t1), unit = to.slice(to.indexOf(' ')),
-			from = s.t0 ? E.time(s.t0) : '0', step = 'step ' + int(s.last + 1);
+			from = s.t0 ? E.time(s.t0) : '0', step = 'step ' + exeFmt(s.last + 1);
 		return (from.endsWith(unit) ? from.slice(0, -unit.length) : from) + '–' + to
 			+ (s.last < 0 ? ', before the first step'
 				: SV.run.steps[s.last].t1 > s.t1 ? ', as ' + step + ' runs' : ', after ' + step);
@@ -3418,8 +3420,8 @@
 			+ (SV.run.alloc === 'contiguous' ? 'its prompt and max_tokens, set aside whole, more than every block'
 			: 'its prompt max_model_len tokens or more, which vLLM rejects');
 		const gaps = r.times.slice(1).map((t, i) => t - r.times[i]);
-		return '#' + (id + 1) + ': a prompt of ' + int(r.prompt) + ' tokens'
-			+ (r.system ? ' (' + int(r.system) + ' of them the system prompt)' : '') + ', an answer of ' + int(r.output)
+		return '#' + (id + 1) + ': a prompt of ' + exeFmt(r.prompt) + ' tokens'
+			+ (r.system ? ' (' + exeFmt(r.system) + ' of them the system prompt)' : '') + ', an answer of ' + exeFmt(r.output)
 			+ (r.capped ? ', cut at max_model_len' : '') + '; ' + (SV.at.sched === 'static'
 				? 'its first token computed after ' + E.time(r.first - r.arrival)
 					+ ', reaching its user as generate() returns, at its batch’s end, after '
@@ -3427,7 +3429,7 @@
 				: 'first token after ' + E.time(r.first - r.arrival)
 					+ (gaps.length ? ', then one every ' + E.time(SE.quantile(gaps, 0.5)) + ' at the median' : ''))
 			+ (r.preempts ? '; preempted ' + plural(r.preempts, 'time') : '')
-			+ (r.hit ? '; ' + int(r.hit) + ' tokens of its prompt cached' : '');
+			+ (r.hit ? '; ' + exeFmt(r.hit) + ' tokens of its prompt cached' : '');
 	}
 	// the end of the static batch r ran in
 	const batchEnd = r => SV.run.steps.findLast(s => s.batch === r.batch).t1;
@@ -3464,7 +3466,7 @@
 		hud();
 		if (!$('.trn-panel').classList.contains('shut')) memory();
 		drawRequests();
-		say('serve.py, step ' + int(SV.k + 1) + ': ' + stepName(SV.k));
+		say('serve.py, step ' + exeFmt(SV.k + 1) + ': ' + stepName(SV.k));
 	}
 	function serveGo(i, byHand = false) {
 		SV.k = Math.max(0, Math.min(SV.run.steps.length - 1, i));
@@ -3535,7 +3537,8 @@
 		const first = SV.frames.length === 1 && SV.k === 0, final = SV.frames.length === 1 && SV.k === lastServed();
 		return { off: { start: first, back: first, next: final, end: final, run: final && !SV.playing,
 			into: !STOPS[serveStop().key].into, out: SV.frames.length === 1 },
-			at: 'step ' + int(SV.k + 1) + ' of ' + int(SV.run.steps.length) + ' · ' + SV.run.steps[SV.k].t0.toFixed(1) + ' s' };
+			at: 'step ' + exeFmt(SV.k + 1) + ' of ' + exeFmt(SV.run.steps.length) + ' · '
+				+ SV.run.steps[SV.k].t0.toFixed(1) + ' s' };
 	}
 	function servePlay(on) {
 		SV.playing = on && SV.k < lastServed();
@@ -3561,7 +3564,7 @@
 	// the debugger kept at the same moment of it; a change of scheduler, which
 	// changes the code, takes it back out to serve.py ----
 	function serveChange(to) {
-		if (to.kv !== undefined) to.kv = to.kv === 'fp8' ? 1 : to.kv === 'auto' ? 2 : to.kv;
+		if (to.kv !== undefined) to.kv = to.kv === 'fp8' ? 1 : 2;
 		const was = SV.run.steps[SV.k].t0, sched = SV.at.sched, alloc = SV.run.alloc;
 		SV.at = { ...SV.at, ...to };
 		play(false);
@@ -3920,7 +3923,7 @@
 		playing = null;
 		if (on) {
 			const tick = () => {
-				if (inside < 0 && k === lastStop()) return play(false);
+				if (!root.isConnected || (inside < 0 && k === lastStop())) return play(false);
 				next();
 				playing = setTimeout(tick, dwell());
 			};
@@ -3930,7 +3933,7 @@
 	}
 	// Run, or Pause while it runs
 	function runButton(on) {
-		$('[data-act="run"]').innerHTML = on ? '&#10074;&#10074; Pause' : '&#9654; Run';
+		exeRunning($('[data-act="run"]'), on);
 		transport();
 	}
 	// the field a seek bar, as the players' are: pressed or dragged, the run
@@ -4041,10 +4044,8 @@
 		dataPath(b.dataset.path);
 		reset();
 	});
-	const timeSized = new ResizeObserver(() => (root.isConnected ? drawLanes() : timeSized.disconnect()));
-	timeSized.observe($('.trn-time'));
-	const plotSized = new ResizeObserver(() => (root.isConnected ? plot() : plotSized.disconnect()));
-	plotSized.observe($('.trn-plot'));
+	exeResized(root, drawLanes, $('.trn-time'));
+	exeResized(root, plot, $('.trn-plot'));
 	serveRun();
 	explain(explaining);
 	// folded until a reader opens it

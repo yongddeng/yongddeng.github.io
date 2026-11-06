@@ -20,7 +20,7 @@
 			row.addEventListener('click', function () {
 				sheet.close();
 				// a heading inside a folded section (fold.js) must be seen
-				if (window.unfoldTo) unfoldTo(h);
+				unfoldTo(h);
 				// land the heading just under the 48px app bar
 				window.scrollBy(0, h.getBoundingClientRect().top - 60);
 			});

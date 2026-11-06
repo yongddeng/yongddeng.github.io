@@ -4,19 +4,11 @@
 (function () {
 	var KEY = 'desk-session';
 	var desktop = window.desktop;
-	if (!desktop) return;
 
 	var wrapper = document.querySelector('.wrapper');
 	// The post the layout drew is the one the address bar asked for
 	var asked = document.querySelector('.content[data-url]');
 	var restoring = false;
-
-	function read() {
-		try {
-			var raw = sessionStorage.getItem(KEY);
-			return raw ? JSON.parse(raw) : null;
-		} catch (e) { return null; }
-	}
 
 	function write(state) {
 		try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
@@ -43,7 +35,6 @@
 	// Post and folder windows are restorable; Settings and the error box
 	// are transient chrome and deliberately are not
 	function kindOf(win) {
-		if (win.classList.contains('settings-win')) return null;
 		if (win.dataset.tag) return 'folder';
 		if (win.dataset.url) return 'post';
 		return null;
@@ -65,13 +56,13 @@
 				});
 			});
 		return {
-			explorer: wrapper ? {
+			explorer: {
 				hidden: wrapper.style.display === 'none',
 				geom: geomOf(wrapper),
 				at: window.explorer.at(),
 				folders: window.explorer.folders(),
 				front: wrapper.classList.contains('active-win')
-			} : null,
+			},
 			windows: wins
 		};
 	}
@@ -87,14 +78,10 @@
 	// Reopen in saved order so the taskbar buttons come back in that order
 	function restore(state) {
 		restoring = true;
-		if (wrapper && state.explorer) {
-			wrapper.style.display = state.explorer.hidden ? 'none' : '';
-			// a session saved before My Computer had places kept a tag, and
-			// one saved before the Folders bar left it out, so opens without it
-			window.explorer.go(state.explorer.at || state.explorer.tag || 'mc', state.explorer.folders === true);
-			var g = state.explorer.geom;
-			if (g && !state.explorer.hidden) desktop.applyGeom(wrapper, g);
-		}
+		wrapper.style.display = state.explorer.hidden ? 'none' : '';
+		window.explorer.go(state.explorer.at, state.explorer.folders);
+		var g = state.explorer.geom;
+		if (g && !state.explorer.hidden) desktop.applyGeom(wrapper, g);
 
 		var winOf = function (w) {
 			return document.querySelector(w.kind === 'folder'
@@ -107,7 +94,7 @@
 			if (win) win.querySelector('.btn_max').click();
 		};
 		var chain = Promise.resolve();
-		(state.windows || []).forEach(function (w) {
+		state.windows.forEach(function (w) {
 			chain = chain.then(function () {
 				if (w.kind === 'folder') {
 					desktop.openFolderWindow(w.id, w.geom);
@@ -121,10 +108,10 @@
 		return chain.then(function () {
 			// Raising the saved front window settles the z-order last
 			var front = null;
-			(state.windows || []).forEach(function (w) {
+			state.windows.forEach(function (w) {
 				if (w.front) front = winOf(w) || front;
 			});
-			if (!front && state.explorer && state.explorer.front && !state.explorer.hidden) {
+			if (!front && state.explorer.front && !state.explorer.hidden) {
 				front = wrapper;
 			}
 			// A link, bookmark or typed URL lands on top. On F5 it already is
@@ -159,32 +146,26 @@
 	function shutdown() {
 		restoring = true;
 		document.querySelectorAll('.content').forEach(function (win) { win.remove(); });
-		if (wrapper) {
-			wrapper.style.display = 'none';
-			// drop any dragged position so the next open starts fresh
-			wrapper.style.position = '';
-			wrapper.style.margin = '';
-			wrapper.style.left = '';
-			wrapper.style.top = '';
-			wrapper.style.width = '';
-			wrapper.style.height = '';
-			wrapper.dispatchEvent(new CustomEvent('win:reset'));
-			window.explorer.home();
-		}
+		wrapper.style.display = 'none';
+		// drop any dragged position so the next open starts fresh
+		wrapper.style.position = '';
+		wrapper.style.margin = '';
+		wrapper.style.left = '';
+		wrapper.style.top = '';
+		wrapper.style.width = '';
+		wrapper.style.height = '';
+		window.explorer.home();
 		document.title = document.body.dataset.site || '';
 		if (location.pathname !== '/') history.pushState(null, '', '/');
 		clear();
-		document.dispatchEvent(new CustomEvent('content:swapped', { detail: {} }));
+		document.dispatchEvent(new CustomEvent('content:swapped'));
 		restoring = false;
 	}
 
-	var menuItem = document.getElementById('menu-shutdown');
-	if (menuItem) {
-		menuItem.addEventListener('click', function (e) {
-			e.preventDefault();
-			confirmShutdown();
-		});
-	}
+	document.getElementById('menu-shutdown').addEventListener('click', function (e) {
+		e.preventDefault();
+		confirmShutdown();
+	});
 
 	document.addEventListener('content:swapped', save);
 	document.addEventListener('window:focused', save);
@@ -197,8 +178,10 @@
 	// Restore is desktop furniture: on a phone it would stack absolutely
 	// positioned windows over the unwrapped page. Saving still runs, so a
 	// return to desktop width picks the session back up.
-	var saved = read();
-	if (!phone() && saved && ((saved.windows && saved.windows.length) || (saved.explorer && !saved.explorer.hidden))) {
+	var saved = window.deskSess;
+	// a post opened from here on is placed afresh, not where this session had it
+	window.deskSess = null;
+	if (!phone() && saved && (saved.windows.length || !saved.explorer.hidden)) {
 		restore(saved);
 	}
 })();
