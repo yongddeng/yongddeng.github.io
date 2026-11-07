@@ -1439,9 +1439,7 @@ $exe-mute: #4d4852;
 	}
 }
 .trn {
-	// the tensor cores and HBM as the render lights them
-	--lit-hbm: #5a7cff;
-	--lit-tc: #e060c8;
+	// device.js sets --lit-tc and --lit-hbm, the tensor cores and HBM as the render lights them
 	// Dark+, as VS Code ships it
 	--vs-bg: #1e1e1e;
 	--vs-bar: #252526;

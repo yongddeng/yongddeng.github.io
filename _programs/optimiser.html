@@ -65,7 +65,7 @@ description: SGD, Momentum, RMSProp, AdamW and Muon down four loss surfaces over
 <span class="lit-sep"></span>
 <label class="exe-lbl" title="Gaussian noise on each gradient, as a minibatch’s">noise <i>σ</i> <input type="range" min="0" max="8" value="0" data-in="noise"></label><output data-out="noise">0</output>
 <span class="lit-sep"></span>
-<label class="exe-lbl" title="The loss scaled up, as summing it over a batch of this many instead of averaging would, reduction='sum': every gradient this many times as long; the readings stay in the mean's units">loss × <input type="range" min="0" max="3" value="0" data-in="scale"></label><output data-out="scale">1</output>
+<label class="exe-lbl" title="The loss scaled up, as summing it over a batch of this many instead of averaging would, reduction='sum': every gradient this many times as long; the readings stay in the mean's units">loss × <input type="range" min="0" value="0" data-in="scale"></label><output data-out="scale">1</output>
 <button type="button" class="lit-btn" data-act="clip" title="clip_grad_norm_(params, max_norm=1.0) before each step">grad clip 1.0</button>
 </div>
 <dl class="exe-read opt-cards"></dl>

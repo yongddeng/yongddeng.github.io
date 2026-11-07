@@ -275,11 +275,11 @@
 			ln('M260,420H396'); ln('M390,340H396');
 		} else {
 			ln('M80,500H330'); [130, 260, 330].forEach(x => { ln(`M${x},500V478`); up(x, 478); });
-			box(60, 446, 140, 32, 'zq', 'down-project q', `${W} → 1,536 (q latent)`, headsChg); box(210, 446, 100, 32, 'zk', 'down-project kv', `${W} → ${m.mla.dc} latent`, headsChg); box(320, 446, 90, 32, 'zk', 'RoPE key', `${W} → ${m.mla.dr} · RoPE`, posChg);
+			box(60, 446, 140, 32, 'zq', 'down-project q', `${W} → ${n(m.mla.dq)} (q latent)`, headsChg); box(210, 446, 100, 32, 'zk', 'down-project kv', `${W} → ${m.mla.dc} latent`, headsChg); box(320, 446, 90, 32, 'zk', 'RoPE key', `${W} → ${m.mla.dr} · RoPE`, posChg);
 			T('<rect x="214" y="430" width="92" height="8" class="lat"/>'); T('<rect x="324" y="430" width="82" height="8" class="lat"/>');
 			T(`<rect x="414" y="368" width="100" height="70" class="frame${cacheChg ? ' chgf' : ''}"/>`); txt(420, 382, 'cached per token', 'lab'); T('<rect x="420" y="389" width="40" height="9" class="lat"/>'); txt(464, 397, `${m.mla.dc} + ${m.mla.dr}`, 'bs'); txt(420, 412, `2 bytes × ${m.layers} layers`, 'bs'); txt(420, 423, `= ${fmtB(kv(m))} a token`, 'bs'); txt(420, 434, 'K and V are not kept', 'bs');
 			ln('M130,446V414'); up(130, 414); ln('M260,446V414'); up(260, 414); ln('M365,446V355H290'); left(290, 355);
-			box(60, 380, 140, 34, 'zq', 'up-project q · RoPE part', `1,536 → ${H} × (${hd} + ${m.mla.dr})`, headsChg); box(210, 380, 100, 34, 'zk', 'up-project K, V', `${m.mla.dc} → ${H} × ${hd} each`, headsChg);
+			box(60, 380, 140, 34, 'zq', 'up-project q · RoPE part', `${n(m.mla.dq)} → ${H} × (${hd} + ${m.mla.dr})`, headsChg); box(210, 380, 100, 34, 'zk', 'up-project K, V', `${m.mla.dc} → ${H} × ${hd} each`, headsChg);
 			ln('M130,380V370'); ln('M260,380V370'); ln('M310,397H330V237H250');
 		}
 		// per head: scores, the mask, softmax, the weighted sum

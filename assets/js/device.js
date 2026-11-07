@@ -45,6 +45,11 @@
 			if (s < 120) return fmt(s) + ' s';
 			return fmt(s / 60) + ' min';
 		}
+		// a bandwidth to the four figures a data sheet gives, 281.6 GB/s
+		function rate(bw) {
+			if (bw < 1e12) return exeFmt(+(bw / 1e9).toPrecision(4)) + ' GB/s';
+			return exeFmt(+(bw / 1e12).toPrecision(4)) + ' TB/s';
+		}
 		const CLOCK = 1.83e9, PEAK = SE.GPU.peak;
 		// the DGX H100's host, one Micron 7450 for the SSD, two H100 SXM5s
 		// through NVSwitch; and a socket of the host computing for itself,
@@ -86,7 +91,7 @@
 				lane: held === 'latency' ? HOPS[hops[0].key].lane : HOPS[held].lane };
 		}
 		const copyTime = c => (c.k || 1) * lay(c).T;
-		return { HOPS, fmt, bytes, time, lay, copyTime };
+		return { HOPS, fmt, bytes, time, rate, lay, copyTime };
 	})();
 
 	const H = E.HOPS;
@@ -94,6 +99,8 @@
 	// opened again with another run of this waiting on them too
 	const root = document.querySelector('.trn:not([data-ready])');
 	if (!root) return;
+	// the canvases' type, the editor's own (--mono in _programs.scss)
+	const MONO = getComputedStyle(root).getPropertyValue('--mono').trim();
 	root.dataset.ready = '1';
 	const $ = sel => root.querySelector(sel), $$ = sel => [...root.querySelectorAll(sel)];
 	const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -133,6 +140,9 @@
 	const ROLE = { CPU: '#e8e8e8', SSD: '#c8b838', PCIe: '#22b8b8',
 		NVLink: '#f05a5a', HBM: '#5a7cff', 'Tensor cores': '#e060c8' };
 	const roleOf = key => H[key].lane;
+	// the HUD's meters in the same colours
+	root.style.setProperty('--lit-tc', ROLE['Tensor cores']);
+	root.style.setProperty('--lit-hbm', ROLE.HBM);
 
 	// ---- where things are, in metres: the board's top at y = 0 ----
 	const BOARD = { w: 0.62, d: 0.44 };
@@ -830,15 +840,17 @@
 	const P0 = PKG[0];
 	tag('CPU', 'Xeon 8480C, one of two', [CPU.x, 0.012, CPU.z], 0.4, 2,
 		['stage', 'amx', 'ddr'], ['CPU', 'Xeon 8480C: the batching']);
-	tag('DDR5 RDIMMs', '281.6 GB/s a socket', [CPU.x - 0.09, 0.04, CPU.z - 0.07], 0.4, 2, ['stage', 'ddr'], null);
-	tag('NVMe SSD', 'the files in /data, 6.8 GB/s read', [SSD.x + 0.035, 0.012, SSD.z + 0.022], 0.4, 2, 'nvme', null);
+	tag('DDR5 RDIMMs', E.rate(H.ddr.bw) + ' a socket', [CPU.x - 0.09, 0.04, CPU.z - 0.07],
+		0.4, 2, ['stage', 'ddr'], null);
+	tag('NVMe SSD', 'the files in /data, ' + E.rate(H.nvme.bw) + ' read', [SSD.x + 0.035, 0.012, SSD.z + 0.022],
+		0.4, 2, 'nvme', null);
 	tag('PCIe switch', 'the CPU, the SSD and the GPUs on it',
 		[PSW.x - 0.01, 0.024, PSW.z + 0.012], 0.4, 2, 'gds', null);
 	tag('H100 · GPU 0', 'SXM5', [MODS[0].x, 0.065, MODS[0].z], 0.4, 2, null, ['H100 · GPU 0', 'half of every layer']);
 	tag('H100 · GPU 1', 'SXM5', [MODS[1].x, 0.065, MODS[1].z], 0.4, 2, null, ['H100 · GPU 1', 'the other half']);
-	tag('NVSwitch', 'NVLink 4, 450 GB/s a GPU each way', [SWITCH.x, 0.024, SWITCH.z],
-		0.4, 2, 'nvlink', ['NVSwitch', 'the halves summed, 450 GB/s a GPU']);
-	tag('PCIe 5.0 ×16', '63 GB/s each way', [0.02, 0.002, 0.03], 0.4, 2, 'pcie', null);
+	tag('NVSwitch', 'NVLink 4, ' + E.rate(H.nvlink.bw) + ' a GPU each way', [SWITCH.x, 0.024, SWITCH.z],
+		0.4, 2, 'nvlink', ['NVSwitch', 'the halves summed, ' + E.rate(H.nvlink.bw) + ' a GPU']);
+	tag('PCIe 5.0 ×16', E.rate(H.pcie.bw) + ' each way', [0.02, 0.002, 0.03], 0.4, 2, 'pcie', null);
 	tag('Power stages', 'the module’s own', [MODS[0].x + 0.05, 0.012, MODS[0].z - 0.035], 0.13, 0.42);
 	tag('Heatsink', 'lifted off the module', [MODS[0].x - 0.04, 0.16, MODS[0].z - 0.16], 0.16, 0.42);
 	tag('GH100 die', '814 mm², 80 billion transistors', [P0.x, Y.die + 0.0004, P0.z - 0.004], 0.055, 0.14);
@@ -1224,6 +1236,8 @@
 		'    return CausalLMOutputWithPast(logits=logits)',
 	];
 	let MODEL = modelCode();
+	// a line of the forward pass by its text, as run() finds train.py's
+	const modelLine = text => MODEL.findIndex(l => l.trim().startsWith(text));
 	const mm = (m, n, k) => 2 * m * n * k;
 	// where the arithmetic and the bytes go: on the GPU through HBM to the
 	// tensor cores, on the CPU through its DDR5 to its AMX tiles
@@ -1238,34 +1252,35 @@
 		// the MLP's share of a layer's matmuls
 		const share = 3 * FFN * DM / (DM * (DM + 2 * KVD) + (SEQ + 1) * DM + DM * DM + 3 * FFN * DM);
 		return [
-			{ line: 2, short: 'embedding',
+			{ line: modelLine('x = self.embed_tokens'), short: 'embedding',
 				text: 'a row of the table for each of ' + exeFmt(T) + ' tokens: a gather, held by '
 					+ at.memName + ', no arithmetic to speak of',
 				copies: [{ n: 2 * T * DM * 4, route: at.mem }] },
-			{ line: 4, short: 'for layer', note: true,
+			{ line: modelLine('for layer'), short: 'for layer', note: true,
 				text: 'the next lines run in each of the ' + LAYERS
 					+ ' layers; each shows one layer’s time and the sum of all ' + LAYERS },
-			{ line: 5, short: 'RMSNorm',
+			{ line: modelLine('h = layer.input_layernorm'), short: 'RMSNorm', inLayer: true,
 				text: 'reads the fp32 residual stream and writes it normalised: bytes, not FLOPs, so '
 					+ at.memName + ' holds it', copies: [norm] },
-			{ line: 6, short: 'q, k, v',
+			{ line: modelLine('q, k, v'), short: 'q, k, v', inLayer: true,
 				text: 'three matmuls of the layer’s input with its query, key and value weights, cast to bf16 by autocast: '
 					+ at.units + ' hold it',
 				copies: [matmul(DM * (DM + 2 * KVD) * 4 + T * DM * 2 + T * (DM + 2 * KVD) * 2,
 					mm(T, DM + 2 * KVD, DM), LAYERS)] },
-			{ line: 7, short: 'attention, o_proj',
+			{ line: modelLine('x = x + layer.o_proj'), short: 'attention, o_proj', inLayer: true,
 				text: 'causal attention, fused so no score matrix is stored, then the output projection: '
 					+ at.units + ' hold it',
 				copies: [matmul(T * (DM + 2 * KVD) * 2 + 2 * T * DM * 2 + DM * DM * 4,
 					4 * B * SEQ * (SEQ + 1) / 2 * DM + mm(T, DM, DM), LAYERS)] },
-			{ line: 9, short: 'RMSNorm',
+			{ line: modelLine('h = layer.post_attention_layernorm'), short: 'RMSNorm', inLayer: true,
 				text: 'the second norm of the layer, held by ' + at.memName + ' like the first', copies: [norm] },
-			{ line: 10, last: 11, short: 'MLP',
+			{ line: modelLine('gate, up'), last: modelLine('x = x + layer.down_proj'), short: 'MLP', inLayer: true,
 				text: 'three matmuls with a ' + exeFmt(FFN) + '-wide middle: '
 					+ Math.round(100 * share) + '% of the layer’s FLOPs, ' + at.units + ' flat out',
 				copies: [matmul(3 * DM * FFN * 4 + 2 * T * DM * 2 + 3 * T * FFN * 2, 3 * mm(T, FFN, DM), LAYERS)] },
-			{ line: 13, short: 'lm_head',
-				text: 'the biggest matmul: every token against all 128,256 rows of the vocabulary, logits out in bf16',
+			{ line: modelLine('logits ='), short: 'lm_head',
+				text: 'the biggest matmul: every token against all ' + exeFmt(VOCAB)
+					+ ' rows of the vocabulary, logits out in bf16',
 				copies: [matmul(VOCAB * DM * 4 + T * DM * 2 + T * VOCAB * 2, mm(T, VOCAB, DM))] },
 		];
 	}
@@ -1297,16 +1312,18 @@
 	// train_dist.py, as black formats them, at the batch size and checkpointing
 	// set ----
 	function script(kind) {
-		const load = [
-			'device = "' + device + '"',
+		// the model and its optimiser, which train_dist.py builds the same way
+		// with its own device and wrapping in between
+		const pretrained = [
 			'model = AutoModelForCausalLM.from_pretrained(',
 			'    "/data/' + modelName + '", torch_dtype=torch.float32',
 			')',
 			(ckpt ? '' : '# ') + 'model.gradient_checkpointing_enable()',
-			'model.to(device)',
-			'',
-			'optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)',
 		];
+		const adamw = 'optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)';
+		const load = ['device = "' + device + '"', ...pretrained, 'model.to(device)', '', adamw];
+		// a sample's ids: SEQ inputs and the target after the last
+		const sample = SEQ + 1;
 		// the loop's body in its parts: the batch's inputs and the targets they
 		// predict, a token on; the forward pass and the loss; the update; the log
 		const loop = [
@@ -1341,7 +1358,7 @@
 			'from torch.utils.data import DataLoader, DistributedSampler',
 			'from transformers import AutoModelForCausalLM',
 			'',
-			'from data import Windows  # samples of 2,049 tokens, as int32',
+			'from data import Windows  # samples of ' + exeFmt(sample) + ' tokens, as int32',
 		], [
 			'strategy = "' + strategy + '"',
 			'',
@@ -1350,7 +1367,7 @@
 			'torch.cuda.set_device(device)',
 			'dist.init_process_group("nccl")',
 			'',
-			...load.slice(1, 5),
+			...pretrained,
 			'if strategy == "ddp":',
 			'    model = DDP(model.to(device), device_ids=[rank])',
 			'else:',
@@ -1362,9 +1379,9 @@
 			'        fully_shard(layer, mp_policy=policy)',
 			'    fully_shard(model, mp_policy=policy)',
 			'',
-			...load.slice(7),
+			adamw,
 			'tokens = np.memmap("/data/tokens.bin", dtype=np.uint32, mode="r")',
-			'data = Windows(tokens, 2049)',
+			'data = Windows(tokens, ' + sample + ')',
 			'loader = DataLoader(',
 			'    data,',
 			'    batch_size=' + batchSize + ',',
@@ -1388,12 +1405,12 @@
 			'from torch.utils.data import DataLoader',
 			'from transformers import AutoModelForCausalLM',
 			'',
-			'from data import Windows  # samples of 2,049 tokens, as int32',
+			'from data import Windows  # samples of ' + exeFmt(sample) + ' tokens, as int32',
 		], [
 			...load,
 			'tokens = np.memmap("/data/tokens.bin", dtype=np.uint32, mode="r")',
 			'loader = DataLoader(',
-			'    Windows(tokens, 2049),',
+			'    Windows(tokens, ' + sample + '),',
 			'    batch_size=' + batchSize + ',',
 			'    num_workers=4,',
 			'    pin_memory=(device == "cuda"),',
@@ -1415,9 +1432,9 @@
 			...load,
 			'path = "/data/tokens.bin"',
 			'batch_size = ' + batchSize,
-			'n = os.path.getsize(path) // (4 * batch_size * 2049)  # int32 ids',
+			'n = os.path.getsize(path) // (4 * batch_size * ' + sample + ')  # int32 ids',
 			'',
-			'shape = (n, batch_size, 2049)',
+			'shape = (n, batch_size, ' + sample + ')',
 			'tokens = torch.empty(shape, dtype=torch.int32, device=device)',
 			'with kvikio.CuFile(path, "r") as f:',
 			'    f.read(tokens)  # GPUDirect Storage: SSD to HBM',
@@ -1442,7 +1459,8 @@
 		const files = M.shards === 1 ? 'model.safetensors' : 'the ' + M.shards + ' safetensors shards';
 		const FWD = { n: sum(INSIDE, c => c.n), flops: sum(INSIDE, c => c.flops) };
 		// a layer's lines, which checkpointing runs again in backward
-		const layer = INSIDE.slice(2, 7), REDO = { n: sum(layer, c => c.n), flops: sum(layer, c => c.flops) };
+		const layer = INSIDE.filter(s => s.inLayer);
+		const REDO = { n: sum(layer, c => c.n), flops: sum(layer, c => c.flops) };
 		const stops = [], bars = [];
 		let cpu = 0, gpu = 0, step = null;
 		const stop = s => {
@@ -1593,7 +1611,8 @@
 		if (kind !== 'gds') {
 			note('tokens =', 'np.memmap',
 				'maps the file into the address space; nothing is read until a page is touched');
-			if (dist) note('data =', 'Windows', 'the samples of 2,049 tokens, as a dataset a sampler can index');
+			if (dist) note('data =', 'Windows',
+				'the samples of ' + exeFmt(SEQ + 1) + ' tokens, as a dataset a sampler can index');
 			note('loader =', 'DataLoader',
 				dist
 					? 'nothing starts yet; DistributedSampler hands this rank every other sample and rank 1 the rest, so the GPUs never see the same one'
@@ -1602,8 +1621,9 @@
 		} else {
 			const reserve = whole * IDS * 4;
 			note('n = os.path', 'os.path.getsize',
-				'a stat call: the file system answers from its metadata, 8 GB, without reading the data; '
-				+ exeFmt(whole) + ' whole batches of ' + batchSize + ' × 2,049');
+				'a stat call: the file system answers from its metadata, ' + E.fmt(4 * FILE_TOKENS / 1e9)
+				+ ' GB, without reading the data; ' + exeFmt(whole) + ' whole batches of ' + batchSize
+				+ ' × ' + exeFmt(SEQ + 1));
 			stop({ line: at('tokens = torch.empty'), short: 'torch.empty', note: true,
 				text: 'reserves ' + E.fmt(reserve / 1e9) + ' GB of HBM for the whole file; nothing is written to it',
 				mem: { add: [['hbm', 'tokens', 'tokens, reserved', reserve]] } });
@@ -1677,7 +1697,8 @@
 				s.span = work(s, 'HBM', widen, '.long()');
 			}
 			note('inputs, targets', 'inputs, targets',
-				'two views of the batch, nothing copied: the first 2,048 ids of each sample go in, and each one’s target is the id after it');
+				'two views of the batch, nothing copied: the first ' + exeFmt(SEQ)
+				+ ' ids of each sample go in, and each one’s target is the id after it');
 			if (step === 0) note('with torch.autocast', 'autocast',
 				fsdp
 					? 'nothing moves: FSDP hands each layer its weights in bf16 already, so autocast, there for DDP, has next to nothing to cast'
@@ -1701,17 +1722,20 @@
 				for (let l = 0; l < LAYERS; l++) {
 					if (cast && !ckpt) {
 						add.push([here, 'cast', 'weights, bf16, autocast’s copies kept for backward', cast,
-							{ what: 'layer ' + l + '’s weights in bf16', line: 6, at: embedT + l * layerT }]);
+							{ what: 'layer ' + l + '’s weights in bf16', line: modelLine('q, k, v'),
+								at: embedT + l * layerT }]);
 					}
 					add.push([here, 'acts', ckpt ? 'layer inputs, kept to recompute' : 'activations for backward', keep,
 						{ what: 'layer ' + l + '’s ' + (ckpt ? 'input' : 'activations'),
-							line: ckpt ? 4 : 10, at: embedT + l * layerT }]);
+							line: modelLine(ckpt ? 'for layer' : 'gate, up'), at: embedT + l * layerT }]);
 				}
 				if (cast) {
 					add.push([here, 'cast', 'weights, bf16, autocast’s copies kept for backward',
-						2 * VOCAB * DM, { what: 'lm_head’s weight in bf16', line: 13, at: headT }]);
+						2 * VOCAB * DM, { what: 'lm_head’s weight in bf16', line: modelLine('logits ='),
+							at: headT }]);
 				}
-				add.push([here, 'logits', 'logits, bf16', 2 * T * VOCAB, { what: 'the logits', line: 13, at: headT }]);
+				add.push([here, 'logits', 'logits, bf16', 2 * T * VOCAB,
+					{ what: 'the logits', line: modelLine('logits ='), at: headT }]);
 				const c = both({ n: FWD.n, flops: FWD.flops, route: ON[device].mm, on: ON[device].on }),
 					gather = nvlink((layersHalf + rootHalf) / 2);
 				const s = stop({ line: at('logits = model'), short: 'forward',
@@ -1847,7 +1871,8 @@
 		}
 		const files0 = [['ssd:model', { where: 'ssd', key: 'model', name: files + ', bf16', n: W16 }],
 			['ssd:tokens',
-				{ where: 'ssd', key: 'tokens', name: 'tokens.bin, 2 billion uint32 ids', n: 4 * FILE_TOKENS }]];
+				{ where: 'ssd', key: 'tokens', name: 'tokens.bin, ' + E.fmt(FILE_TOKENS / 1e9) + ' billion uint32 ids',
+					n: 4 * FILE_TOKENS }]];
 		const peak = account(stops, bars, here, new Map(files0), 2 * W32 / (fsdp ? 2 : 1));
 		const oom = stops[stops.length - 1].oom ? stops[stops.length - 1] : null;
 		return { code, stops, bars, T: Math.max(...bars.map(b => b.t1)), peak, oom, place: here,
@@ -2267,7 +2292,7 @@
 			return c;
 		});
 		// the steps, step 1 in a band
-		cx.font = '9px Menlo, Monaco, monospace';
+		cx.font = '9px ' + MONO;
 		cx.textBaseline = 'alphabetic';
 		cx.textAlign = 'left';
 		for (const st of [0, 1]) {
@@ -2425,7 +2450,7 @@
 		ROW = Math.min(17, (H - TOP - 30) / R.lanes.length);
 		const bot = TOP + R.lanes.length * ROW, out = [];
 		cx.textBaseline = 'middle';
-		cx.font = '9px Menlo, Monaco, monospace';
+		cx.font = '9px ' + MONO;
 		R.lanes.forEach((name, i) => {
 			const y = TOP + i * ROW;
 			cx.fillStyle = 'rgba(232, 235, 231, 0.55)';
@@ -2483,8 +2508,9 @@
 		// inside the forward pass, the line in play's share of it, once a layer
 		if (inside >= 0 && INSIDE[inside].copies) {
 			const f = R.stops[k], each = s => (s.copies || []).reduce((a, c) => a + E.lay(c).T, 0), order = [INSIDE[0]];
-			for (let l = 0; l < M.layers; l++) for (const s of INSIDE.slice(2, 7)) order.push(s);
-			order.push(INSIDE[7]);
+			const layer = INSIDE.filter(s => s.inLayer);
+			for (let l = 0; l < M.layers; l++) order.push(...layer);
+			order.push(INSIDE[INSIDE.length - 1]);
 			let t = f.span[0];
 			const y = TOP + R.lanes.indexOf((R.bars.find(b => b.k === k) || { lane: 'Tensor cores' }).lane) * ROW;
 			cx.fillStyle = 'rgba(255, 255, 255, 0.85)';
@@ -2500,7 +2526,7 @@
 		cx.fillStyle = '#ffffff';
 		cx.fillRect(Math.round(cpu), TOP - 6, 1, bot - TOP + 8);
 		const y = bot + 10;
-		cx.font = '10px Menlo, Monaco, monospace';
+		cx.font = '10px ' + MONO;
 		cx.textAlign = 'center';
 		cx.fillText('CPU', Math.max(LEFT + 12, Math.min(cpu, W - 32)), y);
 		if (gpu > s.t + 1e-6) {
@@ -2525,7 +2551,7 @@
 		// the time, and how to move along it
 		const span = v1 - v0, unit = 10 ** Math.floor(Math.log10(span / 6));
 		const tick = unit * [1, 2, 5, 10].find(n => span / (unit * n) <= 8);
-		cx.font = '9px Menlo, Monaco, monospace';
+		cx.font = '9px ' + MONO;
 		cx.fillStyle = 'rgba(232, 235, 231, 0.4)';
 		cx.textAlign = 'center';
 		for (let v = Math.ceil(v0 / tick) * tick; v <= v1 + 1e-12; v += tick) {
@@ -3184,12 +3210,12 @@
 			held: c.bound === 'memory'
 				? 'held by HBM: each GPU reads ' + E.bytes(each(c.weightBytes)) + ' of its ' + E.bytes(SE.WEIGHTS)
 				+ ' of weights, all but the embedding table, and ' + E.bytes(each(c.kvBytes))
-				+ ' of cache, ' + E.time(c.memory) + ' at 3.35 TB/s'
+				+ ' of cache, ' + E.time(c.memory) + ' at ' + E.rate(SE.GPU.bw)
 				: 'held by the tensor cores: ' + exeFmt(Math.round(each(c.matmul + c.attention) / 1e12))
-					+ ' TFLOP a GPU, ' + E.time(c.compute) + ' at 989 TFLOPS',
+					+ ' TFLOP a GPU, ' + E.time(c.compute) + ' at ' + E.fmt(SE.GPU.peak / 1e12) + ' TFLOPS',
 			text: stepNote(f) + ' Tensor parallelism sums the two halves of every layer over NVLink, twice a layer: '
 				+ E.bytes(nvBytes(c)) + ' from each GPU this step, '
-				+ E.time(nvBytes(c) / NVLINK) + ' or more at 450 GB/s, which this model does not time.',
+				+ E.time(nvBytes(c) / NVLINK) + ' or more at ' + E.rate(NVLINK) + ', which this model does not time.',
 		};
 	}
 	// what the step's rows make of the roofline
@@ -3281,7 +3307,7 @@
 		cx.lineWidth = 1.5;
 		cx.strokeRect(cols[at].x0 - 0.5, m.t - 2, cols[at].x1 - cols[at].x0, Hh - m.t - m.b + 2);
 		// the time along the foot, as the timeline under the render keeps it
-		cx.font = '9px Menlo, Monaco, monospace';
+		cx.font = '9px ' + MONO;
 		cx.fillStyle = '#6f7680';
 		cx.textBaseline = 'alphabetic';
 		for (const t of SE.ticks(0, run.S.t)) {
@@ -3360,7 +3386,7 @@
 			p.restore();
 			// the requests by number down the left, the key across the top, and
 			// the time along the foot, in the timeline's own type
-			p.font = '9px Menlo, Monaco, monospace';
+			p.font = '9px ' + MONO;
 			p.fillStyle = 'rgba(232, 235, 231, 0.55)';
 			p.textBaseline = 'middle';
 			p.textAlign = 'right';
@@ -3720,7 +3746,8 @@
 	const OPTIONS = {
 		model: () => Object.entries(MODELS)
 			.map(([name, m]) => [name, E.fmt(m.params / 1e9) + 'B, ' + E.fmt(2 * m.params / 1e9) + ' GB', FOLDER]),
-		device: () => [['cuda', 'H100 SXM5, 79.2 GiB of HBM3', CHIP], ['cpu', 'Xeon 8480C, 2 TiB of DDR5', CHIP]],
+		device: () => [['cuda', 'H100 SXM5, ' + E.bytes(CAP.cuda) + ' of HBM3', CHIP],
+			['cpu', 'Xeon 8480C, ' + E.bytes(CAP.cpu) + ' of DDR5', CHIP]],
 		strategy: () => [['ddp', 'the whole model on each GPU', CHIP],
 			['fsdp', 'half of every tensor on each GPU', CHIP]],
 		// serve.py's, each list simplest first

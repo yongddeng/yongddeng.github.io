@@ -1729,6 +1729,8 @@
 	// the slider for all at one η steps through ETAS, at first at most optimisers' lr
 	rateIn.max = ETAS.length - 1;
 	rateIn.value = ETAS.indexOf(OPTIMISERS[0].lr);
+	// and the loss's through SCALES
+	scaleIn.max = SCALES.length - 1;
 	exeResized(root, draw, $('.exe-body'));
 	paint('cividis');
 	pick('ravine');

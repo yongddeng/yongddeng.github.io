@@ -74,8 +74,10 @@
 	// monitor's picture white, as the programs' panes are
 	const C = { ink: '#000000', mute: '#4d4852', faint: '#9a949a', grid: '#e6e2e6',
 		navy: '#000080', purple: '#800080', gold: '#b8860b', red: '#b00000' };
-	const SMALL = '10px "Helvetica Neue", Arial, sans-serif',
-		FONT = '11px "Helvetica Neue", Arial, sans-serif', MONO = '10px Menlo, Monaco, Consolas, monospace';
+	// the window's own faces, --ui and --mono (_programs.scss)
+	const face = getComputedStyle(root), UI = face.getPropertyValue('--ui').trim(),
+		CODE = face.getPropertyValue('--mono').trim();
+	const SMALL = '10px ' + UI, FONT = '11px ' + UI, MONO = '10px ' + CODE;
 	// the map's: a free block, the gaps between cells, the weights, what
 	// vLLM holds back, the null block, a free block still holding a prefix,
 	// and free blocks too scattered for the next run, hatched the other way
@@ -887,7 +889,7 @@
 			cx.fillRect(x, y, w, h);
 			if (w >= 13) {
 				cx.fillStyle = '#ffffff';
-				cx.font = (w >= 17 ? 9 : 8) + 'px Menlo, Monaco, monospace';
+				cx.font = (w >= 17 ? 9 : 8) + 'px ' + CODE;
 				cx.textAlign = 'center';
 				cx.fillText(ref[b], x + w / 2, y + h / 2 + 3);
 			}
@@ -952,7 +954,7 @@
 				+ fmt(ref[b]) + ' request' + (ref[b] > 1 ? 's' : '') + ' (its reference count)';
 		}
 		return id + 'request ' + (o + 1) + '’s logical block ' + slot[b]
-			+ (kind[b] === KEY.own ? ', full and keyed for reuse' : '') + '; its 16 slots: ' + slotsOf(b);
+			+ (kind[b] === KEY.own ? ', full and keyed for reuse' : '') + '; its ' + BLOCK + ' slots: ' + slotsOf(b);
 	}
 
 	// ---- the map and the GPU over it ----
@@ -1127,7 +1129,8 @@
 		return 'The KV cache, what gpu_memory_utilization ' + E.UTIL
 			+ ' leaves beside the weights, cut into ' + fmt(run.N) + ' blocks of ' + BLOCK + ' tokens'
 			+ (run.nullBlock >= 0 ? ', block 0 vLLM’s null block, so ' + fmt(run.usable) + ' for requests' : '')
-			+ '. A block id names the same slot on both GPUs, each holding its half of the 8 KV heads, '
+			+ '. A block id names the same slot on both GPUs, each holding its half of the '
+			+ E.MODEL.kvHeads + ' KV heads, '
 			+ mib(run.bytes / E.GPUS) + ' a block' + (at.kv === 1 ? ' in fp8' : ' in bf16')
 			+ '; the ids index a tensor, not addresses in DRAM. vLLM’s profiling also sets aside the forward pass’s peak activations, memory outside PyTorch such as the CUDA context and NCCL’s buffers, and in newer versions an estimate for CUDA graphs, '
 			+ 'so a real server holds fewer blocks, the count it logs as it starts; this engine leaves them out';
