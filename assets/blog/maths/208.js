@@ -94,7 +94,7 @@ function controls(el, draw) {
 	const row = figRow(el);
 	const state = { sum: SUMMANDS[0], n: 10 };
 	const pick = presets(row, SUMMANDS.map((sum, i) => [i, sum.label]), i => { state.sum = SUMMANDS[i]; draw(state); });
-	slider(row, 'n', 1, 100, state.n, v => { state.n = v; draw(state); }, { show: v => String(v).padStart(3, ' ') });
+	runSlider(row, slider(row, 'n', 1, 100, state.n, v => { state.n = v; draw(state); }, { show: v => String(v).padStart(3, ' ') }));
 	pick(0);
 }
 const W = 600;

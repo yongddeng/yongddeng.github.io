@@ -107,7 +107,7 @@ FIGS['212/tv'] = el => {
 		out.innerHTML = `‖π(${n}) − π‖ = ${dist[n] < 1e-4 ? dist[n].toExponential(1) : dist[n].toFixed(4)}`;
 	}
 	const pick = presets(row, [['weather', 'Weather'], ['sticky', 'Sticky'], ['swap', 'Swap']], k => { key = k; exact(); draw(); });
-	slider(row, 'n', 0, NMAX, n, v => { n = v; draw(); }, { show: v => String(v).padStart(2, ' ') });
+	runSlider(row, slider(row, 'n', 0, NMAX, n, v => { n = v; draw(); }, { show: v => String(v).padStart(2, ' ') }));
 	const out = reading(row);
 	pick('weather');
 };

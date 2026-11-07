@@ -53,6 +53,6 @@
 	window.addEventListener('scroll', function () {
 		if (phone()) updateAll();
 	}, { passive: true });
-	// MathJax and images change scrollHeight after first paint
+	// The maths and images change scrollHeight after first paint
 	window.addEventListener('load', updateAll);
 })();

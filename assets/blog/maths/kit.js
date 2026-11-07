@@ -98,6 +98,21 @@ function runButton(row, frame) {
 	b.classList.add('fig-run');
 	return { stop };
 }
+// ▶ Run for a slider: moves it a step at a time, as a drag would, across its
+// range in five seconds, and from its start again if it is at its end
+function runSlider(row, inp) {
+	const [min, max, step] = [inp.min, inp.max, inp.step].map(Number);
+	const every = 5000 * step / (max - min);
+	let wait = 0;
+	return runButton(row, dt => {
+		wait += dt;
+		if (wait < every) return true;
+		wait -= every;
+		inp.value = +inp.value >= max ? min : +inp.value + step;
+		inp.dispatchEvent(new Event('input'));
+		return +inp.value < max;
+	});
+}
 
 // ---- drawing ----
 // the whole canvas back to paper

@@ -75,7 +75,7 @@ function rasterFig(el, seq) {
 		label(c, 'before n', G.x0 + G.w + 10, G.y0 + 64);
 		readEl.innerHTML = seq.read(n);
 	}
-	slider(row, 'n', 1, N, seq.start, draw, { show: n => String(n).padStart(2, ' ') });
+	runSlider(row, slider(row, 'n', 1, N, seq.start, draw, { show: n => String(n).padStart(2, ' ') }));
 	const readEl = reading(row);
 	draw(seq.start);
 }
@@ -119,6 +119,6 @@ FIGS['206/quantile'] = el => {
 		label(c, 'Yₙ(ω), the quantile of Sₙ/√n', P.x0 + 8, P.y1 + 14, 'left', COL.black);
 		label(c, 'Φ⁻¹(ω)', P.x0 + 8, P.y1 + 28, 'left', COL.tail);
 	}
-	slider(row, 'n', 1, 120, 6, draw, { show: n => String(n).padStart(3, ' ') + ' coins' });
+	runSlider(row, slider(row, 'n', 1, 120, 6, draw, { show: n => String(n).padStart(3, ' ') + ' coins' }));
 	draw(6);
 };

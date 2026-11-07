@@ -96,17 +96,7 @@ FIGS['210/slices'] = el => {
 	}
 	const pick = presets(row, [['walk', 'Walk'], ['ar', 'AR(1)']], key => { kind = key; sample(); draw(); });
 	button(row, 'Resample', () => { seed += 1; sample(); draw(); });
-	const tIn = slider(row, 't', 1, N, t, v => { t = v; draw(); }, { show: v => String(v).padStart(2, ' ') });
-	// Run moves t along through its slider, a step every 80 ms, from 1 again once at the end
-	let wait = 0;
-	runButton(row, dt => {
-		wait += dt;
-		if (wait < 80) return true;
-		wait = 0;
-		tIn.value = t >= N ? 1 : t + 1;
-		tIn.dispatchEvent(new Event('input'));
-		return t < N;
-	});
+	runSlider(row, slider(row, 't', 1, N, t, v => { t = v; draw(); }, { show: v => String(v).padStart(2, ' ') }));
 	pick('walk');
 };
 

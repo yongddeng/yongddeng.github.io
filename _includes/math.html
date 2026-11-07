@@ -1,0 +1,63 @@
+<script>
+// KaTeX comes with the first maths shown: at once on a use_math page, and
+// from tag-filter.js when a window with maths opens on any other. Its
+// stylesheet and two scripts are pinned by their hashes, and what asked to
+// be typeset waits until all three are in, or have failed.
+var MATH = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/';
+var mathAsked = false, mathWaiting = [];
+function needMath() {
+    if (mathAsked) return;
+    mathAsked = true;
+    var parts = [
+        ['link', 'katex.min.css', 'sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+'],
+        ['script', 'katex.min.js', 'sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg'],
+        ['script', 'contrib/auto-render.min.js', 'sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk']
+    ];
+    var left = parts.length;
+    function arrived() {
+        if (--left) return;
+        var waiting = mathWaiting;
+        mathWaiting = null;
+        waiting.forEach(function (f) { f(); });
+    }
+    parts.forEach(function (p) {
+        var n = document.createElement(p[0]);
+        if (p[0] === 'link') {
+            n.rel = 'stylesheet';
+            n.href = MATH + p[1];
+        } else {
+            n.src = MATH + p[1];
+            // run in order: auto-render needs katex
+            n.async = false;
+        }
+        n.integrity = p[2];
+        n.crossOrigin = 'anonymous';
+        n.onload = n.onerror = arrived;
+        document.head.appendChild(n);
+    });
+}
+// Typesets el once KaTeX is here, then calls then. Without it, blocked or
+// offline, the TeX stays as written and then is still called
+function typesetMath(el, then) {
+    if (mathWaiting) {
+        mathWaiting.push(function () { typesetMath(el, then); });
+        return needMath();
+    }
+    if (window.renderMathInElement) renderMathInElement(el, {
+        delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '\\[', right: '\\]', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\(', right: '\\)', display: false }
+        ],
+        // a prime's ' back from the ’ kramdown's smart quotes make of it,
+        // since kramdown does not read $…$ as maths
+        macros: { '’': "'" },
+        // maths already typeset, when a window is typeset again
+        ignoredClasses: ['katex']
+    });
+    if (then) then();
+}
+{% if page.use_math %}needMath();
+document.addEventListener('DOMContentLoaded', function () { typesetMath(document.body); });{% endif %}
+</script>

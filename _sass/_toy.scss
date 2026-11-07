@@ -537,10 +537,9 @@ $toy-scale: 0.9;
 
 	i { font-style: normal; font-weight: bold; color: main.$navy; }
 }
-// the size MathJax comes to against the maths posts' text
+// its size is every page's maths (_main.scss)
 .toy .katex {
 	color: inherit;
-	font-size: 1.09em;
 }
 
 // the cells: the step's numbers as an SVG, each cell keyed to a cube

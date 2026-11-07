@@ -587,6 +587,12 @@ ul.topbar {
 .kw-flash {
 	background: #ffff00;
 }
+// KaTeX's maths at 1.09 of the text around it, the size MathJax drew it
+// beside Georgia, not KaTeX's own 1.21. Its stylesheet comes after this
+// one with a rule of the same weight, hence the html
+html .katex {
+	font-size: 1.09em;
+}
 .post_list, .post_content {
 	background: var(--paper, #fbfafb);
 	@include bevel(false, ridge groove groove ridge);

@@ -80,7 +80,7 @@
 		return many(ps.length, kind) + ', ' + (ns.length === 1 ? ns[0] : ns[0] + ' to ' + ns[ns.length - 1]);
 	}
 
-	// an element marked data-tex stays unshown until it is typeset (mathjax.html)
+	// an element marked data-tex stays unshown until it is typeset (math.html)
 	function typeset(el, then) {
 		typesetMath(el, () => {
 			el.querySelectorAll('[data-tex]').forEach(t => t.removeAttribute('data-tex'));
@@ -380,7 +380,7 @@
 					+ '<span class="mt">' + p.type + ' · ' + p.size + ' · ' + p.xp.created + '</span></span></a></li>';
 			}).join('') + '</ul>').join('');
 		pane.style.visibility = '';
-		// MathJax loads only once a row with TeX scrolls near
+		// KaTeX loads only once a row with TeX scrolls near
 		const tex = pane.querySelectorAll('[data-tex]');
 		if (!tex.length || !window.IntersectionObserver) return;
 		const io = new IntersectionObserver(seen => {

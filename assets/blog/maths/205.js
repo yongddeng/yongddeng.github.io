@@ -154,6 +154,6 @@ FIGS['205/curve'] = el => {
 		label(c, `sup |φₙ − exp(−t²/2)| = ${sup.toFixed(3)}`, R.x0, R.y0 + 32, 'left', COL.black);
 	}
 	const pick = presets(row, Object.keys(LAWS).map(name => [name, name]), name => { law = name; draw(); });
-	slider(row, 'n', 1, 100, n, v => { n = v; draw(); }, { show: v => String(v).padStart(3, ' ') });
+	runSlider(row, slider(row, 'n', 1, 100, n, v => { n = v; draw(); }, { show: v => String(v).padStart(3, ' ') }));
 	pick(law);
 };

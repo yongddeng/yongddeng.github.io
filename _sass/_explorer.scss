@@ -275,7 +275,7 @@ $xp-tip: Verdana, Tahoma, main.$ui;
 	}
 }
 
-// TeX stays unshown until MathJax has typeset it
+// TeX stays unshown until KaTeX has typeset it
 .wrapper [data-tex],
 .xp-tip [data-tex] {
 	visibility: hidden;

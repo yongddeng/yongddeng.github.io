@@ -164,6 +164,6 @@ FIGS['211/upcrossings'] = el => {
 	}
 	const pick = presets(row, [['walk', 'Walk'], ['urn', 'Pólya urn']], key => { kind = key; exact(); sample(); draw(); });
 	button(row, 'Resample', () => { seed += 1; sample(); draw(); });
-	slider(row, 'n', 10, N, n, v => { n = v; draw(); }, { show: v => String(v).padStart(3, ' ') });
+	runSlider(row, slider(row, 'n', 10, N, n, v => { n = v; draw(); }, { show: v => String(v).padStart(3, ' ') }));
 	pick('walk');
 };

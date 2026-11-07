@@ -25,7 +25,7 @@
   }
 
   // Fill a container with a fetched post, links disabled the way a
-  // preview wants, scrolled to the referenced section once MathJax
+  // preview wants, scrolled to the referenced section once KaTeX
   // has settled the heights
   function fillPreview(body, html, section) {
     body.innerHTML = html;
