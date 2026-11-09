@@ -207,7 +207,10 @@
 			txt(x + w - 8, y + h - 6, 'open ▸', 'opn', 'end');
 			o.push('</g>');
 		}
-		const normName = NORMN[m.norm].replace(', zero-centred', ' (0-centred)');
+		// a norm's box, 20 high from y; a kind named in two parts (RMSNorm, zero-centred) takes the second on a line of its own,
+		// in a box 26 high round the same middle
+		const [normName, normNote = ''] = NORMN[m.norm].split(', ');
+		const normBox = (x, y, w, key) => box(x, normNote ? y - 3 : y, w, normNote ? 26 : 20, 'norm', normName, normNote, c.norm, key);
 		o.push(`<path d="M${TX},556V${post ? 34 : 42}" class="trunk"/>`);
 		txt(TX, 566, 'tokens in', 'io', 'middle'); txt(TX + 70, 12, 'next-token distribution →', 'io', 'start');
 		box(22, 512, 116, 26, 'emb', 'Embedding', `V = ${n(m.vocab.n)}`, c.embed, 'emb');
@@ -219,31 +222,31 @@
 		txt(TX + 6, 464, 'residual stream', 'axis'); txt(BX + 43, 464, 'branch', 'axis', 'middle');
 		o.push(`<text x="502" y="${fy0 + 14}" class="fl${c.layers ? ' chgt' : ''}" text-anchor="end">× ${m.layers} layers${m.full_layers ? `, ${m.full_layers} of them with full attention` : ''}${m.dense_first ? ` · the first ${m.dense_first} with a dense FFN` : ''}${m.moe_every ? ' · experts in every other layer' : ''}</text>`);
 		if (m.par) {
-			ln(`M${TX},432H${BX}`); box(BX, 422, 86, 20, 'norm', normName, '', c.norm, 'n1');
+			ln(`M${TX},432H${BX}`); normBox(BX, 422, 86, 'n1');
 			ln(`M${BX + 43},422V412H422V400`); ln(`M${BX + 43},412V400`);
 			ln(`M${BX + 43},400V380`); ln(`M422,400V380`);
 			attnBox(BX, 250, 165, 130, true); ffnBox(340, 250, 165, 130, true);
 			ln(`M${BX + 43},250V230H${TX + 8}`); ln(`M422,250V230`); ln(`M${BX + 43},230H422`); plus(TX, 230);
-			box(22, 58, 116, 20, 'norm', 'Final ' + normName, '', c.norm, 'fn'); up(TX, 80);
+			normBox(22, 58, 116, 'fn'); up(TX, 80);
 		} else if (!post) {
-			if (m.pre) { ln(`M${TX},432H${BX}`); box(BX, 422, 86, 20, 'norm', normName, '', c.norm, 'n1'); ln(`M${BX + 43},422V410`); } else ln(`M${TX},432H${BX + 43}V410`);
+			if (m.pre) { ln(`M${TX},432H${BX}`); normBox(BX, 422, 86, 'n1'); ln(`M${BX + 43},422V410`); } else ln(`M${TX},432H${BX + 43}V410`);
 			attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${TX + 8}`); plus(TX, 300);
-			if (m.norm_after) box(100, 290, 86, 20, 'norm', normName, '', c.norm, 'na1');
-			if (m.pre) { ln(`M${TX},272H${BX}`); box(BX, 262, 86, 20, 'norm', normName, '', c.norm, 'n2'); ln(`M${BX + 43},262V250`); } else ln(`M${TX},272H${BX + 43}V250`);
+			if (m.norm_after) normBox(100, 290, 86, 'na1');
+			if (m.pre) { ln(`M${TX},272H${BX}`); normBox(BX, 262, 86, 'n2'); ln(`M${BX + 43},262V250`); } else ln(`M${TX},272H${BX + 43}V250`);
 			ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${TX + 8}`); plus(TX, 140);
-			if (m.norm_after) box(100, 130, 86, 20, 'norm', normName, '', c.norm, 'na2');
-			box(22, 58, 116, 20, 'norm', 'Final ' + normName, '', c.norm, 'fn'); up(TX, 80);
+			if (m.norm_after) normBox(100, 130, 86, 'na2');
+			normBox(22, 58, 116, 'fn'); up(TX, 80);
 		} else if (m.xattn) {
 			// the Transformer's decoder: masked self-attention, cross-attention to the encoder, then the MLP, a norm on the trunk after each
-			ln(`M${TX},432H${BX + 43}V412`); attnBox(BX, 326, BW, 86, false); ln(`M${BX + 43},326V314H${TX + 8}`); plus(TX, 314); box(TX - 43, 288, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n1');
+			ln(`M${TX},432H${BX + 43}V412`); attnBox(BX, 326, BW, 86, false); ln(`M${BX + 43},326V314H${TX + 8}`); plus(TX, 314); normBox(TX - 43, 288, 86, 'n1');
 			ln(`M${TX},272H${BX + 43}V260`);
 			box(BX, 212, BW, 48, 'xattn', 'Cross-attention', 'reads the encoder output', false, 'xa');
-			ln(`M${BX + 43},212V200H${TX + 8}`); plus(TX, 200); box(TX - 43, 176, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'nx');
-			ln(`M${TX},164H${BX + 43}V152`); ffnBox(BX, 84, BW, 68, false); ln(`M${BX + 43},84V72H${TX + 8}`); plus(TX, 72); box(TX - 43, 48, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n2');
+			ln(`M${BX + 43},212V200H${TX + 8}`); plus(TX, 200); normBox(TX - 43, 176, 86, 'nx');
+			ln(`M${TX},164H${BX + 43}V152`); ffnBox(BX, 84, BW, 68, false); ln(`M${BX + 43},84V72H${TX + 8}`); plus(TX, 72); normBox(TX - 43, 48, 86, 'n2');
 		} else {
 			// post-norm decoder-only (GPT-1): the same two sub-blocks as pre-norm, with the norm on the trunk after each add
-			ln(`M${TX},432H${BX + 43}V410`); attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${TX + 8}`); plus(TX, 300); box(TX - 43, 268, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n1');
-			ln(`M${TX},256H${BX + 43}V250`); ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${TX + 8}`); plus(TX, 140); box(TX - 43, 108, 86, 20, 'norm', 'LayerNorm', '', c.norm, 'n2');
+			ln(`M${TX},432H${BX + 43}V410`); attnBox(BX, 310, BW, 100, false); ln(`M${BX + 43},310V300H${TX + 8}`); plus(TX, 300); normBox(TX - 43, 268, 86, 'n1');
+			ln(`M${TX},256H${BX + 43}V250`); ffnBox(BX, 150, BW, 100, false); ln(`M${BX + 43},150V140H${TX + 8}`); plus(TX, 140); normBox(TX - 43, 108, 86, 'n2');
 		}
 		box(22, post ? 8 : 16, 116, 26, 'head', 'Linear · softmax', 'over the vocabulary', false, 'head');
 		if (post) up(TX, 36);
