@@ -817,6 +817,65 @@ html .katex {
 			padding: 3px 18px;
 		}
 	}
+
+	// the Screen Saver tab (saver.js): the saver in a monitor over its choice
+	.set-monitor {
+		width: 184px;
+		margin: 0 auto 12px;
+		padding: 10px 10px 14px;
+		@include bevel;
+
+		canvas {
+			display: block;
+			width: 100%;
+			aspect-ratio: 4 / 3;
+			background: var(--desk, #008082);
+			@include bevel(false);
+		}
+	}
+	.set-ssrow {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+
+		select {
+			flex: 1;
+		}
+		.set-preview {
+			padding: 3px 12px;
+		}
+	}
+	.set-about {
+		margin: 8px 0 10px;
+		line-height: 1.45;
+	}
+	// its fields sunken as the Find dialog's, in the dialog's type
+	select, input[type="number"] {
+		height: 20px;
+		box-sizing: border-box;
+		padding: 0 2px;
+		background: #ffffff;
+		@include bevel(false);
+		border-radius: 0;
+		font: inherit;
+	}
+	input[type="number"] {
+		width: 46px;
+	}
+}
+// a saver over the whole screen (saver.js), until the reader moves
+.saver-cover {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	background: #000000;
+	cursor: none;
+
+	canvas {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
 }
 // Win95 error box (tag-filter.js showError)
 .err-win {
@@ -863,6 +922,7 @@ html .katex {
 	}
 }
 .content.settings-win .set-btnrow button,
+.content.settings-win .set-preview,
 .err-win .err-btnrow button {
 	background: $face;
 	@include bevel;

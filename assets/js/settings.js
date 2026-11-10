@@ -1,5 +1,6 @@
 // Start → System Properties: General is the About sheet, Settings holds
-// the controls. Persisted in localStorage, applied pre-paint from <head>.
+// the controls, and Screen Saver the saver and its wait (saver.js).
+// Persisted in localStorage, applied pre-paint from <head>.
 (function () {
 	var DEFAULTS = deskSettings.DEFAULTS, get = deskSettings.get;
 
@@ -37,6 +38,68 @@
 			+ '</div></fieldset>';
 	}
 
+	// saver.js, fetched the first time it is wanted: by the Screen Saver tab,
+	// or by the wait running out
+	var saverJs = null;
+	function withSaver(then) {
+		saverJs = saverJs || new Promise(function (ok) {
+			var s = document.createElement('script');
+			s.src = '/assets/js/saver.js';
+			s.onload = ok;
+			document.head.appendChild(s);
+		});
+		saverJs.then(then);
+	}
+
+	// The Screen Saver tab: the saver chosen running in the monitor while the
+	// tab is on show, what it draws, a preview and the wait
+	function saverPane(pane) {
+		withSaver(function () {
+			var S = saver.SAVERS;
+			pane.innerHTML = '<div class="set-monitor"><canvas></canvas></div>'
+				+ '<fieldset><legend>Screen Saver</legend>'
+				+ '<div class="set-ssrow"><select><option value="none">(None)</option><option value="random">Random</option>'
+				+ Object.keys(S).map(function (k) { return '<option value="' + k + '">' + S[k].name + '</option>'; }).join('')
+				+ '</select><button type="button" class="set-preview">Preview</button></div>'
+				+ '<p class="set-about"></p>'
+				+ '<label>Wait <input type="number" min="1" max="60"> minutes</label>'
+				+ '</fieldset>';
+			var canvas = pane.querySelector('canvas'), pick = pane.querySelector('select'), wait = pane.querySelector('input');
+			var stop = null, seen = false;
+			function monitor() {
+				if (stop) stop();
+				stop = null;
+				canvas.width = canvas.width;
+				if (seen && pick.value !== 'none') stop = saver.run(canvas, pick.value, false);
+			}
+			function about() {
+				var k = pick.value;
+				pane.querySelector('.set-about').textContent = S[k] ? S[k].about : k === 'random' ? 'One of the four, picked each time the saver comes on.' : 'No screen saver.';
+				pane.querySelector('.set-preview').disabled = k === 'none';
+				monitor();
+			}
+			pick.value = get('saver');
+			wait.value = get('wait');
+			pick.addEventListener('change', function () {
+				set('saver', pick.value);
+				about();
+			});
+			wait.addEventListener('change', function () {
+				var v = parseInt(wait.value, 10);
+				wait.value = isNaN(v) ? DEFAULTS.wait : Math.max(1, Math.min(60, v));
+				set('wait', wait.value);
+			});
+			pane.querySelector('.set-preview').addEventListener('click', function () {
+				saver.show(pick.value);
+			});
+			new IntersectionObserver(function (es) {
+				seen = es[0].isIntersecting;
+				monitor();
+			}).observe(canvas);
+			about();
+		});
+	}
+
 	function generalPane() {
 		var postCount = window.searchIndex.length;
 		return '<div class="set-sysrow">'
@@ -63,6 +126,7 @@
 			+ '<div class="set-tabs">'
 			+ '<span class="set-tab on">General</span>'
 			+ '<span class="set-tab">Settings</span>'
+			+ '<span class="set-tab">Screen Saver</span>'
 			+ '</div>'
 			+ '<div class="set-body">'
 
@@ -81,6 +145,8 @@
 			+ '</div></fieldset>'
 			+ '</div>'
 
+			+ '<div class="set-pane"></div>'
+
 			+ '</div>'
 			+ '<div class="set-btnrow"><button class="set-reset">Restore defaults</button>'
 			+ '<button class="set-ok">OK</button></div>'
@@ -98,6 +164,7 @@
 				panes[i].classList.add('on');
 			});
 		});
+		tabs[2].addEventListener('click', function () { saverPane(panes[2]); }, { once: true });
 
 		win.querySelector('.set-swatches').addEventListener('click', function (e) {
 			var sw = e.target.closest('.set-sw');
@@ -175,4 +242,27 @@
 		e.preventDefault();
 		openSettings();
 	});
+
+	// The saver chosen comes on after the wait with no key, pointer or wheel,
+	// as Windows' did, and only in a tab on show: hiding it stops the wait and
+	// showing it starts the wait over. Read once and again on a change, not on
+	// every move
+	var idleT = 0, chosen = get('saver'), minutes = +get('wait');
+	function idle() {
+		clearTimeout(idleT);
+		if (chosen === 'none' || document.hidden) return;
+		idleT = setTimeout(function () {
+			withSaver(function () { saver.show(chosen, idle); });
+		}, minutes * 60000);
+	}
+	['pointermove', 'pointerdown', 'keydown', 'wheel'].forEach(function (t) {
+		document.addEventListener(t, idle, { capture: true, passive: true });
+	});
+	document.addEventListener('visibilitychange', idle);
+	document.addEventListener('settings:changed', function () {
+		chosen = get('saver');
+		minutes = +get('wait');
+		idle();
+	});
+	idle();
 })();
