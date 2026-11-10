@@ -10,18 +10,21 @@
 
   var cache = {};
 
-  // Fetch and cache a post's content, shared by the desktop tooltip
-  // and the phone peek sheet
-  function fetchPost(id, cb) {
-    if (cache[id]) return cb(cache[id]);
-    fetch(refs[id].url)
+  // Fetch and cache a post's content, shared by the desktop tooltip, the
+  // phone peek sheet and What's This? (whatsthis.js)
+  window.fetchPostContent = function (url, cb) {
+    if (url in cache) return cb(cache[url]);
+    fetch(url)
       .then(function (r) { return r.text(); })
       .then(function (html) {
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var pc = doc.querySelector('.post_content');
-        cache[id] = pc ? pc.innerHTML : '';
-        cb(cache[id]);
+        cache[url] = pc ? pc.innerHTML : '';
+        cb(cache[url]);
       });
+  };
+  function fetchPost(id, cb) {
+    fetchPostContent(refs[id].url, cb);
   }
 
   // Fill a container with a fetched post, links disabled the way a

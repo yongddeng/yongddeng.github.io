@@ -1307,7 +1307,7 @@ $det-date: 88px;   // 2026-01-01
 .wt-on, .wt-on * {
 	cursor: help;
 }
-.wt-on [data-wt] {
+.wt-on [data-wt]:not(.wt-term) {
 	position: relative;
 
 	&::after {
@@ -1318,6 +1318,14 @@ $det-date: 88px;   // 2026-01-01
 		pointer-events: none;
 	}
 	&.wt-at::after {
+		background: rgba(0, 0, 128, 0.2);
+	}
+}
+// a term, which may break across lines, tinted as text is
+.wt-on .wt-term {
+	background: rgba(0, 0, 128, 0.1);
+
+	&.wt-at {
 		background: rgba(0, 0, 128, 0.2);
 	}
 }
@@ -1335,6 +1343,37 @@ $det-date: 88px;   // 2026-01-01
 
 	p + p {
 		margin-top: 6px;
+	}
+}
+// a term's card, the statement that defines it set as its post sets it
+.wt-def {
+	font-family: var(--font, inherit);
+	font-size: var(--text, 12px);
+	line-height: 150%;
+
+	.wt-from {
+		margin-bottom: 4px;
+		color: $mute;
+		font: 11px $ui;
+	}
+	p, ul, ol {
+		margin-bottom: 6px;
+	}
+	ul {
+		list-style: square;
+		margin-left: 18px;
+	}
+	em {
+		font-style: italic;
+	}
+	strong {
+		font-weight: 700;
+	}
+	.wt-mark {
+		background: #fff0a0;
+	}
+	> .st:last-child {
+		margin-bottom: 0;
 	}
 }
 

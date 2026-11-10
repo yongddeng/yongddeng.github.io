@@ -182,7 +182,7 @@
 				<a href="/"><div class="btn"><span class="cap-x"></span></div></a>
 				<div class="btn btn_max"><span class="cap-max"></span></div>
 				<div class="btn btn_min"><span class="cap-min"></span></div>
-				{% if content contains 'data-wt=' %}<button type="button" class="btn btn_help" aria-pressed="false" aria-keyshortcuts="?" title="What's This? (?)"><span class="cap-help"></span></button>{% endif %}
+				{% if content contains 'data-wt=' or page.tags contains 'maths200' %}<button type="button" class="btn btn_help" aria-pressed="false" aria-keyshortcuts="?" title="What's This? (?)"><span class="cap-help"></span></button>{% endif %}
 			</div>
 			{% unless page.winclass %}<div class="read-prog">{% for i in (1..18) %}<i></i>{% endfor %}</div>{% endunless %}
 			<ul class="topbar">

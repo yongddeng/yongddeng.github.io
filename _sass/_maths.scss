@@ -2,16 +2,16 @@
 // head (Definition., Theorem (…)., Example., Remark.) and the display or
 // list that completes it in a .st block; definitions, results and examples
 // are tinted by kind, and a proof, the <details> after a statement, hangs
-// from it folded, in grey. The blocks are the post's own children, or a §
-// preview's, which keeps these rules off any .st an interactive post draws
-// inside itself
+// from it folded, in grey. The blocks are the post's own children, a §
+// preview's or a What's This? card's, which keeps these rules off any .st an
+// interactive post draws inside itself
 $st-gap: 15px;
 // the tints, which 301's side pane shares (_toy.scss)
 $tint-def: #edf1f9;
 $tint-thm: #fbf5de;
 $tint-ex: #ebf4ea;
 
-.post_content, .xref-tip-body {
+.post_content, .xref-tip-body, .wt-def {
 	> .st {
 		margin-bottom: $st-gap;
 
