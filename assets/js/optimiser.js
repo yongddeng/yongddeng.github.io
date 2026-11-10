@@ -1498,7 +1498,8 @@
 		meshing();
 		lows = surf.lows && Array.from({ length: 201 }, (_, n) => surf.lows(n / 200)).map(p => (inBox(p) ? p : null));
 		noise();
-		$$('.exe-note[data-for]').forEach(p => p.classList.toggle('on', p.dataset.for === key));
+		// the map's What's This? card tells of the surface on it
+		$$('[data-note][data-for]').forEach(p => { p.hidden = p.dataset.for !== key; });
 		$('.opt-caption').textContent = 'Maps: L − L* at step ' + exeFmt(surf.steps) + ' by η across and the navy knob down · lighter is lower · × diverged · outlined, the sliders · click a cell to set them';
 		restart();
 	}
@@ -1513,9 +1514,8 @@
 		back: n => goTo(t - n),
 		next: n => goTo(t + n),
 		end: () => goTo(surf.steps),
-		help: () => help(),
 	};
-	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end', '?': 'help' };
+	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end' };
 	for (const b of $$('.exe-run, .exe-buttons [data-act]')) b.addEventListener('click', () => ACTS[b.dataset.act](1));
 	// the keys wherever the focus is in the window but on a control, whose
 	// keys are its own; presses keep them with the window but for a slider's
@@ -1656,8 +1656,6 @@
 	});
 
 	// ---- the panes' controls ----
-	// the surface's note and the credits, in a balloon from the ? on the map
-	const help = exeHelp(root);
 	// the palettes, a chip each in the map's corner, its heat ramp on it
 	chips.innerHTML = Object.entries(PALETTES).map(([key, p]) => '<button type="button" data-palette="' + key + '" title="' + p.name + '" aria-label="' + p.name
 		+ '" style="background:linear-gradient(to right,' + p.heat.map(css).join(',') + ')"></button>').join('');

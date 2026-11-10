@@ -8,7 +8,7 @@ winclass: exe-win trn-win
 description: A Llama trained a line at a time in a debugger beside the H100 server it runs on, drawn in 3D from the board down to one SM; train.py on one device, the GPU or the CPU, fed by a DataLoader or by GPUDirect Storage, and train_dist.py on both GPUs by DDP or FSDP; the model, the device, the strategy, the batch size and checkpointing set in the code as it runs, each line's copies lit on the render, timed on a timeline that shows the CPU running ahead of the GPU, and charted in memory, to the line where PyTorch would run out of it. A third script, serve.py, serves thirty chats to Llama 3.1 70B over both GPUs with vLLM's engine, from static batches to chunked prefill, stepped into its scheduler, its KV cache charted in the same panel.
 ---
 
-<div class="exe trn" tabindex="0" aria-label="device.exe: Space or F5 runs on through the lines and pauses, the right arrow or F10 runs the next line, the left arrow steps back, F11 steps into the forward pass and Shift+F11 out of it, Home and End go to the first and last line; in serve.py the arrows step through the engine’s steps and F11 steps into engine.step() and the scheduler; T hides the timeline, M the Memory panel, the question mark explains the line">
+<div class="exe trn" tabindex="0" aria-label="device.exe: Space or F5 runs on through the lines and pauses, the right arrow or F10 runs the next line, the left arrow steps back, F11 steps into the forward pass and Shift+F11 out of it, Home and End go to the first and last line; in serve.py the arrows step through the engine’s steps and F11 steps into engine.step() and the scheduler; T hides the timeline, M the Memory panel, E explains the line">
 <div class="lit-tool">
 <button type="button" class="lit-btn exe-run" data-act="run" title="Run on through the lines, as the debugger’s Continue does, to the last or to an error (Space or F5); again to pause">&#9654; Run</button>
 <span class="exe-buttons">
@@ -50,7 +50,7 @@ description: A Llama trained a line at a time in a debugger beside the H100 serv
 <div class="trn-tags" aria-hidden="true"></div>
 <div class="trn-over">
 <section class="trn-hud">
-<p class="trn-what"><i data-out="swatch"></i><b data-out="short"></b><span data-out="time"></span><button type="button" class="trn-more" data-act="explain" aria-expanded="false" aria-label="What this line does" title="What this line does (?)">?</button></p>
+<p class="trn-what"><i data-out="swatch"></i><b data-out="short"></b><span data-out="time"></span><button type="button" class="trn-more" data-act="explain" aria-expanded="false" title="What this line does (E)"><svg viewBox="0 0 8 8" aria-hidden="true"><path d="M2 0l4 4-4 4z"/></svg>Explain</button></p>
 <div class="trn-why">
 <p class="trn-cpu" data-out="cpu"></p>
 <p class="trn-held" data-out="held"></p>

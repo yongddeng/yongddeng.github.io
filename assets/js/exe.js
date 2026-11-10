@@ -2,9 +2,10 @@
 // init.js, device.js): a place in their window's status bar beside the
 // note they draw for, canvases drawn at the screen's density and drawn again as
 // they resize, the hatching for room set aside that nothing fills, toggles
-// pressed, the notes in a balloon from a ?, a player's seek bar, transport and
-// Run, and chance and numbers as they draw and write them. Declared as functions,
-// as the desktop runs this file again for each window.
+// pressed, a player's seek bar, transport and Run, and chance and numbers as
+// they draw and write them. Declared as functions, as the desktop runs this
+// file again for each window. Their notes are What's This? cards
+// (whatsthis.js).
 
 // The note's link moves into the status bar and opens the note in a window of
 // its own, as My Computer does. Returns a setter for the bar's first cell, which
@@ -128,25 +129,6 @@ function exeRunning(button, on) {
 function exePress(button, on) {
 	button.classList.toggle('on', on);
 	button.setAttribute('aria-pressed', on);
-}
-
-// The notes in a balloon from the window's ?, which opens and shuts them;
-// Escape shuts them. Returns the same, the balloon opened as given or else the
-// other way from how it is, for a program that gives the ? a key
-function exeHelp(root) {
-	const button = root.querySelector('.exe-help'), balloon = root.querySelector('.exe-balloon');
-	function help(open) {
-		if (open === undefined) open = balloon.hidden;
-		balloon.hidden = !open;
-		button.setAttribute('aria-expanded', open);
-	}
-	button.addEventListener('click', function () {
-		help();
-	});
-	root.addEventListener('keydown', function (e) {
-		if (e.key === 'Escape') help(false);
-	});
-	return help;
 }
 
 // A seeded uniform on [0, 1) (mulberry32), so that a draw is the same on every

@@ -691,7 +691,6 @@
 		update(false);
 	});
 
-	exeHelp(root);
 	exeResized(root, draw, $('.exe-body'));
 	update(true);
 })();

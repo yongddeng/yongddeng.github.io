@@ -163,7 +163,6 @@
 		pressed();
 		draw();
 	}));
-	exeHelp(root);
 	exeResized(root, draw, $('.exe-body'));
 	pressed();
 	walk();

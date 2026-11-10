@@ -214,44 +214,6 @@ $exe-mute: #4d4852;
 	font-size: 11.5px;
 	line-height: 1.45;
 }
-// the notes in a balloon from a ?, as Windows 98's tooltips were
-.exe .exe-help {
-	width: 18px;
-	height: 18px;
-	padding: 0;
-	border: 1px solid #000000;
-	border-radius: 50%;
-	font: bold 11px main.$ui;
-	color: #000000;
-	background: main.$note;
-	cursor: pointer;
-
-	&[aria-expanded="true"] {
-		color: main.$note;
-		background: #000000;
-	}
-}
-.exe-balloon {
-	position: absolute;
-	z-index: 4;
-	overflow: auto;
-	padding: 6px 2px 3px;
-	background: main.$note;
-	border: 1px solid #000000;
-	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
-}
-// the ? at the end of a toolbar's row, its balloon over the top right of the
-// panes under it, unless the program places them elsewhere
-.exe .lit-tool > .exe-help {
-	margin-left: auto;
-}
-.exe-body > .exe-balloon {
-	top: 4px;
-	right: 4px;
-	width: min(480px, calc(100% - 8px));
-	max-height: calc(100% - 8px);
-}
-
 // a window that takes the keys, Space and the arrows, shows when it has them
 // from the keyboard
 .exe[tabindex] {
@@ -396,24 +358,6 @@ $exe-mute: #4d4852;
 		outline-offset: 1px;
 	}
 }
-// the ? in the map's corner, its balloon over the map
-.opt .exe-help {
-	position: absolute;
-	right: 6px;
-	bottom: 6px;
-}
-.opt .exe-balloon {
-	right: 6px;
-	bottom: 30px;
-	width: min(560px, calc(100% - 12px));
-	max-height: calc(100% - 40px);
-
-	// the note for the surface on show
-	.exe-note[data-for]:not(.on) {
-		display: none;
-	}
-}
-
 // the rates, the schedule and the noise, on a row of their own over the cards they act on
 .opt .opt-hyper {
 	margin-top: 3px;
@@ -2125,26 +2069,31 @@ $exe-mute: #4d4852;
 		white-space: nowrap;
 	}
 }
+// Explain, a fold as the Memory panel's, its triangle down while the line is
+// explained
 .trn-more {
 	flex: none;
 	align-self: center;
-	width: 17px;
-	height: 17px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 	padding: 0;
 	background: none;
-	border: 1px solid rgba(232, 235, 231, 0.35);
-	border-radius: 50%;
-	color: #e8ebe7;
-	font: 600 10.5px/15px main.$ui;
+	border: 0;
+	color: #c5c5c5;
+	font: 11.5px main.$ui;
 	cursor: pointer;
 
-	&:hover {
-		border-color: rgba(232, 235, 231, 0.7);
+	svg {
+		width: 8px;
+		height: 8px;
+		fill: currentColor;
 	}
-	&[aria-expanded="true"] {
-		background: #e8ebe7;
-		border-color: #e8ebe7;
-		color: #090b0d;
+	&:hover {
+		color: #e8ebe7;
+	}
+	&[aria-expanded="true"] svg {
+		transform: rotate(90deg);
 	}
 }
 .trn-why {

@@ -182,6 +182,7 @@
 				<a href="/"><div class="btn"><span class="cap-x"></span></div></a>
 				<div class="btn btn_max"><span class="cap-max"></span></div>
 				<div class="btn btn_min"><span class="cap-min"></span></div>
+				{% if content contains 'data-wt=' %}<button type="button" class="btn btn_help" aria-pressed="false" aria-keyshortcuts="?" title="What's This? (?)"><span class="cap-help"></span></button>{% endif %}
 			</div>
 			{% unless page.winclass %}<div class="read-prog">{% for i in (1..18) %}<i></i>{% endfor %}</div>{% endunless %}
 			<ul class="topbar">
@@ -263,6 +264,7 @@
 	<script src="/assets/js/explorer.js"></script>
 	<script src="/assets/js/sheet.js"></script>
 	<script src="/assets/js/xref.js"></script>
+	<script src="/assets/js/whatsthis.js"></script>
 	<script src="/assets/js/toc.js"></script>
 	<script src="/assets/js/find.js"></script>
 	<script src="/assets/js/fold.js"></script>

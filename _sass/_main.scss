@@ -29,7 +29,7 @@ $title-bar: linear-gradient(to right, #00007f, #1084d0);
 // Caption glyphs as Marlett draws them, pixel for pixel, in the button's
 // 13x11 face: an icon font for three glyphs weighed 84 KB
 @mixin caption-glyphs {
-	.cap-x, .cap-max, .cap-min {
+	.cap-x, .cap-max, .cap-min, .cap-help {
 		display: block;
 		position: static;
 		width: 13px;
@@ -43,6 +43,9 @@ $title-bar: linear-gradient(to right, #00007f, #1084d0);
 	}
 	.cap-min {
 		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='2'%3E%3Cpath d='M0 0h6v2H0z'/%3E%3C/svg%3E") no-repeat 2px 7px;
+	}
+	.cap-help {
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='9' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h4v1H1zM0 1h2v1H0zM4 1h2v1H4zM4 2h2v1H4zM3 3h2v1H3zM2 4h2v2H2zM2 7h2v2H2z'/%3E%3C/svg%3E") no-repeat 3px 1px;
 	}
 }
 
@@ -400,6 +403,17 @@ body {
 	.btn:active {
 		width: 12px;
 		height: 10px;
+	}
+
+	// What's This? (whatsthis.js), held in while it is on
+	.btn_help {
+		box-sizing: content-box;
+		margin-right: 2px;
+		padding: 0;
+
+		&[aria-pressed="true"] {
+			@include pressed;
+		}
 	}
 }
 // Notepad-style menu bar: File (date, close), Edit (find), View (outline)
@@ -1286,6 +1300,42 @@ $det-date: 88px;   // 2026-01-01
 .xref {
 	cursor: help;
 	border-bottom: 1px dotted #888;
+}
+
+// What's This? (whatsthis.js): while it is on, the parts with a card are
+// tinted over whatever they draw, the one whose card is open the deeper
+.wt-on, .wt-on * {
+	cursor: help;
+}
+.wt-on [data-wt] {
+	position: relative;
+
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 128, 0.1);
+		pointer-events: none;
+	}
+	&.wt-at::after {
+		background: rgba(0, 0, 128, 0.2);
+	}
+}
+.wt-card {
+	position: fixed;
+	z-index: 999;
+	width: min(400px, calc(100vw - 16px));
+	max-height: 60vh;
+	overflow: auto;
+	padding: 6px 10px;
+	background: $note;
+	border: 1px solid #000000;
+	box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
+	font: 12px/1.5 $ui;
+
+	p + p {
+		margin-top: 6px;
+	}
 }
 
 .xref-tip {

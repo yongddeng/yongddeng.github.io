@@ -4017,7 +4017,7 @@
 			: e.key === 'Home' ? reset
 			: e.key === 'End' ? end
 			: e.key === 't' || e.key === 'T' ? () => timeline()
-			: e.key === '?' ? ACT.explain
+			: e.key === 'e' || e.key === 'E' ? ACT.explain
 			: e.key === 'm' || e.key === 'M' ? ACT.fold
 			: null;
 		if (!act) return;
