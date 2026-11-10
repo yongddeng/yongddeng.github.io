@@ -5,6 +5,8 @@
 // from it folded, in grey. The blocks are the post's own children, a §
 // preview's or a What's This? card's, which keeps these rules off any .st an
 // interactive post draws inside itself
+@use "main";
+
 $st-gap: 15px;
 // the tints, which 301's side pane shares (_toy.scss)
 $tint-def: #edf1f9;
@@ -26,7 +28,8 @@ $tint-ex: #ebf4ea;
 	> .st-thm { background: $tint-thm; }
 	> .st-ex { background: $tint-ex; }
 
-	> .st + details {
+	// a proof, and the Lean under it (lean.js)
+	> .st + details, > details + .lean {
 		margin: (-$st-gap) 0 $st-gap;
 		padding: 3px 9px 4px;
 		background: #f1f0f3;
@@ -53,6 +56,115 @@ $tint-ex: #ebf4ea;
 		}
 		&[open] > summary::before {
 			content: '\25BE\00A0';
+		}
+	}
+}
+
+// Lean under a statement's proof (lean.js): a white line from the proof, its
+// lines on the left and Lean's goals after the line picked on the right, in
+// an editor's colours
+.lean {
+	border-top: 1px solid #ffffff;
+
+	.lean-ok {
+		margin-left: 6px;
+		padding: 0 5px;
+		border: 1px solid #1a7f37;
+		background: #eaf6ec;
+		color: #0d5c25;
+		font: normal 11px main.$ui;
+	}
+	.lean-note {
+		margin: 4px 0 6px;
+		color: main.$mute;
+		font: 11.5px/1.45 main.$ui;
+	}
+	code {
+		font: 11px main.$mono;
+	}
+	.lean-pane {
+		display: grid;
+		grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+		margin-bottom: 4px;
+		background: #ffffff;
+		border: 1px solid #b7b2ba;
+		font: 11px/1.6 main.$mono;
+	}
+	.lean-src, .lean-goals {
+		max-height: 360px;
+		overflow: auto;
+	}
+	.lean-src {
+		margin: 0;
+		padding: 4px 0;
+		list-style: none;
+		border-right: 1px solid #dfdfdf;
+
+		li {
+			display: grid;
+			grid-template-columns: 28px minmax(0, 1fr);
+			gap: 8px;
+			padding: 0 8px 0 0;
+			white-space: pre-wrap;
+			word-break: break-word;
+			cursor: pointer;
+
+			&:hover {
+				background: #f2f2f8;
+			}
+			&.on {
+				background: #dfe6ff;
+			}
+		}
+		i {
+			color: #8a8a8a;
+			font-style: normal;
+			text-align: right;
+		}
+	}
+	.lean-kw {
+		color: #0000ff;
+	}
+	.lean-cm {
+		color: #008000;
+	}
+	.lean-nm {
+		color: #795e26;
+		font-weight: bold;
+	}
+	.lean-goals {
+		padding: 6px 8px;
+
+		.lean-h {
+			margin-bottom: 4px;
+			color: #444444;
+			font-family: main.$ui;
+		}
+		.lean-goal {
+			padding: 3px 0 5px;
+			border-top: 1px solid #dfdfdf;
+
+			> div {
+				padding-left: 2ch;
+				text-indent: -2ch;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+		}
+		.lean-case {
+			color: #6a6a6a;
+			font-style: italic;
+		}
+		i {
+			color: #a31515;
+			font-style: normal;
+		}
+		b {
+			color: #0000a0;
+		}
+		.lean-done {
+			color: #1a7f37;
+			font-family: main.$ui;
 		}
 	}
 }

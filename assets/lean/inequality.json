@@ -1,0 +1,73 @@
+{
+	"file": "Ineq.lean",
+	"checked": "Lean 4.36.0-rc2 with Mathlib",
+	"src": [
+		"import Mathlib",
+		"",
+		"open MeasureTheory ProbabilityTheory ENNReal",
+		"",
+		"variable {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} {X : Ω → ℝ}",
+		"",
+		"/-- 204, Markov's inequality: for a Borel `g : ℝ → [0, ∞]` and a Borel set `A`,",
+		"`g_*(A) P(X ∈ A) ≤ E(g(X) I{X ∈ A}) ≤ E g(X)`, where `g_*(A) = inf_{y ∈ A} g y`. -/",
+		"theorem markov (hX : Measurable X) {g : ℝ → ℝ≥0∞} (hg : Measurable g) (A : Set ℝ) :",
+		"    (⨅ y ∈ A, g y) * P (X ⁻¹' A) ≤ ∫⁻ ω in X ⁻¹' A, g (X ω) ∂P ∧",
+		"      ∫⁻ ω in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ ω, g (X ω) ∂P := by",
+		"  refine ⟨?_, ?_⟩",
+		"  rw [← setLIntegral_const]",
+		"  apply setLIntegral_mono (hg.comp hX)",
+		"  intro ω hω",
+		"  exact iInf₂_le (X ω) hω",
+		"  exact setLIntegral_le_lintegral _ _",
+		"",
+		"/-- 204, Corollary (iii), Chebyshev's inequality, from Markov's with `g(x) = x²`",
+		"on `A = {|x| ≥ a}`, applied to `X - E X`. -/",
+		"theorem chebyshev (hX : Measurable X) {a : ℝ} (ha : 0 < a) :",
+		"    ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - P[X]|} ≤ eVar[X; P] := by",
+		"  set Y := fun ω => X ω - P[X]",
+		"  have hY : Measurable Y := hX.sub_const _",
+		"  have h := markov (P := P) hY (g := fun x => ‖x‖ₑ ^ 2) (by fun_prop) {x | a ≤ |x|}",
+		"  have low : ENNReal.ofReal (a ^ 2) ≤ ⨅ y ∈ {x : ℝ | a ≤ |x|}, ‖y‖ₑ ^ 2 := by",
+		"    refine le_iInf₂ fun y hy => ?_",
+		"    rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg y)]",
+		"    exact ENNReal.ofReal_le_ofReal (pow_le_pow_left₀ ha.le hy 2)",
+		"  calc ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - P[X]|}",
+		"      ≤ (⨅ y ∈ {x : ℝ | a ≤ |x|}, ‖y‖ₑ ^ 2) * P (Y ⁻¹' {x | a ≤ |x|}) := by gcongr; rfl",
+		"    _ ≤ ∫⁻ ω, ‖Y ω‖ₑ ^ 2 ∂P := h.1.trans h.2",
+		"    _ = eVar[X; P] := rfl"
+	],
+	"states": {
+		"11": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ (⨅ y ∈ A, g y) * P (X ⁻¹' A) ≤ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ∧\n    ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ (ω : Ω), g (X ω) ∂P",
+		"12": "case refine_1\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ (⨅ y ∈ A, g y) * P (X ⁻¹' A) ≤ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P\n\ncase refine_2\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ (ω : Ω), g (X ω) ∂P",
+		"13": "case refine_1\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∫⁻ (x : Ω) in X ⁻¹' A, ⨅ y ∈ A, g y ∂P ≤ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P\n\ncase refine_2\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ (ω : Ω), g (X ω) ∂P",
+		"14": "case refine_1\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∀ x ∈ X ⁻¹' A, ⨅ y ∈ A, g y ≤ (g ∘ X) x\n\ncase refine_2\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ (ω : Ω), g (X ω) ∂P",
+		"15": "case refine_1\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\nω : Ω\nhω : ω ∈ X ⁻¹' A\n⊢ ⨅ y ∈ A, g y ≤ (g ∘ X) ω\n\ncase refine_2\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ (ω : Ω), g (X ω) ∂P",
+		"16": "case refine_2\nΩ : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\ng : ℝ → ℝ≥0∞\nhg : Measurable g\nA : Set ℝ\n⊢ ∫⁻ (ω : Ω) in X ⁻¹' A, g (X ω) ∂P ≤ ∫⁻ (ω : Ω), g (X ω) ∂P",
+		"17": "",
+		"22": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\n⊢ ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - ∫ (x : Ω), X x ∂P|} ≤ eVar[X; P]",
+		"23": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\n⊢ ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - ∫ (x : Ω), X x ∂P|} ≤ eVar[X; P]",
+		"24": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\nhY : Measurable Y\n⊢ ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - ∫ (x : Ω), X x ∂P|} ≤ eVar[X; P]",
+		"25": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\nhY : Measurable Y\nh :\n  (⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2) * P (Y ⁻¹' {x | a ≤ |x|}) ≤ ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ∧\n    ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ≤ ∫⁻ (ω : Ω), ‖Y ω‖ₑ ^ 2 ∂P\n⊢ ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - ∫ (x : Ω), X x ∂P|} ≤ eVar[X; P]",
+		"26": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\nhY : Measurable Y\nh :\n  (⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2) * P (Y ⁻¹' {x | a ≤ |x|}) ≤ ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ∧\n    ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ≤ ∫⁻ (ω : Ω), ‖Y ω‖ₑ ^ 2 ∂P\n⊢ ENNReal.ofReal (a ^ 2) ≤ ⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2",
+		"27": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\nhY : Measurable Y\nh :\n  (⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2) * P (Y ⁻¹' {x | a ≤ |x|}) ≤ ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ∧\n    ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ≤ ∫⁻ (ω : Ω), ‖Y ω‖ₑ ^ 2 ∂P\ny : ℝ\nhy : y ∈ {x | a ≤ |x|}\n⊢ ENNReal.ofReal (a ^ 2) ≤ ‖y‖ₑ ^ 2",
+		"28": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\nhY : Measurable Y\nh :\n  (⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2) * P (Y ⁻¹' {x | a ≤ |x|}) ≤ ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ∧\n    ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ≤ ∫⁻ (ω : Ω), ‖Y ω‖ₑ ^ 2 ∂P\ny : ℝ\nhy : y ∈ {x | a ≤ |x|}\n⊢ ENNReal.ofReal (a ^ 2) ≤ ENNReal.ofReal (|y| ^ 2)",
+		"29": "Ω : Type u_1\ninst✝ : MeasurableSpace Ω\nP : Measure Ω\nX : Ω → ℝ\nhX : Measurable X\na : ℝ\nha : 0 < a\nY : Ω → ℝ := fun ω => X ω - ∫ (x : Ω), X x ∂P\nhY : Measurable Y\nh :\n  (⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2) * P (Y ⁻¹' {x | a ≤ |x|}) ≤ ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ∧\n    ∫⁻ (ω : Ω) in Y ⁻¹' {x | a ≤ |x|}, ‖Y ω‖ₑ ^ 2 ∂P ≤ ∫⁻ (ω : Ω), ‖Y ω‖ₑ ^ 2 ∂P\nlow : ENNReal.ofReal (a ^ 2) ≤ ⨅ y ∈ {x | a ≤ |x|}, ‖y‖ₑ ^ 2\n⊢ ENNReal.ofReal (a ^ 2) * P {ω | a ≤ |X ω - ∫ (x : Ω), X x ∂P|} ≤ eVar[X; P]",
+		"33": ""
+	},
+	"proofs": {
+		"Markov's inequality": {
+			"from": 1,
+			"to": 17,
+			"lo": 11,
+			"pick": 15,
+			"note": "Mathlib has it as <code>mul_meas_ge_le_lintegral₀</code>, for f ≥ 0 and the set {f ≥ ε}. This is the post’s form, with g and A."
+		},
+		"Chebyshev's inequality": {
+			"from": 19,
+			"to": 33,
+			"lo": 22,
+			"pick": 25,
+			"note": "Part (iii) only, from <code>markov</code> above with g(x) = x² and A = {|x| ≥ a}. Lean states it multiplied out, with the extended variance, so X need not be in L². Mathlib’s own is <code>meas_ge_le_variance_div_sq</code>."
+		}
+	}
+}

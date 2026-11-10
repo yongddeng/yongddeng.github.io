@@ -81,7 +81,8 @@
 
 	// Each use of a term in a post's text becomes a part: every form of a
 	// term, singular and plural, longest first so that a longer name wins
-	// over a shorter one inside it, outside links, headings, code and maths
+	// over a shorter one inside it, outside links, headings, code, maths and
+	// the Lean folds (lean.js)
 	function markTerms(body) {
 		var forms = {};
 		terms.forEach(function (t, i) {
@@ -95,7 +96,7 @@
 		}).join('|') + ')\\b', 'gi');
 		var walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT), nodes = [];
 		while (walker.nextNode()) {
-			if (!walker.currentNode.parentElement.closest('a, h1, h2, h3, h4, summary, code, pre, button, .katex, .xref, .comment')) nodes.push(walker.currentNode);
+			if (!walker.currentNode.parentElement.closest('a, h1, h2, h3, h4, summary, code, pre, button, .katex, .xref, .comment, .lean')) nodes.push(walker.currentNode);
 		}
 		nodes.forEach(function (node) {
 			var text = node.textContent, last = 0, frag = null, m;
