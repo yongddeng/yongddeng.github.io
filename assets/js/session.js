@@ -32,11 +32,12 @@
 		};
 	}
 
-	// Post and folder windows are restorable; Settings and the error box
-	// are transient chrome and deliberately are not
+	// Post, folder and System Properties windows are restorable; the error
+	// box is transient chrome and deliberately is not
 	function kindOf(win) {
 		if (win.dataset.tag) return 'folder';
 		if (win.dataset.url) return 'post';
+		if (win.classList.contains('settings-win')) return 'settings';
 		return null;
 	}
 
@@ -49,7 +50,10 @@
 				if (!kind) return;
 				wins.push({
 					kind: kind,
-					id: kind === 'folder' ? win.dataset.tag : win.dataset.url,
+					// System Properties by the tab it is on
+					id: kind === 'folder' ? win.dataset.tag
+						: kind === 'post' ? win.dataset.url
+						: [].indexOf.call(win.querySelectorAll('.set-tab'), win.querySelector('.set-tab.on')),
 					geom: geomOf(win),
 					maxed: !!win.dataset.premax,
 					front: win.classList.contains('active-win')
@@ -84,9 +88,9 @@
 		if (g && !state.explorer.hidden) desktop.applyGeom(wrapper, g);
 
 		var winOf = function (w) {
-			return document.querySelector(w.kind === 'folder'
-				? '.folder-win[data-tag="' + w.id + '"]'
-				: '.content[data-url="' + w.id + '"]');
+			return document.querySelector(w.kind === 'folder' ? '.folder-win[data-tag="' + w.id + '"]'
+				: w.kind === 'post' ? '.content[data-url="' + w.id + '"]'
+				: '.settings-win');
 		};
 		// a post saved maximized is maximized again, by its own button
 		var remax = function (w) {
@@ -98,6 +102,14 @@
 			chain = chain.then(function () {
 				if (w.kind === 'folder') {
 					desktop.openFolderWindow(w.id, w.geom);
+					return;
+				}
+				// System Properties by its Start menu item, then moved and
+				// turned to its tab
+				if (w.kind === 'settings') {
+					document.getElementById('menu-settings').click();
+					desktop.applyGeom(winOf(w), w.geom);
+					winOf(w).querySelectorAll('.set-tab')[w.id].click();
 					return;
 				}
 				// force: the cap counts a session as already-open windows
