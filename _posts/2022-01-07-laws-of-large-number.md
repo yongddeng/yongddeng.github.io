@@ -1,12 +1,12 @@
 ---
 layout: default
-title: "207. law of large number"
+title: "207. law of large numbers"
 tags: maths200
 use_math: true
 ---
 
 
-# Law of Large Number
+# Law of Large Numbers
 ---
 Roll a fair die and the running average of the rolls settles at $3.5$. The laws of large numbers make this precise for sums of independent random variables, a weak law in probability and a strong law almost surely, under hypotheses that come down from a finite variance to a finite mean, and a sequence obeying the first and not the second shows that the gap between them is real.
 
@@ -44,16 +44,10 @@ Take $b_n = n$, so (i) reads $nP(\lvert X_1 \rvert > n) \to 0$, while (ii) follo
 
 ## II
 ---
-**Lemma** (Kolmogorov's maximal inequality)**.** If $X\_1, \dots, X\_n$ are independent with mean $0$ and finite variances, then $P(\max\_{1 \leq k \leq n}\lvert S\_k \rvert \geq \varepsilon) \leq \varepsilon^{-2}\operatorname{Var}S\_n$ for every $\varepsilon > 0$.
-
-<details><summary>Proof</summary>
-Let $A_k$ be the event that $k$ is the first index with $\lvert S_k \rvert \geq \varepsilon$. As $S_n - S_k$ has mean zero and is independent of $S_k I_{A_k}$, $\operatorname{E}(S_n^2 I_{A_k}) \geq \operatorname{E}(S_k^2 I_{A_k}) \geq \varepsilon^2 P(A_k)$, and summing over the disjoint $A_k$ gives $\operatorname{Var}S_n \geq \varepsilon^2 P(\bigcup_k A_k)$. &#8718;
-</details>
-
 **Theorem** (Kolmogorov's convergence criterion)**.** If $X\_1, X\_2, \dots$ are independent with $\sum\_k \operatorname{Var}X\_k < \infty$, then $\sum\_k (X\_k - \operatorname{E}X\_k)$ converges almost surely.
 
 <details><summary>Proof</summary>
-Applied to the centred summands after $m$, the maximal inequality gives $P(\sup_{n > m}\lvert (S_n - \operatorname{E}S_n) - (S_m - \operatorname{E}S_m) \rvert \geq \varepsilon) \leq \varepsilon^{-2}\sum_{k > m}\operatorname{Var}X_k \to 0$ for every $\varepsilon > 0$, so the centred partial sums are almost surely Cauchy. &#8718;
+Kolmogorov's inequality, applied to the centred summands after $m$, gives $P(\sup_{n > m}\lvert (S_n - \operatorname{E}S_n) - (S_m - \operatorname{E}S_m) \rvert \geq \varepsilon) \leq \varepsilon^{-2}\sum_{k > m}\operatorname{Var}X_k \to 0$ for every $\varepsilon > 0$, so the centred partial sums are almost surely Cauchy. &#8718;
 </details>
 
 *Remarks.* Chebyshev's inequality bounds a single $S\_n$, Kolmogorov's the whole path up to $n$ at the same price, which is what an almost sure statement needs. Kolmogorov's [three-series theorem]() completes the criterion, as independent $X\_k$ have an almost surely convergent sum if and only if, for some $c > 0$, the series $\sum\_k P(\lvert X\_k \rvert > c)$, $\sum\_k \operatorname{E}(X\_k I\_{\lbrace \lvert X\_k \rvert \leq c \rbrace})$ and $\sum\_k \operatorname{Var}(X\_k I\_{\lbrace \lvert X\_k \rvert \leq c \rbrace})$ all converge. A convergent series has a finite sum, not the sum $0$, so a strong law needs one step more.

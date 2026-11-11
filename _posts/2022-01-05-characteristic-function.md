@@ -55,7 +55,7 @@ $$
 \lim_{T \to \infty} \frac{1}{2\pi}\int_{-T}^{T} \frac{e^{-ita} - e^{-itb}}{it}\,\varphi_X(t)\,\mathrm{d}t = P(a < X < b) + \tfrac12 P(X = a) + \tfrac12 P(X = b),
 $$
 
-which is $F\_X(b) - F\_X(a)$ when $a, b \in C(F\_X)$. If $\varphi\_X$ is integrable, $X$ has the bounded continuous density $f\_X(x) = \frac{1}{2\pi}\int\_{\mathbb{R}} e^{-itx}\varphi\_X(t)\,\mathrm{d}t$.
+which is $F\_X(b) - F\_X(a)$ when $a$ and $b$ lie in the set $C(F\_X)$ of continuity points of $F\_X$. If $\varphi\_X$ is integrable, $X$ has the bounded continuous density $f\_X(x) = \frac{1}{2\pi}\int\_{\mathbb{R}} e^{-itx}\varphi\_X(t)\,\mathrm{d}t$.
 
 <details><summary>Proof</summary>
 The integrand is bounded by $b - a$, so Fubini's theorem turns the left side before the limit into the expectation of $\frac{1}{\pi}\int_0^T (\sin t(X - a) - \sin t(X - b))/t\,\mathrm{d}t$. This is bounded in $T$ and $X$ and tends to $\frac12(\operatorname{sgn}(X - a) - \operatorname{sgn}(X - b))$, as $\int_0^\infty \sin(ct)/t\,\mathrm{d}t = \frac{\pi}{2}\operatorname{sgn}c$, and bounded convergence finishes. For integrable $\varphi_X$ the limit is an integral over $\mathbb{R}$, continuous in $a$ and $b$, so $X$ has no atoms, and dividing by $b - a$ and letting $b \downarrow a$ gives $f_X$. &#8718;

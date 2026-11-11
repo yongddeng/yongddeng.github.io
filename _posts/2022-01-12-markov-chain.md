@@ -8,7 +8,7 @@ use_math: true
 
 # Markov Chain
 ---
-A Markov chain forgets its past once its present is known, as tomorrow's weather depends mostly on today's and hardly on the record before it<!-- , and a model that learns from the entire record may be more faithful, but its joint law is impractical to compute -->. Its law is then a starting distribution and a transition matrix, so its long-run behaviour is the linear algebra of that matrix. This note classifies the states, shows that a chain which is irreducible, aperiodic and positive recurrent settles to a unique stationary law from any start, and turns detailed balance into Markov chain Monte Carlo.
+A Markov chain forgets its past once its present is known, as tomorrow's weather depends mostly on today's and hardly on the record before it<!-- , and a model that learns from the entire record may be more faithful, but its joint law is impractical to compute -->. Its law is then a starting distribution and a transition matrix, so its long-run behaviour is the linear algebra of that matrix. The post classifies the states, shows that a chain which is irreducible, aperiodic and positive recurrent settles to a unique stationary law from any start, and turns detailed balance into Markov chain Monte Carlo.
 
 
 ## I

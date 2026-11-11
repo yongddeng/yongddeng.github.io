@@ -8,7 +8,7 @@ use_math: true
 
 # Stochastic Process
 ---
-A stochastic process is a random function of time, or equally a family of random variables indexed by time, and its finite-dimensional distributions join the two views. This note fixes the objects that martingales and Markov chains are built on, the law of a process, its stationarity and ergodicity, its increments, and the filtrations and stopping times that record what is known when. Billingsley's [Probability and Measure]() and Doob's [Stochastic Processes]() are the references<!-- , and a process is a vast object that takes time to comprehend -->.
+A stochastic process is a random function of time, or equally a family of random variables indexed by time, and its finite-dimensional distributions join the two views. The post fixes the objects that martingales and Markov chains are built on, the law of a process, its stationarity and ergodicity, its increments, and the filtrations and stopping times that record what is known when. Billingsley's *Probability and Measure* and Doob's *Stochastic Processes* are the references<!-- , and a process is a vast object that takes time to comprehend -->.
 
 
 ## I
