@@ -1363,7 +1363,8 @@ $det-date: 88px;   // 2026-01-01
 }
 
 // What's This? (whatsthis.js): while it is on, the parts with a card are
-// tinted over whatever they draw, the one whose card is open the deeper
+// marked in navy dotted over whatever they draw, and the one whose card is
+// open is selected as Windows 98 selected
 .wt-on, .wt-on * {
 	cursor: help;
 }
@@ -1374,19 +1375,23 @@ $det-date: 88px;   // 2026-01-01
 		content: "";
 		position: absolute;
 		inset: 0;
-		background: rgba(0, 0, 128, 0.1);
+		outline: 1px dotted #000080;
+		outline-offset: -3px;
 		pointer-events: none;
 	}
 	&.wt-at::after {
 		background: rgba(0, 0, 128, 0.2);
 	}
 }
-// a term, which may break across lines, tinted as text is
+// a term, which may break across lines, ruled as text is
 .wt-on .wt-term {
-	background: rgba(0, 0, 128, 0.1);
+	text-decoration: underline dotted #000080;
+	text-underline-offset: 3px;
 
 	&.wt-at {
-		background: rgba(0, 0, 128, 0.2);
+		background: #000080;
+		color: #fff;
+		text-decoration: none;
 	}
 }
 .wt-card {
