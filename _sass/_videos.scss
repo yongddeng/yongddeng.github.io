@@ -1,0 +1,167 @@
+// The videos deck (_includes/videos.html, assets/js/videos.js): a dark player
+// over a green-screen list of the series' videos by post. _mobile.scss
+// reworks it for a phone, three classes deep to outrank these
+@use "main";
+
+.vp {
+	padding: 2px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+
+	.vp-main {
+		flex: none;
+		padding: 10px 10px 8px;
+		background: #1c1c22;
+		border: 2px solid;
+		border-color: #000000 #3a3a44 #3a3a44 #000000;
+	}
+	.vp-screen {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		background: #000000;
+		cursor: pointer;
+		border: 2px solid;
+		border-color: #000000 #3a3a44 #3a3a44 #000000;
+
+		iframe, .vp-thumb {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			border: 0;
+			max-width: none;
+			max-height: none;
+			object-fit: cover;
+			display: block;
+		}
+		&:hover .vp-play {
+			background: #ec0000;
+		}
+	}
+	.vp-play {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 56px;
+		height: 40px;
+		background: #cc0000;
+		border-radius: 8px;
+
+		&::after {
+			content: "";
+			position: absolute;
+			left: 52%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			border-style: solid;
+			border-width: 10px 0 10px 17px;
+			border-color: transparent transparent transparent #ffffff;
+		}
+	}
+	.vp-now {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		padding: 6px 2px 2px;
+		color: #33ff33;
+		font-family: "Courier New", monospace;
+
+		b {
+			font-size: 12px;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+		span {
+			margin-left: auto;
+			font-size: 11px;
+		}
+	}
+	.vp-controls {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		padding: 4px 0 1px;
+
+		button {
+			width: 28px;
+			height: 21px;
+			padding: 0;
+			font-size: 10px;
+			line-height: 1;
+			cursor: pointer;
+			background: main.$face;
+			@include main.bevel;
+
+			&:active {
+				@include main.pressed;
+			}
+		}
+	}
+	.vp-list {
+		margin-top: 6px;
+		height: 150px;
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		font-size: 11px;
+		font-family: "Courier New", monospace;
+		background: #16161c;
+		color: #33ff33;
+		border: 2px solid;
+		border-color: #000000 #34343e #34343e #000000;
+	}
+	.vp-grp {
+		display: flex;
+		align-items: baseline;
+		padding: 3px 6px;
+		font: 700 12px/12px main.$ui;
+		background: #23232c;
+		color: #ffffff;
+		border-bottom: 1px solid #000000;
+
+		// a flex item, so the posts' link margin would open a band under it
+		a {
+			margin: 0;
+			color: inherit;
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+		span {
+			margin-left: auto;
+			font-weight: 400;
+			font-size: 11px;
+			color: #1c9a1c;
+		}
+	}
+	.vp-item {
+		display: flex;
+		gap: 6px;
+		padding: 3px 6px 3px 14px;
+		cursor: pointer;
+
+		&:hover, &.on {
+			background: #33ff33;
+			color: #000000;
+
+			.vp-item-d {
+				color: #000000;
+			}
+		}
+	}
+	.vp-item-t {
+		flex: 1;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+	}
+	.vp-item-d {
+		color: #1c9a1c;
+	}
+}

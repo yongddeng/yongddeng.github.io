@@ -237,8 +237,7 @@
 
 	// The videos deck owns the viewport: black to the edges, the player
 	// pinned under the app bar, terminal rows sized for thumbs. Three
-	// classes deep because the post's own <style> block comes later in
-	// the document than this stylesheet.
+	// classes deep to outrank the deck's own rules (_videos.scss).
 	.content.deck-win {
 		background: #16161c;
 

@@ -1,0 +1,22 @@
+{%- comment -%}The videos deck (assets/js/videos.js, _sass/_videos.scss): the page's rows, a post's videos under its number and topic{%- endcomment -%}
+<div class="vp">
+  <div class="vp-main">
+    <div class="vp-screen"></div>
+    <div class="vp-now"><b></b><span></span></div>
+    <div class="vp-controls">
+      <button data-act="prev" aria-label="previous">&#9198;</button>
+      <button data-act="play" aria-label="play">&#9654;</button>
+      <button data-act="stop" aria-label="stop">&#9632;</button>
+      <button data-act="next" aria-label="next">&#9197;</button>
+    </div>
+  </div>
+  <div class="vp-list">
+    {% for row in page.rows %}
+    <div class="vp-grp"><a href="{{ row.link }}">{{ row.n }} &mdash; {{ row.topic }}</a><span>{{ row.videos | size }}</span></div>
+    {% for v in row.videos %}
+    <div class="vp-item" data-id="{{ v.id }}" data-title="{{ v.title }}" data-dur="{{ v.dur }}"><span class="vp-item-t" title="{{ v.title }}">{{ v.title }}</span><span class="vp-item-d">{{ v.dur }}</span></div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+</div>
+<script src="/assets/js/videos.js" defer></script>
