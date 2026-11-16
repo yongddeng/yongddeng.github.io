@@ -17,7 +17,7 @@
 		// Saved Settings, applied before first paint (no colour flash) and
 		// again whenever System Properties (settings.js) changes one
 		window.deskSettings = (function () {
-			var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '12px', clock: '12', font: 'georgia', saver: 'random', wait: '30' };
+			var DEFAULTS = { desk: '#008082', paper: '#fbfafb', text: '13px', clock: '12', font: 'georgia', saver: 'random', wait: '30' };
 			var FONTS = {
 				arial: '"Helvetica Neue", Arial, sans-serif',
 				georgia: 'Georgia, "Times New Roman", serif',
@@ -163,7 +163,7 @@
 		<div class="win-grip"></div>
 	</div>
 	{% if page.title %}
-        <div class="content{% if page.winclass %} {{ page.winclass }}{% endif %}" data-url="{{ page.url }}"{% if page.use_math %} data-math{% endif %}>
+        <div class="content{% if page.winclass %} {{ page.winclass }}{% else %} note-win{% endif %}" data-url="{{ page.url }}"{% if page.use_math %} data-math{% endif %}>
 			<script>
 			// Runs while this window's div is still open, ahead of first
 			// paint of its contents.

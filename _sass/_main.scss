@@ -332,6 +332,14 @@ body {
 		margin-left: 100px;
 	}
 }
+// A post of prose, a note or a maths post: its column widens with the text
+// size, so the notes' paragraphs keep the five lines they were written to at
+// Small (706px), whichever size is picked
+@media (min-width: 901px) {
+	.content.note-win {
+		width: calc(750px + (var(--text) - 12px) * 62);
+	}
+}
 .default_title, .post_title {
 	padding: 2px 4px 3px 4px;
 	position: relative;
