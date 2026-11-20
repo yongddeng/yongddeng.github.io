@@ -1,6 +1,6 @@
 // Win9x menu bar on post windows: File (date, close), Edit (find, select
-// all), View (heading outline). Delegated at document level so windows
-// restored by session.js get working menus without rebinding.
+// all), View (heading outline, or a program's views). Delegated at document
+// level so windows restored by session.js get working menus without rebinding.
 (function () {
 
 	function closeAll() {
@@ -40,10 +40,12 @@
 
 	// The outline is built lazily on first open, one entry per h2/h3.
 	// A post may fill it first with entries of its own (literature.js
-	// lists its views); a non-empty dropdown is left alone.
+	// lists its views); a non-empty dropdown is left alone. A program's
+	// window with views on its toolbar lists those instead.
 	function buildOutline(win) {
 		var drop = win.querySelector('.tb-outline');
 		if (!drop || drop.childNodes.length) return;
+		if (win.classList.contains('exe-win') && listViews(win, drop)) return;
 		var cont = win.querySelector('.post_content');
 		var heads = cont ? cont.querySelectorAll('h2, h3') : [];
 		if (!heads.length) {
@@ -106,9 +108,37 @@
 		drop.addEventListener('scroll', hideFly);
 	}
 
+	// A program's views, one entry per [data-view] button, named as the
+	// button is: by its words, or for an icon by its title up to the colon.
+	// Choosing one presses the button, so the program switches as it would
+	function listViews(win, drop) {
+		var views = win.querySelectorAll('.post_content button[data-view]');
+		views.forEach(function (b) {
+			var item = document.createElement('button');
+			item.type = 'button';
+			item.className = 'tb-item';
+			if (b.textContent.trim()) item.innerHTML = b.innerHTML;
+			else item.textContent = b.title.split(':')[0];
+			item.addEventListener('click', function () {
+				closeAll();
+				b.click();
+			});
+			item._view = b;
+			drop.appendChild(item);
+		});
+		return views.length > 0;
+	}
+
 	function openMenu(li) {
 		closeAll();
-		if (li.querySelector('.tb-outline')) buildOutline(li.closest('.content'));
+		var drop = li.querySelector('.tb-outline');
+		if (drop) {
+			buildOutline(li.closest('.content'));
+			// the view showing, as its toolbar button is pressed
+			drop.querySelectorAll('.tb-item').forEach(function (item) {
+				if (item._view) item.classList.toggle('cur', item._view.classList.contains('on'));
+			});
+		}
 		li.classList.add('open');
 	}
 

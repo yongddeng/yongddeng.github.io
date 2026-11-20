@@ -10,20 +10,6 @@ $lit-link: #008000;
 	width: 900px;
 	@include main.pane-window(550px);
 }
-// View menu lists the views, with a bullet on the current one, here and in 302 (assets/js/decoder.js)
-.help-win, .wb-win {
-	.tb-item {
-		position: relative;
-	}
-	.tb-item.cur::before {
-		content: "\25CF";
-		position: absolute;
-		left: 8px;
-		top: 3px;
-		font-size: 8px;
-	}
-}
-
 .lit {
 	flex: 1;
 	min-height: 0;

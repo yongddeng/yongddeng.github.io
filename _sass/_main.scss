@@ -424,7 +424,7 @@ body {
 		}
 	}
 }
-// Notepad-style menu bar: File (date, close), Edit (find), View (outline)
+// Notepad-style menu bar: File (date, close), Edit (find), View (outline, or views)
 ul.topbar {
 	list-style: none;
 	display: flex;
@@ -490,6 +490,26 @@ ul.topbar {
 			background: #00007f;
 			color: #ffffff;
 		}
+	}
+	// a View menu that lists views (302, 303 and the programs) bullets the one showing
+	.tb-item.cur {
+		position: relative;
+
+		&::before {
+			content: "\25CF";
+			position: absolute;
+			left: 8px;
+			top: 3px;
+			font-size: 8px;
+		}
+	}
+	// a view named in maths, as lil.exe's are, as its toolbar sets it
+	.tb-item i {
+		font-style: italic;
+	}
+	.tb-item sub {
+		font-size: 75%;
+		vertical-align: -0.25em;
 	}
 	.tb-static {
 		color: #6b6b6b;
