@@ -1325,8 +1325,9 @@ $exe-mute: #4d4852;
 	margin-top: 3px;
 }
 
-// ---- init.exe: the ring down the left, its length and the Jacobian's singular
-// values stacked on the right, what to look at under them ----
+// ---- init.exe: Units' ground or Shape's tube down the left, with the views
+// in its corner, two panes stacked on the right, the readings under them; what
+// to look at is in the readings' What's This? card ----
 .ini-win {
 	width: 810px;
 
@@ -1341,27 +1342,47 @@ $exe-mute: #4d4852;
 		grid-auto-flow: row;
 
 		> :first-child {
+			position: relative;
 			grid-row: 1 / 3;
 		}
 	}
 	.exe-lbl input[type="range"] {
 		width: 90px;
 	}
-	// wide enough for any reading, so that a preset leaves the toolbar where it is
+	// the words' buttons narrower than the players', so that two rows hold
+	// them all, as optimiser.exe's
+	.lit-tool > .lit-btn {
+		padding: 0 4px;
+	}
+	// wide enough for any reading, so that a scale leaves the toolbar where it is
 	output[data-out="w"] {
 		min-width: 5ch;
 	}
 	output[data-out="b"] {
 		min-width: 9ch;
 	}
-	// three lines hold any caption, so that the panes keep their size
-	.ini-caption {
-		min-height: 4.35em;
-		padding: 2px 6px 0;
+	// as wide as “layer 64 of 64”
+	.exe-at {
+		min-width: 14ch;
 	}
 }
-// the tube turns under a drag, which on a touch screen is not a scroll
-.ini-ring {
+// Units or Shape, in the main pane's bottom corner, as optimiser.exe's views are
+// in its map's, clear of the pane's title and keys
+.ini-views {
+	position: absolute;
+	bottom: 6px;
+	left: 6px;
+	display: flex;
+	gap: 2px;
+
+	.lit-btn {
+		height: 20px;
+		padding: 0 6px;
+	}
+}
+// the ground and the tube turn under a drag, which on a touch screen is not a
+// scroll
+.ini-main {
 	cursor: grab;
 	touch-action: none;
 

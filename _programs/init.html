@@ -5,45 +5,74 @@ note: "302"
 icon: init-16.png
 large: init-48.png
 winclass: exe-win ini-win
-description: A ring of inputs through a deep stack at initialisation, each layer's ring on its own top two principal components as a tube that turns, its length by layer against √χ, and the input-output Jacobian's singular values, under linear, tanh or ReLU with Gaussian or orthogonal weights, from the ordered phase through the edge of chaos to chaos, and at dynamical isometry.
+description: A plain stack at initialisation under linear, tanh or ReLU, with LayerNorm or RMSNorm before the activation or none, its weights drawn Gaussian, uniform or orthogonal, dense or as a convolution, at Zero, Xavier's or He's scale or set by hand. Units lays three layers out unit by unit on a ground that turns, coloured by how densely the values lie, with the terms of one unit's sum and each layer's weights, beside the second moment by layer against mean field's and the activation's curve; Shape follows a ring of inputs as a tube, its length against √χ, and the input-output Jacobian's singular values.
 ---
 
-<div class="exe ini">
+<div class="exe ini" tabindex="0" role="region" aria-label="init.exe: Space runs the layers and pauses them, the left and right arrows step a layer, Shift ten, Home and End go to the first layer and the last, and ? lights the parts with a What's This? card">
 <div class="lit-tool">
-<span class="exe-lbl"><i>φ</i></span>
-<button type="button" class="lit-btn" data-act-f="linear" title="φ(x) = x">linear</button>
-<button type="button" class="lit-btn" data-act-f="tanh" title="φ(x) = tanh x">tanh</button>
-<button type="button" class="lit-btn" data-act-f="relu" title="φ(x) = max(x, 0)">ReLU</button>
+<button type="button" class="lit-btn exe-run" data-act="run" title="Walk the bold layer from the first to the last, each easing into the next (Space); again to pause">&#9654; Run</button>
+<span class="exe-buttons">
+<button type="button" class="lit-btn" data-act="start" title="Go to the first layer (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
+<button type="button" class="lit-btn" data-act="back" title="Back a layer (←, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
+<button type="button" class="lit-btn" data-act="next" title="On a layer (→, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
+<button type="button" class="lit-btn" data-act="end" title="Go to the last layer (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
+</span>
+<span class="exe-at" data-out="at" title="The layer drawn bold, filled as far down the stack as it is: press or drag to go to another"></span>
 <span class="lit-sep"></span>
-<span class="exe-lbl">weights</span>
-<button type="button" class="lit-btn" data-orth="0" title="Each entry an independent Gaussian of variance σw²/N">Gaussian</button>
-<button type="button" class="lit-btn" data-orth="1" title="σw times a random orthogonal matrix (Haar), the same variance an entry">orthogonal</button>
+<span class="exe-lbl">activation</span>
+<button type="button" class="lit-btn" data-act-f="linear" title="a = z">linear</button>
+<button type="button" class="lit-btn" data-act-f="tanh" title="a = tanh(z)">tanh</button>
+<button type="button" class="lit-btn" data-act-f="relu" title="a = max(z, 0)">ReLU</button>
 <span class="lit-sep"></span>
-<label class="exe-lbl" title="Layers, L">depth <select data-in="L"><option>16</option><option selected>32</option><option>64</option></select></label>
+<span class="exe-lbl">scale</span>
+<button type="button" class="lit-btn" data-method="zero" title="Zero: every weight 0, σw² 0, with no bias; in PyTorch, zeros_">Zero</button>
+<button type="button" class="lit-btn" data-method="xavier" title="Xavier: Var W = 1 / fan-in at equal widths, σw² 1, with no bias (Glorot and Bengio 2010); in PyTorch, xavier_normal_">Xavier</button>
+<button type="button" class="lit-btn" data-method="he" title="He: Var W = 2 / fan-in, σw² 2, with no bias (He et al. 2015); in PyTorch, kaiming_normal_">He</button>
 <span class="lit-sep"></span>
-<button type="button" class="lit-btn" data-preset="ordered" title="tanh, σw² 0.8, σb² 0.05, Gaussian weights">Ordered</button>
-<button type="button" class="lit-btn" data-preset="edge" title="tanh, σw² 1.761, σb² 0.05, Gaussian weights, where χ₁ = 1">Edge</button>
-<button type="button" class="lit-btn" data-preset="chaos" title="tanh, σw² 4, σb² 0.05, Gaussian weights">Chaos</button>
-<button type="button" class="lit-btn" data-preset="isometry" title="tanh, σw² 1.05, σb² 0.0001, orthogonal weights">Isometry</button>
+<span class="exe-lbl">norm</span>
+<button type="button" class="lit-btn" data-norm="layer" title="nn.LayerNorm(64) between the sums and the activation, as it starts, γ = 1 and β = 0: each input’s sums less their mean, over their standard deviation (Ba, Kiros and Hinton 2016); again to take it off">LayerNorm</button>
+<button type="button" class="lit-btn" data-norm="rms" title="nn.RMSNorm(64) between the sums and the activation, as it starts, γ = 1: each input’s sums over their root mean square (Zhang and Sennrich 2019); again to take it off">RMSNorm</button>
 </div>
 <div class="lit-tool">
-<label class="exe-lbl" title="The weights’ variance times the fan-in, 0.01 to 4"><span><i>σ</i><sub>w</sub>²</span> <input type="range" min="1" max="400" value="176" data-in="w"></label><output data-out="w"></output>
-<label class="exe-lbl" title="The biases’ variance, 0, then 0.0001 to 0.5 on a log scale"><span><i>σ</i><sub>b</sub>²</span> <input type="range" min="0" max="100" value="73" data-in="b"></label><output data-out="b"></output>
+<span class="exe-lbl">draw</span>
+<button type="button" class="lit-btn" data-draw="gauss" title="Each weight drawn on its own from a normal distribution">Gaussian</button>
+<button type="button" class="lit-btn" data-draw="uniform" title="Each weight drawn on its own from a uniform distribution of the same variance">uniform</button>
+<button type="button" class="lit-btn" data-draw="orth" title="The whole matrix drawn at once as a random rotation (Haar), its entries of the same variance; for a convolution, the delta-orthogonal draw (Xiao et al. 2018)">orthogonal</button>
 <span class="lit-sep"></span>
-<button type="button" class="lit-btn exe-run" data-act="run" title="Sweep the bold layer from 1 to L">&#9654; Run</button>
-<label class="exe-lbl" title="The layer drawn bold, and on its own in the corner">layer <input type="range" min="1" max="32" value="32" data-in="layer"></label><output data-out="layer"></output>
+<span class="exe-lbl">layer</span>
+<button type="button" class="lit-btn" data-wiring="dense" title="Every unit reads all 64 units of the layer before">dense</button>
+<button type="button" class="lit-btn" data-wiring="conv" title="A convolution: 4 channels of 16 positions, a kernel of 3 between each pair of channels slid round the positions, so a unit reads 12 units through weights its channel shares">conv</button>
+<span class="lit-sep"></span>
+<label class="exe-lbl" title="Layers, L">depth <select data-in="L"><option selected>16</option><option>32</option><option>64</option></select></label>
+<span class="lit-sep"></span>
+<label class="exe-lbl" title="The weights’ variance times the fan-in, 0 to 4"><span><i>σ</i><sub>w</sub>²</span> <input type="range" min="0" max="400" value="100" data-in="w"></label><output data-out="w"></output>
+<label class="exe-lbl" title="The biases’ variance, 0, then 0.0001 to 0.5 on a log scale"><span><i>σ</i><sub>b</sub>²</span> <input type="range" min="0" max="100" value="0" data-in="b"></label><output data-out="b"></output>
 </div>
 <div class="exe-body">
-<div class="lit-pane" data-wt="ring"><canvas class="ini-ring" aria-label="A ring of inputs layer by layer, each on its own top two principal components, laid along the depth as a tube; drag to turn it"></canvas></div>
-<div class="lit-pane" data-wt="len"><canvas class="ini-len" aria-label="The ring’s length by layer, measured as dots, against √χ a layer"></canvas></div>
-<div class="lit-pane" data-wt="jac"><canvas class="ini-jac" aria-label="Histogram of the input-output Jacobian’s singular values on a log scale"></canvas></div>
+<div class="lit-pane" data-wt="main"><canvas class="ini-main" data-pane="main"></canvas>
+<div class="ini-views" role="group" aria-label="View">
+<button type="button" class="lit-btn" data-view="units" title="Units: three layers, each unit a dot at its value, the river of the values, the terms of one unit’s sum and each layer’s weights">Units</button>
+<button type="button" class="lit-btn" data-view="shape" title="Shape: a ring of inputs through the stack, its length, and the Jacobian’s singular values">Shape</button>
 </div>
-<p class="exe-note ini-caption" data-out="caption"></p>
-<dl class="exe-read" data-out="read"></dl>
+</div>
+<div class="lit-pane" data-wt="top"><canvas data-pane="top"></canvas></div>
+<div class="lit-pane" data-wt="foot"><canvas data-pane="foot"></canvas></div>
+</div>
+<dl class="exe-read" data-out="read" data-wt="read"></dl>
 <div class="exe-notes" hidden>
-<p data-note="ring">A ring of 96 inputs, <i>u</i> cos <i>θ</i> + <i>v</i> sin <i>θ</i> with <i>u</i> and <i>v</i> random, orthogonal and of unit variance a unit, goes through a plain stack of <i>N</i> = 64 units a layer. Each layer’s ring is drawn on its own top two principal components, turned to match the layer before, so the tube shows the ring’s shape and size layer by layer. Poole et al. (2016) drew theirs on three components, at layers 5 and 10.</p>
-<p data-note="len">The ring’s length is the sum of its 96 steps. The distance between two nearby inputs grows by √<i>χ</i> a layer, with <i>χ</i> = <i>σ</i><sub>w</sub>² E <i>φ</i>′(√<i>q z</i>)² at that layer’s <i>q</i>. In chaos the steps grow until neighbours are as far apart as any two inputs, √(2<i>q</i>*(1 − <i>c</i>*)) a unit, and the drawn length levels off while the ring’s own length keeps growing.</p>
-<p data-note="jac">The input-output Jacobian ∂<i>h</i><sup><i>L</i></sup>/∂<i>h</i><sup>1</sup> is taken at one input scaled to start at <i>q</i>*. Mean field gives the mean of its <i>σ</i>², <i>χ</i><sub>1</sub> a layer, but not their spread. Orthogonal weights with tanh near <i>q</i>* = 0 keep them near 1, the dynamical isometry of Pennington, Schoenholz and Ganguli (2017). Gaussian weights spread them over decades. ReLU’s inactive units leave half or more at 0, since the Jacobian’s rank is at most the fewest units active in any layer.</p>
+<p data-note="read" data-out="caption"></p>
+<p data-note="read" data-for="units">The readings are the bold layer’s: its sums’ second moment measured over 256 inputs, and the same worked out from what the layer reads, the fan-in times Var <i>W</i> times E <i>a</i>², plus <i>σ</i><sub>b</sub>². Under a norm, E <i>ẑ</i>² too, which the norm holds at 1.</p>
+<p data-note="read" data-for="shape">The readings are the ring’s share in its top two components at the bold layer, the Jacobian’s mean <i>σ</i>² against mean field’s, and how many of its singular values lie within a factor of two of 1.</p>
+<p data-note="main" data-for="units">One input <i>x</i> goes through the stack, and three of its layers are laid out on the ground, the input nearest. Each white line holds a layer’s 64 units as dots: grey the input, navy a layer’s sums <i>z</i> = <i>W a</i> + <i>b</i>, green what the activation makes of them, <i>a</i>. The ground is coloured by how densely the values of 256 inputs lie, in the colours of the lines it runs between, and the dashed lines hold the middle 95% of them.</p>
+<p data-note="main" data-for="units">The thin grey lines are the river’s flow: each tenth of the values, rank to rank, from the input up. They run straight between a layer’s <i>z</i> and <i>a</i>, where the activation moves each unit along its own path, and dotted between an <i>a</i> line and the next <i>z</i>, where the weights mix the units and only the rank carries over. There the river only fades from one line’s colour to the next.</p>
+<p data-note="main" data-for="units">Of the weights’ links only those into the ringed unit are drawn, one a term <i>W a</i> of its sum, thicker the larger, solid where the term adds and dashed where it takes away. So its sum shows as a tug of war. The sheets are each layer’s <i>W</i>, a pixel an entry, darker the larger. Point at a dot to ring its unit, drag to turn, and Run to walk the layers.</p>
+<p data-note="main" data-for="units">With a norm on, each layer has a third line between <i>z</i> and <i>a</i>: <i>ẑ</i>, in blue, each input’s sums normalised over the layer’s 64 units, which is what the activation reads. The river runs straight from <i>z</i> to <i>ẑ</i>, since the norm moves an input’s units by one shift and one scale, and keeps their order.</p>
+<p data-note="top" data-for="units">Each layer’s second moment E <i>z</i>², the mean of its squared sums over 64 units and 256 inputs, as dots on a log axis. The line is mean field’s <i>q</i>. It starts at <i>σ</i><sub>w</sub>² + <i>σ</i><sub>b</sub>², and each layer takes it to <i>σ</i><sub>w</sub>² E <i>a</i>² + <i>σ</i><sub>b</sub>², with <i>a</i> the activation of a Gaussian <i>z</i> of variance <i>q</i>, or under a norm of a standard normal <i>ẑ</i>, the same at every layer. Where it has settled by the last layer, the dashed level is its fixed point <i>q</i>*. The larger dot is the bold layer.</p>
+<p data-note="top" data-for="units">The red dots are the backward pass’s E <i>δz</i>², <i>δz</i> = ∂ℓ/∂<i>z</i>, for a loss whose gradient at the last layer’s <i>a</i> is drawn standard normal, as mean field takes it (Schoenholz et al. 2017). Going down, each layer multiplies a unit’s gradient by its own <i>φ</i>′(<i>z</i>) and sums it down <i>W</i>’s columns, so mean field’s E <i>δz</i>² gains <i>χ</i> = <i>σ</i><sub>w</sub>² E <i>φ</i>′² a layer, the <i>χ</i> of Shape.</p>
+<p data-note="foot" data-for="units">The activation at the bold layer. The dots on its curve are that layer’s 64 units for the one input, each where its sum put it, or under a norm its <i>ẑ</i>, and the larger one is the ringed unit, with its way through dashed. Under the curve is the ridge of what it reads, the layer’s <i>z</i> or <i>ẑ</i>, over 256 inputs. At its right is the ridge of the <i>a</i> it makes of them, which the next layer reads, beside a strip that marks the activation’s range. Dashed is the curve’s slope <i>φ</i>′, the gate the backward pass goes through: a unit far out on tanh’s flat ends, or below ReLU’s 0, passes almost nothing back.</p>
+<p data-note="main" data-for="shape">A ring of 96 inputs, <i>u</i> cos <i>θ</i> + <i>v</i> sin <i>θ</i> with <i>u</i> and <i>v</i> random, orthogonal and of unit variance a unit, goes through a plain stack of <i>N</i> = 64 units a layer. Each layer’s ring is drawn on its own top two principal components, turned to match the layer before, so the tube shows the ring’s shape and size layer by layer. Poole et al. (2016) drew theirs on three components, at layers 5 and 10.</p>
+<p data-note="top" data-for="shape">The ring’s length is the sum of its 96 steps. The distance between two nearby inputs grows by √<i>χ</i> a layer, with <i>χ</i> = <i>σ</i><sub>w</sub>² E <i>φ</i>′(√<i>q ξ</i>)² at that layer’s <i>q</i>, <i>φ</i> the activation and <i>ξ</i> a standard normal. Under a norm the activation reads <i>ξ</i> itself and the norm divides by √<i>q</i>, so <i>χ</i> = <i>σ</i><sub>w</sub>² E <i>φ</i>′(<i>ξ</i>)² / <i>q</i>. In chaos the steps grow until neighbours are as far apart as any two inputs, √(2<i>q</i>*(1 − <i>c</i>*)) a unit, and the drawn length levels off while the ring’s own length keeps growing.</p>
+<p data-note="foot" data-for="shape">The input-output Jacobian ∂<i>z</i><sup><i>L</i></sup>/∂<i>z</i><sup>1</sup> is taken at one input scaled to start at <i>q</i>*. Mean field gives the mean of its <i>σ</i>², <i>χ</i><sub>1</sub> a layer, but not their spread. Orthogonal weights with tanh near <i>q</i>* = 0 keep them near 1, the dynamical isometry of Pennington, Schoenholz and Ganguli (2017). Gaussian weights spread them over decades. ReLU’s inactive units leave half or more at 0, since the Jacobian’s rank is at most the fewest units active in any layer.</p>
 </div>
 <a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
 </div>
