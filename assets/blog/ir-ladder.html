@@ -1,3 +1,78 @@
-<body style="margin: 0; background: white;">
-<div style="position: relative; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;"> <div style="position: relative; flex-shrink: 0; width: 315px; background: white;"> <img src="https://raw.githubusercontent.com/t-vi/acdl2020/cb556dbbd19c7eaee3627c799e5abf1168522bc8/Ch15_F4_PyTorch_calling_pytorch.svg" width="100%"> <a href="https://github.com/t-vi/acdl2020/blob/master/pytorch_introduction.ipynb" target="_blank" style="position: absolute; top: 4px; left: 4px; font-size: 11px;">[src]</a> </div> <div style="flex-shrink: 0; align-self: flex-start; margin-top: 14px;"><div style="background: white; border: 1px solid #ccc; border-radius: 4px; padding: 5px 7px; max-width: 295px; font-family: monospace; font-size: 7px; line-height: 1.4; overflow-x: auto; white-space: nowrap;"><div style="display: flex; gap: 5px; margin: 2px 0;"><div style="flex: 1;"><div style="display: flex; gap: 12px;"><span style="width: 74px; flex-shrink: 0; color: #666;">Python source</span><span>y = x @ w</span></div><div style="display: flex; gap: 12px;"><span style="width: 74px; flex-shrink: 0; color: #666;">CPython bytecode</span><span>LOAD_FAST x · LOAD_FAST w · BINARY_OP @</span></div></div></div><div style="display: flex; gap: 5px; margin: 2px 0;"><div style="flex: 1;"><div style="border-top: 1px dashed #999; color: #999; font-style: italic; margin-top: 4px; padding: 2px 0 4px;">capture, only the tensor operations cross out of Python</div><div style="border: 1px solid #ddd; border-radius: 3px; background: #f7f7f7; margin: 4px 0 12px; padding: 4px 6px;"><div style="display: flex; gap: 12px;"><span style="width: 70px; flex-shrink: 0; color: #d0312d;">TorchScript IR</span><span>%y : Tensor = aten::matmul(%x, %w)</span></div><div style="display: flex; gap: 12px;"><span style="width: 70px; flex-shrink: 0; color: #666;">Torch IR (FX)</span><span>%y = call_function[torch.matmul]</span></div><div style="display: flex; gap: 12px;"><span style="width: 70px; flex-shrink: 0; color: #666;">ATen IR (FX)</span><span>%y = aten.mm(%x, %w)</span></div><div style="color: #999; font-style: italic; margin-top: 2px;">one altitude in three notations, one node per operation</div></div><div style="border-top: 1px dashed #999; color: #999; font-style: italic; padding: 2px 0 8px;">the cliff, node becomes loops, matmul unrecoverable below</div><div style="display: flex; gap: 12px;"><span style="width: 74px; flex-shrink: 0; color: #666;">Inductor IR</span><span>for i0, i1: load(x) · load(w) · store(y)</span></div><div style="display: flex; gap: 12px;"><span style="width: 74px; flex-shrink: 0; color: #666;">Triton IR</span><span>%c = tt.dot %a, %b</span></div></div><div style="flex-shrink: 0; width: 8px; border-right: 1.2px solid #222; border-top: 1.2px solid #222; border-bottom: 1.2px solid #222; border-radius: 0 4px 4px 0; margin: 2px 0;"></div><div style="flex-shrink: 0; display: flex; align-items: center; margin-left: -3px;"><span style="writing-mode: vertical-rl; font-size: 6.5px; letter-spacing: 0.08em; color: #222;">ML COMPILER</span></div></div><div style="display: flex; gap: 5px; margin: 2px 0;"><div style="flex: 1;"><div style="display: flex; gap: 12px;"><span style="width: 74px; flex-shrink: 0; color: #666;">LLVM IR</span><span>%3 = fadd float %1, %2</span></div><div style="display: flex; gap: 12px;"><span style="width: 74px; flex-shrink: 0; color: #666;">PTX</span><span>fma.rn.f32 %f4, %f1, %f2, %f3</span></div></div></div></div></div> <svg style="position: absolute; left: 170px; top: 0; width: 220px; height: 100%; pointer-events: none; overflow: visible;" viewBox="0 0 220 240" preserveAspectRatio="none"><defs><marker id="irlad-ah" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#d0312d"/></marker></defs><path d="M 38 40 C 124 12, 158 50, 178 89" fill="none" stroke="#d0312d" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#irlad-ah)"/></svg> </div>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="fig.css">
+<style>
+  /* One y = x @ w down PyTorch's compilers, beside a figure of PyTorch calling
+     itself: the multiply as each altitude writes it, the cliff where the node
+     becomes loops, and the arrow from the figure's TorchScript to its IR. The
+     type is every figure's (fig.css) */
+  .row { position: relative; display: flex; align-items: flex-start; gap: 18px; }
+  .pic { position: relative; flex: none; width: 280px; }
+  .pic img { display: block; width: 100%; }
+  .pic a { position: absolute; top: 4px; left: 4px; font-size: 11px; }
+  .ladder { flex: none; width: 364px; margin-top: 10px; padding: 5px 7px; background: #fff; border: 1px solid #c8c3c8; font: 9.5px/1.45 var(--mono); color: #000; white-space: nowrap; }
+  .rung { display: flex; gap: 10px; }
+  .rung > span:first-child { flex: none; width: 94px; color: var(--mute); }
+  .note { font: italic 10px var(--ui); color: var(--mute); }
+  .cut { margin-top: 4px; padding: 2px 0 4px; border-top: 1px dashed var(--shade); }
+  .group { display: flex; gap: 5px; margin: 2px 0; }
+  .group > div:first-child { flex: 1; min-width: 0; }
+  .alt { margin: 4px 0 10px; padding: 4px 6px; background: #f7f6f8; border: 1px solid #dcd8dc; }
+  .alt .rung > span:first-child { width: 86px; }
+  .rung > span.hot { color: #a40000; }
+  .brace { flex: none; width: 8px; margin: 2px 0; border: 1px solid #000; border-left: 0; }
+  .brace-lbl { flex: none; display: flex; align-items: center; margin-left: -3px; }
+  .brace-lbl span { writing-mode: vertical-rl; font: 9px var(--ui); letter-spacing: 0.08em; color: #000; }
+  svg.arrow { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="pic"><img src="https://raw.githubusercontent.com/t-vi/acdl2020/cb556dbbd19c7eaee3627c799e5abf1168522bc8/Ch15_F4_PyTorch_calling_pytorch.svg" alt=""><a href="https://github.com/t-vi/acdl2020/blob/master/pytorch_introduction.ipynb" target="_blank">[src]</a></div>
+  <div class="ladder">
+    <div class="rung"><span>Python source</span><span>y = x @ w</span></div>
+    <div class="rung"><span>CPython bytecode</span><span>LOAD_FAST x · LOAD_FAST w · BINARY_OP @</span></div>
+    <div class="group">
+      <div>
+        <div class="note cut">capture, only the tensor operations cross out of Python</div>
+        <div class="alt">
+          <div class="rung"><span class="hot">TorchScript IR</span><span>%y : Tensor = aten::matmul(%x, %w)</span></div>
+          <div class="rung"><span>Torch IR (FX)</span><span>%y = call_function[torch.matmul]</span></div>
+          <div class="rung"><span>ATen IR (FX)</span><span>%y = aten.mm(%x, %w)</span></div>
+          <div class="note">one altitude in three notations, one node per operation</div>
+        </div>
+        <div class="note cut">the cliff, node becomes loops, matmul unrecoverable below</div>
+        <div class="rung"><span>Inductor IR</span><span>for i0, i1: load(x) · load(w) · store(y)</span></div>
+        <div class="rung"><span>Triton IR</span><span>%c = tt.dot %a, %b</span></div>
+      </div>
+      <div class="brace"></div>
+      <div class="brace-lbl"><span>ML COMPILER</span></div>
+    </div>
+    <div class="rung"><span>LLVM IR</span><span>%3 = fadd float %1, %2</span></div>
+    <div class="rung"><span>PTX</span><span>fma.rn.f32 %f4, %f1, %f2, %f3</span></div>
+  </div>
+  <svg class="arrow" aria-hidden="true"><defs><marker id="irlad-ah" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#a40000"/></marker></defs><path fill="none" stroke="#a40000" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#irlad-ah)"/></svg>
+</div>
+<script>
+  // the arrow from the figure's TorchScript, two thirds across and a fifth
+  // down it, to the label of its IR, drawn once both are laid out
+  (function () {
+    var row = document.querySelector('.row'), pic = document.querySelector('.pic'), to = document.querySelector('.hot');
+    var svg = document.querySelector('svg.arrow'), path = svg.querySelector(':scope > path');
+    function draw() {
+      var R = row.getBoundingClientRect(), P = pic.getBoundingClientRect(), T = to.getBoundingClientRect();
+      var x0 = P.left - R.left + P.width * 0.66, y0 = P.top - R.top + P.height * 0.22;
+      var x1 = T.left - R.left - 4, y1 = T.top - R.top + T.height / 2;
+      svg.setAttribute('width', R.width);
+      svg.setAttribute('height', R.height);
+      path.setAttribute('d', 'M ' + x0 + ' ' + y0 + ' C ' + (x0 + 80) + ' ' + (y0 - 26) + ', ' + (x1 - 22) + ' ' + (y1 - 36) + ', ' + x1 + ' ' + y1);
+    }
+    var img = pic.querySelector('img');
+    if (img.complete) draw(); else img.addEventListener('load', draw);
+    window.addEventListener('resize', draw);
+  })();
+</script>
 </body>
+</html>

@@ -2,33 +2,30 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="stylesheet" href="fig.css">
 <style>
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #fff; }
-  #wrap { width: 400px; margin: 0 auto; text-align: center; }
+  /* Five philosophers at one table, a fork between each two: a deadlock
+     forced, and lock ordering that makes it unreachable. The type and the
+     controls are every figure's (fig.css) */
+  #wrap { width: 400px; margin: 0 auto; }
   canvas { display: block; margin: 0 auto; background: #fff; }
-  .row { display: flex; justify-content: flex-start; align-items: center; gap: 14px; margin: 16px 0 6px 8px; }
-  button { font-size: 12px; padding: 3px 12px; border: 1px solid #bbb; border-radius: 4px; background: #fafafa; cursor: pointer; }
-  button:hover { background: #f0f0f0; }
-  label { font-size: 12px; color: #444; display: flex; align-items: center; gap: 4px; cursor: pointer; }
-  #stats { display: flex; justify-content: center; align-items: center; margin: 4px 0 6px; }
-  .stat { width: 120px; }
-  .stat .lbl { font-size: 9px; letter-spacing: 0.8px; color: #aaa; text-transform: uppercase; }
-  .stat .val { font-size: 12px; font-weight: 500; color: #333; font-variant-numeric: tabular-nums; }
-  .divider { width: 1px; height: 22px; background: #ddd; margin: 0 14px; }
-  #dl.dead { color: #b00020; }
+  #stats { display: flex; justify-content: center; gap: 24px; margin: 2px 0 4px; }
+  .stat .val { margin-left: 5px; font: 11px var(--mono); color: #000; }
+  #dl.dead { color: #a40000; }
+  .row { display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 8px; white-space: nowrap; }
+  label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
 </style>
 </head>
 <body>
 <div id="wrap">
   <canvas id="cv" width="400" height="216"></canvas>
   <div id="stats">
-    <div class="stat"><div class="lbl">status</div><div class="val" id="status">Running</div></div>
-    <div class="divider"></div>
-    <div class="stat"><div class="lbl">deadlock</div><div class="val" id="dl">No</div></div>
+    <div class="stat">status<span class="val" id="status">Running</span></div>
+    <div class="stat">deadlock<span class="val" id="dl">No</span></div>
   </div>
   <div class="row">
-    <button id="reset">Reset</button>
-    <button id="force">Trigger deadlock</button>
+    <button type="button" class="fig-btn" id="reset">Reset</button>
+    <button type="button" class="fig-btn" id="force">Trigger deadlock</button>
     <label><input type="checkbox" id="ordered"> lock ordering (asymmetric)</label>
   </div>
 </div>
@@ -111,14 +108,20 @@
     ctx.beginPath();
     ctx.moveTo(x - L * Math.cos(a), y - L * Math.sin(a));
     ctx.lineTo(x + L * Math.cos(a), y + L * Math.sin(a));
-    ctx.strokeStyle = forks[f] === -1 ? '#bbb' : '#444';
+    ctx.strokeStyle = forks[f] === -1 ? C.free : C.held;
     ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
   }
+
+  // the house's colours: the shade's greys, a held fork black, a wait in brown
+  // and a deadlock in the programs' red; the states pale, so their names read
+  const C = { free: '#c8c3c8', held: '#000000', table: '#e3e0e5', line: '#7f787f', text: '#4d4852', wait: '#a85a00', dead: '#a40000',
+    thinking: '#ffffff', hungry: '#fff0a0', eating: '#a8dcbc', starving: '#f4b4ae' };
+  const FONT = '"Helvetica Neue", Arial, sans-serif';
 
   function draw() {
     ctx.clearRect(0, 0, cv.width, cv.height);
     // table
-    ctx.beginPath(); ctx.arc(cx, cy, R - 38, 0, 7); ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, R - 38, 0, 7); ctx.strokeStyle = C.table; ctx.lineWidth = 1; ctx.stroke();
 
     for (let f = 0; f < N; f++) drawChop(f);
 
@@ -129,30 +132,29 @@
         const [fx, fy] = chopPos(p.wait);
         ctx.beginPath(); ctx.setLineDash([4, 3]);
         ctx.moveTo(x + (fx - x) * 0.3, y + (fy - y) * 0.3); ctx.lineTo(fx, fy);
-        ctx.strokeStyle = dead ? '#b00020' : '#e08a00'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.strokeStyle = dead ? C.dead : C.wait; ctx.lineWidth = 1.5; ctx.stroke();
         ctx.setLineDash([]);
       }
       ctx.beginPath(); ctx.arc(x, y, rP, 0, 7);
-      ctx.fillStyle = { thinking: '#eee', hungry: '#f5c542', eating: '#7cb342' }[p.state];
-      if (dead && p.state === 'hungry') ctx.fillStyle = '#e57373';
-      ctx.fill(); ctx.strokeStyle = '#999'; ctx.stroke();
-      ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = dead && p.state === 'hungry' ? C.starving : C[p.state];
+      ctx.fill(); ctx.strokeStyle = C.line; ctx.stroke();
+      ctx.fillStyle = '#000000'; ctx.font = '11px ' + FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('P' + (i + 1), x, y);
     }
     // legend
-    ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-    const legCircles = [['#eee', 'thinking'], ['#f5c542', 'hungry'], ['#7cb342', 'eating']];
+    ctx.font = '11px ' + FONT; ctx.textAlign = 'left';
+    const legCircles = [[C.thinking, 'thinking'], [C.hungry, 'hungry'], [C.eating, 'eating']];
     legCircles.forEach(([c, t], k) => {
-      ctx.beginPath(); ctx.arc(14, 16 + k * 16, 5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = '#999'; ctx.stroke();
-      ctx.fillStyle = '#888'; ctx.fillText(t, 24, 16 + k * 16);
+      ctx.beginPath(); ctx.arc(14, 16 + k * 16, 5, 0, 7); ctx.fillStyle = c; ctx.fill(); ctx.strokeStyle = C.line; ctx.stroke();
+      ctx.fillStyle = C.text; ctx.fillText(t, 24, 16 + k * 16);
     });
-    const legLines = [['#bbb', [], 3, 'free'], ['#444', [], 3, 'taken'], ['#e08a00', [4, 3], 1.5, 'awaited']];
+    const legLines = [[C.free, [], 3, 'free'], [C.held, [], 3, 'taken'], [C.wait, [4, 3], 1.5, 'awaited']];
     legLines.forEach(([c, dash, w, t], k) => {
       const y = 16 + k * 16, x = 326;
       ctx.beginPath(); ctx.setLineDash(dash); ctx.moveTo(x, y); ctx.lineTo(x + 12, y);
       ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.stroke();
       ctx.setLineDash([]); ctx.lineCap = 'butt';
-      ctx.fillStyle = '#888'; ctx.fillText(t, x + 18, y);
+      ctx.fillStyle = C.text; ctx.fillText(t, x + 18, y);
     });
   }
 

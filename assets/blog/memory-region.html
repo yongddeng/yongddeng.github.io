@@ -6,99 +6,99 @@
 <title>From two compiles to the cores</title>
 <style>
   :root{
-    --ground:#fafafa; --ink:#1f2328; --muted:#6b7280; --faint:#9aa1aa; --hair:#e6e8eb;
+    --ground:#ffffff; --ink:#1f2328; --muted:#6b7280; --faint:#9aa1aa; --hair:#e6e8eb;
     --dark:#1b2129; --grn:#63e6a4;
     --rtag:#aab3bf;
-    --teal:#0f766e; --teal-bg:#ecfbf6; --ind:#5b6cc0; --ind-bg:#eef0fb;
+    --teal:#000080; --teal-bg:#edf1f9; --ind:#1f7a55; --ind-bg:#ebf4ea;
     --idle-bg:#f4f5f7;
-    --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
-    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    --mono:"Lucida Console",Menlo,Monaco,monospace;
+    --sans:"Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0; padding:0; background:transparent}
-  .wrap{zoom:0.8; background:var(--ground); color:var(--ink); font-family:var(--sans); max-width:600px; margin:0;
-    padding:22px 22px 10px; -webkit-font-smoothing:antialiased;}
-  .head{font-size:15.5px; font-weight:680; letter-spacing:-.01em; margin:0 0 3px}
-  .sub{font-size:12px; color:var(--muted); margin:0 0 16px; line-height:1.5}
+  .wrap{background:var(--ground); color:var(--ink); font-family:var(--sans); max-width:690px; margin:0;
+    padding:12px 12px 8px; -webkit-font-smoothing:antialiased;}
+  .head{font-size:13px; font-weight:700; letter-spacing:-.01em; margin:0 0 3px}
+  .sub{font-size:11px; color:var(--muted); margin:0 0 16px; line-height:1.5}
   code{font-family:var(--mono); font-size:.92em}
 
   .pipearea{display:flex; gap:9px; align-items:stretch; justify-content:center}
   .pipes{display:flex; flex-direction:column; justify-content:space-between; padding:6px 0}
   .pipe{display:flex; align-items:center; gap:6px; justify-content:flex-start}
-  .card{background:var(--dark); border-radius:7px; padding:6px 7px 5px; flex:none}
-  .card.big{width:150px} .card.art{width:96px}
-  .card .py{font-family:var(--mono); font-size:7px; line-height:1.5; color:#cdd6e2; white-space:pre; margin:0}
+  .card{background:var(--dark); border-radius:0; padding:6px 7px 5px; flex:none}
+  .card.big{width:186px} .card.art{width:104px}
+  .card .py{font-family:var(--mono); font-size:9px; line-height:1.5; color:#cdd6e2; white-space:pre; margin:0}
   .card .py .kw{color:#79b8ff} .card .py .f{color:#c8a3ff} .card .py .cm{color:#7d8794}
-  .card .fn{font-family:var(--mono); font-size:7.5px; color:#e7ebf0; text-align:center; margin-top:5px}
-  .card .bin{font-family:var(--mono); font-size:8px; line-height:1.4; color:var(--grn); opacity:.85; text-align:center}
-  .card .bc{font-family:var(--mono); font-size:7.5px; line-height:1.5; color:#f0b866; text-align:center}
-  .arw{display:flex; flex-direction:column; align-items:center; min-width:46px; font-size:7px; color:var(--muted); line-height:1.15}
+  .card .fn{font-family:var(--mono); font-size:9px; color:#e7ebf0; text-align:center; margin-top:5px}
+  .card .bin{font-family:var(--mono); font-size:9px; line-height:1.4; color:var(--grn); opacity:.85; text-align:center}
+  .card .bc{font-family:var(--mono); font-size:9px; line-height:1.5; color:#f0b866; text-align:center}
+  .arw{display:flex; flex-direction:column; align-items:center; min-width:46px; font-size:9px; color:var(--muted); line-height:1.15}
   .arw .g{font-size:12px; color:var(--faint); line-height:1}
   .into{font-size:16px; color:var(--faint); align-self:center}
 
-  .ram{width:194px; background:var(--dark); border-radius:10px; overflow:hidden; display:flex; flex-direction:column}
-  .ramtop{font-size:8px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--faint); text-align:center; padding:5px 0 4px; border-bottom:1px solid rgba(255,255,255,.08)}
+  .ram{width:214px; background:var(--dark); border-radius:0; overflow:hidden; display:flex; flex-direction:column}
+  .ramtop{font-size:9px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--faint); text-align:center; padding:5px 0 4px; border-bottom:1px solid rgba(255,255,255,.08)}
   .rband{padding:7px 9px; border-bottom:1px dashed rgba(255,255,255,.16)}
   .rband:last-child{border-bottom:0}
   .rband.hi{background:rgba(224,120,110,.06); box-shadow:inset 3px 0 0 #e0776b}
   .rhdr{display:flex; align-items:baseline; gap:6px; margin-bottom:5px}
-  .rtag{font-size:7.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase}
-  .racc{font-size:6.5px; font-weight:600; padding:1px 4px; border-radius:3px; letter-spacing:.01em}
+  .rtag{font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase}
+  .racc{font-size:9px; font-weight:600; padding:1px 4px; border-radius:0; letter-spacing:.01em}
   .racc.ro{color:#aab3bf; background:rgba(150,163,180,.14)}
   .racc.pv{color:#aab3bf; background:rgba(150,163,180,.14)}
   .racc.mut{color:#e88b7d; background:rgba(224,120,110,.18)}
   .chips{display:flex; flex-wrap:wrap; gap:4px}
-  .hchip{font-family:var(--mono); font-size:8px; color:#e7ebf0; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:5px; padding:2px 5px; line-height:1.15}
-  .hchip .rc{color:var(--faint); font-size:6.5px; margin-left:2px}
+  .hchip{font-family:var(--mono); font-size:9px; color:#e7ebf0; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); border-radius:0; padding:2px 5px; line-height:1.15}
+  .hchip .rc{color:var(--faint); font-size:9px; margin-left:2px}
   .hchip.code{background:rgba(240,184,102,.15); border-color:rgba(240,184,102,.42); color:#f0b866}
   .hchip.bin{background:rgba(99,230,164,.13); border-color:rgba(99,230,164,.42); color:#7fe6b0}
   .threads{display:flex; gap:9px} .th{display:flex; flex-direction:column; align-items:center; gap:2px}
-  .thl{font-family:var(--mono); font-size:7px; color:#c7ccd2} .thf{width:24px; height:3.5px; border-radius:1px; background:rgba(255,255,255,.15)}
+  .thl{font-family:var(--mono); font-size:9px; color:#c7ccd2} .thf{width:24px; height:3.5px; border-radius:0; background:rgba(255,255,255,.15)}
 
   .conn{display:flex; align-items:center; gap:8px; justify-content:center; color:var(--faint); font-size:10px; padding:9px 0 3px}
   .conn .ar{font-size:12px} .conn .lb{font-style:italic}
 
   .cols{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  .col{border:1px solid var(--hair); border-top:3px solid var(--accent); border-radius:9px; padding:11px 11px 12px; background:#fff}
+  .col{border:1px solid var(--hair); border-top:3px solid var(--accent); border-radius:0; padding:11px 11px 12px; background:#fff}
   .col.gil{--accent:var(--teal)} .col.ft{--accent:var(--ind)}
   .chdr{display:flex; align-items:baseline; gap:7px; margin-bottom:9px}
-  .chip2{font-size:8.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#fff; padding:2px 6px; border-radius:5px; background:var(--accent)}
+  .chip2{font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#fff; padding:2px 6px; border-radius:0; background:var(--accent)}
   .ctitle{font-size:12.5px; font-weight:660}
-  .eval{display:flex; align-items:center; gap:6px; justify-content:center; text-align:center; border:1px solid var(--accent); border-radius:6px; padding:6px 8px; margin-bottom:9px; font-size:10px; font-weight:620; color:var(--accent); line-height:1.3}
+  .eval{display:flex; align-items:center; gap:6px; justify-content:center; text-align:center; border:1px solid var(--accent); border-radius:0; padding:6px 8px; margin-bottom:9px; font-size:10px; font-weight:620; color:var(--accent); line-height:1.3}
   .col.gil .eval{background:var(--teal-bg)} .col.ft .eval{background:var(--ind-bg)} .eval .lk{font-size:13px}
   .cpu{display:flex; flex-direction:column; align-items:center; margin:11px 0 8px}
-  .chip{position:relative; width:100%; max-width:190px; height:38px; border-radius:9px; padding:6px 8px; background:linear-gradient(150deg,#323c48,#1a1f27); box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 5px 12px rgba(0,0,0,.18)}
+  .chip{position:relative; width:100%; max-width:190px; height:38px; border-radius:0; padding:6px 8px; background:#2b2830}
   .chip::before,.chip::after{content:""; position:absolute; top:15px; bottom:15px; width:5px; background:repeating-linear-gradient(0deg,#9aa1aa 0 3px,transparent 3px 8px)}
   .chip::before{left:-4px} .chip::after{right:-4px}
   .grid{display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:1fr; gap:10px; height:100%}
-  .core{border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--mono); font-size:9px; line-height:1.1}
-  .core .cl{font-size:7px; opacity:.8; margin-top:1px; white-space:nowrap}
-  .core.on{color:#fff; background:var(--accent); box-shadow:0 0 10px -1px var(--accent)}
+  .core{border-radius:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:var(--mono); font-size:9px; line-height:1.1}
+  .core .cl{font-size:9px; opacity:.8; margin-top:1px; white-space:nowrap}
+  .core.on{color:#fff; background:var(--accent)}
   .core.off{color:#5c6672; background:#252c35; border:1px dashed #3a434e}
   .outcome{font-size:10.5px; font-weight:660; text-align:center; color:var(--accent)}
 
-  .card .fn .sm{display:block; font-size:6px; color:var(--faint); font-weight:500; margin-top:1px}
+  .card .fn .sm{display:block; font-size:9px; color:var(--faint); font-weight:500; margin-top:1px}
   .flow3{display:flex; align-items:stretch; gap:8px; justify-content:center; margin:10px 0 8px}
-  .fb{flex:1; border:1px solid var(--hair); border-radius:9px; padding:9px 10px; background:#fbfcfd}
+  .fb{flex:1; border:1px solid var(--hair); border-radius:0; padding:9px 10px; background:#fbfcfd}
   .fb.hi{border-color:#f0c98a; background:rgba(240,184,102,.07)}
   .fbh{font-size:10.5px; font-weight:680; margin-bottom:4px; display:flex; align-items:center; gap:5px}
   .fbh .mi{width:15px; height:15px; object-fit:contain}
-  .fbb{font-size:9px; color:var(--muted); line-height:1.5} .fbb code{font-size:8px} .fbb b{color:var(--ink); font-weight:640}
+  .fbb{font-size:9px; color:var(--muted); line-height:1.5} .fbb code{font-size:9px} .fbb b{color:var(--ink); font-weight:640}
   .fa{align-self:center; font-size:15px; color:var(--faint)}
   .pline{font-size:10px; color:var(--muted); text-align:center; margin:9px 6px 12px; line-height:1.5}
-  .pline b{color:var(--ink); font-weight:640} .pline code{font-size:8.5px}
-  .procbox{border:1px solid var(--hair); border-radius:11px; padding:12px 12px; background:#fdfdfe; box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .pline b{color:var(--ink); font-weight:640} .pline code{font-size:9px}
+  .procbox{border:1px solid var(--hair); border-radius:0; padding:12px 12px; background:#ffffff}
   .run{margin-bottom:9px}
   .trd{display:flex; align-items:center; gap:6px; margin-bottom:4px; opacity:.4; transition:opacity .25s}
   .trd.act{opacity:1}
   .tl2{font-family:var(--mono); font-size:9px; width:15px; color:var(--muted)}
   .ops{flex:1; display:flex; gap:3px}
-  .ops i{flex:1; text-align:center; font-family:var(--mono); font-size:7.5px; font-style:normal; padding:2px 0; border-radius:3px; background:var(--idle-bg); border:1px solid var(--hair); color:var(--faint); transition:background .12s,color .12s}
+  .ops i{flex:1; text-align:center; font-family:var(--mono); font-size:9px; font-style:normal; padding:2px 0; border-radius:0; background:var(--idle-bg); border:1px solid var(--hair); color:var(--faint); transition:background .12s,color .12s}
   .col.gil .ops i.pc{background:var(--teal); border-color:var(--teal); color:#fff}
   .col.ft .ops i.pc{background:var(--ind); border-color:var(--ind); color:#fff}
-  .rst{font-size:8.5px; color:var(--faint); font-style:italic; text-align:center; margin-top:3px}
+  .rst{font-size:9px; color:var(--faint); font-style:italic; text-align:center; margin-top:3px}
   .rst b{color:var(--ink); font-weight:640; font-style:normal}
-  .py .el{border-radius:2px}
+  .py .el{border-radius:0}
   .py .el.pc{background:rgba(240,184,102,.22); box-shadow:inset 2px 0 0 #f0b866}
   #rcchip{transition:background .12s} #rcchip.bump{background:rgba(240,184,102,.3); border-color:rgba(240,184,102,.6)}
   #rcchip .rc b{color:#f0b866; font-style:normal}
@@ -161,7 +161,7 @@
   <div class="cols">
     <div class="col gil">
       <div class="chdr"><span class="chip2">CPython &le; 3.12</span><span class="ctitle">With the GIL</span></div>
-      <div class="eval"><span class="lk">🔒</span><span>the eval loop runs under the GIL</span></div>
+      <div class="eval"><span>the eval loop runs under the GIL</span></div>
       <div class="run" data-mode="gil">
         <div class="trd"><span class="tl2">T1</span><div class="ops"><i>ld</i><i>inc</i><i>st</i><i>jmp</i></div></div>
         <div class="trd"><span class="tl2">T2</span><div class="ops"><i>ld</i><i>inc</i><i>st</i><i>jmp</i></div></div>
