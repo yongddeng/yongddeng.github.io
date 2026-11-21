@@ -46,7 +46,7 @@ The first arrow is the first Borel-Cantelli lemma for each $\varepsilon = 1/k$, 
 **Examples** (no arrow reverses)**.** On $\Omega = [0, 1)$ with Lebesgue measure,
 
 - *the typewriter* $X\_n = I\_{[j2^{-k}, (j+1)2^{-k})}$, with $n = 2^k + j$ and $0 \leq j < 2^k$, has $P(A\_n) = \operatorname{E}X\_n^r = 2^{-k} \to 0$ but $T\_n = [0, 1)$ for every $n$, so neither convergence in probability nor in mean gives almost sure convergence;
-- *the spikes* $X\_n = nI\_{(0, 1/n)}$ have $T\_n = (0, 1/n)$, yet $\sum\_n P(A\_n) = \sum\_n 1/n = \infty$ and $\operatorname{E}X\_n = 1$, so almost sure convergence gives neither complete convergence nor convergence in $r$-th mean for $r \geq 1$, and $e^n I\_{(0, 1/n)}$ does the same for every $r > 0$;
+- *the spikes* $X\_n = nI\_{(0, 1/n)}$ have $T\_n = (0, 1/n)$, yet $\sum\_n P(A\_n) = \sum\_n 1/n = \infty$ and $\operatorname{E}X\_n = 1$, so almost sure convergence gives neither complete convergence nor convergence in $r$-th mean for $r \geq 1$, and $e^n I\_{(0, 1/n)}$ does the same for every $r > 0$, while $e^n I\_{(0, 1/n^2)}$, with $\sum\_n 1/n^2 < \infty$, converges completely and in no mean;
 - *the reflection* $X\_n = 1 - X$ of $X(\omega) = \omega$ has the uniform law of $X$, yet $P(A\_n) = 1 - \varepsilon$, so convergence in distribution does not give convergence in probability.
 ^
 
@@ -68,7 +68,7 @@ The first arrow is the first Borel-Cantelli lemma for each $\varepsilon = 1/k$, 
 The first is the second Borel-Cantelli lemma read backwards, since independent $A_n$ with $P(A_n \text{ i.o.}) = 0$ must have $\sum_n P(A_n) < \infty$. For the second, a subsequence chosen with $P(\lvert X_{n_k} - X \rvert > 2^{-k}) < 2^{-k}$ converges almost surely by the first lemma (Riesz), and conversely a sequence whose $P(A_n)$ stays above some $\eta > 0$ along a subsequence has no further subsequence converging in probability. The third holds as $c \pm \varepsilon$ are continuity points of $I_{[c,\infty)}$, and the fourth is Vitali's theorem below. &#8718;
 </details>
 
-*Remarks.* The typewriter satisfies the subsequence criterion without converging almost surely, so no topology induces almost sure convergence, whereas $\operatorname{E}\min(\lvert X - Y \rvert, 1)$ metrises convergence in probability and the [Lévy metric]() convergence in distribution. Limits are unique almost surely in the first four modes, and only in law in the last, where $F\_X$ and $F\_Y$ agree on the dense set $C(F\_X) \cap C(F\_Y)$. Sums pass to the limit in the first four, and in the last only through [Slutsky's theorem](), for a constant second limit.
+*Remarks.* The typewriter satisfies the subsequence criterion without converging almost surely, so no topology induces almost sure convergence, whereas $\operatorname{E}\min(\lvert X - Y \rvert, 1)$ metrises convergence in probability and the [Lévy metric]() convergence in distribution. Limits are unique almost surely in the first four modes, and only in law in the last, where $F\_X$ and $F\_Y$ agree on the dense set $C(F\_X) \cap C(F\_Y)$. Sums pass to the limit in the first four, but not in general in the last, where [Slutsky's theorem]() covers a constant second limit.
 
 **Definition.** A family $(X\_i)\_{i \in I}$ is [uniformly integrable]() if $\lim\_{b \to \infty} \sup\_i \operatorname{E}(\lvert X\_i \rvert I\_{\lbrace \lvert X\_i \rvert > b \rbrace}) = 0$.
 
@@ -97,8 +97,8 @@ Take $\Omega = (0, 1)$ with Lebesgue measure and the quantile functions $Y_n(\om
 
 - <div style="display: inline-block;"><iframe src="../assets/blog/maths.html#206/quantile" width="460" height="232" style="border: none; overflow: hidden;" scrolling="no"></iframe> <div style="font-size: 11px; font-style: italic; color: #666; margin-top: 5px;">The quantile functions of $S_n/\sqrt{n}$ for $n$ fair $\pm 1$ coins closing on $\Phi^{-1}$, the central limit theorem drawn as almost sure convergence on $(0, 1)$.</div></div>
 
-**Corollary.** If $X\_n \xrightarrow{d} X$, then (i) $g(X\_n) \xrightarrow{d} g(X)$ for every $g$ continuous on a set of $P\_X$-measure one; (ii) $\operatorname{E}\lvert X \rvert \leq \liminf\_n \operatorname{E}\lvert X\_n \rvert$; (iii) $\operatorname{E}X\_n \to \operatorname{E}X$ when $(X\_n)\_{n\in\mathbb{N}}$ is uniformly integrable.
+**Corollary.** If $X\_n \xrightarrow{d} X$, then (i) $g(X\_n) \xrightarrow{d} g(X)$ for every Borel $g$ whose discontinuities form a $P\_X$-null set; (ii) $\operatorname{E}\lvert X \rvert \leq \liminf\_n \operatorname{E}\lvert X\_n \rvert$; (iii) $\operatorname{E}X\_n \to \operatorname{E}X$ when $(X\_n)\_{n\in\mathbb{N}}$ is uniformly integrable.
 
 <details><summary>Proof</summary>
-Apply to the $Y_n$ that almost sure convergence survives a map continuous on a set of full measure and implies convergence in distribution, then Fatou's lemma, then Vitali's theorem, uniform integrability being a property of the laws alone. &#8718;
+Apply to the $Y_n$ that almost sure convergence survives a Borel map whose discontinuities the limit almost surely avoids and implies convergence in distribution, then Fatou's lemma, then Vitali's theorem, uniform integrability being a property of the laws alone. &#8718;
 </details>

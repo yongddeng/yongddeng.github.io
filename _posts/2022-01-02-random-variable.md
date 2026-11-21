@@ -30,7 +30,7 @@ Necessity is monotonicity of $P$ and its continuity along $(-\infty, x_n]$ with 
 **Theorem** (Lebesgue decomposition)**.** Every distribution function is $F = aF\_d + bF\_{ac} + cF\_s$ with $a, b, c \geq 0$ and $a + b + c = 1$, where $F\_d$ is discrete, $F\_{ac}$ absolutely continuous and $F\_s$ continuous with $F\_s' = 0$ almost everywhere, each part being unique when its weight is positive.
 
 <details><summary>Proof</summary>
-The jumps of $F$ are countable, fewer than $k$ of them exceeding $1/k$, and removing them leaves a continuous non-decreasing part. Its measure splits by the Lebesgue decomposition against Lebesgue measure into an absolutely continuous part, whose density is the Radon-Nikodym derivative, and a part carried by a Lebesgue null set. &#8718;
+The jumps of $F$ are countable, fewer than $k$ of them exceeding $1/k$, and removing them leaves a continuous non-decreasing part. Its measure splits by the Lebesgue decomposition against Lebesgue measure into an absolutely continuous part, whose density is the Radon-Nikodym derivative, and a part carried by a Lebesgue null set, whose distribution function has derivative $0$ almost everywhere by Lebesgue's differentiation theorem. &#8718;
 </details>
 
 *Remark.* The [Cantor function](), which climbs from $0$ to $1$ on the Cantor set alone, is the distribution function of $\sum\_k 2B\_k 3^{-k}$ for independent fair bits $B\_k$. It is continuous, so no point has positive probability, yet its derivative vanishes off a null set and no density exists, so a continuous law need not be absolutely continuous.

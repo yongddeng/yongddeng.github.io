@@ -8,7 +8,7 @@ use_math: true
 
 # Law of the Iterated Logarithm
 ---
-Between the strong law, $S\_n = o(n)$ almost surely, and the central limit theorem, $S\_n$ of order $\sqrt{n}$ in distribution, lies the exact almost sure size of the excursions of a sum of independent random variables. It is $\sqrt{2n\log\log n}$, which the path reaches infinitely often and exceeds by any fixed factor only finitely often<!-- , while for fixed time $n$ the partial sum deviates by about $\sqrt{n}$ from its mean -->.
+Between the strong law, $S\_n = o(n)$ almost surely, and the central limit theorem, $S\_n$ of order $\sqrt{n}$ in distribution, lies the exact almost sure size of the excursions of a sum of independent random variables. It is $\sqrt{2n\log\log n}$, which the path approaches to within any fixed factor infinitely often and exceeds by any fixed factor only finitely often<!-- , while for fixed time $n$ the partial sum deviates by about $\sqrt{n}$ from its mean -->.
 
 
 ## I

@@ -29,7 +29,7 @@ over all $n$ and all $t\_1 < \dots < t\_n$ in $T$.
 Consistency makes $P(\lbrace (x_{t_1}, \dots, x_{t_n}) \in B \rbrace) = \mu_{t_1, \dots, t_n}(B)$ a well-defined, finitely additive measure on the algebra of cylinders. For countable additivity let cylinders $C_m$ decrease with $P(C_m) \geq \varepsilon$. Inner regularity on a complete separable space gives cylinders $K_m \subseteq C_m$ with compact bases and $P(C_m \setminus K_m) < 2^{-m-1}\varepsilon$, so $P(K_1 \cap \dots \cap K_m) \geq \varepsilon/2$, and a diagonal argument over the countably many coordinates involved finds a point in every $K_m$. Carathéodory's theorem extends $P$, and uniqueness is the $\pi$-system argument. &#8718;
 </details>
 
-*Remark.* Each event of the product $\sigma$-algebra depends on countably many coordinates, so for $T = [0, \infty)$ the set of continuous paths is not even an event there. Continuous-time processes are therefore built as a continuous or càdlàg [modification](), with $\tilde{X}\_t = X\_t$ almost surely for each $t$, which Kolmogorov's continuity criterion provides when $\operatorname{E}\lvert X\_t - X\_s \rvert^\alpha \leq C\lvert t - s \rvert^{1+\beta}$ for some $\alpha, \beta > 0$. Time and state may each be discrete or continuous, which gives four kinds of process.
+*Remark.* Each event of the product $\sigma$-algebra depends on countably many coordinates, so for $T = [0, \infty)$ the set of continuous paths is not even an event there. Continuous-time processes are therefore built as a continuous or càdlàg [modification](), with $\tilde{X}\_t = X\_t$ almost surely for each $t$, and Kolmogorov's continuity criterion provides a continuous one when $\operatorname{E}\lvert X\_t - X\_s \rvert^\alpha \leq C\lvert t - s \rvert^{1+\beta}$ for some $\alpha, \beta > 0$. Time and state may each be discrete or continuous, which gives four kinds of process.
 
 
 ## II
@@ -88,7 +88,7 @@ Since $n^{-1}\sum_{k=0}^{n-1}\gamma(k) = \operatorname{Cov}(\bar{X}_n, X_0)$, th
 
 *Remark.* Centred complex random variables in $L^2$ form a Hilbert space under $\langle X, Y \rangle = \operatorname{E}(X\bar{Y})$, once almost surely equal ones are identified, so a centred process in $L^2$ is a curve $t \mapsto X\_t$ in it. Linear prediction of $X\_t$ from the past up to $u$ is then orthogonal projection onto the closed span of $\lbrace X\_s \mid s \leq u \rbrace$.
 
-*Remark.* Regression between time series inherits the assumptions of ordinary least squares only for stationary series, and two independent random walks regressed on each other look significantly related, a [spurious regression]() (Granger and Newbold, 1974). In practice a log transform stabilises a variance that grows with the level, differencing removes a trend or a unit root, the sample acf and pacf show the dependence that remains, and [STL decomposition]() splits $y\_t = S\_t + T\_t + R\_t$ into seasonal, trend and remainder parts, or $\log y\_t$ when they multiply.
+*Remark.* Regression between time series that are not stationary can break the assumptions of ordinary least squares, and two independent random walks regressed on each other look significantly related, a [spurious regression]() (Granger and Newbold, 1974). In practice a log transform stabilises a variance that grows with the level, differencing removes a trend or a unit root, the sample acf and pacf show the dependence that remains, and [STL decomposition]() splits $y\_t = S\_t + T\_t + R\_t$ into seasonal, trend and remainder parts, or $\log y\_t$ when they multiply.
 
 
 ## IV

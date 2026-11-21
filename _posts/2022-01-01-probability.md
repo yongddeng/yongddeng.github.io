@@ -8,7 +8,7 @@ use_math: true
 
 # Probability Theory
 ---
-A probability space is a measure space of total mass one, built in three layers, the events, the measure on them and its continuity, which is what lets probabilities pass to limits of events. The events cannot be every subset of an uncountable $\Omega$, as Stein and Shakarchi's [Real Analysis](http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf) shows for Lebesgue measure, and the rest follows Dembo's [Stanford STAT310](https://web.stanford.edu/class/stats310a/lnotes.pdf) notes and Gut's graduate course [Probability](https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf)<!-- , along with W1 https://www.randomservices.org, W2 http://theanalysisofdata.com/ and W3 https://www.stat.berkeley.edu/~aldous/ -->.
+A probability space is a measure space of total mass one, built in three layers, the events, the measure on them and its continuity, which is what lets probabilities pass to limits of events. The events cannot in general be every subset of an uncountable $\Omega$, as Stein and Shakarchi's [Real Analysis](http://www.cmat.edu.uy/~mordecki/courses/medida2013/book.pdf) shows for Lebesgue measure, and the rest follows Dembo's [Stanford STAT310](https://web.stanford.edu/class/stats310a/lnotes.pdf) notes and Gut's graduate course [Probability](https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf)<!-- , along with W1 https://www.randomservices.org, W2 http://theanalysisofdata.com/ and W3 https://www.stat.berkeley.edu/~aldous/ -->.
 
 
 ## I
