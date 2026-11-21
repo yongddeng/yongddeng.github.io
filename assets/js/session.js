@@ -143,7 +143,7 @@
 		var box = document.createElement('div');
 		box.className = 'err-win active-win';
 		box.innerHTML = '<div class="post_title"><h1>Shut Down Windows</h1></div>'
-			+ '<div class="err-body"><span class="err-ic">&#9211;</span>'
+			+ '<div class="err-body"><img class="err-ic" src="/assets/img/shutdown.svg" alt="">'
 			+ '<p>This closes every open window and forgets the desktop.<br>Are you sure?</p></div>'
 			+ '<div class="err-btnrow"><button class="sd-yes">Yes</button>'
 			+ '<button class="sd-no">No</button></div>';

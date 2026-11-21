@@ -1,0 +1,69 @@
+---
+title: "302. backward.exe"
+date: 2023-01-02
+tags: cs300
+note: "307"
+icon: backward-16.png
+large: backward-48.png
+winclass: exe-win grd-win
+description: One backward pass through a small network, x → Linear → φ → Linear → φ → Linear under nn.MSELoss, a batch of 8 in float64, run a node at a time in the order torch.autograd runs it, under tanh or ReLU, with retain_grad(), x.requires_grad or retain_graph=True. Every partial derivative is lit by its role. ∂J/∂W and ∂J/∂b update, kept in .grad; δ and ∂J/∂a back-propagate, handed down one hop and dropped; local derivatives multiply, from what the forward pass saved. Pass draws the derivative tree, the tape of gates and the graph torch records over what the pass costs, each node a vector–Jacobian product against the forward pass; Chain Rule writes the chain rule a line at a time over what is held, step by step.
+---
+
+<div class="exe grd" data-view="pass" tabindex="0" role="region" aria-label="backward.exe: Space runs the backward pass and pauses it, the left and right arrows step a node, Shift ten, Home and End go to the ends, and ? lights the parts with a What's This? card">
+<div class="lit-tool">
+<button type="button" class="lit-btn exe-run" data-act="run" title="Run the backward pass a node at a time (Space); again to pause">&#9654; Run</button>
+<span class="exe-buttons">
+<button type="button" class="lit-btn" data-act="start" title="Go back to the graph as the forward pass left it (Home)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM7 2v8L3 6zM11 2v8L7 6z"/></svg></button>
+<button type="button" class="lit-btn" data-act="back" title="Back a node (←, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M8 2v8L2 6zM9 2h1.5v8H9z"/></svg></button>
+<button type="button" class="lit-btn" data-act="next" title="Run the next node (→, Shift for ten)"><svg viewBox="0 0 12 12"><path d="M1.5 2H3v8H1.5zM4 2v8l6-4z"/></svg></button>
+<button type="button" class="lit-btn" data-act="end" title="Run to the end (End)"><svg viewBox="0 0 12 12"><path d="M1 2v8l4-4zM5 2v8l4-4zM9 2h1.5v8H9z"/></svg></button>
+</span>
+<span class="exe-at" data-out="at" title="How far the pass has run, filled as far as it has gone: press or drag to go to another node"></span>
+<label class="exe-lbl" title="How fast Run runs the pass: at ×1, a node every 1.3 s">speed <select data-in="speed"></select></label>
+<span class="lit-sep"></span>
+<span class="exe-lbl">activation</span>
+<button type="button" class="lit-btn" data-act-f="tanh" title="TanhBackward0 saves its output">tanh</button>
+<button type="button" class="lit-btn" data-act-f="relu" title="ReluBackward0 saves its output">ReLU</button>
+<span class="exe-views" role="group" aria-label="View">
+<button type="button" class="lit-btn" data-view="pass" title="Pass: the tree, the tape and the graph across the top, what the pass costs across the foot">Pass</button>
+<button type="button" class="lit-btn" data-view="chain" title="Chain Rule: the chain rule a line at a time across the top, what is held, step by step, across the foot">Chain Rule</button>
+</span>
+</div>
+<div class="lit-tool" data-wt="torch">
+<span class="exe-lbl">torch</span>
+<button type="button" class="lit-btn" data-opt="retainGrad" title="z.retain_grad() and a.retain_grad() on every layer: each δ and ∂J/∂a stored in its .grad">retain_grad()</button>
+<button type="button" class="lit-btn" data-opt="xGrad" title="x.requires_grad_(): layer 1’s AddmmBackward0 also returns ∂J/∂x, which an AccumulateGrad keeps in x.grad">x.requires_grad</button>
+<button type="button" class="lit-btn" data-opt="retainGraph" title="loss.backward(retain_graph=True): the nodes keep what they saved, so backward can run again">retain_graph=True</button>
+<span class="grd-code">loss.backward()</span>
+</div>
+<div class="exe-body">
+<div class="lit-pane grd-pass" data-wt="tree"><canvas data-pane="tree" aria-label="The derivative tree: J at the root, the stem z and a down to x, W and b its leaves, each edge its local derivative"></canvas></div>
+<div class="lit-pane grd-pass" data-wt="tape"><canvas data-pane="tape" aria-label="The tape: the network as gates on one wire, each value left of it and its gradient right of it, W and b coming in as leaves"></canvas></div>
+<div class="lit-pane grd-pass" data-wt="graph"><canvas data-pane="graph" aria-label="The graph torch records, its nodes numbered in the order the engine runs them"></canvas></div>
+<div class="lit-pane grd-pass grd-wide" data-wt="cost"><canvas data-pane="cost" aria-label="What the pass costs: each node’s multiply-adds against the forward pass, and the totals against working the partial derivatives out one at a time"></canvas></div>
+<div class="lit-pane grd-chain grd-wide" data-wt="chain">
+<p class="grd-head"><b>The chain rule, a line at a time</b><span class="updates">updates</span><span class="propagates">back-propagates</span><span class="multiplies">multiplies</span></p>
+<div class="grd-chain-body"></div>
+</div>
+<div class="lit-pane grd-life grd-wide" data-wt="life"><canvas data-pane="life" aria-label="What is held, step by step: what the forward pass saved, the gradient in flight, and the .grads"></canvas></div>
+</div>
+<dl class="exe-read" data-out="read" data-wt="read"></dl>
+<div class="exe-notes" hidden>
+<p data-note="tree">The derivative tree, as Serban Liviu and Chris Olah draw it: J at the root, the stem z, a running down through the layers, and at each z two wings, W and b, its leaves; x and y hang off it too, but they are data. Beside each node of the stem and under each wing, its key derivative, ∂J/∂(it), lit by its role: updates once stored in .grad, back-propagates while in flight, faded once dropped, dashed while still to come.</p>
+<p data-note="tree">Each edge carries a local derivative, ∂(the node above)/∂(the node below), lit once its node has multiplied it in. A local derivative updates nothing: it multiplies. A key derivative is the product of the edges along the path from J, outlined for the one the step makes; the wings at one layer share every edge above them, so backward() makes those products once, on the stem, and hands them down. The dashed box, the same in all three panes, holds what the step multiplies: from the highest key derivative still held down to the node running, one hop, as a line of the chain rule is, unless retain_grad() keeps what was handed down. A click on an edge runs the pass to its node.</p>
+<p data-note="tape">The network as a tape of gates, as cs231n draws a circuit, stood on end: J at the top and x at the foot, one wire up the middle. Each layer’s band holds a × gate, the product with its weight matrix, under a + gate, the bias added; then φ, the activation, and at the top the loss. Left of the wire at each level, its tensor’s values for input 1 of the batch of 8; right of it, ∂J/∂ of that tensor, which the gate above hands down: lit as back-propagates while in flight, faded once dropped, dashed while still to come.</p>
+<p data-note="tape">W comes in to its × from the right and b to its + from the left, as leaves: the parameter, then its key derivative, ∂J/∂W or ∂J/∂b, filled as updates once AccumulateGrad has stored it in .grad. One rule runs every gate: the upstream gradient times the gate’s local derivative. + copies δ to both addends, so ∂J/∂b is δ, summed over the batch, framed at b’s step with the entry of ∂J/∂b it makes, [1]; × swaps, so ∂J/∂W is δ times the input it multiplied, framed at W’s steps with the entry of ∂J/∂W they make, [1,1], in its .grad, and the input’s is δ times W; φ scales by its slope. Under a value, a teal line while a node holds it saved, faded once it is freed: a layer’s input for its ×, an activation’s output for φ, Wᵀ under W for ×, z and y for the loss. Each node’s gates are framed and numbered as the graph numbers it.</p>
+<p data-note="graph">The graph model(x) records, as torch.autograd builds it (Paszke et al. 2017), numbered in the order the engine runs it. nn.Linear runs addmm(b, a, Wᵀ), so each layer leaves an AddmmBackward0, a TBackward0 for Wᵀ, and an AccumulateGrad for each of W and b, which stores ∂J/∂W or ∂J/∂b in .grad. Each chip is the key derivative an edge carries, ∂J/∂z or ∂J/∂a, lit as back-propagates while in flight, faded once dropped, dashed while still to come. A click on a node runs the pass to it.</p>
+<p data-note="cost">What the pass costs. Each node of backward() stands for a Jacobian, the local derivative of its output by its input, but never forms it: it multiplies the gradient it is handed straight through, a vector–Jacobian product, by only the entries that are not 0 by structure, so it costs what its forward op cost. The columns are each node’s matrix products in multiply-adds, as torch.utils.flop_counter counts them, two FLOPs each: δᵀa, which makes ∂J/∂W, in indigo under δW, which makes ∂J/∂a, in red. The elementwise work, the loss’s, φ′’s and Σₙ δ’s, a few dozen numbers a node, is left out. Done solid, the node at work outlined, still to come dashed; a click on a column runs the pass there.</p>
+<p data-note="cost">At the right, the totals on a log scale: the forward pass, 624 multiply-adds; backward(), 1,056, 1.69 times it, or twice it with x.requires_grad, when layer 1 also works out δW; and the same 93 partial derivatives one at a time, a forward pass each, as forward mode or finite differences take them, or two each, as gradcheck’s central differences in the readings do. Reverse mode costs a small multiple of the forward pass however many parameters there are, the cheap gradient principle (Baur and Strassen 1983). Under the columns, the node at work as the Jacobian it stands for and what it does instead.</p>
+<p data-note="chain">View › Chain Rule: the chain rule a line at a time, a line per key derivative, by the node that makes it, numbered as the graph numbers them. Each is the product a line above made, in red by the name that line gave it, δ or ∂J/∂a, handed down, times the one local derivative this line multiplies in, in teal: red times teal gives the line’s own colour, indigo if it updates, red if it is handed on. A red rail points the way: from a dot at the line that made a product down to an arrow at each line that takes it, lit while the product is held, faded once it is dropped, unless retain_grad() keeps it, dashed before it is made. Follow a name up to the line that made it, and on up to J, for the chain in full.</p>
+<p data-note="chain">Right of each chain, the product in matrices, a row per input, with its shape, and what the node saved in the forward pass for its one new factor. Under them, what writing every chain out in full from J would cost against what backward() does. Lit once the pass has run its node, outlined while it runs, faded ahead; a click on a line runs the pass to it.</p>
+<p data-note="life">Across the foot, what is held, step by step, a column a node: each tensor a node saved, from the forward pass until the last node to read it has run, then freed unless retain_graph=True; each .grad from its AccumulateGrad on, kept for optimizer.step() until zero_grad(). The gradients in flight, δ and ∂J/∂a, are the pointers above: held one hop, from the line that makes one to the lines that take it. Faded once gone from memory, as a dropped pointer fades, handed back to the allocator (on a GPU, PyTorch’s caching allocator, which keeps it for the next tensor); dashed, still to come. x and y never fade: the graph lets go of them, but your code still holds them. A click on a column runs the pass there.</p>
+<p data-note="life">The roles, so: updates stops at its own layer, in .grad; back-propagates travels down the layers and is dropped once used, unless retain_grad() keeps it; multiplies stays at its node, used once, what the node saved freed after. Every line above follows one rule, layer l in place of the number: δ_l gives ∂J/∂W_l = δ_lᵀa_l−1, the inputs summed, ∂J/∂b_l = Σₙ δ_l, needing no input, and ∂J/∂a_l−1 = δ_lW_l, handed down, which φ′ turns into δ_l−1.</p>
+<p data-note="torch">retain_grad() keeps each δ and ∂J/∂a in the .grad of its z or a. x.requires_grad adds ∂J/∂x, the edge x → z₁ of the tree, and an AccumulateGrad for x. retain_graph=True keeps what the nodes saved, which a second backward would need.</p>
+<p data-note="read">J; what the graph holds, the gradients in flight and the .grad written, in bytes as float32 would hold them; and every ∂J/∂W and ∂J/∂b against central differences in float64, the largest gap over the largest gradient.</p>
+</div>
+<a class="exe-ref" href="https://blog.ezyang.com/2019/05/pytorch-internals/" target="_blank" rel="noopener" title="Edward Z. Yang’s PyTorch internals (2019): tensors, autograd and the graph from inside PyTorch, in a new tab">Edward Z. Yang, PyTorch internals</a>
+</div>
+<script src="/assets/js/exe.js" defer></script>
+<script src="/assets/js/backward.js" defer></script>

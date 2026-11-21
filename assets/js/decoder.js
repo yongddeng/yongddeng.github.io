@@ -1,4 +1,4 @@
-// 302. blocks: a workbench inside the post window. The tree on the left
+// 307. blocks: a workbench inside the post window. The tree on the left
 // picks a model; the pane on the right draws its block with the parts that
 // changed from the parent lit, or the diff, the model against its parent (or
 // any other) part by part. The menus above find models by their parts: tick
@@ -26,6 +26,8 @@
 	const year = m => m.date.split(' ')[1];
 	const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 	const fmtB = b => (b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : Math.round(b / 1e3) + ' KB');
+	// a layer's cache, to a tenth of a KB below 10 KB so that layers × it meets fmtB's total
+	const fmtKB = b => (b < 1e4 ? (b / 1e3).toFixed(1) : Math.round(b / 1e3)) + ' KB';
 	const fmtP = p => (p >= 1000 ? (p / 1000).toFixed(2).replace(/\.?0+$/, '') + 'T' : p >= 1 ? (Number.isInteger(p) ? p : p.toFixed(1)) + 'B' : Math.round(p * 1000) + 'M');
 	// what follows a mixture's parameter count: ", 37B active"
 	const activeP = m => (m.active ? `, ${fmtP(m.active)} active` : '');
@@ -274,7 +276,7 @@
 			T(`<rect x="396" y="330" width="118" height="92" class="frame${cacheChg ? ' chgf' : ''}"/>`); txt(404, 344, 'cached per token', 'lab');
 			T('<rect x="404" y="352" width="40" height="9" class="lat"/>'); txt(450, 360, `K · ${Hk} × ${hd}`, 'bs');
 			T('<rect x="404" y="366" width="40" height="9" class="lat"/>'); txt(450, 374, `V · ${Hk} × ${hd}`, 'bs');
-			txt(404, 392, `2 bytes → ${Math.round(Hk * hd * 4 / 1024)} KB / layer`, 'bs'); txt(404, 406, m.attn === 'hybrid' ? `× ${m.full_layers} layers = ${fmtB(kv(m))}` : `× ${m.layers} layers = ${fmtB(kv(m))}`, 'bs'); txt(404, 418, m.attn === 'window' ? `only the last ${n(m.win)} kept` : 'read by every later token', 'bs');
+			txt(404, 392, `2 bytes → ${fmtKB(Hk * hd * 4)} / layer`, 'bs'); txt(404, 406, m.attn === 'hybrid' ? `× ${m.full_layers} layers = ${fmtB(kv(m))}` : `× ${m.layers} layers = ${fmtB(kv(m))}`, 'bs'); txt(404, 418, m.attn === 'window' ? (m.full_layers ? `last ${n(m.win)} in ${m.layers - m.full_layers} layers` : `only the last ${n(m.win)} kept`) : 'read by every later token', 'bs');
 			ln('M260,420H396'); ln('M390,340H396');
 		} else {
 			ln('M80,500H330'); [130, 260, 330].forEach(x => { ln(`M${x},500V478`); up(x, 478); });
@@ -585,7 +587,7 @@
 	}
 	document.addEventListener('keydown', onKey);
 	document.addEventListener('pointerdown', onPress);
-	// The window's View menu normally lists headings (menubar.js); filled here, it lists the two views, as 303's does
+	// The window's View menu normally lists headings (menubar.js); filled here, it lists the two views, as 308's does
 	$('.tb-outline', win).innerHTML = '<button type="button" class="tb-item cur" data-view="block">Block</button><button type="button" class="tb-item" data-view="diff">Diff</button>';
 	// The references take the status bar's first cell, where a post that is read says Ready, which leaves the toolbar
 	// to the menus and the views. The layout draws the bar after the post, so the post defers this script

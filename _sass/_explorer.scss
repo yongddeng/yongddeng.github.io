@@ -5,7 +5,6 @@
 // into the page on a phone.
 @use "main";
 
-$xp-tip: Verdana, Tahoma, main.$ui;
 
 // a large icon: Windows 98's 48px drawing at half size, one pixel to a
 // screen pixel on a 2x display, and blended rather than dropped on a 1x one
@@ -70,7 +69,7 @@ $xp-tip: Verdana, Tahoma, main.$ui;
 		.tb-item[disabled],
 		.tb-item[disabled]:hover {
 			background: none;
-			color: #808080;
+			color: main.$shade;
 			text-shadow: 1px 1px 0 #ffffff;
 		}
 	}
@@ -120,7 +119,7 @@ $xp-tip: Verdana, Tahoma, main.$ui;
 		border-color: main.$shade #ffffff #ffffff main.$shade;
 	}
 	&[disabled] {
-		color: #808080;
+		color: main.$shade;
 		text-shadow: 1px 1px 0 #ffffff;
 
 		svg {
@@ -285,8 +284,8 @@ $xp-tip: Verdana, Tahoma, main.$ui;
 // A row is its connector cells, the icon, a 3px gap and the name, so a
 // child's icon starts where its parent's name does. Each cell draws its own
 // dotted line from the same pixel, so the dots meet across cells
-$dots: repeating-linear-gradient(#808080 0 1px, transparent 1px 2px);
-$dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2px);
+$dots: repeating-linear-gradient(main.$shade 0 1px, transparent 1px 2px);
+$dots-across: repeating-linear-gradient(90deg, main.$shade 0 1px, transparent 1px 2px);
 
 .tv-head {
 	position: sticky;
@@ -358,7 +357,7 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 	width: 9px;
 	height: 9px;
 	box-sizing: border-box;
-	border: 1px solid #808080;
+	border: 1px solid main.$shade;
 	background: linear-gradient(#000000, #000000) 1px 3px / 5px 1px no-repeat, #ffffff;
 
 	&.shut {
@@ -573,12 +572,7 @@ $dots-across: repeating-linear-gradient(90deg, #808080 0 1px, transparent 1px 2p
 	position: fixed;
 	z-index: 1002;
 	max-width: 300px;
-	padding: 4px 6px 5px;
-	background: main.$note;
-	border: 1px solid #000000;
-	color: #000000;
-	font: 11px/1.45 $xp-tip;
-	pointer-events: none;
+	@include main.tip;
 	visibility: hidden;
 
 	.ld {

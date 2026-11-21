@@ -616,8 +616,9 @@ var ServeEngine = ServeEngine || (function () {
 		seqs: [4, 8, 16, 32, 64, 1024],
 		cache: [1, 0.5, 0.25],
 		seed: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-		// seconds of the run a second, which each program opens at its own
-		speed: [0.1, 0.25, 0.5, 1, 2, 4, 8],
+		// seconds of the run a second, which each program opens at its own;
+		// every program's speeds (exe.js)
+		speed: exeSpeeds(),
 	};
 	const SHOW = { rate: v => v === Infinity ? 'inf' : String(v), system: fmt, reserve: fmt,
 		seqs: fmt, cache: v => v === 1 ? 'all' : '÷' + 1 / v, seed: String, speed: v => '×' + v };

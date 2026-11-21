@@ -1,4 +1,4 @@
-// 301. toy: one Mixtral layer in the post window (assets/js/toy.js). The cubes
+// 306. toy: one Mixtral layer in the post window (assets/js/toy.js). The cubes
 // scroll in the pane on the left; the maths, one section per component, is the
 // pane on the right. Toolbar, buttons and panes reuse the WinHelp chrome from
 // _literature.scss; KaTeX typesets the maths.
@@ -49,9 +49,10 @@ $toy-scale: 0.9;
 	[hidden] {
 		display: none !important;
 	}
-	.lit-btn.on {
-		background: #d4d0d4;
-	}
+}
+// the seek field, the programs' (_programs.scss), as wide as “step 20 of 20 · the”
+.toy .exe-at {
+	min-width: 19ch;
 }
 .toy-lbl {
 	color: main.$mute;
@@ -88,18 +89,6 @@ $toy-scale: 0.9;
 		outline: 1px dotted #000000;
 		outline-offset: -3px;
 	}
-	&::-webkit-scrollbar {
-		width: 16px;
-	}
-	&::-webkit-scrollbar-track {
-		background: repeating-conic-gradient(#c0c0c0 0% 25%, #ffffff 0% 50%) 0 0 / 2px 2px;
-	}
-	&::-webkit-scrollbar-thumb {
-		background: main.$face;
-		border: 2px solid;
-		border-color: #ffffff #000000 #000000 #ffffff;
-		box-shadow: inset -1px -1px #808080;
-	}
 }
 .toy-stage {
 	position: sticky;
@@ -118,11 +107,7 @@ $toy-scale: 0.9;
 }
 .toy-tip {
 	position: absolute;
-	pointer-events: none;
-	background: main.$note;
-	border: 1px solid #000000;
-	padding: 2px 6px;
-	font: 11.5px main.$ui;
+	@include main.tip;
 	white-space: nowrap;
 	font-variant-numeric: tabular-nums;
 }
@@ -165,7 +150,7 @@ $toy-scale: 0.9;
 		grid-row: 2;
 		height: 12px;
 		padding: 0;
-		border: 1px solid #808080;
+		border: 1px solid main.$shade;
 		background: #ffffff;
 		cursor: pointer;
 
@@ -184,14 +169,14 @@ $toy-scale: 0.9;
 		color: #000000;
 		background: main.$face;
 		border: 1px solid;
-		border-color: #ffffff #808080 #808080 #ffffff;
+		border-color: #ffffff main.$shade main.$shade #ffffff;
 		padding: 1px 6px;
 		cursor: pointer;
 
 		span { color: main.$navy; }
 		&.on {
 			background: #ffffff;
-			border-color: #808080 #ffffff #ffffff #808080;
+			border-color: main.$shade #ffffff #ffffff main.$shade;
 			font-weight: bold;
 		}
 		&:focus-visible { outline: 1px dotted #000000; outline-offset: 1px; }
@@ -311,7 +296,7 @@ $toy-scale: 0.9;
 			width: 9px;
 			height: 9px;
 			margin-right: -2px;
-			border: 1px solid #808080;
+			border: 1px solid main.$shade;
 			background: #ffffff;
 			font: 9px/1 main.$ui;
 			color: #000000;
@@ -481,7 +466,7 @@ $toy-scale: 0.9;
 .toy-code {
 	background: #ffffff;
 	border: 1px solid #d6d2da;
-	border-left: 3px solid #808080;
+	border-left: 3px solid main.$shade;
 	color: #000000;
 
 	.cm { color: #6a6470; }

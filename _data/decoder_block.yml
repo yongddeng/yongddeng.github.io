@@ -1,4 +1,4 @@
-# 302. blocks — sixteen models, each with its parent in the family tree, and the versions of each part.
+# 307. blocks — sixteen models, each with its parent in the family tree, and the versions of each part.
 # Numbers come from each paper's configuration table; the KV cache per token is computed from them in the browser.
 # attn: mha | mqa | gqa | window | mla | hybrid.  pos: sin | learned | rope | rope-dec | rope-partial | none.  norm: LN | RMS | RMS0.
 # mla: dq and dc, the latent widths of the query and of the keys and values; dr, the RoPE part of a head.
@@ -192,7 +192,7 @@ models:
     ctx: 262144
     params: 52
     active: 12
-    why: The first hybrid. One attention layer for every seven Mamba layers, and experts in every other layer, so a 256K context fits a single 80 GB GPU. No position encoding at all; the Mamba layers carry order.
+    why: The first production-scale hybrid. One attention layer for every seven Mamba layers, and experts in every other layer, so with 8-bit weights a 140K context fits a single 80 GB GPU. No position encoding at all; the Mamba layers carry order.
   - id: dsv2
     name: DeepSeek-V2
     date: May 2024
@@ -215,7 +215,7 @@ models:
     ctx: 131072
     params: 236
     active: 21
-    why: Keys and values are rebuilt from one 512-wide latent per token, cutting the cache by 93% with no loss in quality. Many small experts, two of them shared by every token.
+    why: Keys and values are rebuilt from one 512-wide latent per token, cutting the cache by 93% against DeepSeek 67B with no loss in quality. Many small experts, two of them shared by every token.
   - id: gemma2
     name: Gemma 2
     date: Jun 2024
@@ -382,7 +382,7 @@ parts:
       - { id: sandwich, short: "sandwich", extra: true, what: "Norm before and after", how: "a norm on the branch input and another on its output", models: [gemma2] }
       - { id: inside, short: "inside", what: "Post-norm inside the residual", how: "the norm sits on the branch output, before the add; the trunk stays raw", models: [olmo2] }
       - { id: qk, short: "QK", extra: true, what: "QK-norm", how: "normalise queries and keys before the dot product", models: [olmo2, qnext] }
-      - { id: zero, short: "zero-centred", extra: true, what: "Zero-centred RMSNorm", how: "the scale is learned around zero, so weight decay keeps it small", models: [qnext] }
+      - { id: zero, short: "zero-centred", extra: true, what: "Zero-centred RMSNorm", how: "the gain is 1 plus a weight learned around zero, so weight decay holds the gain near 1", models: [qnext] }
   - id: attn
     name: Attention
     techniques:

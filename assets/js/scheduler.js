@@ -2073,8 +2073,7 @@
 			paintRiver();
 			paintCounts();
 		}
-		const said = (clock.playing ? 'Playing at ×' + speed : t >= endOf() ? 'The run’s end' : 'Paused')
-			+ ' · ' + summary;
+		const said = exeState(clock.playing, t >= endOf()) + ' · ' + summary;
 		if (said !== statusText) status((statusText = said));
 	}
 

@@ -1,4 +1,4 @@
-# 301. toy: fail the build on a dangling id in _data/toy.yml, which would
+# 306. toy: fail the build on a dangling id in _data/toy.yml, which would
 # otherwise blank the side pane with a script error in the browser, or on a
 # step's code that has drifted from the listing it is cut from.
 Jekyll::Hooks.register :site, :post_read do |site|

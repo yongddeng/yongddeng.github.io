@@ -1,4 +1,4 @@
-// init.exe, for 302: a plain stack at initialisation, z = W a + b and a = φ(z)
+// init.exe, for 307: a plain stack at initialisation, z = W a + b and a = φ(z)
 // from the input x up, in two views of the one stack. Units is the network unit
 // by unit: three of its layers laid on a ground that turns, each unit a dot at
 // its value on its layer's line, the ground coloured by how densely the values
@@ -29,7 +29,7 @@
 	const QN = 400;                  // the quantiles a line's values are kept as, for the river
 	const ARCS = 12;                 // the ring drawn in arcs of one hue each
 	const LMAX = 64;                 // the deepest stack
-	const STEP_MS = 620;             // Run's pace, a layer a step, with time to see each
+	const STEP_MS = 620;             // Run's pace at ×1, a layer a step, with time to see each
 	const GLIDE_MS = 360;            // the ground eases from one layer, or one setting, to the next
 	const PICK_PX = 14;              // how near a dot the pointer picks its unit
 	const B_LO = 1e-4, B_HI = 0.5;   // σb²'s slider past 0, on a log scale
@@ -104,7 +104,7 @@
 		shape: {
 			tanh: 'A norm holds ẑ at variance 1, where tanh still bends: χ₁ = σw² E φ′(ẑ)² / (σw² E φ(ẑ)² + σb²), 1.18 with no bias at any σw². So nearby inputs fly apart and the Jacobian’s σ² grows by about 1.18 a layer. The norm fixes the scale, not the phase. A bias of σb² = 0.07 σw² brings χ₁ to 1.',
 			relu: 'Under a norm ReLU’s χ₁ is (σw² / 2) / (σw² / 2 + σb²), so with no bias it is exactly 1 at any σw², the edge however the weights are scaled. A bias puts the stack in order.',
-			linear: 'Under a norm a linear stack’s χ₁ is σw² / (σw² + σb²), 1 with no bias and under 1 with one. With no bias each layer’s ring lies in a plane through 0, and the norm puts every input at the same distance from 0, so the ring is a circle at every layer.',
+			linear: 'Under a norm a linear stack’s χ₁ is σw² / (σw² + σb²), 1 with no bias and under 1 with one. With no bias each layer’s ring lies in a plane through 0, and the norm puts every input at the same distance from 0, so ẑ’s ring is a circle at every layer and the sums’ ring an ellipse, a circle only under orthogonal weights.',
 		},
 	};
 	// the scale whose button is down: the one that sets the weights and the bias as they stand
@@ -1448,7 +1448,7 @@
 			draw();
 			readout();
 			sync();
-			say(`${running ? 'Running' : 'Paused'} · layer ${S.layer} of ${S.L} · ${[weightsLabel(), NORMS[S.norm]?.label].filter(Boolean).join(', ')} · χ₁ = ${fmt(data.fp.chi)} at q* = ${fmt(data.fp.q)}`);
+			say(`${exeState(running, S.layer >= S.L)} · layer ${S.layer} of ${S.L} · ${[weightsLabel(), NORMS[S.norm]?.label].filter(Boolean).join(', ')} · χ₁ = ${fmt(data.fp.chi)} at q* = ${fmt(data.fp.q)}`);
 			// the ground drawn again next frame while it eases
 			if (glide) update(false);
 		});
@@ -1513,11 +1513,12 @@
 
 	// ---- the transport: the bold layer to the first, back n layers, on n or to
 	// the last, greyed at the stack's two ends; and Run, from layer 1 to the
-	// last, a layer a step ----
+	// last, a layer a step at the speed chosen ----
 	const STEP = { start: () => 1, back: (l, n) => l - n, next: (l, n) => l + n, end: () => S.L };
 	$$('.exe-buttons [data-act]').forEach(b => b.addEventListener('click', () => go(STEP[b.dataset.act](S.layer, 1))));
 	const runBtn = $('[data-act="run"]');
-	let running = 0, last = 0;
+	let running = 0, last = 0, speed = 1;
+	exeSpeed($('[data-in="speed"]'), speed, v => { speed = v; });
 	function stop() {
 		cancelAnimationFrame(running);
 		running = 0;
@@ -1526,7 +1527,7 @@
 	}
 	function tick(now) {
 		if (!running || !root.isConnected) return;
-		if (now - last >= STEP_MS) {
+		if (now - last >= STEP_MS / speed) {
 			last = now;
 			go(S.layer + 1);
 		}

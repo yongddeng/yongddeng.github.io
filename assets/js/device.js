@@ -1946,6 +1946,14 @@
 	const HELD = { tc: 'the tensor cores', nvme: 'the NVMe SSD', gds: 'the NVMe SSD', hbm: 'HBM',
 		stage: 'the CPU’s copy', ddr: 'DDR5', amx: 'the CPU’s AMX tiles', latency: 'latency, before the first byte' };
 	const say = exeStatus(root);
+	// the status bar: whether the run plays, then the line or the step it is at,
+	// kept to be told again when the run starts or stops
+	let told = '';
+	function tell(text = told) {
+		told = text;
+		const ended = serving() ? SV.k >= lastServed() : inside < 0 && k === lastStop();
+		say(exeState(serving() ? SV.playing : !!playing, ended) + ' · ' + told);
+	}
 	let kind = 'loader', R = run(kind), k = 0, inside = -1, spans = [], depths = [], want = null;
 	// the run again, and the forward pass it steps into, at the batch and on the device set
 	function rerun() {
@@ -3492,7 +3500,7 @@
 		hud();
 		if (!$('.trn-panel').classList.contains('shut')) memory();
 		drawRequests();
-		say('serve.py, step ' + exeFmt(SV.k + 1) + ': ' + stepName(SV.k));
+		tell('serve.py, step ' + exeFmt(SV.k + 1) + ': ' + stepName(SV.k));
 	}
 	function serveGo(i, byHand = false) {
 		SV.k = Math.max(0, Math.min(SV.run.steps.length - 1, i));
@@ -3612,11 +3620,9 @@
 		if (list[j] !== SV.at[key]) serveChange({ [key]: list[j] });
 	}
 	const serveToggle = () => SV.run.alloc !== 'contiguous' && serveChange({ prefix: !SV.at.prefix });
-	const speed = $('[data-in="speed"]');
-	speed.innerHTML = SE.VALUES.speed.map(v => '<option value="' + v + '"'
-			+ (v === SV.at.speed ? ' selected' : '') + '>' + SE.SHOW.speed(v) + '</option>').join('');
-	speed.addEventListener('change', () => {
-		SV.at.speed = +speed.value;
+	// the speed every file plays at: serve.py's clock, and train.py's time a line
+	exeSpeed($('[data-in="speed"]'), SV.at.speed, v => {
+		SV.at.speed = v;
 		SV.wall = performance.now();
 	});
 
@@ -3634,7 +3640,7 @@
 		hud();
 		if (inside < 0 && !$('.trn-panel').classList.contains('shut')) memory();
 		drawLanes();
-		say((inside >= 0 ? 'forward › ' : '') + s.short
+		tell((inside >= 0 ? 'forward › ' : '') + s.short
 			+ (R.stops[k].step !== null ? ', step ' + R.stops[k].step : ''));
 	}
 	// the line the debugger was taken to, which a change to the script keeps
@@ -3939,9 +3945,10 @@
 	// Run: on through the lines, into nothing, to the last line or the one that
 	// raises, as the debugger's Continue runs to the end; a line that copies
 	// nothing for a moment, and a line that does until the camera has landed
-	// where its bytes are held and a while after, to watch them go
+	// where its bytes are held and a while after, to watch them go; at ×1, as the
+	// speed divides both
 	const PACE = 900, WATCH = 2400;
-	const dwell = () => ((cur().copies || []).length ? (flight ? (flight.span - flight.t) * 1000 : 0) + WATCH : PACE);
+	const dwell = () => ((cur().copies || []).length ? (flight ? (flight.span - flight.t) * 1000 : 0) + WATCH : PACE) / SV.at.speed;
 	let playing = null;
 	// serve.py plays its run on its own clock
 	function play(on = !(serving() ? SV.playing : playing)) {
@@ -3958,10 +3965,11 @@
 		}
 		runButton(!!playing);
 	}
-	// Run, or Pause while it runs
+	// Run, or Pause while it runs, and the word the status bar opens with
 	function runButton(on) {
 		exeRunning($('[data-act="run"]'), on);
 		transport();
+		tell();
 	}
 	// the field a seek bar, as the players' are: pressed or dragged, the run
 	// goes to the stop under the pointer; the wheel moves it a thousandth of

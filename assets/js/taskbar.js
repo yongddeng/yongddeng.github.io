@@ -54,17 +54,11 @@
 			var b = document.createElement('button');
 			b.className = 'task-win' + (win.classList.contains('active-win') ? ' active' : '');
 			var icon = win.querySelector('.post_title img');
-			var emoji = win.querySelector('.post_title .t-emoji');
 			if (icon) {
 				var i = document.createElement('img');
 				i.src = icon.getAttribute('src');
 				i.alt = '';
 				b.appendChild(i);
-			} else if (emoji) {
-				var s = document.createElement('span');
-				s.className = 't-emoji';
-				s.textContent = emoji.textContent;
-				b.appendChild(s);
 			}
 			b.appendChild(document.createTextNode(h1.textContent));
 			b.addEventListener('click', function () {

@@ -1,4 +1,4 @@
-# 303. papers — papers, shelves and builds-on links.
+# 308. papers — papers, shelves and builds-on links.
 # shelves group papers by subject (used by the Timeline and Lineage views); short, when given, is the narrow lane label;
 # venues, grouped by type, are the Contents books; each paper lists the ids it builds on (builds_on).
 
@@ -128,7 +128,7 @@ papers:
       note: "Why deep nets with sigmoids stall: activations and gradients shrink layer by layer. Scale the initial weights by fan-in and fan-out, and they do not." }
   - { id: heinit, name: "He init", year: 2015, venue: "ICCV", shelf: pre, sub: reg, builds_on: [xavier],
       title: "Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification",
-      note: "Xavier's variance argument redone for ReLU, which zeroes half its inputs: scale the weights by √(2/fan-in). Very deep ReLU nets then train from scratch; the basis of PyTorch's default init." }
+      note: "Xavier's variance argument redone for ReLU, which zeroes half its inputs: scale the weights by √(2/fan-in). Very deep ReLU nets then train from scratch; PyTorch's default init calls it with a = √5, a sixth of this variance." }
   - { id: adagrad, name: "Adagrad", year: 2011, venue: "JMLR", shelf: pre, sub: opt, builds_on: [],
       title: "Adaptive Subgradient Methods for Online Learning and Stochastic Optimization",
       note: "A per-parameter learning rate that shrinks with the gradient history. Rare features get big steps; Adam adds momentum and fixes the shrinkage." }
@@ -305,7 +305,7 @@ papers:
       note: "A linear state-space layer whose recurrence is also a convolution, so it trains in parallel and runs as an RNN. Solves Long Range Arena where attention could not; Mamba makes its parameters input-dependent." }
   - { id: palm, name: "PaLM", year: 2023, venue: "JMLR", shelf: lm, sub: gpt, builds_on: [gpt3],
       title: "PaLM: Scaling Language Modeling with Pathways",
-      note: "A 540B dense model trained across TPU pods. Chain-of-thought and multi-step reasoning appear at scale, a month after Chinchilla argued the same compute wanted a smaller model on more tokens." }
+      note: "A 540B dense model trained across TPU pods. Chain-of-thought and multi-step reasoning appear at scale, a week after Chinchilla argued the same compute wanted a smaller model on more tokens." }
   - { id: gpt4, name: "GPT-4", year: 2023, venue: "OpenAI report", shelf: lm, sub: gpt, builds_on: [gpt3, instructgpt],
       title: "GPT-4 Technical Report",
       note: "The capability report with the method withheld: human-exam results, predictable scaling from small runs, and RLHF for behaviour. The reference point for every model after it." }
@@ -347,7 +347,7 @@ papers:
       note: "Fine-tune on a thousand curated reasoning traces, then control thinking length at inference by forcing or suppressing the end-of-thought token. The test-time scaling curve reproduced with almost no training compute." }
   - { id: gdn, name: "Gated DeltaNet", year: 2025, venue: "ICLR", shelf: arch, sub: attn, builds_on: [linattn, mamba],
       title: "Gated Delta Networks: Improving Mamba2 with Delta Rule",
-      note: "A linear-attention state updated by the delta rule, with Mamba-style gating to forget. Matches Mamba2 on language modelling with better recall; the recurrent layer inside Qwen3-Next and Kimi Linear." }
+      note: "A linear-attention state updated by the delta rule, with Mamba-style gating to forget. Matches Mamba2 on language modelling with better recall; the recurrent layer inside Qwen3-Next, and the base of Kimi Linear's finer-gated KDA." }
   - { id: t5, name: "T5", year: 2020, venue: "JMLR", shelf: lm, sub: s2s, builds_on: [bert],
       title: "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer",
       note: "Every task as text-to-text; a systematic study of pretraining choices at scale." }
@@ -374,7 +374,7 @@ papers:
       note: "SFT, then a reward model, then PPO (RLHF). A 1.3B model preferred over 175B GPT-3." }
   - { id: r1, name: "DeepSeek-R1", year: 2025, venue: "arXiv", shelf: post, sub: sft, builds_on: [instructgpt, cot, dsv3, distill],
       title: "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
-      note: "RL with verifiable rewards (GRPO) elicits long chain-of-thought without SFT; then distilled into small models." }
+      note: "RL with verifiable rewards (GRPO) elicits long chain-of-thought without SFT in R1-Zero; R1 adds a cold-start SFT, then is distilled into small models." }
   - { id: selfcons, name: "Self-consistency", year: 2023, venue: "ICLR", shelf: tt, sub: tts, builds_on: [cot],
       title: "Self-Consistency Improves Chain of Thought Reasoning in Language Models",
       note: "Sample several chains and take the majority answer. The first test-time compute knob, years before o1." }

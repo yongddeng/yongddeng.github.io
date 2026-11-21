@@ -40,12 +40,12 @@
 
 	// The outline is built lazily on first open, one entry per h2/h3.
 	// A post may fill it first with entries of its own (literature.js
-	// lists its views); a non-empty dropdown is left alone. A program's
-	// window with views on its toolbar lists those instead.
+	// lists its views); a non-empty dropdown is left alone. A window with
+	// views, a program's or the toy's, lists those instead.
 	function buildOutline(win) {
 		var drop = win.querySelector('.tb-outline');
 		if (!drop || drop.childNodes.length) return;
-		if (win.classList.contains('exe-win') && listViews(win, drop)) return;
+		if (listViews(win, drop)) return;
 		var cont = win.querySelector('.post_content');
 		var heads = cont ? cont.querySelectorAll('h2, h3') : [];
 		if (!heads.length) {
@@ -108,11 +108,13 @@
 		drop.addEventListener('scroll', hideFly);
 	}
 
-	// A program's views, one entry per [data-view] button, named as the
-	// button is: by its words, or for an icon by its title up to the colon.
-	// Choosing one presses the button, so the program switches as it would
+	// A program's views, one entry per [data-view] button, or per editor tab
+	// as device.exe has, named as the button is: by its words, or for an icon
+	// by its title up to the colon. Choosing one presses the button, so the
+	// program switches as it would. The tabs of files stepped into are the
+	// debugger's, not views
 	function listViews(win, drop) {
-		var views = win.querySelectorAll('.post_content button[data-view]');
+		var views = win.querySelectorAll('.post_content button[data-view], .post_content [data-tab]:not([data-tab^="in"])');
 		views.forEach(function (b) {
 			var item = document.createElement('button');
 			item.type = 'button';

@@ -1,4 +1,4 @@
-// 302. blocks: a workbench in the post window (assets/js/decoder.js).
+// 307. blocks: a workbench in the post window (assets/js/decoder.js).
 // The part menus and the two views make the toolbar; the model tree and the shown
 // model's parts stack on the left; the block (or the diff) is drawn on the right;
 // two references sit in the window's status bar.
@@ -147,7 +147,7 @@ $wb-newtext: #8a6d00;
 	}
 	&.open {
 		@include main.bevel(false);
-		background: #d4d0d4;
+		background: main.$on;
 	}
 }
 // a menu's techniques; fixed, like the window menus' flyouts, so a shrunk window cannot clip it. A black edge
@@ -160,7 +160,7 @@ $wb-newtext: #8a6d00;
 	padding: 2px;
 	background: main.$face;
 	border: 1px solid #000000;
-	box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080, 3px 3px 0 rgba(0, 0, 0, 0.35);
+	box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 main.$shade, 3px 3px 0 rgba(0, 0, 0, 0.35);
 
 	.wb-vers {
 		background: var(--paper, #fbfafb);
@@ -426,10 +426,16 @@ $wb-newtext: #8a6d00;
 	font-size: 11px;
 	color: main.$mute;
 
+	// a sunken field, as the programs' selects are
 	select {
 		height: 20px;
 		max-width: 230px;
+		padding: 0 1px;
+		background: #ffffff;
+		@include main.sunken-field;
+		border-radius: 0;
 		font: 11px main.$ui;
+		color: #000000;
 	}
 	.sum {
 		flex-basis: 100%;
@@ -443,7 +449,7 @@ $wb-newtext: #8a6d00;
 	padding: 4px 0;
 	background: var(--paper, #fbfafb);
 	border: 1px solid #dddddd;
-	font: 11px/1.55 "Lucida Console", Monaco, "Courier New", monospace;
+	font: 11px/1.55 main.$mono;
 
 	div {
 		display: grid;

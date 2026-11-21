@@ -1,26 +1,29 @@
-// What the programs on (D:) share (lil.js, optimiser.js, scheduler.js,
-// init.js, device.js): a place in their window's status bar beside the
-// note they draw for, canvases drawn at the screen's density and drawn again as
-// they resize, the hatching for room set aside that nothing fills, toggles
-// pressed, a player's seek bar, transport and Run, and chance and numbers as
-// they draw and write them. Declared as functions, as the desktop runs this
-// file again for each window. Their notes are What's This? cards
-// (whatsthis.js).
+// What the programs share (lil.js, init.js, backward.js, optimiser.js,
+// scheduler.js, device.js, and the toy's toy.js): a place in their window's
+// status bar beside the note they draw for, canvases drawn at the screen's
+// density and drawn again as they resize, the hatching for room set aside that
+// nothing fills, toggles pressed, and one frame for a run: Run and the
+// transport, a seek bar, a speed and the word the status bar opens with; and
+// chance and numbers as they draw and write them. Declared as functions, as the
+// desktop runs this file again for each window. Their notes are What's This?
+// cards (whatsthis.js).
 
-// The note's link moves into the status bar and opens the note in a window of
-// its own, as My Computer does. Returns a setter for the bar's first cell, which
-// says what the program is doing. A phone hides the bar, so there the link stays
-// in the program and the setter does nothing
+// The note's link, where the program has one, moves into the status bar and
+// opens the note in a window of its own, as My Computer does, with any reading
+// the program credits (.exe-ref) before it, which opens in a tab. Returns a
+// setter for the bar's first cell, which says what the program is doing. A
+// phone hides the bar, so there the links stay in the program and the setter
+// does nothing
 function exeStatus(root) {
 	const link = root.querySelector('.exe-for');
 	const win = root.closest('.content'), bar = win && win.querySelector('.post_total');
-	link.addEventListener('click', function (e) {
+	if (link) link.addEventListener('click', function (e) {
 		if (!window.desktop || phone()) return;
 		e.preventDefault();
 		desktop.loadPost(link.getAttribute('href'));
 	});
 	if (!bar || phone()) return function () {};
-	bar.append(link);
+	bar.append(...root.querySelectorAll('.exe-ref, .exe-for'));
 	const cell = bar.querySelector('.left');
 	return function (text) { cell.textContent = text; };
 }
@@ -123,6 +126,26 @@ function exeEnds(root) {
 function exeRunning(button, on) {
 	const text = on ? '❚❚ Pause' : '▶ Run';
 	if (button.textContent !== text) button.textContent = text;
+}
+
+// The speeds a run plays at, its program's own pace at ×1
+function exeSpeeds() {
+	return [0.1, 0.25, 0.5, 1, 2, 4, 8];
+}
+// A select of the speeds, at `at`; `to` is told the one chosen
+function exeSpeed(select, at, to) {
+	select.innerHTML = exeSpeeds().map(function (v) {
+		return '<option value="' + v + '"' + (v === at ? ' selected' : '') + '>×' + v + '</option>';
+	}).join('');
+	select.addEventListener('change', function () {
+		to(+select.value);
+	});
+}
+
+// The word a program's status bar opens with: Playing while the run goes,
+// Finished at its end, Paused anywhere else
+function exeState(playing, ended) {
+	return playing ? 'Playing' : ended ? 'Finished' : 'Paused';
 }
 
 // A toggle pressed or not: its look, and its state as a screen reader hears it

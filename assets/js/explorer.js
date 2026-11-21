@@ -1,11 +1,12 @@
 // My Computer, as Windows 98 opened it: the place itself, with the Folders bar
 // down the left a toolbar button away. My Computer and its drives show
 // large icons, with a drive's General tab and its pie beneath; a folder lists
-// its posts in Details, and (D:) holds the programs (_programs), each opening
-// in a window of its own. Resting the pointer on an item gives its infotip. A
-// click selects and a double-click opens, as on the desktop it imitates. On
-// a phone the window is the page: the chips pick a folder, and each row
-// carries its post's opening sentence. The facts come from _plugins/explorer.rb.
+// its posts in Details, and the programs (_programs) that carry its tag, each
+// opening in a window of its own; (D:) holds the programs with none. Resting
+// the pointer on an item gives its infotip. A click selects and a double-click
+// opens, as on the desktop it imitates. On a phone the window is the page: the
+// chips pick a folder, and each row carries its post's opening sentence, or
+// what a program holds. The facts come from _plugins/explorer.rb.
 (function () {
 	const win = document.querySelector('.wrapper');
 	const posts = window.searchIndex, programs = window.programs;
@@ -17,27 +18,32 @@
 	const hasTex = s => /\$[^$]+\$/.test(s || '');
 
 	// ---- the places: My Computer, its drives, the folders, the posts and the programs ----
-	// Every tag is a course on (C:); (D:) holds the programs. A post or a
-	// program is a leaf: it opens at its URL, and carries its own icon, type,
-	// size and date
+	// Every tag is a course on (C:), holding its posts and the programs tagged
+	// with it, as the courses' deep-learning programs are cs300's; (D:) holds
+	// the programs with no tag. A post or a program is a leaf: it opens at its
+	// URL, and carries its own icon, type, size and date
 	const N = {};
 	const add = (id, o) => { N[id] = Object.assign({ id: id, kids: [] }, o); };
 	const tags = Array.from(new Set(posts.map(p => p.tags[0]).filter(Boolean))).sort();
 	add('mc', { name: 'My Computer', kind: 'root', addr: 'My Computer', kids: ['C', 'D'] });
 	add('C', { name: '(C:)', kind: 'drive', addr: 'C:\\', up: 'mc', kids: tags });
-	add('D', { name: '(D:)', kind: 'drive', addr: 'D:\\', up: 'mc', kids: programs.map(x => x.url) });
+	add('D', { name: '(D:)', kind: 'drive', addr: 'D:\\', up: 'mc' });
 	tags.forEach(t => add(t, { name: t, kind: 'folder', addr: 'C:\\' + t, up: 'C' }));
 	// Each place's own order, which its list keeps until Arrange picks another:
-	// a folder's posts newest first, as searchIndex holds them and the
-	// desktop's folder windows (tag-filter.js) list them; (D:)'s programs by
-	// their dates, which, as the posts' do, place each in the series of the
-	// note it draws for
+	// a folder's posts and programs by their numbers, the latest first, as
+	// searchIndex holds the posts and the desktop's folder windows
+	// (tag-filter.js) list them; (D:)'s programs by their dates
+	const byName = (a, b) => a.localeCompare(b, 'en', { numeric: true });
 	posts.forEach(p => {
 		add(p.url, { name: p.title, kind: 'file', up: p.tags[0], post: p, url: p.url, icon: p.icon, type: p.type, size: p.size, created: p.xp.created });
 		if (N[p.tags[0]]) N[p.tags[0]].kids.push(p.url);
 	});
-	programs.forEach(x => add(x.url, { name: x.name, kind: 'exe', up: 'D', exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, created: x.created }));
-	const byName = (a, b) => a.localeCompare(b, 'en', { numeric: true });
+	programs.forEach(x => {
+		const up = N[x.tags[0]] ? x.tags[0] : 'D';
+		add(x.url, { name: x.name, kind: 'exe', up: up, exe: x, url: x.url, icon: x.icon, large: x.large, type: 'Application', size: x.size, created: x.created });
+		N[up].kids.push(x.url);
+	});
+	tags.forEach(t => N[t].kids.sort((a, b) => byName(N[b].name, N[a].name)));
 	const isBox = n => n.kind !== 'file' && n.kind !== 'exe';
 	const TYPE = { drive: 'Local Disk', folder: 'File Folder' };
 	// Windows 98's own icons: 16px drawings, and for the large icons its 48px
@@ -52,27 +58,20 @@
 	const listsPosts = n => n.kind === 'folder';
 
 	// what a place holds, all the way down: its posts and programs, and so its
-	// size and date; and of those, its posts
+	// size; and of those, its posts and its programs
 	const leaves = n => (isBox(n) ? n.kids.flatMap(k => leaves(N[k])) : [n]);
 	const files = n => leaves(n).filter(m => m.kind === 'file').map(m => m.post);
+	const exes = n => leaves(n).filter(m => m.kind === 'exe');
 	const kbOf = n => leaves(n).reduce((a, m) => a + kb(m.size), 0);
-	// when a place was created: its own date, or a folder's first
-	const madeOf = n => leaves(n).reduce((a, m) => (!a || m.created < a ? m.created : a), '');
+	// when a place was created: its own date, or a folder's first post's or
+	// program's, each dated by its number in the folder's series
+	const madeOf = n => (isBox(n) ? leaves(n) : [n]).map(m => m.created).reduce((a, d) => (!a || d < a ? d : a), '');
 	// whether a place shows when it was created: a post, a program or a folder, not a drive
 	const dated = n => n.kind !== 'drive';
 
-	// what a post holds, for its infotip
-	function inside(p) {
-		const x = p.xp;
-		if (x.about) return x.about.slice();
-		const out = [];
-		if (x.parts) out.push(x.sections ? many(x.parts, 'part') + ', ' + many(x.sections, 'section') : many(x.parts, 'part'));
-		const bits = [];
-		if (x.figures) bits.push(many(x.figures, 'figure'));
-		if (x.formulas) bits.push(many(x.formulas, 'formula'));
-		if (bits.length) out.push(bits.join(' · '));
-		return out;
-	}
+	// what a post says it is, for its infotip and its phone row: its opening
+	// sentence, or what a post that opens on controls holds
+	const leadOf = p => p.xp.lead || (p.xp.about ? p.xp.about.join('. ') + '.' : '');
 	// "12 notes, 201 to 212"
 	function span(ps) {
 		const kind = ps.every(p => p.xp.about) ? 'program' : ps.some(p => p.xp.about) ? 'file' : 'note';
@@ -122,9 +121,10 @@
 	}
 
 	// ---- a drive's General tab: on (C:) what each folder holds, and the pie; on (D:) the programs ----
-	// Windows 98's pie, here the drive's posts by folder, its depth drawn as
-	// the same slices stacked in a darker shade; the selected folder's slice
-	// pulls out. Posts, not bytes: 699's clip alone would fill the pie
+	// Windows 98's pie, here the drive's files by folder, posts and programs,
+	// its depth drawn as the same slices stacked in a darker shade; the
+	// selected folder's slice pulls out. Files, not bytes: 699's clip alone
+	// would fill the pie
 	const PIE = [['#000080', '#00004a'], ['#008080', '#004a4a'], ['#800080', '#4a004a'], ['#808000', '#4a4a00'],
 		['#800000', '#4a0000'], ['#008000', '#004a00'], ['#0000ff', '#000094'], ['#808080', '#4a4a4a']];
 	const shade = (i, dark) => PIE[i % PIE.length][dark ? 1 : 0];
@@ -152,9 +152,9 @@
 		const row = (m, i, mark, what) => '<tr' + (i === hl ? ' class="on"' : '') + '><td>' + mark + '<span>' + esc(m.name) + '</span></td><td>' + what + '</td><td>' + fmtKB(kbOf(m)) + '</td></tr>';
 		const table = (rows, total, cls) => '<table class="dp-table' + (cls ? ' ' + cls : '') + '"><tbody>' + rows.join('')
 			+ '<tr class="dp-total"><td>Total</td><td>' + total + '</td><td>' + fmtKB(kbOf(n)) + '</td></tr></tbody></table>';
-		const body = isBox(kids[0])
-			? table(kids.map((f, i) => row(f, i, '<i style="background:' + shade(i) + '"></i>', many(files(f).length, 'file'))), many(files(n).length, 'file'))
-				+ '<figure>' + pie(kids.map(f => files(f).length), hl) + '<figcaption>Drive ' + n.name[1] + '</figcaption></figure>'
+		const body = kids.length && isBox(kids[0])
+			? table(kids.map((f, i) => row(f, i, '<i style="background:' + shade(i) + '"></i>', many(leaves(f).length, 'file'))), many(leaves(n).length, 'file'))
+				+ '<figure>' + pie(kids.map(f => leaves(f).length), hl) + '<figcaption>Drive ' + n.name[1] + '</figcaption></figure>'
 			: table(kids.map((x, i) => row(x, i, '<img src="' + icon(x) + '" alt="" />', 'for ' + esc(x.exe.note))), many(kids.length, 'program'), 'dp-progs');
 		return '<section class="dp">' + head + '<div class="dp-body">' + body + '</div></section>';
 	}
@@ -317,7 +317,7 @@
 		pane.focus();
 	});
 
-	// ---- infotips: what an item is and holds, after half a second ----
+	// ---- infotips: what an item is, when it was created and its size, after half a second ----
 	let tip = null, tipTimer = null;
 	function hideTip() {
 		clearTimeout(tipTimer);
@@ -325,18 +325,14 @@
 		tip = null;
 	}
 	function tipFor(n) {
-		if (n.kind === 'file') {
-			const p = n.post;
-			return (p.xp.lead ? '<p class="ld"' + (hasTex(p.xp.lead) ? ' data-tex' : '') + '>' + esc(p.xp.lead) + '</p>' : '')
-				+ inside(p).map(f => '<div>' + esc(f) + '</div>').join('')
+		if (!isBox(n)) {
+			const lead = n.post ? leadOf(n.post) : n.exe.about;
+			return (lead ? '<p class="ld"' + (hasTex(lead) ? ' data-tex' : '') + '>' + esc(lead) + '</p>' : '')
 				+ '<div class="k">Created: ' + n.created + ' · Size: ' + n.size + '</div>';
 		}
-		if (n.kind === 'exe') {
-			return '<p class="ld">' + esc(n.exe.about) + '</p><div>For ' + esc(n.exe.note) + '</div>'
-				+ '<div class="k">Created: ' + n.created + ' · Size: ' + n.size + '</div>';
-		}
-		// a folder; the drives have none
-		return '<div>' + esc(span(files(n))) + '</div><div class="k">Created: ' + madeOf(n) + '</div>';
+		// a folder, its posts and then its programs, by their Type; the drives have none
+		const apps = exes(n).length;
+		return '<div>' + esc(span(files(n)) + (apps ? ' · ' + many(apps, 'application') : '')) + '</div><div class="k">Created: ' + madeOf(n) + '</div>';
 	}
 	pane.addEventListener('mousemove', e => {
 		if (phone()) return;
@@ -373,11 +369,12 @@
 		});
 		const groups = tag && N[tag] ? [tag] : N.C.kids;
 		pane.innerHTML = groups.map(t => (tag ? '' : '<div class="xp-group">' + esc(N[t].addr) + ' · ' + N[t].kids.length + '</div>') + '<ul>'
-			+ N[t].kids.map(id => N[id].post).map(p => {
-				const lead = p.xp.lead || (p.xp.about || []).join('. ') + '.';
-				return '<li><a href="' + p.url + '"><img src="/assets/img/' + p.icon + '" alt="" /><span class="tx"><span class="nm">' + esc(p.title) + '</span>'
-					+ '<span class="ld"' + (hasTex(p.xp.lead) ? ' data-tex' : '') + '>' + esc(lead) + '</span>'
-					+ '<span class="mt">' + p.type + ' · ' + p.size + ' · ' + p.xp.created + '</span></span></a></li>';
+			+ N[t].kids.map(id => N[id]).map(n => {
+				// a post's opening sentence, or what it or a program holds
+				const lead = n.post ? leadOf(n.post) : n.exe.about;
+				return '<li><a href="' + n.url + '"><img src="' + icon(n) + '" alt="" /><span class="tx"><span class="nm">' + esc(n.name) + '</span>'
+					+ '<span class="ld"' + (hasTex(lead) ? ' data-tex' : '') + '>' + esc(lead) + '</span>'
+					+ '<span class="mt">' + typeOf(n) + ' · ' + n.size + ' · ' + n.created + '</span></span></a></li>';
 			}).join('') + '</ul>').join('');
 		pane.style.visibility = '';
 		// KaTeX loads only once a row with TeX scrolls near
