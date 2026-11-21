@@ -1,21 +1,19 @@
-// The programs on (D:) (_programs), in its order: lil.exe, optimiser.exe,
-// scheduler.exe, init.exe and device.exe, each in a window of its own
-// (assets/js/lil.js, optimiser.js, scheduler.js, init.js, device.js). A
-// toolbar, the panes their canvases fill, a row of readings and a note on
-// what is drawn; the link to the note each draws for moves into the status bar
-// (assets/js/exe.js). Toolbar, buttons and panes reuse the WinHelp chrome from
-// _literature.scss; scheduler.exe draws chat clients and a Disk Defragmenter's
-// map, and device.exe draws VS Code's.
+// The programs (_programs), in their dates' order: lil.exe, on (D:), and
+// cs300's init.exe, backward.exe, optimiser.exe, scheduler.exe and device.exe,
+// each in a window of its own (assets/js/lil.js, init.js, backward.js,
+// optimiser.js, scheduler.js, device.js). A toolbar, the panes their canvases
+// fill, a row of readings and a note on what is drawn; the link to the note
+// each draws for moves into the status bar (assets/js/exe.js). Toolbar, buttons
+// and panes reuse the WinHelp chrome from _literature.scss; scheduler.exe draws
+// chat clients and a Disk Defragmenter's map, and device.exe draws VS Code's.
 @use "main";
 
-// grey text on the toolbar's face, #bfb8bf, at 4.6:1
+// grey text on the toolbar's face, main.$face, at 4.6:1
 $exe-mute: #4d4852;
 
 // sunken, as Windows 98 sinks a field or a pane
 @mixin exe-sunken {
-	border: 1px solid;
-	border-color: #808080 #ffffff #ffffff #808080;
-	box-shadow: inset 1px 1px 0 #404040;
+	@include main.sunken-field;
 }
 
 .exe-win {
@@ -77,9 +75,14 @@ $exe-mute: #4d4852;
 		padding: 0 7px;
 		font-size: 11px;
 	}
-	.lit-btn.on {
-		background: #d4d0d4;
+	output {
+		min-width: 3ch;
+		font: 12px main.$mono;
 	}
+}
+// what the frame puts on every program's toolbar, and on the toy's, which plays
+// its pass the same way (_toy.scss)
+.exe, .toy {
 	// Run, the button the window is for, in bold as a default button was
 	.exe-run {
 		min-width: 64px;
@@ -97,11 +100,7 @@ $exe-mute: #4d4852;
 	// greyed, as a disabled button's words are
 	select:disabled {
 		background: main.$face;
-		color: #808080;
-	}
-	output {
-		min-width: 3ch;
-		font: 12px main.$mono;
+		color: main.$shade;
 	}
 }
 .exe-lbl {
@@ -252,6 +251,14 @@ $exe-mute: #4d4852;
 		margin-left: 3px;
 	}
 }
+// a program's views, at the right end of the toolbar's first row, where the
+// papers' window keeps its Page, Timeline and Lineage; View lists them too
+// (menubar.js)
+.exe-views {
+	display: flex;
+	gap: 3px;
+	margin-left: auto;
+}
 // where the run is, in a sunken field as a player keeps its timecode: a seek
 // bar, filled to the clock with a navy line at its foot, ticked where the
 // program marks a moment (--ticks, its script's); each program sets it as
@@ -305,6 +312,10 @@ $exe-mute: #4d4852;
 	.lit-tool > .lit-btn {
 		padding: 0 4px;
 	}
+	// as wide as “step 1,500 of 1,500”
+	.exe-at {
+		min-width: 19ch;
+	}
 }
 
 // the map: a click on the contours starts the runs there, a drag turns the mesh
@@ -318,19 +329,6 @@ $exe-mute: #4d4852;
 	&.turn {
 		cursor: grab;
 		touch-action: none;
-	}
-}
-// Contours or 3D, in the map's top corner across from the palettes
-.opt-views {
-	position: absolute;
-	top: 6px;
-	left: 6px;
-	display: flex;
-	gap: 2px;
-
-	.lit-btn {
-		height: 20px;
-		padding: 0 6px;
 	}
 }
 // the palettes, a chip each in the map's top corner
@@ -727,7 +725,7 @@ $exe-mute: #4d4852;
 	display: flex;
 	flex-direction: column;
 	background: #ffffff;
-	border: 1px solid #808080;
+	border: 1px solid main.$shade;
 	font: 9.5px/1.25 var(--ui);
 	overflow: hidden;
 	cursor: pointer;
@@ -1023,7 +1021,7 @@ $exe-mute: #4d4852;
 	padding: 6px 8px;
 	background: #ffffff;
 	border: 1px solid;
-	border-color: #808080 #ffffff #ffffff #808080;
+	border-color: main.$shade #ffffff #ffffff main.$shade;
 	overflow: hidden;
 }
 .sv-pin-time {
@@ -1185,7 +1183,7 @@ $exe-mute: #4d4852;
 	flex-direction: column;
 	margin-top: calc(var(--gap) - 3px + 7px);
 	padding: 9px var(--gap) var(--gap);
-	border: 1px solid #808080;
+	border: 1px solid main.$shade;
 	box-shadow: inset 1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 .sv .sv-box-title {
@@ -1194,7 +1192,7 @@ $exe-mute: #4d4852;
 	left: 8px;
 	margin: 0;
 	padding: 0 4px;
-	background: #bfb8bf;
+	background: main.$face;
 	font: bold 11px/15px var(--ui);
 }
 .sv-strip {
@@ -1309,11 +1307,7 @@ $exe-mute: #4d4852;
 	z-index: 5;
 	box-sizing: border-box;
 	max-width: 394px;
-	padding: 3px 6px;
-	background: var(--note);
-	border: 1px solid #000000;
-	font: 11px/1.4 var(--ui);
-	pointer-events: none;
+	@include main.tip;
 }
 .sv-tip[hidden] {
 	display: none;
@@ -1325,14 +1319,14 @@ $exe-mute: #4d4852;
 	margin-top: 3px;
 }
 
-// ---- init.exe: Units' ground or Shape's tube down the left, with the views
-// in its corner, two panes stacked on the right, the readings under them; what
-// to look at is in the readings' What's This? card ----
+// ---- init.exe: Units' ground or Shape's tube down the left, two panes
+// stacked on the right, the readings under them; what to look at is in the
+// readings' What's This? card. Three rows of toolbar at this width ----
 .ini-win {
-	width: 810px;
+	width: 730px;
 
 	.post_content {
-		height: 549px;
+		height: 500px;
 	}
 }
 .ini {
@@ -1366,20 +1360,6 @@ $exe-mute: #4d4852;
 		min-width: 14ch;
 	}
 }
-// Units or Shape, in the main pane's bottom corner, as optimiser.exe's views are
-// in its map's, clear of the pane's title and keys
-.ini-views {
-	position: absolute;
-	bottom: 6px;
-	left: 6px;
-	display: flex;
-	gap: 2px;
-
-	.lit-btn {
-		height: 20px;
-		padding: 0 6px;
-	}
-}
 // the ground and the tube turn under a drag, which on a touch screen is not a
 // scroll
 .ini-main {
@@ -1389,6 +1369,207 @@ $exe-mute: #4d4852;
 	&:active {
 		cursor: grabbing;
 	}
+}
+
+// ---- backward.exe: one backward pass in two views. Pass: the tree, the tape and
+// the graph across the top, on one vertical, what the pass costs across the foot.
+// Chain Rule: the chain rule a line at a time across the top, what is held,
+// step by step, across the foot. Drawn in PyTorch's red, indigo and teal on
+// white, a colour a role (backward.js's INK), the words and code in IBM Plex,
+// every size a tenth up (its SCALE), and the window with them ----
+$grd-updates: #3f3ac6;
+$grd-propagates: #e0301e;
+$grd-multiplies: #08866d;
+$grd-text: #111111;
+$grd-sign: #141414;
+$grd-mute: #4a4a52;
+$grd-rule: #dcdde2;
+$grd-rule-head: #111111;
+$grd-frame: #8f929b;
+$grd-sans: "IBM Plex Sans", main.$ui;
+$grd-mono: "IBM Plex Mono", main.$mono;
+$grd-scale: 1.1;
+.grd-win {
+	width: 830px * $grd-scale;
+
+	.post_content {
+		height: 640px * $grd-scale;
+	}
+}
+.grd {
+	.exe-body {
+		grid-auto-flow: row;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-rows: minmax(0, 1fr) 156px;
+	}
+	.grd-wide {
+		grid-column: 1 / 4;
+	}
+	&[data-view="pass"] :is(.grd-chain, .grd-life), &[data-view="chain"] .grd-pass {
+		display: none;
+	}
+	// a click on a pane's part runs the pass there
+	canvas {
+		cursor: pointer;
+	}
+	// as wide as “node 16 of 16”
+	.exe-at {
+		min-width: 15ch;
+	}
+}
+// the call the pass is, at the torch row's end
+.grd-code {
+	margin-left: auto;
+	padding-right: 4px;
+	font: 11px $grd-mono;
+	color: $exe-mute;
+}
+// the chain rule's table, an HTML pane drawn as the canvases are: a serif on
+// the paper backward.js's paper() draws, a colour a role. Each line's chain is the
+// name handed down, red, times the one local derivative multiplied in, teal;
+// left of the chains, the pointers from the line that made a name to the lines
+// that take it (backward.js's pointers())
+.grd-chain {
+	display: flex;
+	flex-direction: column;
+	padding: 0 8px;
+	background:
+		linear-gradient(to right, rgba(195, 198, 208, 0.32) 1px, transparent 1px) 0 0 / 60px 60px,
+		linear-gradient(to bottom, rgba(195, 198, 208, 0.32) 1px, transparent 1px) 0 0 / 60px 60px,
+		linear-gradient(to right, rgba(195, 198, 208, 0.16) 1px, transparent 1px) 0 0 / 12px 12px,
+		linear-gradient(to bottom, rgba(195, 198, 208, 0.16) 1px, transparent 1px) 0 0 / 12px 12px,
+		radial-gradient(circle, #ffffff, #f6f6f8 75%);
+	color: $grd-text;
+	font: 12px/1.5 main.$serif;
+
+	.updates {
+		color: $grd-updates;
+	}
+	.propagates {
+		color: $grd-propagates;
+	}
+	.multiplies {
+		color: $grd-multiplies;
+	}
+	.muted {
+		color: $grd-mute;
+	}
+	.post_content & .grd-head {
+		margin: 0;
+		padding: 4px 0;
+		font: 600 (12px * $grd-scale) $grd-sans;
+		color: $grd-sign;
+
+		// the title underlined in red, as the canvases' titles are
+		b {
+			font-weight: 600;
+			padding-bottom: 1px;
+			border-bottom: 2px solid $grd-propagates;
+		}
+		span {
+			margin-left: 9px;
+			font: (10.5px * $grd-scale) $grd-sans;
+		}
+	}
+	// the post's own table rules undone: no box, a rule under each line
+	.post_content & table {
+		display: table;
+		width: 100%;
+		color: inherit;
+		border: 0;
+	}
+	th, td {
+		padding: 1px 6px;
+		text-align: left;
+		vertical-align: middle;
+		white-space: nowrap;
+		color: inherit;
+		border: 0;
+		border-bottom: 1px solid $grd-rule;
+		background: transparent;
+	}
+	thead th {
+		padding: 1px 6px 2px;
+		font: (10px * $grd-scale) $grd-sans;
+		color: $grd-mute;
+		border-bottom-color: $grd-rule-head;
+	}
+	tbody th {
+		font: (9px * $grd-scale) $grd-mono;
+		color: $grd-mute;
+	}
+	td {
+		font: italic (12px * $grd-scale) main.$serif;
+	}
+	td:last-child {
+		font-size: 11px * $grd-scale;
+	}
+	td.chain {
+		padding-left: 26px;
+	}
+	tbody tr {
+		cursor: pointer;
+	}
+	// the line the pass is running, banded grey as its step's column is under it (backward.js's steps()), so its
+	// red reads; those it has not reached, or never will, faded, lightly so they still read
+	tr.now {
+		background: rgba($grd-frame, 0.18);
+	}
+	tr.ahead, tr.off {
+		opacity: 0.85;
+	}
+	// ∂top/∂bottom set as a fraction
+	.fr {
+		display: inline-flex;
+		flex-direction: column;
+		vertical-align: middle;
+		text-align: center;
+		font-size: 10.5px * $grd-scale;
+		line-height: 1.02;
+
+		> span {
+			padding: 0 2px;
+		}
+		> span:first-child {
+			border-bottom: 1px solid currentColor;
+		}
+	}
+	.dot {
+		display: inline-block;
+		width: 9px;
+		text-align: center;
+	}
+	// a product's shape, after it
+	.sh {
+		margin-left: 8px;
+		font-size: 9.5px * $grd-scale;
+		color: $grd-mute;
+	}
+	.grd-sum {
+		margin: 4px 4px 0;
+		font-style: italic;
+		font-size: 10.5px * $grd-scale;
+		color: $grd-mute;
+	}
+}
+// the table stretched down the pane, its lines spaced to fill it, the sum under it
+.grd-chain-body {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+
+	table {
+		flex: 1;
+	}
+}
+.grd-ptr {
+	position: absolute;
+	left: 0;
+	top: 0;
+	overflow: visible;
+	pointer-events: none;
 }
 
 // ---- device.exe: the code and what is where on the left, the machine in 3D
@@ -2222,8 +2403,7 @@ $exe-mute: #4d4852;
 .trn .trn-data {
 	display: contents;
 }
-.trn.serving .trn-data,
-.trn:not(.serving) .trn-speed {
+.trn.serving .trn-data {
 	display: none;
 }
 .trn-tabs span[data-tab="serve"] {
@@ -2301,7 +2481,7 @@ $exe-mute: #4d4852;
 @media only screen and (max-width: 700px) {
 	.exe-win .post_content {
 		height: auto;
-		background: #bfb8bf;
+		background: main.$face;
 		padding: 8px 6px 24px;
 	}
 	.exe-body {
@@ -2314,12 +2494,27 @@ $exe-mute: #4d4852;
 	.lil .exe-body .lit-pane {
 		aspect-ratio: 5 / 4;
 	}
-	.opt .exe-body, .ini .exe-body {
+	.opt .exe-body, .ini .exe-body, .grd .exe-body, .grd[data-view] .exe-body {
 		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: none;
 
 		> :first-child {
 			grid-row: auto;
+		}
+	}
+	// backward.exe's panes one under another, its chain rule's table as long as its lines, scrolled across
+	.grd .exe-body {
+		.grd-wide {
+			grid-column: auto;
+		}
+		// the costs' totals under its columns, and the node's words under them
+		[data-wt="cost"] {
+			aspect-ratio: auto;
+			height: 310px;
+		}
+		.grd-chain {
+			aspect-ratio: auto;
+			overflow-x: auto;
 		}
 	}
 	.opt .opt-cards {

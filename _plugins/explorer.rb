@@ -1,8 +1,8 @@
 # My Computer's facts about each post (assets/js/explorer.js): the opening
-# sentence, parts and sections, figures, formulas, and the date it was
-# created, its own. Read from the markdown before anything renders, so every
-# page's index carries all of them. And about each program on (D:)
-# (_programs): the note it draws for, its script's size, and its date.
+# sentence, or what a post that opens on controls holds, its size and the date
+# it was created, its own. Read from the markdown before anything renders, so
+# every page's index carries all of them, and the same. And about each program (_programs): the
+# note it draws for, its script's size, and its date.
 module Explorer
   HIDDEN = /\{%-?\s*comment\s*-?%\}.*?\{%-?\s*endcomment\s*-?%\}|<!--.*?-->/m
   TEX = /(\$\$.+?\$\$|(?<!\\)\$[^$\n]+?(?<!\\)\$)/m
@@ -49,6 +49,13 @@ module Explorer
     s
   end
 
+  # A post's Size, a plausible 1995 file size from the words it shows, a video
+  # deck's as a clip's would be (_includes/post-size.html)
+  def size(post, text)
+    words = text.gsub(/<[^>]+>/, " ").split.size
+    post.data["icon"] == "video.svg" ? "#{words / 40 + 2}.#{words % 9}MB" : "#{words / 170 + 1}KB"
+  end
+
   # When a document was created: its own date, from its name or front matter,
   # which places a post in its series rather than on the day it was written
   def created(doc)
@@ -58,17 +65,17 @@ module Explorer
   # The programs open on controls rather than prose, so say what they hold
   def about(site, post)
     case post.data["title"][0, 3]
-    when "301"
+    when "306"
       toy = site.data["toy"]
       ["#{toy["steps"].size} steps through one decoder layer",
         toy["components"].map { |c| c["name"] }.drop(1).join(" · ")]
-    when "302"
+    when "307"
       d = site.data["decoder_block"]
       ["#{d["models"].size} decoder models, part by part", "#{d["parts"].size} parts, and a diff between any two"]
-    when "303"
+    when "308"
       d = site.data["ml_literature"]
       ["#{d["papers"].size} papers on #{d["shelves"].size} shelves", "from #{d["venues"].size} venues, with a timeline of lineage"]
-    when "699"
+    when "399", "699"
       rows = post.data["rows"]
       ["#{rows.sum { |r| (r["videos"] || []).size }} clips for #{rows.first["n"]} to #{rows.last["n"]}", "one row a topic, in the series’ order"]
     end
@@ -82,10 +89,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     p.data["explorer"] = {
       "lead" => about ? "" : Explorer.opening(text),
       "about" => about,
-      "parts" => text.scan(/^## +[IVX]+\s*$/).size,
-      "sections" => text.scan(/^### +\*\*\d+(?:\.\d+)+\.\s*.+?\*\*\s*$/).size,
-      "figures" => text.scan(/<img\b|!\[/).size,
-      "formulas" => text.scan(Explorer::TEX).size,
+      "size" => Explorer.size(p, text),
       "created" => Explorer.created(p),
     }
   end

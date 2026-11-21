@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "302. blocks"
+title: "307. blocks"
 permalink: /20230102/decoder-block
 tags: cs300
 icon: defragment.png

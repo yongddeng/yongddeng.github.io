@@ -1,4 +1,4 @@
-// 301. toy: one Mixtral decoder layer in the post window. A toy model built to
+// 306. toy: one Mixtral decoder layer in the post window. A toy model built to
 // Mixtral's recipe at d = 8 runs in the browser. The pane on the left draws its
 // tensors as cubes and plays one token's pass through the layer as the pane is
 // scrolled; the pane on the right is the maths, one section per component, with
@@ -707,6 +707,8 @@
 			write('scroll in this pane to move the token ▾', W / 2, H - 10, `bold 11px ${UI}`, C.navy, 'center', 'bottom');
 			ctx.globalAlpha = 1;
 		}
+		// the seek field filled as far through the pass as the token is
+		place.style.setProperty('--at', Math.round(tau / (NST - 1) * place.clientWidth) + 'px');
 		// the side pane is rebuilt after the frame, not in it, and once for a scroll that crosses several steps
 		if (SL !== lastStep) {
 			lastStep = SL;
@@ -1716,10 +1718,9 @@
 	// once from the data. The current step's detail block moves into that step's row.
 	const side = $('.toy-side'), sideHead = $('.toy-sidehead'), nav = $('.toy-nav'), map = $('.toy-map'), secs = $('.toy-secs');
 	const detail = $('.toy-detail'), panel = $('.toy-panel');
-	// the window's status bar: the step in words, then the token and how far through the pass it is. The layout
-	// draws the bar after the post, so the post defers this script
-	const status = $('.post_total', win), place = document.createElement('span');
-	status.append(place);
+	// the window's status bar: whether Run plays, then the step and its words; the toolbar's seek field holds the
+	// token and how far through the pass it is. The layout draws the bar after the post, so the post defers this script
+	const status = $('.post_total', win), place = $('[data-out="at"]');
 	const PRE = {};
 	DATA.prerequisites.forEach(it => { PRE[it.id] = it; });
 	DATA.components.forEach(c => c.pre.forEach((id, k) => { PRE[id].tag = `${c.n}.${k + 1}`; }));
@@ -1805,8 +1806,8 @@
 		$$('button', map).forEach((b, i) => { b.classList.toggle('on', i === s); b.classList.toggle('done', i < s); });
 		$('.toy-end').hidden = s !== NST - 1;
 		$('[data-act="nexttok"]').textContent = cur < T - 1 ? `Run the next token: ${tokName(cur + 1)} →` : 'Back to the first token';
-		$('.left', status).textContent = `${COMP_OF[s].nav} · ${DATA.steps[s].title}`;
-		place.textContent = `${WORDS[cur]} · step ${s + 1} of ${NST}`;
+		place.textContent = `step ${s + 1} of ${NST} · ${WORDS[cur]}`;
+		tell();
 		// the side follows the step, as the cubes do; on first load it stays at the top
 		if (shownStep !== null && shownStep !== s) sideTo(row);
 		shownStep = s;
@@ -1853,7 +1854,7 @@
 	}, { passive: true });
 
 	// ---- controls ------------------------------------------------------------------------
-	const tool = $('.lit-tool'), playBtn = $('[data-act="play"]', tool);
+	const tool = $('.lit-tool'), playBtn = $('[data-act="run"]', tool), ends = exeEnds(root);
 	$('.toy-toks', tool).innerHTML = WORDS.map((w, j) => `<button type="button" class="lit-btn" data-tok="${j}">${w}</button>`).join('');
 	function setTok(p) {
 		cur = p;
@@ -1863,14 +1864,22 @@
 		$$('[data-tok]', tool).forEach(b => b.classList.toggle('on', +b.dataset.tok === p));
 		draw();
 	}
-	let playing = false, lastT = 0, holdT = 0, rafPlay = 0;
+	let playing = false, lastT = 0, holdT = 0, rafPlay = 0, speed = 1;
+	exeSpeed($('[data-in="speed"]', tool), speed, v => { speed = v; });
+	// the status bar: whether Run plays, Finished at the last token's last step, then the step and its words;
+	// told again when the play starts or stops, and the transport greyed at the run's two ends
+	function tell() {
+		const s = Math.max(0, lastStep), first = cur === 0 && s === 0, last = cur >= T - 1 && s >= NST - 1;
+		$('.left', status).textContent = `${exeState(playing, last)} · step ${s + 1} of ${NST} · ${COMP_OF[s].nav} · ${DATA.steps[s].title}`;
+		ends(first, last);
+	}
 	function stopPlay() {
 		playing = false;
 		cancelAnimationFrame(rafPlay);
-		playBtn.innerHTML = '&#9654; Play';
-		playBtn.classList.remove('on');
+		exeRunning(playBtn, false);
+		tell();
 	}
-	// play: scroll the pane at a steady pace, pause at the end, then run the next token
+	// play: scroll the pane at a steady pace, pause at the end, then run the next token, all at the speed chosen
 	function startPlay() {
 		stopGlide();
 		readTau();
@@ -1878,8 +1887,8 @@
 		playing = true;
 		lastT = performance.now();
 		holdT = 0;
-		playBtn.innerHTML = '&#10074;&#10074; Pause';
-		playBtn.classList.add('on');
+		exeRunning(playBtn, true);
+		tell();
 		const tick = now => {
 			if (!playing) return;
 			const dt = Math.min(64, now - lastT);
@@ -1887,14 +1896,14 @@
 			readTau();
 			if (tau >= NST - 1.001) {
 				holdT += dt;
-				if (holdT > 1800) {
+				if (holdT > 1800 / speed) {
 					if (cur >= T - 1) return stopPlay();
 					setTok(cur + 1);
 					scrollToTau(0, false);
 					holdT = 0;
 				}
 			} else {
-				scroller.scrollTop += Math.max(1, STEP * dt / (REDUCED ? 3200 : 2100));
+				scroller.scrollTop += Math.max(1, STEP * dt * speed / (REDUCED ? 3200 : 2100));
 			}
 			rafPlay = requestAnimationFrame(tick);
 		};
@@ -1920,8 +1929,9 @@
 		glideRaf = requestAnimationFrame(tick);
 	}
 	const ACTS = {
-		first() { setTok(0); stopGlide(); scrollToTau(0, false); },
-		prev() {
+		start() { setTok(0); stopGlide(); scrollToTau(0, false); },
+		end() { setTok(T - 1); stopGlide(); scrollToTau(NST - 1, false); },
+		back() {
 			const base = navTarget ?? Math.ceil(tau - 0.02);
 			if (base > 0) navTo(base - 1);
 			else if (cur > 0) { setTok(cur - 1); stopGlide(); scrollToTau(NST - 1, false); }
@@ -1931,7 +1941,7 @@
 			if (base < NST - 1) navTo(base + 1);
 			else if (cur < T - 1) { setTok(cur + 1); stopGlide(); scrollToTau(0, false); }
 		},
-		play() { if (playing) stopPlay(); else startPlay(); },
+		run() { if (playing) stopPlay(); else startPlay(); },
 		maths() {
 			const b = $('[data-act="maths"]', tool), on = !b.classList.contains('on');
 			b.classList.toggle('on', on);
@@ -1949,11 +1959,23 @@
 			$$('[data-view]', tool).forEach(v => v.classList.toggle('on', v === b));
 			draw();
 		} else if (ACTS[b.dataset.act]) {
-			if (b.dataset.act !== 'play') stopPlay();
+			if (b.dataset.act !== 'run') stopPlay();
 			ACTS[b.dataset.act]();
 		}
 	});
-	['wheel', 'touchstart', 'keydown'].forEach(ev => scroller.addEventListener(ev, () => { if (playing) stopPlay(); stopGlide(); }, { passive: true }));
+	['wheel', 'touchstart'].forEach(ev => scroller.addEventListener(ev, () => { if (playing) stopPlay(); stopGlide(); }, { passive: true }));
+	scroller.addEventListener('keydown', e => { if (!KEYS[e.key]) { if (playing) stopPlay(); stopGlide(); } });
+	// the seek field, as the programs' is: pressed or dragged, the token goes to that point of its pass
+	exeSeekBar(place, share => { stopPlay(); stopGlide(); scrollToTau(share * (NST - 1), false); });
+	// the keys wherever the focus is in the toy but on a control or the maths, whose keys are their own, as the
+	// programs': Space plays and pauses, the arrows step, Home and End go to the run's two ends
+	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end' };
+	root.addEventListener('keydown', e => {
+		if (e.target.closest('button, select, input, .toy-side') || !KEYS[e.key]) return;
+		e.preventDefault();
+		if (KEYS[e.key] !== 'run') stopPlay();
+		ACTS[KEYS[e.key]]();
+	});
 
 	// ---- hover, both ways ----------------------------------------------------------------
 	function markPanel(k) {

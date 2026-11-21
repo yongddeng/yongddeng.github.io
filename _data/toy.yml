@@ -1,4 +1,4 @@
-# 301. toy — the maths beside the cubes. One section per component: the prerequisites it
+# 306. toy — the maths beside the cubes. One section per component: the prerequisites it
 # assumes, each folded to its defining line, then the steps of its forward pass. A step comes
 # in fixed parts: its maths with shapes, one entry by hand, the PyTorch lines and what they
 # print, the cells, the toy against Mixtral 8x7B, and a note. The current token's numbers are
@@ -128,7 +128,7 @@ prerequisites:
     title: The layer in PyTorch
     points:
       - >-
-        **The steps’ code, in one place.** With the weights of §0.3 as tensors, these lines
+        **The steps’ code, in one place.** With the parameters above as tensors, these lines
         compute every number on this side. Each step shows its own lines, and what they print
         for the token on the left.
       - >-
@@ -406,7 +406,7 @@ prerequisites:
       F.cross_entropy(logits[:-1], ids[1:])  # logits [T, 16]
 
 # the forward pass, one entry per step the cubes play: its name; its line, short (eq) and with
-# shapes (maths); the prerequisites it uses; its PyTorch lines, cut from §0.5; the toy against
+# shapes (maths); the prerequisites it uses; its PyTorch lines, cut from the layer’s code in Setup; the toy against
 # Mixtral 8x7B (scale); and notes
 steps:
   - title: x arrives
@@ -623,7 +623,7 @@ steps:
     notes:
       - >-
         **A soft gate.** SiLU never drops below −0.28, so a neuron with a negative gate passes
-        almost nothing, whatever $u$ says.
+        at most 0.28 of $u$, and a strongly negative one almost nothing.
   - title: Down, then mix
     eq: f_t = \textstyle\sum_{e \in \operatorname{top}_2(r_t)} G^{[e]}_t\; m^{[e]}_t W^{[e]}_2
     maths: m^{[e]}_t W^{[e]}_2 \in \mathbb{R}^{1\times d},\quad \textstyle\sum_{e} G^{[e]}_t = 1
@@ -665,8 +665,8 @@ steps:
       - >-
         **Once,** after the last layer.
       - >-
-        **Prefill and generation.** In prefill every position gets logits, which is how
-        training scores a whole sentence at once. In generation only the newest needs them.
+        **Prefill and generation.** Training gives every position logits, which is how it scores
+        a whole sentence at once. Prefill and generation need only the newest position’s.
   - title: Logits
     eq: \ell_t = z_t W_U
     maths: \ell_t \in \mathbb{R}^{1\times |V|},\quad \ell_{t,w} = z_t \cdot (W_U)_{:,w}

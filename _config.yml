@@ -10,7 +10,8 @@ cloudflare_analytics_token: d39f12a22c66442389e654cf251872e5
 # File management
 exclude: ["README.md", "LICENSE"]
 
-# The programs on (D:) in My Computer, each a window of its own
+# The programs, each a window of its own: in My Computer, one with a tag sits
+# in that course's folder beside its posts, and one with none on (D:)
 collections:
   programs:
     output: true

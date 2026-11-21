@@ -1,4 +1,4 @@
-// 303. papers: a WinHelp-style reader in the post window
+// 308. papers: a WinHelp-style reader in the post window
 // (assets/js/literature.js). Contents on the left, a page on the right;
 // the Timeline and Lineage views replace the page.
 @use "main";
@@ -79,8 +79,11 @@ $lit-link: #008000;
 	&:active, &.on {
 		@include main.pressed;
 	}
+	&.on {
+		background: main.$on;
+	}
 	&[disabled] {
-		color: #808080;
+		color: main.$shade;
 		text-shadow: 1px 1px 0 #ffffff;
 		cursor: default;
 	}

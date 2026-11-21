@@ -1,4 +1,4 @@
-// optimiser.exe, for 301: SGD, Momentum, RMSProp, AdamW and Muon set off together
+// optimiser.exe, for 306: SGD, Momentum, RMSProp, AdamW and Muon set off together
 // down a loss surface over two parameters. The map, on the left, draws the
 // surface, L over θ, as contours or as a mesh to turn; the top right, how far
 // each run is above the surface's lowest point, L − L*, step by step on a log
@@ -544,9 +544,9 @@
 	}
 
 	// ---- the race on screen: each optimiser's runs a step at a time, at its own η ----
-	const RUN = 900; // frames a race takes, 15 s at 60 a second
-	let runs, twins, t, due, playing = false;
-	const runBtn = $('[data-act="run"]'), ends = exeEnds(root);
+	const RUN = 900; // frames a race takes at ×1, 15 s at 60 a second
+	let runs, twins, t, due, playing = false, speed = 1;
+	const runBtn = $('[data-act="run"]'), atField = $('[data-out="at"]'), ends = exeEnds(root);
 	function reset() {
 		runs = OPTIMISERS.map(() => starts.map((s0, n) => fresh(s0, n, true)));
 		// under AMP, the same runs in fp32, to draw beside them
@@ -566,7 +566,7 @@
 		if (!playing || !root.isConnected) return;
 		// a share of a step a frame, and a step whenever the shares make one,
 		// once every η is known
-		if (!tuning()) due += REDUCED ? surf.steps : surf.steps / RUN;
+		if (!tuning()) due += REDUCED ? surf.steps : surf.steps / RUN * speed;
 		for (; due >= 1 && t < surf.steps; due--) advance();
 		if (t >= surf.steps) play(false);
 		drawRace();
@@ -1469,8 +1469,11 @@
 		$('[data-out="rate"]').textContent = same ? ETAS[settings[0].eta] : '—';
 		say(tip ?? (hover !== null ? torchCall(hover) : preview ? 'All at η = ' + ETAS[preview.e] + ', run to the end · click to keep it'
 			: scrub !== null ? 'At step ' + exeFmt(scrub) : playing && tuning() ? 'Tuning η…'
-			: (playing ? 'Playing' : t >= surf.steps ? 'The run’s end' : 'Paused') + ' · step ' + exeFmt(t) + ' of ' + exeFmt(surf.steps)));
+			: exeState(playing, t >= surf.steps) + ' · step ' + exeFmt(t) + ' of ' + exeFmt(surf.steps)));
 		ends(t <= 0, t >= surf.steps);
+		// the step the race is at, and the field filled as far
+		atField.textContent = 'step ' + exeFmt(t) + ' of ' + exeFmt(surf.steps);
+		atField.style.setProperty('--at', Math.round(t / surf.steps * atField.clientWidth) + 'px');
 	}
 	function draw() {
 		drawRace();
@@ -1517,6 +1520,10 @@
 	};
 	const KEYS = { ' ': 'run', ArrowLeft: 'back', ArrowRight: 'next', Home: 'start', End: 'end' };
 	for (const b of $$('.exe-run, .exe-buttons [data-act]')) b.addEventListener('click', () => ACTS[b.dataset.act](1));
+	// the field a seek bar, as the players' are: pressed or dragged, the race goes
+	// to the step under the pointer; and the speed it plays at
+	exeSeekBar(atField, share => goTo(Math.round(share * surf.steps)));
+	exeSpeed($('[data-in="speed"]'), speed, v => { speed = v; });
 	// the keys wherever the focus is in the window but on a control, whose
 	// keys are its own; presses keep them with the window but for a slider's
 	root.addEventListener('keydown', e => {

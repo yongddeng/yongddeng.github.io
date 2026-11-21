@@ -2,7 +2,11 @@
 $ui: "Helvetica Neue", Arial, sans-serif;
 $serif: Georgia, "Times New Roman", serif;
 $mono: "Lucida Console", Menlo, Monaco, monospace;
-$face: #c0c0c0;
+// one face for every window, button, bar and menu, tinted as the shade and the
+// muted text are; and one fill for a toggle held in, the window in front on the
+// taskbar among them
+$face: #bfb8bf;
+$on: #d4d0d4;
 $shade: #7f787f;
 $mute: #55505a;
 $navy: #000080;
@@ -19,6 +23,24 @@ $title-bar: linear-gradient(to right, #00007f, #1084d0);
 	} @else {
 		border-color: $shade #ffffff #ffffff $shade;
 	}
+}
+
+// A tooltip as Windows 98 drew one: the note's yellow inside a black line, the
+// desktop's sans at 11px and no shadow. What's This? cards are larger (.wt-card)
+@mixin tip {
+	padding: 3px 6px;
+	background: $note;
+	border: 1px solid #000000;
+	color: #000000;
+	font: 11px/1.4 $ui;
+	pointer-events: none;
+}
+
+// A field sunk into the face, as Windows 98 sinks a text box or a list
+@mixin sunken-field {
+	border: 1px solid;
+	border-color: $shade #ffffff #ffffff $shade;
+	box-shadow: inset 1px 1px 0 #404040;
 }
 
 // A button held down, or a toggle that stays in: the raised bevel inverted
@@ -51,9 +73,12 @@ $title-bar: linear-gradient(to right, #00007f, #1084d0);
 
 body {
 	background: var(--desk, #008082);
-	font-family: sans-serif, serif, monospace;
+	font-family: $ui;
 	font-size: 13px;
 	padding-bottom: 36px;
+	// a window dragged past the screen's edge is cut there, as the screen cut
+	// it, rather than scrolling the page sideways
+	overflow-x: clip;
 }
 .taskbar {
 	position: fixed;
@@ -98,8 +123,14 @@ body {
 		font-weight: bold;
 	}
 
+	// the windows' buttons 160px wide while they fit, narrower as the bar fills,
+	// so the clock keeps its place at the end
+	#task-posts {
+		min-width: 0;
+	}
 	.task-win {
 		width: 160px;
+		min-width: 0;
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
@@ -115,11 +146,12 @@ body {
 
 	.task-win.active {
 		@include pressed;
-		background: #dadada;
+		background: $on;
 		font-weight: bold;
 	}
 
 	.task-start-wrap {
+		flex: none;
 		position: relative;
 	}
 
@@ -200,6 +232,7 @@ body {
 	// Cascade / Tile buttons by the clock: one press arranges, the
 	// same press restores (assets/js/arrange.js)
 	.task-arr {
+		flex: none;
 		width: 26px;
 		justify-content: center;
 		padding: 0;
@@ -212,10 +245,13 @@ body {
 
 	.task-arr.active {
 		@include pressed;
-		background: #dadada;
+		background: $on;
 	}
 
+	// the clock on one line however many windows crowd the bar
 	.task-clock {
+		flex: none;
+		white-space: nowrap;
 		padding: 3px 10px;
 		font-size: 12px;
 		@include bevel(false);
@@ -322,7 +358,7 @@ body {
 	width: 750px;
 	margin: auto;
 	margin-top: 36px;
-	background: #bfb8bf;
+	background: $face;
 	@include bevel;
 	padding: 2px 0;
 
@@ -348,7 +384,7 @@ body {
 	background: linear-gradient(to right, #808080, #b5b5b5);
 
 	h1 {
-		color: #bfb8bf;
+		color: $face;
 		font-size: 14px;
 		font-weight: bold;
 	}
@@ -362,24 +398,12 @@ body {
 		image-rendering: pixelated;
 	}
 
-	// Emoji stand-in for windows without an icon asset
-	.t-emoji {
-		float: left;
-		font-size: 12px;
-		line-height: 14px;
-		margin: 0 3px 0 0;
-	}
-}
-.task-win .t-emoji {
-	vertical-align: middle;
-	margin-right: 4px;
-	font-size: 13px;
 }
 .active-win .default_title, .active-win .post_title {
 	background: $title-bar;
 }
 .default_title .btn, .post_title .btn {
-	background: #cccccc;
+	background: $face;
 	width: 13px;
 	height: 11px;
 	float: right;
@@ -491,7 +515,7 @@ ul.topbar {
 			color: #ffffff;
 		}
 	}
-	// a View menu that lists views (302, 303 and the programs) bullets the one showing
+	// a View menu that lists views (307, 308 and the programs) bullets the one showing
 	.tb-item.cur {
 		position: relative;
 
@@ -538,7 +562,7 @@ ul.topbar {
 	}
 	.tb-sep {
 		height: 0;
-		border-top: 1px solid #808080;
+		border-top: 1px solid $shade;
 		border-bottom: 1px solid #ffffff;
 		margin: 3px 1px;
 	}
@@ -566,7 +590,7 @@ ul.topbar {
 	}
 
 	.find-dlg-x {
-		background: #cccccc;
+		background: $face;
 		color: #000000;
 		width: 13px;
 		height: 11px;
@@ -716,6 +740,29 @@ html .katex {
 	50% { opacity: 0; }
 }
 // Settings dialog, spawned by Start → Settings
+// a radio button as Windows 98 drew one, System Properties' among them: a
+// round white well sunk into the face, and a black dot once chosen
+input[type="radio"] {
+	-webkit-appearance: none;
+	appearance: none;
+	flex: none;
+	width: 12px;
+	height: 12px;
+	margin: 0 3px 0 0;
+	vertical-align: -2px;
+	border-radius: 50%;
+	background: #ffffff;
+	box-shadow: inset 1px 1px 0 $shade, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #404040, inset -2px -2px 0 $face;
+	cursor: pointer;
+
+	&:checked {
+		background: radial-gradient(circle, #000000 0 2px, #ffffff 2.5px);
+	}
+	&:focus-visible {
+		outline: 1px dotted #000000;
+		outline-offset: 1px;
+	}
+}
 .content.settings-win {
 	width: 400px;
 	min-width: 400px;
@@ -913,7 +960,7 @@ html .katex {
 	transform: translate(-50%, -50%);
 	width: 340px;
 	z-index: 3000;
-	background: #bfb8bf;
+	background: $face;
 	@include bevel;
 	padding: 2px;
 	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
@@ -926,7 +973,9 @@ html .katex {
 		font-size: 13px;
 
 		.err-ic {
-			font-size: 30px;
+			flex: none;
+			width: 32px;
+			height: 32px;
 		}
 
 		p {
@@ -967,7 +1016,7 @@ html .katex {
 	text-align: center;
 }
 img.task-menu-ic {
-	height: 17px;
+	height: 16px;
 	object-fit: contain;
 }
 // A window whose pane is chrome, the panes inside it carrying the paper. On a
@@ -978,7 +1027,7 @@ img.task-menu-ic {
 		flex-direction: column;
 		height: $height;
 		overflow: hidden;
-		background: #bfb8bf;
+		background: $face;
 		border: 0;
 		padding: 0 4px 2px;
 	}
@@ -1108,7 +1157,7 @@ $det-date: 88px;   // 2026-01-01
 		font-size: 12px;
 		padding: 1px 6px;
 		border: 1px solid;
-		border-color: #888888 #dadada #dadada #888888;
+		border-color: $shade #ffffff #ffffff $shade;
 	}
 }
 .post_list {
@@ -1124,7 +1173,7 @@ $det-date: 88px;   // 2026-01-01
 	// its cells: the layout's, and any an interactive post adds
 	> * {
 		border: 1px solid;
-		border-color: #888888 #dadada #dadada #888888;
+		border-color: $shade #ffffff #ffffff $shade;
 		box-sizing: border-box;
 		padding: 1px 3px;
 	}
@@ -1317,14 +1366,18 @@ $det-date: 88px;   // 2026-01-01
 	background-image: url("/assets/img/track.png");
 } /* the new scrollbar will have a flat appearance with the set background color */
  
+// the thumb and the arrows raised as Windows 98's, the one scrollbar every
+// pane and window shares
 ::-webkit-scrollbar-thumb {
-	background-color: #cccccc;
-	@include bevel(true, groove ridge ridge groove);
-} /* this will style the thumb, ignoring the track */
+	background-color: $face;
+	@include bevel;
+	box-shadow: inset -1px -1px $shade;
+}
 
 ::-webkit-scrollbar-button {
-	background-color: #cccccc;
-	@include bevel(true, groove ridge ridge groove);
+	background-color: $face;
+	@include bevel;
+	box-shadow: inset -1px -1px $shade;
 	background-position: center center;
 	background-repeat: no-repeat;
 
@@ -1473,7 +1526,7 @@ $det-date: 88px;   // 2026-01-01
 .xref-tip {
 	position: absolute;
 	z-index: 999;
-	background: #bfb8bf;
+	background: $face;
 	@include bevel;
 	width: 350px;
 	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.35);

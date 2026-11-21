@@ -1,14 +1,15 @@
 ---
-title: scheduler.exe
-date: 2023-01-03
-note: "301"
+title: "304. scheduler.exe"
+date: 2023-01-04
+tags: cs300
+note: "306"
 icon: scheduler-16.png
 large: scheduler-48.png
 winclass: exe-win sv-win
 description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by a small rewrite of vLLM's scheduler, each step timed by the roofline. In Users, the chats as the people who sent them see them, in English, Korean and other languages, each answer coming in as the engine makes its tokens, the steps, the cache and the latencies under them, and a second server beside the first serving the same chats; in Memory, the chats a line each over the KV cache, block by block, and the cache through the run. From static batches, through prefill first, to chunked prefill, the cache contiguous or paged, prefix caching, bf16 or fp8, and the load.
 ---
 
-<div class="exe sv view-users" tabindex="0" role="region" aria-label="scheduler.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it">
+<div class="exe sv view-users" tabindex="0" role="region" aria-label="scheduler.exe: Space plays and pauses, the left and right arrows step, Shift ten steps, Home and End go to the run’s start and end; Tab reaches the chats, Enter picks one, Escape lets go of it; and ? lights the parts with a What's This? card">
 <div class="lit-tool">
 <button type="button" class="lit-btn exe-run" data-act="run" title="Play the run at the speed beside it (Space); again to pause">&#9654; Run</button>
 <span class="exe-buttons">
@@ -26,7 +27,7 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 <button type="button" class="lit-btn" data-view="memory" aria-pressed="false" title="Memory: the chats a line each, over the KV cache that holds them, block by block, and the cache through the run"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1.5" y="1.5" width="13" height="5" fill="#fff" stroke="#000"/><path d="M3 3h4v1H3zM9 3h4v1H9zM3 5h4v1H3zM9 5h4v1H9z" fill="#808080"/><rect x="1.5" y="7.5" width="13" height="7" fill="#fff" stroke="#000"/><path d="M3 9h2v2H3zM9 9h2v2H9zM6 12h2v2H6zM12 12h1v2h-1z" fill="#008080"/><path d="M6 9h2v2H6z" fill="#b8860b"/><path d="M12 9h1v2h-1zM3 12h2v2H3z" fill="#efdfae"/></svg></button>
 </span>
 </div>
-<div class="lit-tool">
+<div class="lit-tool" data-wt="workload">
 <label class="exe-lbl" title="Requests a second, arriving as a Poisson process, as vllm bench serve’s --request-rate; inf sends them all at once, its default">request_rate <select data-in="rate"></select></label>
 <span class="lit-sep"></span>
 <label class="exe-lbl" title="Tokens every prompt starts with, the same for all">system prompt <select data-in="system"></select></label>
@@ -35,7 +36,7 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 <span class="lit-sep"></span>
 <label class="exe-lbl" title="Another draw of the same workload: other arrivals, other lengths">seed <select data-in="seed"></select></label>
 </div>
-<div class="lit-tool">
+<div class="lit-tool" data-wt="engine">
 <label class="exe-lbl" title="How the engine fills a step: a static batch at a time, the oldest way; whole prompts first, the decodes waiting, as vLLM v0 with chunked prefill off, its default for a context under 32K; or chunks of prompts beside the decodes within a token budget, vLLM’s v1 scheduler as of 0.11, where chunked prefill is always on">scheduler <select data-in="sched"></select></label>
 <span class="lit-sep"></span>
 <label class="exe-lbl" title="Contiguous: a run of blocks a request, set aside for its prompt and max_tokens, as servers before vLLM did; paged: blocks as tokens need them, from anywhere (PagedAttention). A static batch is always contiguous">KV cache <select data-in="alloc"></select></label>
@@ -49,7 +50,7 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 </div>
 <div class="sv-body">
 <div class="sv-users">
-<div class="sv-sides">
+<div class="sv-sides" data-wt="chats">
 <section class="sv-side" data-side="0">
 <header class="sv-head"><b data-out="name"></b><span data-out="count"></span></header>
 <p class="sv-event" data-out="event"></p>
@@ -70,7 +71,7 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 </div>
 </section>
 </div>
-<section class="lit-pane sv-cache" aria-label="The KV cache, a cell a block">
+<section class="lit-pane sv-cache" data-wt="cache" aria-label="The KV cache, a cell a block">
 <canvas class="sv-map" role="img" aria-label="The KV cache’s blocks in the order vLLM numbers them, each filled as its sixteen slots hold tokens, under a bar of one GPU’s memory"></canvas>
 <canvas class="sv-wires" aria-hidden="true"></canvas>
 <p class="sv-key" data-out="key"></p>
@@ -79,29 +80,40 @@ description: Twenty-four chat requests served to Llama 3.1 70B over two H100s by
 <section class="sv-box">
 <span class="sv-box-title" role="heading" aria-level="2">The server</span>
 <div class="sv-strip">
-<section class="sv-pane">
+<section class="sv-pane" data-wt="steps">
 <header title="Each step a column as wide as it took, as tall as its tokens on a log scale, split by what they were: answers’ next tokens, prompts going through, prompts and answers computed again after a preemption, a static batch’s padding">The steps, last <span data-out="window"></span> s <i>tokens, log</i></header>
 <canvas class="sv-steps" role="img" aria-label="The steps of the last two seconds, each as wide as its time and as tall as its tokens"></canvas>
 </section>
-<section class="sv-pane">
+<section class="sv-pane" data-wt="usage">
 <header title="The blocks of the KV cache in use, as vLLM’s kv_cache_usage counts them, of those a request can be given, the null block not among them; a free block still holding a prefix counts as free">KV cache usage</header>
 <canvas class="sv-usage" role="img" aria-label="How much of the KV cache is in use, and the run’s figures so far"></canvas>
 </section>
-<section class="sv-pane">
+<section class="sv-pane" data-wt="ttft">
 <header title="Each request’s time to first token, against when it arrived: a dot as its first token reaches its user, for a static batch with its last; the median and the 99th percentile of those so far, as vllm bench serve reports them">Time to first token</header>
 <canvas class="sv-ttft" role="img" aria-label="Each request’s time to its first token against its arrival"></canvas>
 </section>
-<section class="sv-pane">
+<section class="sv-pane" data-wt="itl">
 <header title="The gaps between an answer’s tokens as they reach its user, every answer’s, on a log scale: vllm bench serve’s inter-token latency, with its median and 99th percentile">Between tokens</header>
 <canvas class="sv-itl" role="img" aria-label="How the gaps between tokens are spread"></canvas>
 </section>
 </div>
 </section>
-<section class="lit-pane sv-time">
+<section class="lit-pane sv-time" data-wt="river">
 <canvas class="sv-river" role="img" aria-label="The cache over the run, in blocks, stacked by kind, with the playhead; drag across it to move through the run"></canvas>
 </section>
 <div class="sv-tip" hidden></div>
 <script type="application/json" class="sv-chats">{{ site.data.scheduler_chats | jsonify }}</script>
+<div class="exe-notes" hidden>
+<p data-note="workload">The workload, as vllm bench serve sets one: request_rate, the chats arriving a second as a Poisson process, inf sending them all at once, its default; the system prompt every chat starts with; max_tokens, the most an answer may run to, which a contiguous cache sets aside up front; and seed, another draw of the same chats, other arrivals and other lengths.</p>
+<p data-note="engine">The engine, in vLLM’s names. The scheduler fills a step a static batch at a time, the oldest way, or whole prompts first with the decodes waiting, or chunks of prompts beside the decodes within a token budget, vLLM’s v1 scheduler. The KV cache is contiguous, a run of blocks a request set aside for its prompt and max_tokens, or paged, blocks as tokens need them, from anywhere (PagedAttention), with prefix caching a paged cache’s only. kv_cache_dtype halves the bytes in fp8, num_gpu_blocks sets the cache’s size and max_num_seqs the most requests a step runs.</p>
+<p data-note="chats">The chats. In Users, as the people who sent them see them, a tile a request, each answer coming in as the engine makes its tokens; compare with puts a second server beside the first, serving the same chats. In Memory, a line each over the KV cache, with why the head of the queue waits. A click on a chat, or Enter on one reached by Tab, picks it, with what it did from its arrival to its last token; Escape lets go.</p>
+<p data-note="cache">The KV cache, a cell a block, in the order vLLM numbers them, each filled as its sixteen slots hold tokens, under a bar of one GPU’s memory: what the weights take, what gpu_memory_utilization holds back, and the cache.</p>
+<p data-note="river">The cache over the whole run, in blocks, stacked by kind, with the playhead where the clock is. A drag across it moves through the run, as the seek field does.</p>
+<p data-note="steps">The steps of the last two seconds, each a column as wide as it took and as tall as its tokens on a log scale, split by what they were: answers’ next tokens, prompts going through, prompts and answers computed again after a preemption, and a static batch’s padding.</p>
+<p data-note="usage">KV cache usage: the blocks in use, as vLLM’s kv_cache_usage counts them, of those a request can be given, the null block not among them; a free block still holding a prefix counts as free. Under it, the requests running and waiting, the tokens made in the last second and the preemptions so far.</p>
+<p data-note="ttft">Time to first token: a dot for each request as its first token reaches its user, against when it arrived, for a static batch with its last; the median and the 99th percentile of those so far, as vllm bench serve reports them.</p>
+<p data-note="itl">Between tokens: the gaps between an answer’s tokens as they reach its user, every answer’s, on a log scale, vllm bench serve’s inter-token latency, with its median and 99th percentile.</p>
+</div>
 <a class="exe-for" href="{{ page.explorer.note.url }}">{{ page.explorer.note.title }}</a>
 </div>
 <script src="/assets/js/exe.js" defer></script>

@@ -136,9 +136,24 @@
 		}
 	});
 
+	// A window that would run past the screen's right edge slides back left,
+	// as far as it can: My Computer widens when a folder opens in Details, and
+	// a window put back where it was may no longer fit a narrower screen. So
+	// the page never scrolls sideways under the desktop
+	var onScreen = new ResizeObserver(function(entries) {
+		entries.forEach(function(e) { keepOnScreen(e.target); });
+	});
+	function keepOnScreen(win) {
+		if (phone() || !win.isConnected || win.style.position !== 'absolute') return;
+		var over = win.getBoundingClientRect().right - document.documentElement.clientWidth;
+		if (over > 0) win.style.left = Math.max(0, parseFloat(win.style.left) - over) + 'px';
+	}
+	document.querySelectorAll('.wrapper, .content').forEach(function(w) { onScreen.observe(w); });
+
 	// Random spot overlapping the open windows least (zero if possible),
-	// unless geom pins it to a remembered one
+	// unless geom pins it to a remembered one; either way kept on the screen
 	function placeWindow(win, geom) {
+		onScreen.observe(win);
 		if (geom) return preGeom(win, geom);
 		var others = [];
 		var wrapper = document.querySelector('.wrapper');
@@ -190,7 +205,7 @@
 		var box = document.createElement('div');
 		box.className = 'err-win active-win';
 		box.innerHTML = '<div class="post_title"><h1>Hikikomori</h1></div>'
-			+ '<div class="err-body"><span class="err-ic">&#9888;&#65039;</span><p>' + message + '</p></div>'
+			+ '<div class="err-body"><img class="err-ic" src="/assets/img/warning.svg" alt=""><p>' + message + '</p></div>'
 			+ '<div class="err-btnrow"><button>OK</button></div>';
 		document.body.appendChild(box);
 		box.querySelector('button').addEventListener('click', function() { box.remove(); });
@@ -275,7 +290,11 @@
 	window.desktop = {
 		loadPost: loadPost,
 		openFolderWindow: openFolderWindow,
-		applyGeom: preGeom,
+		// a remembered spot, as the session and Cascade put windows back, kept on the screen
+		applyGeom: function(win, g) {
+			preGeom(win, g);
+			keepOnScreen(win);
+		},
 		escapeHtml: escapeHtml,
 		sizeValue: sizeValue
 	};
